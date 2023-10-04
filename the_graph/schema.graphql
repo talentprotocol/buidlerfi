@@ -1,34 +1,34 @@
 type Trade @entity(immutable: true) {
-  id: Bytes!
-  trader: Bytes! # address
-  subject: Bytes! # address
-  isBuy: Boolean! # bool
-  shareAmount: BigInt! # uint256
-  ethAmount: BigInt! # uint256
-  protocolEthAmount: BigInt! # uint256
-  subjectEthAmount: BigInt! # uint256
-  hodlerEthAmount: BigInt! # uint256
-  supply: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+	id: Bytes!
+	trader: Bytes! # address
+	subject: Bytes! # address
+	isBuy: Boolean! # bool
+	shareAmount: BigInt! # uint256
+	ethAmount: BigInt! # uint256
+	protocolEthAmount: BigInt! # uint256
+	subjectEthAmount: BigInt! # uint256
+	hodlerEthAmount: BigInt! # uint256
+	supply: BigInt! # uint256
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
 }
 
 type ShareParticipant @entity {
-  id: ID!
-  owner: ID! # address
-  supply: BigInt! # uint256
-  buyPrice: BigInt # uint256
-  sellPrice: BigInt # uint256
-  numberOfHolders: BigInt! # uint256
-  numberOfHoldings: BigInt! # uint256
-  tradingFeesAmount: BigInt! # uint256
+	id: ID!
+	owner: ID! # address
+	supply: BigInt! # uint256
+	buyPrice: BigInt # uint256
+	sellPrice: BigInt # uint256
+	numberOfHolders: BigInt! # uint256
+	numberOfHoldings: BigInt! # uint256
+	tradingFeesAmount: BigInt! # uint256
 }
 
 type ShareRelationship @entity {
-  id: ID!
-  holder: ShareParticipant! # ShareParticipant
-  owner: ShareParticipant! # ShareParticipant
-  supporterNumber: BigInt! # uint256
-  heldKeyNumber: BigInt! # uint256
+	id: ID!
+	holder: ShareParticipant! # ShareParticipant
+	owner: ShareParticipant! # ShareParticipant
+	supporterNumber: BigInt! # uint256
+	heldKeyNumber: BigInt! # uint256
 }

@@ -1,5 +1,5 @@
-import { Share } from '@/models/share.model';
-import { ShareRelationship } from '@/models/shareRelationship.model';
+import { Share } from "@/models/share.model";
+import { ShareRelationship } from "@/models/shareRelationship.model";
 
 const gqlShare = `
   id
@@ -32,25 +32,25 @@ const query = `
 `;
 
 interface BuilderFiDataResponse {
-	data: {
-		shareParticipants: Share[];
-		shareRelationships: ShareRelationship[];
-	};
+  data: {
+    shareParticipants: Share[];
+    shareRelationships: ShareRelationship[];
+  };
 }
 
 export const fetchBuilderfiData = async () => {
-	const res: BuilderFiDataResponse = await fetch(
-		'https://api.thegraph.com/subgraphs/name/francisco-leal/buidlerfi-eth-singapore',
-		{
-			method: 'POST',
-			body: JSON.stringify({
-				query,
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		}
-	).then(res => res.json());
+  const res: BuilderFiDataResponse = await fetch(
+    "https://api.thegraph.com/subgraphs/name/francisco-leal/buidlerfi-eth-singapore",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        query
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  ).then(res => res.json());
 
-	return res.data;
+  return res.data;
 };

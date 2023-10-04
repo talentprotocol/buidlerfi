@@ -13,12 +13,6 @@
     "isolatedModules": true,
     "outDir": "dist"
   },
-  "include": [
-    "./scripts",
-    "./test",
-    "./typechain"
-  ],
-  "files": [
-    "./hardhat.config.ts"
-  ],
+  "include": ["./scripts", "./test", "./typechain"],
+  "files": ["./hardhat.config.ts"]
 }

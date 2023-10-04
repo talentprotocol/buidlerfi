@@ -1,3 +1,3 @@
 export interface SimpleUseQueryOptions {
-	enabled: boolean;
+  enabled: boolean;
 }

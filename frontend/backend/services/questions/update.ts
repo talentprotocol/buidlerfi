@@ -1,20 +1,20 @@
-import prisma from '@/lib/prisma';
+import prisma from "@/lib/prisma";
 
 const call = async (questionId: number, answerContent: string) => {
-	const question = await prisma.question.update({
-		where: {
-			id: questionId,
-		},
-		data: {
-			answerContent: answerContent,
-		},
-	});
+  const question = await prisma.question.update({
+    where: {
+      id: questionId
+    },
+    data: {
+      answerContent: answerContent
+    }
+  });
 
-	return question;
+  return question;
 };
 
 const UpdateQuestion = {
-	call,
+  call
 };
 
 export default UpdateQuestion;

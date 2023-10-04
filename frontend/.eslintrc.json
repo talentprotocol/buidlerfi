@@ -1,7 +1,7 @@
 {
-	"extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
-	"parser": "@typescript-eslint/parser",
-	"plugins": ["@typescript-eslint"],
-	"root": true,
-	"ignorePatterns": ["__generated__/*"]
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "root": true,
+  "ignorePatterns": ["__generated__/*"]
 }

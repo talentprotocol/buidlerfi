@@ -1,10 +1,16 @@
 {
   "useTabs": true,
-  "printWidth": 120,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "arrowParens": "avoid",
-  "proseWrap": "never",
-  "singleQuote": true,
-  "semi": true
+  "overrides": [
+    {
+      "files": "*.{json,babelrc,eslintrc,remarkrc,prettierrc,js,jsx,ts,tsx,scss}",
+      "options": {
+        "printWidth": 120,
+        "tabWidth": 2,
+        "useTabs": false,
+        "trailingComma": "none",
+        "arrowParens": "avoid",
+        "proseWrap": "never"
+      }
+    }
+  ]
 }
