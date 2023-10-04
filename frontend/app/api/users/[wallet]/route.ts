@@ -1,12 +1,9 @@
-import UpsertUser from "@/backend/services/users/upsert";
+import UpdateSocialData from "@/backend/services/users/updateSocialData";
 
-export async function PUT(req: Request) {
+export async function PUT(req: Request, { params }: { params: { wallet: string } }) {
   try {
     const body = await req.json();
-    if (!body.wallet) {
-      return Response.json({ error: "Wallet field is mandatory" }, { status: 409 });
-    }
-    const user = await UpsertUser.call(body.wallet);
+    const user = await UpdateSocialData.call(params.wallet, body);
 
     return Response.json({ data: user }, { status: 200 });
   } catch (error) {

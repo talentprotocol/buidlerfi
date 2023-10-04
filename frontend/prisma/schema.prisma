@@ -12,16 +12,28 @@ datasource db {
 }
 
 model User {
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  wallet     String   @id @db.VarChar(50)
-  questioner Question[] @relation("questioner")
-  replier    Question[] @relation("replier")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  wallet         String          @id @db.VarChar(50)
+  questioner     Question[]      @relation("questioner")
+  replier        Question[]      @relation("replier")
+  userSocialData UserSocialData?
+}
+
+model UserSocialData {
+  id                 Int      @id @default(autoincrement())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userWallet], references: [wallet])
+  userWallet         String   @unique
+  talentProtocolData Json?
+  farcasterData      Json?
+  ensData            Json?
 }
 
 model Question {
   id               Int      @id @default(autoincrement())
-  questionContent  String   @db.VarChar
+  questionContent  String   @db.VarChar(500)
   answerContent    String?  @db.VarChar
   createdAt        DateTime @default(now())
   questioner       User     @relation("questioner", fields: [questionerWallet], references: [wallet])

@@ -16,6 +16,7 @@ import { MUMBAI_ADDRESS } from "@/lib/address";
 import { FARCASTER_LOGO, LENS_LOGO } from "@/lib/assets";
 import { shortAddress } from "@/lib/utils";
 import { Avatar, Button, Chip, Tooltip, Typography } from "@mui/joy";
+import axios from "axios";
 import Image from "next/image";
 import { FC, useMemo, useState } from "react";
 import { formatUnits } from "viem";
@@ -29,10 +30,21 @@ interface Props {
   sellPrice?: bigint;
 }
 
+interface User {
+  userSocialData: {
+    talentProtocolData: {
+      name: string;
+      username: string;
+      headline: string;
+    };
+  };
+}
+
 export const Overview: FC<Props> = ({ socialData, buyPrice, totalSupply, buyPriceAfterFee, sellPrice }) => {
   const { address } = useAccount();
   const [buyingKeys, setBuyingKeys] = useState(false);
   const [sellingKeys, setSellingKeys] = useState(false);
+  const [user, setUser] = useState({} as User);
   const [openBuy, setOpenBuy] = useState(false);
   const { toast } = useToast();
 
@@ -166,6 +178,14 @@ export const Overview: FC<Props> = ({ socialData, buyPrice, totalSupply, buyPric
     return !!supporterKeys && supporterKeys > 0;
   };
 
+  const refreshTalentProtocolData = async () => {
+    const response = await axios.put(`/api/users/${socialData.address}`, {
+      talentProtocol: true
+    });
+    console.log(response.data.data);
+    setUser(response.data.data);
+  };
+
   return (
     <Flex y>
       <Flex x yc xsb>
@@ -268,6 +288,23 @@ export const Overview: FC<Props> = ({ socialData, buyPrice, totalSupply, buyPric
           ))}
         </div>
       )}
+
+      <div className="flex flex-wrap space-x-2 my-5">
+        {user && (
+          <div className="flex items-center justify-between">
+            <div className="flex flex-column items-center space-x-2">
+              <p className="text-sm text-muted-foreground">
+                username: {user.userSocialData.talentProtocolData.username}
+              </p>
+              <p className="text-sm text-muted-foreground">name: {user.userSocialData.talentProtocolData.name}</p>
+              <p className="text-sm text-muted-foreground">
+                headline: {user.userSocialData.talentProtocolData.headline}
+              </p>
+            </div>
+          </div>
+        )}
+        <Button onClick={() => refreshTalentProtocolData()}>Get your info from Talent Protocol</Button>
+      </div>
     </Flex>
   );
 };

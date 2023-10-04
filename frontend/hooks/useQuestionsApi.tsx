@@ -10,15 +10,19 @@ interface Question {
   replierWallet: string;
 }
 
+interface ResponseData {
+  data: Question[];
+}
+
 export const useGetQuestions = (questionerWallet?: string, replierWallet?: string) => {
   return useQuery(
     ["useGetQuestions", questionerWallet, replierWallet],
     () =>
       axios
-        .get<Question[]>(`/api/questions`, {
+        .get<ResponseData>(`/api/questions`, {
           params: { questionerWallet, replierWallet }
         })
-        .then(res => res.data),
+        .then(res => res.data.data),
     { enabled: !!questionerWallet && !!replierWallet }
   );
 };

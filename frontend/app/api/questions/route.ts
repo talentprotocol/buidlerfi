@@ -21,9 +21,10 @@ export async function POST(req: Request) {
 
     const question = await CreateQuestion.call(body.questionerWallet, body.replierWallet, body.questionContent);
 
-    return Response.json(question, { status: 200 });
+    return Response.json({ data: question }, { status: 200 });
   } catch (error) {
     console.error(error);
+    console.error("Error from URL:", req.url);
     return Response.json({ error: "Unexpected error. Contact Us." }, { status: 500 });
   }
 }
@@ -48,7 +49,7 @@ export async function GET(req: Request) {
     }
     const questions = await GetQuestions.call(questionerWallet, replierWallet);
 
-    return Response.json(questions, { status: 200 });
+    return Response.json({ data: questions }, { status: 200 });
   } catch (error) {
     console.error(error);
     console.error("Error from URL:", req.url);

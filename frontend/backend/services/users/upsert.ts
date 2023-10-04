@@ -1,21 +1,18 @@
 import prisma from "@/lib/prisma";
 
 const call = async (wallet: string) => {
-  let user = await prisma.user.findUnique({
+  return await prisma.user.upsert({
     where: {
       wallet: wallet.toLowerCase()
+    },
+    update: {},
+    create: {
+      wallet: wallet.toLowerCase()
+    },
+    include: {
+      userSocialData: true
     }
   });
-
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        wallet: wallet.toLowerCase()
-      }
-    });
-  }
-
-  return user;
 };
 
 const UpsertUser = {
