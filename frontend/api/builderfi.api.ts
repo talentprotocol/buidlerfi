@@ -40,7 +40,7 @@ interface BuilderFiDataResponse {
 
 export const fetchBuilderfiData = async () => {
   const res: BuilderFiDataResponse = await fetch(
-    "https://api.thegraph.com/subgraphs/name/francisco-leal/buidlerfi-eth-singapore",
+    "https://api.thegraph.com/subgraphs/name/talent-protocol/builderfi-base-test-net",
     {
       method: "POST",
       body: JSON.stringify({

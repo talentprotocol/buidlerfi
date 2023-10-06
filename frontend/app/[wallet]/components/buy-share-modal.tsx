@@ -107,7 +107,7 @@ export const BuyShareModal: FC<Props> = ({
   return (
     <Modal open={open} onClose={close}>
       <ModalDialog minWidth="400px">
-        <DialogTitle>{hasKeys ? "Trade" : "Buy"} Keys</DialogTitle>
+        <DialogTitle>{hasKeys ? "Trade" : "Buy"} Cards</DialogTitle>
 
         <Flex y gap3>
           <Flex x yc xsb>
@@ -118,7 +118,7 @@ export const BuyShareModal: FC<Props> = ({
               </Typography>
             </Flex>
             <Flex y>
-              <Typography level="body-md">{formatEth(buyPrice)} MATIC</Typography>
+              <Typography level="body-md">{formatEth(buyPrice)} ETH</Typography>
               <Typography level="body-sm" textColor="neutral.400">
                 Card price
               </Typography>

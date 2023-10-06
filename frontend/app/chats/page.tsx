@@ -38,11 +38,11 @@ export default function ChatsPage() {
       <div className="grid gap-4 grid-cols-2 mb-6">
         <Flex component={Card}>
           <Typography level={"body-lg"}>Portfolio Value</Typography>
-          <Typography>{formatUnits(portfolio, 18)} MATIC</Typography>
+          <Typography>{formatUnits(portfolio, 18)} ETH</Typography>
         </Flex>
         <Flex component={Card}>
           <Typography level={"body-lg"}>Trading fees</Typography>
-          <Typography>{!tradingFees ? "undefined" : formatUnits(tradingFees, 18)} MATIC</Typography>
+          <Typography>{!tradingFees ? "undefined" : formatUnits(tradingFees, 18)} ETH</Typography>
         </Flex>
       </div>
       {holding.map(item => (

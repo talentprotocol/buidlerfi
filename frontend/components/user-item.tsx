@@ -36,7 +36,7 @@ export function UserItem({ address, numberOfHolders, buyPrice }: Props) {
             {socialData.name}
           </Typography>
           <Typography textColor={"neutral.500"} level="body-sm">
-            {numberOfHolders.toString()} holders | Price {formatUnits(BigInt(buyPrice || 0), 18)} MATIC
+            {numberOfHolders.toString()} holders | Price {formatUnits(BigInt(buyPrice || 0), 18)} ETH
           </Typography>
         </Flex>
       </Flex>

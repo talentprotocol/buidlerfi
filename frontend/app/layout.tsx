@@ -5,7 +5,7 @@ import "./globals.css";
 import { EthereumClient, w3mConnectors, w3mProvider } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { lineaTestnet, mainnet, polygon, polygonMumbai } from "wagmi/chains";
+import { baseGoerli } from "wagmi/chains";
 
 import { BottomNav } from "@/components/bottom-nav";
 import { NavBalance } from "@/components/nav-balance";
@@ -21,7 +21,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-const chains = [mainnet, polygonMumbai, lineaTestnet, polygon];
+const chains = [baseGoerli];
 const projectId = "530148d9ddb07d128a40fc21cc9ffdd9";
 
 const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);

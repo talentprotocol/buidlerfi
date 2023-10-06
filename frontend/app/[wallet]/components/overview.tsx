@@ -143,7 +143,7 @@ export const Overview: FC<Props> = ({ socialData }) => {
         </Flex>
 
         <Flex y>
-          <Typography className="text-base font-medium">{formatEth(buyPrice)} MATIC</Typography>
+          <Typography className="text-base font-medium">{formatEth(buyPrice)} ETH</Typography>
           <Typography level="body-sm" textColor="neutral.400">
             Card price
           </Typography>
