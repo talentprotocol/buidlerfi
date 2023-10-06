@@ -66,7 +66,6 @@ export const Overview: FC<Props> = ({ socialData }) => {
   }, [refetchBuyPrice, refetchKeys, refetchSellprice, refetchSupporterNumber, refetchTotalSupply]);
 
   const holderNumberText = () => {
-    console.log({ totalSupply, supporterNumber, supporterKeys });
     if (totalSupply === undefined || supporterNumber === undefined || supporterKeys === undefined) return "...";
 
     if (totalSupply === BigInt(0) && address == socialData.address) {

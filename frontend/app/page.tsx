@@ -34,7 +34,7 @@ export default function Home() {
       socialFollowers?.Follower.map(follower => ({
         id: follower.followerAddress.identity,
         name:
-          follower.followerAddress.domains.find(domain => domain.isPrimary)?.name || follower.followerAddress.identity,
+          follower.followerAddress.domains?.find(domain => domain.isPrimary)?.name || follower.followerAddress.identity,
         dappName: follower.dappName
       })) || [],
     [socialFollowers]
