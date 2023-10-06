@@ -2,7 +2,7 @@ import { Flex } from "@/components/flex";
 import { useToast } from "@/components/ui/use-toast";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { MUMBAI_ADDRESS } from "@/lib/address";
+import { BASE_GOERLI_TESTNET } from "@/lib/address";
 import { formatEth } from "@/lib/utils";
 import { Button, DialogTitle, Modal, ModalDialog, Typography } from "@mui/joy";
 import { FC } from "react";
@@ -30,7 +30,7 @@ export const BuyShareModal: FC<Props> = ({
   const { toast } = useToast();
 
   const { data: buyPriceAfterFee } = useContractRead({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "getBuyPriceAfterFee",
     args: [socialData.address]
@@ -41,7 +41,7 @@ export const BuyShareModal: FC<Props> = ({
     write: contractBuyKeys,
     isLoading: buyIsLoading
   } = useContractWrite({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "buyShares",
     onSuccess: ({ hash }) => {
@@ -63,7 +63,7 @@ export const BuyShareModal: FC<Props> = ({
     write: contractSellKeys,
     isLoading: sellIsLoading
   } = useContractWrite({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "sellShares",
     onSuccess: ({ hash }) => {

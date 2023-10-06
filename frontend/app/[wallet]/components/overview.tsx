@@ -3,7 +3,7 @@ import { BuyShareModal } from "@/app/[wallet]/components/buy-share-modal";
 import { Flex } from "@/components/flex";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { MUMBAI_ADDRESS } from "@/lib/address";
+import { BASE_GOERLI_TESTNET } from "@/lib/address";
 import { FARCASTER_LOGO, LENS_LOGO } from "@/lib/assets";
 import { formatEth, shortAddress } from "@/lib/utils";
 import { ContentCopy } from "@mui/icons-material";
@@ -21,28 +21,28 @@ export const Overview: FC<Props> = ({ socialData }) => {
   const [openBuy, setOpenBuy] = useState(false);
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useContractRead({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "sharesSupply",
     args: [socialData.address]
   });
 
   const { data: buyPrice, refetch: refetchBuyPrice } = useContractRead({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "getBuyPrice",
     args: [socialData.address]
   });
 
   const { data: sellPrice, refetch: refetchSellprice } = useContractRead({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "getSellPrice",
     args: [socialData.address, BigInt(1)]
   });
 
   const { data: supporterKeys, refetch: refetchKeys } = useContractRead({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "sharesBalance",
     args: [socialData.address, address!],
@@ -50,7 +50,7 @@ export const Overview: FC<Props> = ({ socialData }) => {
   });
 
   const { data: supporterNumber, refetch: refetchSupporterNumber } = useContractRead({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "supporterNumber",
     args: [socialData.address, address!],

@@ -3,7 +3,7 @@ import { Flex } from "@/components/flex";
 import { useGetQuestions, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { MUMBAI_ADDRESS } from "@/lib/address";
+import { BASE_GOERLI_TESTNET } from "@/lib/address";
 import { Button, Input } from "@mui/joy";
 import { Lock, MessageSquare } from "lucide-react";
 import { FC, useState } from "react";
@@ -18,7 +18,7 @@ export const ChatTab: FC<Props> = ({ socialData }) => {
   const [chatValue, setChatValue] = useState<string>("");
   const { address } = useAccount();
   const { data: supporterKeys } = useContractRead({
-    address: MUMBAI_ADDRESS,
+    address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "sharesBalance",
     args: [socialData.address, address!],

@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: BuidlerFiV1
-    network: mumbai
+    network: base-testnet
     source:
-      address: "0x7083d3c0B2c031dc62ecD14184eB61B6815b31ED"
+      address: "0x664d86cf8d30eec4169393a70eb3aa796be85642"
       abi: BuidlerFiV1
-      startBlock: 39998892
+      startBlock: 10709224
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -18,7 +18,7 @@ dataSources:
         - Trade
       abis:
         - name: BuidlerFiV1
-          file: ./abis/BuidlerFiV1.json
+          file: ./abis/BuilderFiV1.json
       eventHandlers:
         - event: Trade(address,address,bool,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleTrade
