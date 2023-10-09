@@ -1,5 +1,5 @@
 "use client";
-import { BuyShareModal } from "@/app/[wallet]/components/buy-share-modal";
+import { BuyShareModal } from "@/app/u/[wallet]/components/buy-share-modal";
 import { Flex } from "@/components/flex";
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { SocialData } from "@/hooks/useSocialData";
