@@ -1,5 +1,5 @@
 import CreateQuestion from "@/backend/services/questions/create";
-import GetQuestions from "@/backend/services/questions/get";
+// import GetQuestions from "@/backend/services/questions/get";
 
 export async function POST(req: Request) {
   try {
@@ -31,26 +31,7 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const questionerWallet = searchParams.get("questionerWallet") as string;
-    const replierWallet = searchParams.get("replierWallet") as string;
-
-    let errorMessage = "";
-
-    // if (!questionerWallet) {
-    //   errorMessage += "QuestionerWallet field is mandatory.";
-    // }
-
-    if (!replierWallet) {
-      errorMessage += " ReplierWallet field is mandatory.";
-    }
-
-    if (errorMessage.length > 0) {
-      return Response.json({ error: errorMessage }, { status: 409 });
-    }
-    const questions = await GetQuestions.call(replierWallet, questionerWallet);
-
-    return Response.json({ data: questions }, { status: 200 });
+    return Response.json({ data: "123" }, { status: 200 });
   } catch (error) {
     console.error(error);
     console.error("Error from URL:", req.url);
