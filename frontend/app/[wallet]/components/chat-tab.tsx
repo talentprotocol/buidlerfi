@@ -73,7 +73,7 @@ export const ChatTab: FC<Props> = ({ socialData }) => {
           })
         )}
       </Flex>
-      {!isOwnChat && (
+      {
         <Flex x gap2>
           <Input
             value={chatValue}
@@ -86,7 +86,7 @@ export const ChatTab: FC<Props> = ({ socialData }) => {
             Send message
           </Button>
         </Flex>
-      )}
+      }
     </Flex>
   );
 };

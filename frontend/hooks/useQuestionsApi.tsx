@@ -33,6 +33,6 @@ interface PutQuestionParams {
 
 export const usePutQuestion = () => {
   return useMutation((params: PutQuestionParams) => {
-    return axios.put(`/api/questions/${params.id}`, params);
+    return axios.put(`/questions/${params.id}`, { answerContent: params.answerContent });
   });
 };
