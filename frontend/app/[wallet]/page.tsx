@@ -9,7 +9,7 @@ import { useSocialData } from "@/hooks/useSocialData";
 import { tryParseBigInt } from "@/lib/utils";
 import { Chat, Lock } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
@@ -21,6 +21,16 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   const holdings = useGetHoldings(params.wallet);
 
   const isOwnProfile = address?.toLowerCase() === socialData?.address?.toLowerCase();
+
+  const isValidWallet = useMemo(() => {
+    return /^0x[a-fA-F0-9]{40}$/gm.test(params.wallet);
+  }, [params]);
+
+  useEffect(() => {
+    if (!isValidWallet) window.location.replace("/notfound");
+  }, [isValidWallet]);
+
+  if (!isValidWallet) return <></>;
 
   return (
     <Flex component={"main"} y grow gap2 sx={{ p: { sm: 0, md: 2 } }}>
