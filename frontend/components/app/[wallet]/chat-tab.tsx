@@ -46,6 +46,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
       replierWallet: socialData.address
     });
     await refetch();
+    setChatValue("");
   };
 
   if (!ownsKeys && !isOwnProfile) {
