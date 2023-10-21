@@ -29,8 +29,8 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
           onClick={() => router.push("/")}
           alt="App logo"
           src={isSm ? LOGO_SMALL : LOGO}
-          height={40}
-          width={isSm ? 40 : 150}
+          height={30}
+          width={isSm ? 30 : 150}
         />
         <Flex x yc gap2>
           <NavBalance />
