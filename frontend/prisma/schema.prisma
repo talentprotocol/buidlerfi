@@ -6,38 +6,126 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  wallet         String          @id @db.VarChar(50)
-  questioner     Question[]      @relation("questioner")
-  replier        Question[]      @relation("replier")
-  userSocialData UserSocialData?
+  wallet      String       @unique @db.VarChar(50)
+  questions   Question[]   @relation("questioner")
+  replies     Question[]   @relation("replier")
+  inviteCodes InviteCode[]
+  comments    Comment[]
+  invitedBy   InviteCode?  @relation("invitation", fields: [invitedById], references: [id])
+  invitedById Int?
+  points      Points[]
+  reactions   Reaction[]
+
+  socialProfiles SocialProfile[]
+  //Each social platform can have it's own avatar and name. One will be chosen as the main one
+  avatarUrl      String?         @db.VarChar(255)
+  displayName    String?         @db.VarChar(50)
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model UserSocialData {
-  id                 Int      @id @default(autoincrement())
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  user               User     @relation(fields: [userWallet], references: [wallet])
-  userWallet         String   @unique
-  talentProtocolData Json?
-  farcasterData      Json?
-  ensData            Json?
+enum SocialProfileType {
+  FARCASTER
+  LENS
+  TALENT_PROTOCOL
+  ENS
+}
+
+model SocialProfile {
+  type         SocialProfileType
+  profileName  String            @db.VarChar(50)
+  profileImage String?           @db.VarChar(255)
+  user         User              @relation(fields: [userId], references: [id])
+  userId       Int
+  //Just in case we need to store data specific to each social platform
+  socialData   Json?
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Question {
-  id               Int      @id @default(autoincrement())
-  questionContent  String   @db.VarChar(500)
-  answerContent    String?  @db.VarChar
-  createdAt        DateTime @default(now())
-  questioner       User     @relation("questioner", fields: [questionerWallet], references: [wallet])
-  replier          User     @relation("replier", fields: [replierWallet], references: [wallet])
-  questionerWallet String   @db.VarChar(50)
-  replierWallet    String   @db.VarChar(50)
+  questionContent String     @db.VarChar(500)
+  questioner      User       @relation("questioner", fields: [questionerId], references: [id])
+  questionerId    Int
+  reply           String?    @db.VarChar
+  replier         User       @relation("replier", fields: [replierId], references: [id])
+  replierId       Int
+  repliedOn       DateTime?
+  comments        Comment[]
+  reactions       Reaction[]
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  content    String   @db.VarChar(500)
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+  author     User     @relation(fields: [authorId], references: [id])
+  authorId   Int
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+  LOVE
+  HATE
+  LAUGH
+  CRY
+  ANGRY
+  SURPRISED
+}
+
+model Reaction {
+  reactionType ReactionType
+  user         User         @relation(fields: [userId], references: [id])
+  userId       Int
+  question     Question     @relation(fields: [questionId], references: [id])
+  questionId   Int
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, questionId])
+}
+
+model InviteCode {
+  code        String @unique @db.VarChar(50)
+  user        User   @relation(fields: [userId], references: [id])
+  userId      Int
+  invitations User[] @relation("invitation")
+  maxUses     Int
+  used        Int
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Points {
+  description String  @db.VarChar(500)
+  user        User    @relation(fields: [userId], references: [id])
+  userId      Int
+  points      Int
+  hidden      Boolean
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
