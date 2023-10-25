@@ -1,0 +1,39 @@
+import { useGetUser } from "@/hooks/useUserApi";
+import { User } from "@prisma/client";
+import { User as PrivyUser, usePrivy } from "@privy-io/react-auth";
+import { ReactNode, createContext, useContext, useMemo } from "react";
+
+interface UserContextType {
+  user?: User;
+  privyUser?: PrivyUser;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  address?: `0x${string}`;
+}
+const userContext = createContext<UserContextType>({
+  user: undefined,
+  privyUser: undefined,
+  isLoading: true,
+  isAuthenticated: false,
+  address: undefined
+});
+
+export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const { user: privyUser, ready } = usePrivy();
+  const user = useGetUser(privyUser?.wallet?.address);
+  console.log({ privyUser, ready, isLoading: user.isLoading });
+  const value = useMemo(
+    () => ({
+      user: user.data,
+      privyUser: privyUser || undefined,
+      isLoading: !ready || privyUser ? user.isLoading : false,
+      isAuthenticated: ready && !user.isLoading && !!user.data && user.data.isActive,
+      address: privyUser?.wallet?.address ? (privyUser?.wallet?.address as `0x${string}`) : undefined
+    }),
+    [privyUser, ready, user.data, user.isLoading]
+  );
+
+  return <userContext.Provider value={value}>{children}</userContext.Provider>;
+};
+
+export const useUserContext = () => useContext(userContext);

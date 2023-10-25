@@ -1,20 +1,26 @@
 "use client";
-import { Typography } from "@mui/joy";
-import { useAccount, useBalance } from "wagmi";
+import { useUserContext } from "@/contexts/userContext";
+import { shortAddress } from "@/lib/utils";
+import { Button, Typography } from "@mui/joy";
+import { usePrivy } from "@privy-io/react-auth";
+import { useBalance } from "wagmi";
+import { Flex } from "./flex";
 
 export function NavBalance() {
-  const { address } = useAccount();
+  const { address } = useUserContext();
+  const { logout } = usePrivy();
   const { data: balance } = useBalance({
     address
   });
 
-  if (balance) {
-    return (
-      <Typography>
-        {parseFloat(balance?.formatted).toFixed(3)} {balance?.symbol}
-      </Typography>
-    );
-  } else {
-    return <></>;
-  }
+  return (
+    <Flex x yc gap2>
+      {balance && (
+        <Typography>
+          {parseFloat(balance?.formatted).toFixed(3)} {balance?.symbol}
+        </Typography>
+      )}
+      {address && <Button onClick={logout}>{shortAddress(address)}</Button>}
+    </Flex>
+  );
 }

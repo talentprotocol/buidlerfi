@@ -4,3 +4,5 @@ export const POLYGON_ZKEVM_TESTNET = "0xa013cDBBE8c9b1325992e3D4Fc312bB990cC61F5
 export const TAIKO_TESTNET = "0xa013cDBBE8c9b1325992e3D4Fc312bB990cC61F5";
 export const LINEA_TESTNET = "0xa013cDBBE8c9b1325992e3D4Fc312bB990cC61F5";
 export const BASE_GOERLI_TESTNET = "0x8b35b89ed2df3682b9783db65136211aee8bdd08";
+export const GRAPH_URL = "https://api.thegraph.com/subgraphs/name/francisco-leal/builder-fi-base-testnet";
+export const SUPPORTED_CHAIN_ID = [84531];

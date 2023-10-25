@@ -1,7 +1,7 @@
 import { Flex } from "@/components/shared/flex";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { BASE_GOERLI_TESTNET } from "@/lib/address";
+import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import { formatError, formatEth } from "@/lib/utils";
 import { Button, DialogTitle, Modal, ModalDialog, Typography } from "@mui/joy";
 import { FC, useRef } from "react";

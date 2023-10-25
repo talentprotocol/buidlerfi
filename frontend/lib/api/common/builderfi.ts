@@ -1,3 +1,4 @@
+import { GRAPH_URL } from "@/lib/constants";
 import { Share } from "@/models/share.model";
 import { ShareRelationship } from "@/models/shareRelationship.model";
 
@@ -71,18 +72,15 @@ interface BuilderFiDataResponse {
 }
 
 export const fetchBuilderfiData = async () => {
-  const res: BuilderFiDataResponse = await fetch(
-    "https://api.thegraph.com/subgraphs/name/francisco-leal/builder-fi-base-testnet",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        query
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
+  const res: BuilderFiDataResponse = await fetch(GRAPH_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      query
+    }),
+    headers: {
+      "Content-Type": "application/json"
     }
-  ).then(res => res.json());
+  }).then(res => res.json());
 
   return res.data;
 };
@@ -94,41 +92,35 @@ interface BuilderFiHoldersResponse {
 }
 
 export const fetchHoldings = async (address: string) => {
-  const res: BuilderFiHoldersResponse = await fetch(
-    "https://api.thegraph.com/subgraphs/name/francisco-leal/builder-fi-base-testnet",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        query: getHoldingsQuery,
-        variables: {
-          address: address.toLowerCase()
-        }
-      }),
-      headers: {
-        "Content-Type": "application/json"
+  const res: BuilderFiHoldersResponse = await fetch(GRAPH_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      query: getHoldingsQuery,
+      variables: {
+        address: address.toLowerCase()
       }
+    }),
+    headers: {
+      "Content-Type": "application/json"
     }
-  ).then(res => res.json());
+  }).then(res => res.json());
 
   return res.data.shareRelationships;
 };
 
 export const fetchHolders = async (address: string) => {
-  const res: BuilderFiHoldersResponse = await fetch(
-    "https://api.thegraph.com/subgraphs/name/francisco-leal/builder-fi-base-testnet",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        query: getHoldersQuery,
-        variables: {
-          address: address.toLowerCase()
-        }
-      }),
-      headers: {
-        "Content-Type": "application/json"
+  const res: BuilderFiHoldersResponse = await fetch(GRAPH_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      query: getHoldersQuery,
+      variables: {
+        address: address.toLowerCase()
       }
+    }),
+    headers: {
+      "Content-Type": "application/json"
     }
-  ).then(res => res.json());
+  }).then(res => res.json());
 
   return res.data.shareRelationships;
 };

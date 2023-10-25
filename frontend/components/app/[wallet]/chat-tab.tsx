@@ -4,7 +4,7 @@ import { PageMessage } from "@/components/shared/page-message";
 import { useGetQuestions, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { BASE_GOERLI_TESTNET } from "@/lib/address";
+import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import theme from "@/theme";
 import { Chat, Lock, LockOpen } from "@mui/icons-material";
 import { Button, Textarea } from "@mui/joy";

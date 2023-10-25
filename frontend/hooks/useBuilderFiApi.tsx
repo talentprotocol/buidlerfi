@@ -1,4 +1,4 @@
-import { fetchBuilderfiData, fetchHolders, fetchHoldings } from "@/lib/api/builderfi.api";
+import { fetchBuilderfiData, fetchHolders, fetchHoldings } from "@/lib/api/common/builderfi";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { useQuery } from "@tanstack/react-query";
 

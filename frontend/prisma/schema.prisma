@@ -11,20 +11,21 @@ datasource db {
 }
 
 model User {
-  wallet      String       @unique @db.VarChar(50)
-  questions   Question[]   @relation("questioner")
-  replies     Question[]   @relation("replier")
-  inviteCodes InviteCode[]
-  comments    Comment[]
-  invitedBy   InviteCode?  @relation("invitation", fields: [invitedById], references: [id])
-  invitedById Int?
-  points      Points[]
-  reactions   Reaction[]
-
+  wallet         String          @unique @db.VarChar(50)
+  questions      Question[]      @relation("questioner")
+  replies        Question[]      @relation("replier")
+  inviteCodes    InviteCode[]
+  comments       Comment[]
+  invitedBy      InviteCode?     @relation("invitation", fields: [invitedById], references: [id])
+  invitedById    Int?
+  points         Points[]
+  reactions      Reaction[]
   socialProfiles SocialProfile[]
   //Each social platform can have it's own avatar and name. One will be chosen as the main one
-  avatarUrl      String?         @db.VarChar(255)
-  displayName    String?         @db.VarChar(50)
+  avatarUrl      String?         @db.VarChar(500)
+  displayName    String?         @db.VarChar(255)
+  privyUserId    String?         @unique
+  isActive       Boolean         @default(false)
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -40,7 +41,7 @@ enum SocialProfileType {
 
 model SocialProfile {
   type         SocialProfileType
-  profileName  String            @db.VarChar(50)
+  profileName  String            @db.VarChar(500)
   profileImage String?           @db.VarChar(255)
   user         User              @relation(fields: [userId], references: [id])
   userId       Int

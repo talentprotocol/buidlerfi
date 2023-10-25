@@ -1,15 +1,30 @@
 "use client";
 
 import { Flex } from "@/components/shared/flex";
-import { Button, Input, Link, Typography } from "@mui/joy";
+import { useCreateUser } from "@/hooks/useUserApi";
+import { Button, Input, Typography } from "@mui/joy";
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function InvitationCode() {
+  const { replace } = useRouter();
+  const { user: privyUser, logout } = usePrivy();
   const [inviteCode, setInviteCode] = useState<string>("");
-  const handleOnClickProceed = () => {
-    //Check invite code
-    //Make appropriate API calls
-    //Redirect to next step
+  const createUser = useCreateUser();
+  const handleOnClickProceed = async () => {
+    if (!privyUser) {
+      replace("/signup");
+      return;
+    }
+
+    await createUser.mutateAsync({ privyUser, inviteCode });
+    replace("/home");
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    replace("/signup");
   };
 
   return (
@@ -32,12 +47,12 @@ export default function InvitationCode() {
       </Flex>
 
       <Flex y xc gap2 fullwidth>
-        <Button fullWidth size="lg" onClick={() => handleOnClickProceed}>
+        <Button loading={createUser.isLoading} fullWidth size="lg" onClick={handleOnClickProceed}>
           Proceed
         </Button>
-        <Link href="/signup" textColor="neutral.500">
+        <Button disabled={createUser.isLoading} onClick={handleLogout} variant="plain">
           Log out
-        </Link>
+        </Button>
       </Flex>
     </Flex>
   );

@@ -3,15 +3,17 @@
 import { Flex } from "@/components/shared/flex";
 import { useGetUser } from "@/hooks/useUserApi";
 import { CircularProgress } from "@mui/joy";
+import { usePrivy } from "@privy-io/react-auth";
 import { redirect } from "next/navigation";
 import { useEffect } from "react";
 
 export default function RootPage() {
-  //Waiting for backend and privy authentication
-  const user = useGetUser("test");
+  const { user: privyUser } = usePrivy();
+  const user = useGetUser(privyUser?.wallet?.address);
 
+  console.log({ privyUser, user });
   useEffect(() => {
-    if (user.isLoading) return;
+    if (user.isInitialLoading) return;
     if (!user.data) {
       //Not found ?
       redirect("/signup");

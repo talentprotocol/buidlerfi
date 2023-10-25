@@ -1,8 +1,8 @@
 "use client";
 import { AirstackUserItem } from "@/components/shared/airstack-user-item";
 import { Flex } from "@/components/shared/flex";
-import { Icons } from "@/components/shared/ui/icons";
 import { UserItem } from "@/components/shared/user-item";
+import { useUserContext } from "@/contexts/userContext";
 import { useGetSocialFollowers } from "@/hooks/useAirstackApi";
 import { useBuilderFIData } from "@/hooks/useBuilderFiApi";
 import { parseFollower } from "@/lib/airstack/parser";
@@ -10,40 +10,21 @@ import { tryParseBigInt } from "@/lib/utils";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { Wallet } from "lucide-react";
 import { useMemo } from "react";
-import { useAccount } from "wagmi";
 
 export default function Home() {
-  const { address, isConnecting, isDisconnected } = useAccount();
+  const { address } = useUserContext();
   const builderfiData = useBuilderFIData();
 
   const users = useMemo(
     () =>
-      [...(builderfiData.data?.shareParticipants || [])].sort((a, b) =>
-        a.numberOfHolders > b.numberOfHolders ? -1 : 1
-      ),
+      [...(builderfiData.data?.shareParticipants || [])]
+        .filter(user => Number(user.numberOfHolders) > 0)
+        .sort((a, b) => (a.numberOfHolders > b.numberOfHolders ? -1 : 1)),
     [builderfiData]
   );
 
   const { data: socialFollowers } = useGetSocialFollowers(address);
   const followers = useMemo(() => socialFollowers?.Follower.map(f => parseFollower(f)) || [], [socialFollowers]);
-
-  if (isConnecting) {
-    return (
-      <div className="flex flex-col items-center justify-center mt-24">
-        <Icons.spinner className="text-muted-foreground h-32 w-32 animate-spin mb-6" />
-        <p>Connecting...</p>
-      </div>
-    );
-  }
-
-  if (isDisconnected) {
-    return (
-      <div className="flex flex-col items-center justify-center mt-24">
-        <Wallet className="text-muted-foreground h-32 w-32 mb-6" />
-        <p>Please connect your wallet to proceed.</p>
-      </div>
-    );
-  }
 
   return (
     <Flex component={"main"} y grow>

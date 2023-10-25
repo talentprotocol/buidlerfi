@@ -1,29 +1,23 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
+import { UserProvider } from "@/contexts/userContext";
+import { LOGO } from "@/lib/assets";
 import theme from "@/theme";
 import { CssVarsProvider } from "@mui/joy";
+import { PrivyProvider } from "@privy-io/react-auth";
+import { PrivyWagmiConnector } from "@privy-io/wagmi-connector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { EthereumClient, w3mConnectors, w3mProvider } from "@web3modal/ethereum";
-import { Web3Modal } from "@web3modal/react";
 import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { WagmiConfig, configureChains, createConfig } from "wagmi";
+import { configureChains } from "wagmi";
 import { baseGoerli } from "wagmi/chains";
+import { publicProvider } from "wagmi/providers/public";
 import "./globals.css";
 
 const chains = [baseGoerli];
-const projectId = "530148d9ddb07d128a40fc21cc9ffdd9";
-
-const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors: w3mConnectors({ projectId, chains }),
-  publicClient
-});
-const ethereumClient = new EthereumClient(wagmiConfig, chains);
-
-// const inter = Inter({ subsets: ['latin'] });
+// const projectId = "530148d9ddb07d128a40fc21cc9ffdd9";
+const configureChainsConfig = configureChains(chains, [publicProvider()]);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,23 +31,45 @@ const queryClient = new QueryClient({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
       <Flex y component={"body"} sx={{ height: "100%" }}>
         <CssVarsProvider theme={theme}>
-          <WagmiConfig config={wagmiConfig}>
-            <QueryClientProvider client={queryClient}>{mounted && children}</QueryClientProvider>
-          </WagmiConfig>
+          <QueryClientProvider client={queryClient}>
+            {mounted && <InnerProviders>{children}</InnerProviders>}
+          </QueryClientProvider>
           <ToastContainer />
-          <Web3Modal
-            projectId={projectId}
-            ethereumClient={ethereumClient}
-            themeVariables={{
-              "--w3m-accent-color": "#000"
-            }}
-          />
         </CssVarsProvider>
       </Flex>
     </html>
   );
 }
+
+//It is necessary to separate this to access the QueryClientProvider
+const InnerProviders = ({ children }: { children: React.ReactNode }) => {
+  if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
+    throw new Error("NEXT_PUBLIC_PRIVY_APP_ID not set in env vars");
+  }
+
+  return (
+    <PrivyProvider
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
+      config={{
+        loginMethods: ["google", "sms", "email", "wallet", "twitter", "discord"],
+        embeddedWallets: {
+          createOnLogin: "users-without-wallets"
+        },
+        appearance: {
+          theme: "light",
+          accentColor: "#676FFF",
+          logo: LOGO
+        }
+      }}
+    >
+      <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
+        <UserProvider>{children}</UserProvider>
+      </PrivyWagmiConnector>
+    </PrivyProvider>
+  );
+};

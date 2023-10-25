@@ -1,6 +1,7 @@
 import { PeopleOutline } from "@mui/icons-material";
-import { Link } from "@mui/joy";
+import { Link as JoyLink } from "@mui/joy";
 import { MessageSquare, Search, User } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAccount } from "wagmi";
 import { Flex } from "./flex";
@@ -11,20 +12,22 @@ export function BottomNav() {
 
   return (
     <Flex x yc xsa component="nav" className={"fixed bottom-0 left-0 border-t w-full bg-white"}>
-      <Link
-        href="/"
+      <JoyLink
+        component={Link}
+        href="/home"
         sx={{
           py: 1.5,
           display: "flex",
           flexDirection: "column",
           width: "100%",
-          backgroundColor: pathname === "/" ? "neutral.100" : "background"
+          backgroundColor: pathname === "/home" ? "neutral.100" : "background"
         }}
       >
         <Search className="h-4 w-4" />
         Explore
-      </Link>
-      <Link
+      </JoyLink>
+      <JoyLink
+        component={Link}
         href="/chats"
         sx={{
           py: 1.5,
@@ -36,8 +39,9 @@ export function BottomNav() {
       >
         <MessageSquare className="h-4 w-4" />
         Cards
-      </Link>
-      <Link
+      </JoyLink>
+      <JoyLink
+        component={Link}
         href={address ? `/${address}` : `/`}
         sx={{
           py: 1.5,
@@ -49,8 +53,9 @@ export function BottomNav() {
       >
         <User className="h-4 w-4" />
         Profile
-      </Link>
-      <Link
+      </JoyLink>
+      <JoyLink
+        component={Link}
         href={"/invite"}
         sx={{
           py: 1.5,
@@ -62,7 +67,7 @@ export function BottomNav() {
       >
         <PeopleOutline />
         Invite
-      </Link>
+      </JoyLink>
     </Flex>
   );
 }

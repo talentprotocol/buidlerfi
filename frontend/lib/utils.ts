@@ -35,3 +35,28 @@ export const formatError = (error: unknown) => {
   }
   return JSON.stringify(error);
 };
+
+export const generateRandomString = (length: number) => {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  return result;
+};
+
+export function buildQueryClauses(query: URLSearchParams) {
+  const where: { [key: string]: string } = {};
+  const orderBy: { [key: string]: string } = {};
+
+  for (const key of Object.keys(query)) {
+    // Assume any param ending in "OrderBy" is for ordering, others are for filtering
+    if (key.endsWith("OrderBy")) {
+      const field = key.slice(0, -7); // Remove 'OrderBy' from the key
+      orderBy[field] = query.get(key) as string;
+    } else {
+      where[key] = query.get(key) as string;
+    }
+  }
+
+  return { where, orderBy: Object.keys(orderBy).length ? orderBy : undefined };
+}
