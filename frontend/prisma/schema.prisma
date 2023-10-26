@@ -22,8 +22,8 @@ model User {
   reactions      Reaction[]
   socialProfiles SocialProfile[]
   //Each social platform can have it's own avatar and name. One will be chosen as the main one
-  avatarUrl      String?         @db.VarChar(500)
   displayName    String?         @db.VarChar(255)
+  avatarUrl      String?         @db.VarChar(500)
   privyUserId    String?         @unique
   isActive       Boolean         @default(false)
 
@@ -41,8 +41,8 @@ enum SocialProfileType {
 
 model SocialProfile {
   type         SocialProfileType
-  profileName  String            @db.VarChar(500)
-  profileImage String?           @db.VarChar(255)
+  profileName  String            @db.VarChar(255)
+  profileImage String?           @db.VarChar(500)
   user         User              @relation(fields: [userId], references: [id])
   userId       Int
   //Just in case we need to store data specific to each social platform

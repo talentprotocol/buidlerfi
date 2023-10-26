@@ -7,19 +7,16 @@ import { getAirstackSocialData } from "./airstack";
 
 export const updateUserSocialProfiles = async (user: User) => {
   const ensProfile = await getEnsProfile(user.wallet as `0x${string}`);
-  console.log("ensProfile", ensProfile);
   const talentProtocolProfile = await axios
     .get<GetTalentResponse>(`${process.env.TALENT_PROTOCOL_API_BASE_URL}/talents/${user.wallet}`)
     .then(res => res.data);
-  console.log("talentProtocolProfile", talentProtocolProfile);
   const airstackData = await getAirstackSocialData(user.wallet);
-  console.log("airstackData", airstackData);
   const lensProfile = airstackData.socials?.find(social => social.dappName === "lens");
   const farcasterProfile = airstackData.socials?.find(social => social.dappName === "farcaster");
 
   return await prisma.$transaction(async tx => {
     if (ensProfile.name) {
-      tx.socialProfile.create({
+      await tx.socialProfile.create({
         data: {
           profileName: ensProfile.name,
           profileImage: ensProfile.avatar,
@@ -30,7 +27,7 @@ export const updateUserSocialProfiles = async (user: User) => {
     }
 
     if (talentProtocolProfile) {
-      tx.socialProfile.create({
+      await tx.socialProfile.create({
         data: {
           profileName: talentProtocolProfile.talent.name,
           profileImage: talentProtocolProfile.talent.profile_picture_url,
@@ -41,7 +38,7 @@ export const updateUserSocialProfiles = async (user: User) => {
     }
 
     if (lensProfile) {
-      tx.socialProfile.create({
+      await tx.socialProfile.create({
         data: {
           profileName: lensProfile.profileName,
           profileImage: lensProfile.profileImage,
@@ -52,7 +49,7 @@ export const updateUserSocialProfiles = async (user: User) => {
     }
 
     if (farcasterProfile) {
-      tx.socialProfile.create({
+      await tx.socialProfile.create({
         data: {
           profileName: farcasterProfile.profileName,
           profileImage: farcasterProfile.profileImage,
@@ -79,6 +76,9 @@ export const updateUserSocialProfiles = async (user: User) => {
         data: {
           avatarUrl: defaultAvatar,
           displayName: defaultName
+        },
+        include: {
+          socialProfiles: true
         }
       });
     }

@@ -53,12 +53,19 @@ export async function POST(req: Request) {
 
       const code = await tryGenerateUniqueCode();
 
-      tx.inviteCode.create({
+      await tx.inviteCode.create({
         data: {
           code: code,
           userId: newUser.id,
           used: 0,
           maxUses: 10
+        }
+      });
+
+      await tx.inviteCode.update({
+        where: { id: existingCode.id },
+        data: {
+          used: existingCode.used + 1
         }
       });
 

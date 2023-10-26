@@ -42,7 +42,6 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
 
     await postQuestion.mutateAsync({
       questionContent: chatValue,
-      questionerWallet: address,
       replierWallet: socialData.address
     });
     await refetch();
@@ -78,7 +77,15 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
           <PageMessage text={`Congratulations. You can now chat with ${socialData.name}`} icon={<LockOpen />} />
         ) : (
           questions?.map(question => {
-            return <QuestionEntry key={question.id} question={question} isOwnChat={isOwnProfile} refetch={refetch} />;
+            return (
+              <QuestionEntry
+                key={question.id}
+                socialData={socialData}
+                question={question}
+                isOwnChat={isOwnProfile}
+                refetch={refetch}
+              />
+            );
           })
         )}
       </Flex>

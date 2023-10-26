@@ -1,10 +1,9 @@
-import { useGetUser } from "@/hooks/useUserApi";
-import { User } from "@prisma/client";
+import { GetCurrentUserResponse, useGetCurrentUser } from "@/hooks/useUserApi";
 import { User as PrivyUser, usePrivy } from "@privy-io/react-auth";
 import { ReactNode, createContext, useContext, useMemo } from "react";
 
 interface UserContextType {
-  user?: User;
+  user?: GetCurrentUserResponse;
   privyUser?: PrivyUser;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -20,8 +19,7 @@ const userContext = createContext<UserContextType>({
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { user: privyUser, ready } = usePrivy();
-  const user = useGetUser(privyUser?.wallet?.address);
-  console.log({ privyUser, ready, isLoading: user.isLoading });
+  const user = useGetCurrentUser();
   const value = useMemo(
     () => ({
       user: user.data,

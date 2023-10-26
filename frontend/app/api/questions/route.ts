@@ -4,20 +4,20 @@ import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { questionerWallet, replierWallet, questionContent } = await req.json();
-    if (!questionerWallet || !replierWallet || !questionContent) {
+    const { replierWallet, questionContent } = await req.json();
+    if (!replierWallet || !questionContent) {
       return Response.json({ error: "Incorrect request body" }, { status: 400 });
     }
 
     //TODO check if user isActive = true. Removed for now
-    const questioner = await prisma.user.findUnique({ where: { wallet: questionerWallet.toLowerCase() } });
+    const questioner = await prisma.user.findUnique({ where: { privyUserId: req.headers.get("privyUserId")! } });
     const replier = await prisma.user.findUnique({ where: { wallet: replierWallet.toLowerCase() } });
     if (!questioner || !replier) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
     const replierHolders = await fetchHolders(replierWallet);
-    const found = replierHolders.find(holder => holder.holder.owner.toLowerCase() === questionerWallet.toLowerCase());
+    const found = replierHolders.find(holder => holder.holder.owner.toLowerCase() === questioner.wallet.toLowerCase());
     if (!found || Number(found.heldKeyNumber) === 0) {
       return Response.json({ error: "You must hold a card to ask a question to this user" }, { status: 404 });
     }
@@ -48,7 +48,10 @@ export async function GET(req: NextRequest) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
-    const questions = await prisma.question.findMany({ where: { replierId: replier.id } });
+    const questions = await prisma.question.findMany({
+      where: { replierId: replier.id },
+      include: { questioner: true, reactions: true, comments: true }
+    });
 
     return Response.json({ data: questions }, { status: 200 });
   } catch (error) {

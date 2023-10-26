@@ -2,12 +2,14 @@
 import { Flex } from "@/components/shared/flex";
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { SocialData } from "@/hooks/useSocialData";
+import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { FARCASTER_LOGO, LENS_LOGO } from "@/lib/assets";
+import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
 import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import { formatEth, shortAddress } from "@/lib/utils";
-import { ContentCopy } from "@mui/icons-material";
+import { ContentCopy, Refresh } from "@mui/icons-material";
 import { Avatar, Button, Chip, IconButton, Tooltip, Typography } from "@mui/joy";
+import { SocialProfileType } from "@prisma/client";
 import Image from "next/image";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useAccount, useContractRead } from "wagmi";
@@ -19,15 +21,25 @@ interface Props {
 }
 
 const socialInfo = {
-  lens: {
+  [SocialProfileType.LENS]: {
     name: "Lens",
     icon: <Image width={20} height={20} src={LENS_LOGO} alt="Lens logo" />,
     url: (username: string) => `https://hey.xyz/u/${username}`
   },
-  farcaster: {
+  [SocialProfileType.FARCASTER]: {
     name: "Farcaster",
     icon: <Image width={20} height={20} src={FARCASTER_LOGO} alt="Farcaster logo" />,
     url: (username: string) => `https://warpcast.com/${username}`
+  },
+  [SocialProfileType.TALENT_PROTOCOL]: {
+    name: "Talent Protocol",
+    icon: <Image width={20} height={20} src={TALENT_PROTOCOL_LOGO} alt="Talent Protocol logo" />,
+    url: (_: string, address: string) => `https://beta.talentprotocol.com/u/${address}`
+  },
+  [SocialProfileType.ENS]: {
+    name: "ENS",
+    icon: <Image width={20} height={20} src={ENS_LOGO} alt="Ens logo" />,
+    url: (username: string) => `https://app.ens.domains/${username}`
   }
 };
 
@@ -98,6 +110,8 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
     }
   };
 
+  const refreshData = useRefreshCurrentUser();
+
   const hasKeys = useMemo(() => !!supporterKeys && supporterKeys > 0, [supporterKeys]);
   return (
     <Flex y gap1>
@@ -105,9 +119,16 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
         <Flex x yc gap2>
           <Avatar src={socialData.avatar} />
           <Flex y>
-            <Typography level="h3" className="font-bold">
-              {socialData.name}
-            </Typography>
+            <Flex x yc>
+              <Typography level="h3" className="font-bold">
+                {socialData.name}
+              </Typography>
+              {isOwnProfile && (
+                <IconButton onClick={() => refreshData.mutate()}>
+                  <Refresh />
+                </IconButton>
+              )}
+            </Flex>
             {!socialData.name.startsWith("0x") && (
               <Flex x yc gap={0.5}>
                 <Typography level="body-sm" textColor="neutral.400">
@@ -169,7 +190,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
             return (
               <Tooltip key={social.dappName} title={additionalData.name} placement="top">
                 <Chip
-                  onClick={() => window.open(additionalData.url(social.profileName), "_blank")}
+                  onClick={() => window.open(additionalData.url(social.profileName, socialData.address), "_blank")}
                   variant="outlined"
                   color="neutral"
                   size="lg"

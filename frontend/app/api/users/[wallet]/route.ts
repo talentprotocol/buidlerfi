@@ -9,6 +9,9 @@ export async function PUT(req: NextRequest, { params }: { params: { wallet: stri
     const res = await prisma.user.findUnique({
       where: {
         wallet: address
+      },
+      include: {
+        socialProfiles: true
       }
     });
     if (res) return Response.json({ data: res }, { status: 200 });

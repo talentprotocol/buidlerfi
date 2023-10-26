@@ -10,20 +10,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { baseGoerli } from "viem/chains";
 import { configureChains } from "wagmi";
-import { baseGoerli } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import "./globals.css";
 
-const chains = [baseGoerli];
 // const projectId = "530148d9ddb07d128a40fc21cc9ffdd9";
-const configureChainsConfig = configureChains(chains, [publicProvider()]);
+const configureChainsConfig = configureChains([baseGoerli], [publicProvider()]);
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: false
+      retry: 0,
+      cacheTime: 10 * 60 * 1000,
+      staleTime: 10 * 60 * 1000,
+      refetchOnMount: false
     }
   }
 });
@@ -56,13 +58,16 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
       config={{
-        loginMethods: ["google", "sms", "email", "wallet", "twitter", "discord"],
+        loginMethods: ["google", "email", "wallet", "github"],
+
         embeddedWallets: {
           createOnLogin: "users-without-wallets"
         },
+        supportedChains: [baseGoerli],
+        defaultChain: baseGoerli,
         appearance: {
           theme: "light",
-          accentColor: "#676FFF",
+          accentColor: "#18181b",
           logo: LOGO
         }
       }}

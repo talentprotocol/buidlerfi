@@ -11,7 +11,6 @@ export default function RootPage() {
   const { user: privyUser } = usePrivy();
   const user = useGetUser(privyUser?.wallet?.address);
 
-  console.log({ privyUser, user });
   useEffect(() => {
     if (user.isInitialLoading) return;
     if (!user.data) {

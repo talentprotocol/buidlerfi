@@ -9,9 +9,8 @@ import { ReactNode, useEffect } from "react";
 export default function SignupLayout({ children }: { children: ReactNode }) {
   const { replace } = useRouter();
   const pathname = usePathname();
-  const { privyUser, user, isLoading, isAuthenticated } = useUserContext();
+  const { privyUser, isLoading, isAuthenticated } = useUserContext();
 
-  console.log({ privyUser, user, isLoading });
   useEffect(() => {
     if (isLoading) return;
 
