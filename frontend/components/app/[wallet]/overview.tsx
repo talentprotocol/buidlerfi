@@ -114,7 +114,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
 
   const hasKeys = useMemo(() => !!supporterKeys && supporterKeys > 0, [supporterKeys]);
   return (
-    <Flex y gap1>
+    <Flex y gap1 p={2}>
       <Flex x yc xsb>
         <Flex x yc gap2>
           <Avatar src={socialData.avatar} />

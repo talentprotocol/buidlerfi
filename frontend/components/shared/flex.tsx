@@ -1,4 +1,4 @@
-import { Box, type BoxProps } from "@mui/joy";
+import { Box, Skeleton, type BoxProps } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import type { FC, ReactNode } from "react";
 
@@ -36,7 +36,7 @@ interface Props extends BoxProps {
 
   wrap?: boolean;
   grow?: boolean;
-
+  loading?: boolean;
   fullwidth?: boolean;
 }
 
@@ -62,6 +62,7 @@ export const Flex: FC<Props> = ({
   fullwidth,
   wrap,
   grow,
+  loading,
   ...rest
 }) => {
   const style: SxProps = { display: "flex" };
@@ -112,8 +113,10 @@ export const Flex: FC<Props> = ({
   }
 
   return (
-    <Box {...rest} sx={{ ...style, ...sx }}>
-      {children}
-    </Box>
+    <Skeleton animation="wave" loading={loading || false}>
+      <Box {...rest} sx={{ ...style, ...sx }}>
+        {children}
+      </Box>
+    </Skeleton>
   );
 };

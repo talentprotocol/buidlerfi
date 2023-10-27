@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { baseGoerli } from "viem/chains";
 import { configureChains } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-import "./globals.css";
+//import "./globals.css";
 
 // const projectId = "530148d9ddb07d128a40fc21cc9ffdd9";
 const configureChainsConfig = configureChains([baseGoerli], [publicProvider()]);
@@ -24,8 +24,8 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 0,
       cacheTime: 10 * 60 * 1000,
-      staleTime: 10 * 60 * 1000,
-      refetchOnMount: false
+      staleTime: 10 * 60 * 1000
+      // refetchOnMount: false,
     }
   }
 });
@@ -35,8 +35,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => setMounted(true), []);
 
   return (
-    <html lang="en" suppressHydrationWarning className="h-full">
-      <Flex y component={"body"} sx={{ height: "100%" }}>
+    <Flex
+      lang="en"
+      component={"html"}
+      suppressHydrationWarning
+      grow
+      sx={{
+        maxWidth: "500px",
+        margin: "auto",
+        minHeight: "100vh",
+        border: theme => "1px solid " + theme.palette.neutral[300]
+      }}
+    >
+      <Flex y component={"body"} grow m={0}>
         <CssVarsProvider theme={theme}>
           <QueryClientProvider client={queryClient}>
             {mounted && <InnerProviders>{children}</InnerProviders>}
@@ -44,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ToastContainer />
         </CssVarsProvider>
       </Flex>
-    </html>
+    </Flex>
   );
 }
 

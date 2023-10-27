@@ -1,30 +1,30 @@
 import { updateUserSocialProfiles } from "@/lib/api/backend/user";
+import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { generateRandomString } from "@/lib/utils";
 import { User } from "@privy-io/react-auth";
 
+//Signup
 export async function POST(req: Request) {
   try {
     const { privyUser, inviteCode }: { privyUser: User; inviteCode: string } = await req.json();
-    if (!privyUser || !privyUser.id || !privyUser.wallet || !inviteCode) {
-      return Response.json({ error: "Incorrect body" }, { status: 400 });
+    if (!privyUser || !privyUser.id || !privyUser.wallet) {
+      return Response.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
     }
 
     const address = privyUser.wallet.address.toLowerCase();
 
     const existingCode = await prisma.inviteCode.findUnique({ where: { code: inviteCode } });
     if (!existingCode) {
-      return Response.json({ error: "Invalid invite code" }, { status: 400 });
+      return Response.json({ error: ERRORS.INVALID_INVITE_CODE }, { status: 400 });
     }
 
     if (existingCode.used >= existingCode.maxUses) {
-      return Response.json({ error: "Invite code has been used too many times" }, { status: 400 });
+      return Response.json({ error: ERRORS.CODE_ALREADY_USED }, { status: 400 });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { privyUserId: privyUser.id, isActive: true } });
-    if (existingUser) return Response.json({ data: existingUser }, { status: 200 });
-
     const newUser = await prisma.$transaction(async tx => {
+      //If user has been created previously (from contract interactions) but hasn't signed up yet
       const existingWallet = await tx.user.findUnique({ where: { wallet: address } });
       const newUser = existingWallet
         ? await tx.user.update({
@@ -48,19 +48,24 @@ export async function POST(req: Request) {
         if (existing) {
           return await tryGenerateUniqueCode();
         }
-        return code;
+        return "bf-" + code;
       };
 
-      const code = await tryGenerateUniqueCode();
+      //Generate 3 invite codes
+      await Promise.all(
+        [0, 0, 0].map(async () => {
+          const code = await tryGenerateUniqueCode();
 
-      await tx.inviteCode.create({
-        data: {
-          code: code,
-          userId: newUser.id,
-          used: 0,
-          maxUses: 10
-        }
-      });
+          return await tx.inviteCode.create({
+            data: {
+              code: code,
+              userId: newUser.id,
+              used: 0,
+              maxUses: 1
+            }
+          });
+        })
+      );
 
       await tx.inviteCode.update({
         where: { id: existingCode.id },
@@ -72,11 +77,16 @@ export async function POST(req: Request) {
       return newUser;
     });
 
-    await updateUserSocialProfiles(newUser);
+    try {
+      await updateUserSocialProfiles(newUser);
+    } catch (err) {
+      console.error("Error while updating social profiles: ", err);
+    }
+
     return Response.json({ data: newUser }, { status: 200 });
   } catch (error) {
     console.error(error);
     console.error("Error url:", req.url);
-    return Response.json({ error: "Unexpected error. Contact Us." }, { status: 500 });
+    return Response.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });
   }
 }

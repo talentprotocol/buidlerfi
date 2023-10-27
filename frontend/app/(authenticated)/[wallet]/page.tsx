@@ -33,7 +33,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   if (!isValidWallet) return <></>;
 
   return (
-    <Flex component={"main"} y grow gap2 sx={{ p: { sm: 0, md: 2 } }}>
+    <Flex component={"main"} y grow gap2>
       <Overview socialData={socialData} isOwnProfile={isOwnProfile} />
       <Tabs value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)} sx={{ flexGrow: 1 }}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">

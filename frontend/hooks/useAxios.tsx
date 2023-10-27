@@ -56,6 +56,16 @@ export const useAxios = () => {
       return config;
     });
 
+    // instance.interceptors.response.use(
+    //   response => {
+    //     return response;
+    //   },
+    //   error => {
+    //     toast.error(error.response?.data?.error || error.message);
+    //     return Promise.reject(error);
+    //   }
+    // );
+
     return instance;
   }, [getAccessToken]);
 

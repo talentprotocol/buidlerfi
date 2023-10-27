@@ -9,11 +9,11 @@ import { useMemo } from "react";
 
 export default function Invite() {
   const { user } = useUserContext();
+
   const points = useMemo(() => user?.points?.reduce((prev, curr) => prev + curr.points, 0), [user?.points]);
 
   const leaderboardPosition = "Coming soon";
   const invitedAmount = user?.inviteCodes.reduce((prev, curr) => prev + curr.used, 0);
-  const inviteCode = user?.inviteCodes.find(inviteCode => inviteCode.used < inviteCode.maxUses)?.code;
 
   return (
     <Flex y xc px={4}>
@@ -23,7 +23,21 @@ export default function Invite() {
       </Typography>
 
       <Flex y xs gap3 alignSelf="flex-start" mt={8}>
-        <TitleAndValue title="Your unique invite code" value={inviteCode} />
+        <TitleAndValue
+          title="Your unique invite code"
+          value={
+            <Flex y gap1>
+              {user?.inviteCodes.map(code => (
+                <Typography
+                  sx={{ textDecoration: code.used >= code.maxUses ? "strikethrough" : undefined }}
+                  key={code.code}
+                >
+                  {code.code}
+                </Typography>
+              ))}
+            </Flex>
+          }
+        />
         <TitleAndValue title="Your points" value={points} />
         <TitleAndValue title="Invited people" value={invitedAmount} />
         <TitleAndValue title="Weekly leaderboard" value={`${leaderboardPosition}`} />

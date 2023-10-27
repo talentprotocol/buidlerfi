@@ -8,13 +8,15 @@ interface UserContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   address?: `0x${string}`;
+  refetch: () => Promise<unknown>;
 }
 const userContext = createContext<UserContextType>({
   user: undefined,
   privyUser: undefined,
   isLoading: true,
   isAuthenticated: false,
-  address: undefined
+  address: undefined,
+  refetch: () => Promise.resolve()
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -26,9 +28,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       privyUser: privyUser || undefined,
       isLoading: !ready || privyUser ? user.isLoading : false,
       isAuthenticated: ready && !user.isLoading && !!user.data && user.data.isActive,
-      address: privyUser?.wallet?.address ? (privyUser?.wallet?.address as `0x${string}`) : undefined
+      address: privyUser?.wallet?.address ? (privyUser?.wallet?.address as `0x${string}`) : undefined,
+      refetch: user.refetch
     }),
-    [privyUser, ready, user.data, user.isLoading]
+    [privyUser, ready, user.data, user.isLoading, user.refetch]
   );
 
   return <userContext.Provider value={value}>{children}</userContext.Provider>;

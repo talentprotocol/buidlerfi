@@ -1,6 +1,7 @@
 "use client";
 
 import { Flex } from "@/components/shared/flex";
+import { useUserContext } from "@/contexts/userContext";
 import { useCreateUser } from "@/hooks/useUserApi";
 import { Button, Input, Typography } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
@@ -10,8 +11,10 @@ import { useState } from "react";
 export default function InvitationCode() {
   const { replace } = useRouter();
   const { user: privyUser, logout } = usePrivy();
+  const { refetch } = useUserContext();
   const [inviteCode, setInviteCode] = useState<string>("");
   const createUser = useCreateUser();
+
   const handleOnClickProceed = async () => {
     if (!privyUser) {
       replace("/signup");
@@ -19,6 +22,7 @@ export default function InvitationCode() {
     }
 
     await createUser.mutateAsync({ privyUser, inviteCode });
+    await refetch();
     replace("/home");
   };
 
@@ -50,7 +54,7 @@ export default function InvitationCode() {
         <Button loading={createUser.isLoading} fullWidth size="lg" onClick={handleOnClickProceed}>
           Proceed
         </Button>
-        <Button disabled={createUser.isLoading} onClick={handleLogout} variant="plain">
+        <Button disabled={createUser.isLoading} fullWidth onClick={handleLogout} variant="plain">
           Log out
         </Button>
       </Flex>

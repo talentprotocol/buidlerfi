@@ -1,19 +1,21 @@
 "use client";
 import { AirstackUserItem } from "@/components/shared/airstack-user-item";
 import { Flex } from "@/components/shared/flex";
+import { PageMessage } from "@/components/shared/page-message";
 import { UserItem } from "@/components/shared/user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetSocialFollowers } from "@/hooks/useAirstackApi";
 import { useBuilderFIData } from "@/hooks/useBuilderFiApi";
 import { parseFollower } from "@/lib/airstack/parser";
 import { tryParseBigInt } from "@/lib/utils";
+import { SupervisorAccountOutlined } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
-import { Wallet } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export default function Home() {
   const { address } = useUserContext();
   const builderfiData = useBuilderFIData();
+  const [selectedTab, setSelectedTab] = useState("top");
 
   const users = useMemo(
     () =>
@@ -28,16 +30,24 @@ export default function Home() {
 
   return (
     <Flex component={"main"} y grow>
-      <Tabs defaultValue="top" className="space-y-4">
+      <Tabs
+        defaultValue="top"
+        value={selectedTab}
+        onChange={(_, val) => val && setSelectedTab(val as string)}
+        sx={{ flexGrow: 1 }}
+      >
         <TabList tabFlex={1} className="grid w-full grid-cols-2">
-          <Tab variant="soft" disableIndicator value="top">
+          <Tab variant="soft" value="top">
             Top
           </Tab>
-          <Tab variant="soft" disableIndicator value="recommended">
+          <Tab variant="soft" value="recommended">
             Recommended
           </Tab>
         </TabList>
-        <TabPanel value="top" sx={{ p: 0 }} className="space-y-2">
+        <TabPanel
+          value="top"
+          sx={{ flexDirection: "column", display: selectedTab === "top" ? "flex" : "none", flexGrow: 1, p: 0 }}
+        >
           {users.map(user => (
             <UserItem
               address={user.owner as `0x${string}`}
@@ -47,12 +57,17 @@ export default function Home() {
             />
           ))}
         </TabPanel>
-        <TabPanel value="recommended" className="space-y-4">
+        <TabPanel
+          value="recommended"
+          sx={{ flexDirection: "column", display: selectedTab === "recommended" ? "flex" : "none", flexGrow: 1 }}
+        >
           {followers.length == 0 && (
-            <div className="flex flex-col items-center justify-center mt-24">
-              <Wallet className="text-muted-foreground h-32 w-32 mb-6" />
-              <p>We could find any connections to recommend based on your wallet.</p>
-            </div>
+            <PageMessage
+              title="Missing profiles on your wallet"
+              icon={<SupervisorAccountOutlined />}
+              text="Your wallet is missing lens or farcaster profiles, preventing us from suggesting any builders to you at
+            the moment."
+            />
           )}
           {followers.map(item => (
             <AirstackUserItem

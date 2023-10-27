@@ -21,6 +21,15 @@ const theme = extendTheme({
     dark: {
       palette: {}
     }
+  },
+  components: {
+    JoyTabPanel: {
+      styleOverrides: {
+        root: props => ({
+          backgroundColor: props.theme.palette.background.body
+        })
+      }
+    }
   }
 });
 

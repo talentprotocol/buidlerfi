@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const shortAddress = (address: `0x${string}`) => {
+export const shortAddress = (address: string) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
@@ -37,7 +37,7 @@ export const formatError = (error: unknown) => {
 };
 
 export const generateRandomString = (length: number) => {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   const charactersLength = characters.length;
   for (let i = 0; i < length; i++) result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -59,4 +59,8 @@ export function buildQueryClauses(query: URLSearchParams) {
   }
 
   return { where, orderBy: Object.keys(orderBy).length ? orderBy : undefined };
+}
+
+export function isEVMAddress(str: string) {
+  return /^0x[a-fA-F0-9]{40}$/gm.test(str);
 }

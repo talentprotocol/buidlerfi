@@ -6,7 +6,7 @@ import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
 import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import theme from "@/theme";
-import { Chat, Lock, LockOpen } from "@mui/icons-material";
+import { Chat, Lock, LockOpen, LockOutlined } from "@mui/icons-material";
 import { Button, Textarea } from "@mui/joy";
 import { useMediaQuery } from "@mui/material";
 import { FC, useState } from "react";
@@ -51,7 +51,8 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
   if (!ownsKeys && !isOwnProfile) {
     return (
       <PageMessage
-        icon={<Lock />}
+        title="Unlock Q&A"
+        icon={<LockOutlined />}
         text={`Hold at least one card to ask ${socialData.name} a question and access the answers.`}
       />
     );
