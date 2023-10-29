@@ -1,9 +1,16 @@
 import { extendTheme } from "@mui/joy/styles";
 
+declare module "@mui/joy/styles" {
+  interface Palette {
+    link: string;
+  }
+}
+
 const theme = extendTheme({
   colorSchemes: {
     light: {
       palette: {
+        link: "#0B6BCB",
         primary: {
           "50": "#fafafa",
           "100": "#f4f4f5",

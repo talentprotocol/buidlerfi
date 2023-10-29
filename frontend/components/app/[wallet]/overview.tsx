@@ -7,8 +7,8 @@ import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
 import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import { formatEth, shortAddress } from "@/lib/utils";
-import { ContentCopy, Refresh } from "@mui/icons-material";
-import { Avatar, Button, Chip, IconButton, Tooltip, Typography } from "@mui/joy";
+import { ContentCopy, KeyOutlined, Refresh } from "@mui/icons-material";
+import { Avatar, Box, Button, IconButton, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
 import { SocialProfileType } from "@prisma/client";
 import Image from "next/image";
 import { FC, useCallback, useMemo, useState } from "react";
@@ -64,7 +64,11 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
     args: [socialData.address]
   });
 
-  const { data: buyPrice, refetch: refetchBuyPrice } = useContractRead({
+  const {
+    data: buyPrice,
+    isLoading: isLoadingBuyPrice,
+    refetch: refetchBuyPrice
+  } = useContractRead({
     address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
     functionName: "getBuyPrice",
@@ -93,45 +97,47 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
     refetchKeys();
   }, [refetchBuyPrice, refetchKeys, refetchSellprice, refetchTotalSupply]);
 
-  const holderNumberText = () => {
-    if (holders.isLoading || supporterKeys === undefined) return "...";
-
-    if (totalSupply === BigInt(0) && isOwnProfile) {
-      return "Your first card is free.";
-    }
-
-    if (supporterNumber === 0 && supporterKeys > 0) {
-      return "You are holder #0";
-    }
-    if (supporterNumber && supporterNumber > 0) {
-      return `You are holder #${supporterNumber}`;
-    } else {
-      return "You don't own any cards";
-    }
-  };
-
   const refreshData = useRefreshCurrentUser();
 
   const hasKeys = useMemo(() => !!supporterKeys && supporterKeys > 0, [supporterKeys]);
   return (
-    <Flex y gap1 p={2}>
-      <Flex x yc xsb>
-        <Flex x yc gap2>
-          <Avatar src={socialData.avatar} />
+    <>
+      <BuyShareModal
+        open={openBuy}
+        socialData={socialData}
+        supporterKeysCount={supporterKeys}
+        hasKeys={hasKeys}
+        buyPrice={buyPrice}
+        sellPrice={sellPrice}
+        close={() => {
+          refetchAll();
+          setOpenBuy(false);
+        }}
+      />
+
+      <Flex y gap2 p={2}>
+        <Flex x yc gap1>
+          <Avatar size="lg" src={socialData.avatar} />
           <Flex y>
             <Flex x yc>
               <Typography level="h3" className="font-bold">
                 {socialData.name}
               </Typography>
+              {shortAddress(socialData.address) === socialData.name && (
+                <IconButton size="sm" onClick={() => window.navigator.clipboard.writeText(socialData.address)}>
+                  <ContentCopy sx={{ fontSize: "0.9rem" }} />
+                </IconButton>
+              )}
               {isOwnProfile && (
                 <IconButton onClick={() => refreshData.mutate()}>
                   <Refresh />
                 </IconButton>
               )}
             </Flex>
-            {!socialData.name.startsWith("0x") && (
-              <Flex x yc gap={0.5}>
-                <Typography level="body-sm" textColor="neutral.400">
+            {/* Only display if user has a display name */}
+            {shortAddress(socialData.address) !== socialData.name && (
+              <Flex x yc gap={0.5} height="20px">
+                <Typography level="body-sm" textColor="neutral.600">
                   {shortAddress(socialData.address)}
                 </Typography>
                 <IconButton size="sm" onClick={() => window.navigator.clipboard.writeText(socialData.address)}>
@@ -141,68 +147,49 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
             )}
           </Flex>
         </Flex>
-        <div className="space-x-2">
-          <Button onClick={() => setOpenBuy(true)} disabled={totalSupply === BigInt(0) && !isOwnProfile}>
-            {hasKeys ? "Trade" : "Buy"}
-          </Button>
-        </div>
-        <BuyShareModal
-          open={openBuy}
-          socialData={socialData}
-          supporterKeysCount={supporterKeys}
-          hasKeys={hasKeys}
-          buyPrice={buyPrice}
-          sellPrice={sellPrice}
-          close={() => {
-            refetchAll();
-            setOpenBuy(false);
-          }}
-        />
-      </Flex>
-      <Flex x yc xsb>
-        <Flex y>
-          <Typography className="text-base font-medium">{holderNumberText()}</Typography>
-          <Flex x yc gap2>
-            {/* <Typography level="body-sm" textColor={'neutral.400'}>
-							{holders} holders
-						</Typography>
-						<Typography level="body-sm" textColor={'neutral.400'}>
-							{holdings} holding
-						</Typography> */}
-            <Typography level="body-sm" textColor="neutral.400">
-              {hasKeys ? `You own ${supporterKeys} cards` : "You don't own any cards"}
-            </Typography>
-          </Flex>
-        </Flex>
 
-        <Flex y>
-          <Typography className="text-base font-medium">{formatEth(buyPrice)} ETH</Typography>
-          <Typography level="body-sm" textColor="neutral.400">
-            Card price
+        <Flex y gap1>
+          <Typography level="body-sm" startDecorator={<KeyOutlined fontSize="small" />}>
+            <Skeleton loading={isLoadingBuyPrice}>{formatEth(buyPrice)}</Skeleton>
           </Typography>
-        </Flex>
-      </Flex>
-
-      {socialData.socialsList.length > 0 && (
-        <Flex x gap2 wrap>
           {socialData.socialsList.map(social => {
             const additionalData = socialInfo[social.dappName as keyof typeof socialInfo];
             return (
-              <Tooltip key={social.dappName} title={additionalData.name} placement="top">
-                <Chip
-                  onClick={() => window.open(additionalData.url(social.profileName, socialData.address), "_blank")}
-                  variant="outlined"
-                  color="neutral"
-                  size="lg"
-                  startDecorator={additionalData.icon}
-                >
-                  {social.profileName}
-                </Chip>
-              </Tooltip>
+              <JoyLink
+                key={social.dappName}
+                href={additionalData.url(social.profileName, socialData.address)}
+                target="_blank"
+                startDecorator={additionalData.icon}
+                textColor={"link"}
+              >
+                {social.profileName}
+              </JoyLink>
             );
           })}
         </Flex>
-      )}
-    </Flex>
+
+        <Flex x gap2>
+          <Typography level="body-sm">
+            Holder{" "}
+            <Box fontWeight={600} component="span">
+              {supporterNumber}/{totalSupply?.toString()}
+            </Box>
+          </Typography>
+          <Typography level="body-sm">
+            You own{" "}
+            <Box fontWeight={600} component="span">
+              {supporterKeys?.toString()} key
+            </Box>
+          </Typography>
+        </Flex>
+        <Button
+          sx={{ alignSelf: "flex-start" }}
+          onClick={() => setOpenBuy(true)}
+          disabled={totalSupply === BigInt(0) && !isOwnProfile}
+        >
+          {hasKeys ? "Trade" : "Buy"}
+        </Button>
+      </Flex>
+    </>
   );
 };

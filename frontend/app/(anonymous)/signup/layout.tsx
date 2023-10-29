@@ -11,6 +11,7 @@ export default function SignupLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { privyUser, isLoading, isAuthenticated } = useUserContext();
 
+  console.log({ privyUser, isAuthenticated });
   useEffect(() => {
     if (isLoading) return;
 

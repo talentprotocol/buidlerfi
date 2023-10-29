@@ -16,6 +16,10 @@ export function Topbar() {
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
   const { address } = useUserContext();
   const { logout } = usePrivy();
+
+  const handleLogout = async () => {
+    await logout().then(() => router.push("/signup"));
+  };
   // const { data: balance } = useBalance({
   //   address
   // });
@@ -39,7 +43,7 @@ export function Topbar() {
       />
 
       {address && (
-        <Button startDecorator={<AccountCircle sx={{ fontSize: "24px" }} />} onClick={logout}>
+        <Button startDecorator={<AccountCircle sx={{ fontSize: "24px" }} />} onClick={handleLogout}>
           {shortAddress(address)}
         </Button>
       )}

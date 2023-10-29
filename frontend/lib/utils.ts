@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const shortAddress = (address: string) => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  return `${address.toLowerCase().slice(0, 6)}...${address.toLowerCase().slice(-4)}`;
 };
 
 export const formatEth = (eth?: bigint) => {

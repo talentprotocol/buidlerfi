@@ -51,7 +51,8 @@ export async function GET(req: NextRequest) {
 
     const questions = await prisma.question.findMany({
       where: { replierId: replier.id },
-      include: { questioner: true, reactions: true, comments: true }
+      include: { questioner: true, reactions: true, comments: true },
+      orderBy: { createdAt: "desc" }
     });
 
     return Response.json({ data: questions }, { status: 200 });

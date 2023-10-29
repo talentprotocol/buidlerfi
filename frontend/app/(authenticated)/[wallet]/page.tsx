@@ -37,19 +37,13 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
       <Overview socialData={socialData} isOwnProfile={isOwnProfile} />
       <Tabs value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)} sx={{ flexGrow: 1 }}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
-          <Tab disableIndicator value="chat">
-            Questions
-          </Tab>
-          <Tab disableIndicator value="holders">
-            Holders ({holders.data?.length})
-          </Tab>
-          <Tab disableIndicator value="holding">
-            Holding ({holdings.data?.length})
-          </Tab>
+          <Tab value="chat">Q&A</Tab>
+          <Tab value="holders">Holders({holders.data?.length})</Tab>
+          <Tab value="holding">Holding({holdings.data?.length})</Tab>
         </TabList>
         <TabPanel
           value="chat"
-          sx={{ display: selectedTab === "chat" ? "flex" : "none", flexGrow: 1, flexDirection: "column" }}
+          sx={{ display: selectedTab === "chat" ? "flex" : "none", flexGrow: 1, flexDirection: "column", p: 0 }}
         >
           <ChatTab socialData={socialData} isOwnProfile={isOwnProfile} />
         </TabPanel>

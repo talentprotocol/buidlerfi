@@ -15,8 +15,9 @@ interface Props {
   isOwnChat: boolean;
   socialData: SocialData;
   refetch: () => void;
+  index: string;
 }
-export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialData }) => {
+export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialData, index }) => {
   const answerRef = useRef<HTMLDivElement>(null);
 
   const [isAnswerTooLong, setIsAnswerTooLong] = useState(false);
@@ -41,23 +42,26 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Flex y gap1 pb={2} borderBottom={"1px solid " + theme.palette.divider}>
-      <Flex x ys gap1>
-        <Avatar src={question.questioner?.avatarUrl || DEFAULT_PROFILE_PICTURE} />
-        <Flex y gap1={!question.reply} key={question.id}>
-          <Flex x yc gap1>
-            <Typography fontWeight={500} level="body-md" whiteSpace="pre-line">
-              {question.questioner.displayName || shortAddress(question.questioner.wallet as `0x${string}`)}
+    <Flex y gap2 p={2} borderBottom={"1px solid " + theme.palette.divider}>
+      <Flex x xsb>
+        <Flex x ys gap1>
+          <Avatar size="sm" src={question.questioner?.avatarUrl || DEFAULT_PROFILE_PICTURE} />
+          <Flex y key={question.id}>
+            <Flex x yc gap1>
+              <Typography fontWeight={500} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
+                {question.questioner.displayName || shortAddress(question.questioner.wallet as `0x${string}`)}
+              </Typography>
+              <Typography level="body-sm">{format(question.createdAt, "MMM dd,yyyy")}</Typography>
+            </Flex>
+            <Typography fontWeight={300} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
+              {question.questionContent}
             </Typography>
-            <Typography level="body-sm">{format(question.createdAt, "MMM dd,yyyy")}</Typography>
           </Flex>
-          <Typography fontWeight={300} level="body-md" whiteSpace="pre-line">
-            {question.questionContent}
-          </Typography>
         </Flex>
+        <Typography level="body-sm">{index}</Typography>
       </Flex>
       <Flex x yc gap1>
-        <Avatar src={socialData.avatar || DEFAULT_PROFILE_PICTURE} />
+        <Avatar size="sm" src={socialData.avatar || DEFAULT_PROFILE_PICTURE} />
         {question.reply || !isOwnChat ? (
           <Flex y gap2>
             <Typography
@@ -67,7 +71,7 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
                 overflow: "hidden",
                 textOverflow: "ellipsis"
               }}
-              textColor="neutral.500"
+              textColor={question.reply ? "neutral.800" : "neutral.600"}
               level="body-sm"
               maxWidth="100%"
             >

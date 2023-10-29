@@ -24,7 +24,7 @@ export default function Invite() {
 
       <Flex y xs gap3 alignSelf="flex-start" mt={8}>
         <TitleAndValue
-          title="Your unique invite code"
+          title="Your unique invite codes"
           value={
             <Flex y gap1>
               {user?.inviteCodes.map(code => (

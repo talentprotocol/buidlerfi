@@ -14,7 +14,7 @@ export default function Signup() {
       <Flex y xc gap2>
         <Image alt="App logo" src={LOGO} height={40} width={150} />
         <Typography level="body-sm" textColor="neutral.500">
-          Monetize your alpha and network
+          Monetize Your Knowledge
         </Typography>
       </Flex>
 

@@ -7,7 +7,7 @@ import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
 import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import theme from "@/theme";
 import { Chat, Lock, LockOpen, LockOutlined } from "@mui/icons-material";
-import { Button, Textarea } from "@mui/joy";
+import { Button, CircularProgress, Textarea, Typography } from "@mui/joy";
 import { useMediaQuery } from "@mui/material";
 import { FC, useState } from "react";
 import { useAccount, useContractRead } from "wagmi";
@@ -31,7 +31,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
 
   const ownsKeys = supporterKeys !== undefined && supporterKeys > BigInt(0);
 
-  const { data: questions, refetch } = useGetQuestions(socialData.address);
+  const { data: questions, refetch, isLoading } = useGetQuestions(socialData.address);
 
   const postQuestion = usePostQuestion();
 
@@ -50,64 +50,80 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
 
   if (!ownsKeys && !isOwnProfile) {
     return (
-      <PageMessage
-        title="Unlock Q&A"
-        icon={<LockOutlined />}
-        text={`Hold at least one card to ask ${socialData.name} a question and access the answers.`}
-      />
+      <Flex p={2}>
+        <PageMessage
+          title="Unlock Q&A"
+          icon={<LockOutlined />}
+          text={`Hold at least one key to ask ${socialData.name} a question and access the answers.`}
+        />
+      </Flex>
     );
   }
 
   if (!ownsKeys && isOwnProfile) {
     return (
-      <PageMessage
-        icon={<Lock />}
-        text="Buy the first card to allow others to trade your cards and ask you questions."
-      />
+      <Flex p={2}>
+        <PageMessage
+          icon={<Lock />}
+          text="Buy the first key to allow others to trade your keys and ask you questions."
+        />
+      </Flex>
     );
   }
 
   if (isOwnProfile && !questions?.length) {
-    return <PageMessage icon={<Chat />} text="Questions asked by holders of your cards will appear here." />;
+    return (
+      <Flex p={2}>
+        {" "}
+        <PageMessage icon={<Chat />} text="Questions asked by holders of your keys will appear here." />
+      </Flex>
+    );
   }
 
   return (
     <Flex y grow>
-      <Flex y grow gap2>
-        {ownsKeys && !questions?.length ? (
-          <PageMessage text={`Congratulations. You can now chat with ${socialData.name}`} icon={<LockOpen />} />
-        ) : (
-          questions?.map(question => {
-            return (
-              <QuestionEntry
-                key={question.id}
-                socialData={socialData}
-                question={question}
-                isOwnChat={isOwnProfile}
-                refetch={refetch}
-              />
-            );
-          })
-        )}
-      </Flex>
       {!isOwnProfile && (
-        <Flex y={isSm} yc gap2>
-          <Textarea
-            value={chatValue}
-            onChange={e => setChatValue(e.target.value)}
-            error={chatValue.length > 500}
-            placeholder={`Ask a question to ${socialData.name}`}
-            endDecorator={<>{chatValue.length}/500</>}
-            sx={{ flexGrow: 1 }}
-          />
-          <Button
-            disabled={chatValue.length > 500}
-            className="appearance-none"
-            loading={postQuestion.isLoading}
-            onClick={() => sendQuestion()}
-          >
-            Post Question
-          </Button>
+        <Flex y grow gap={0.5} p={2} borderBottom={"1px solid " + theme.palette.divider}>
+          <Flex y={isSm} yc gap2>
+            <Textarea
+              value={chatValue}
+              onChange={e => setChatValue(e.target.value)}
+              error={chatValue.length > 500}
+              placeholder={`Ask a question to ${socialData.name}`}
+              sx={{ flexGrow: 1 }}
+            />
+            <Button
+              disabled={chatValue.length > 500}
+              className="appearance-none"
+              loading={postQuestion.isLoading}
+              onClick={() => sendQuestion()}
+            >
+              Ask
+            </Button>
+          </Flex>
+          <Typography level="body-sm">{chatValue.length}/500</Typography>
+        </Flex>
+      )}
+      {isLoading ? (
+        <CircularProgress />
+      ) : (
+        <Flex y grow>
+          {ownsKeys && !questions?.length ? (
+            <PageMessage text={`Congratulations. You can now chat with ${socialData.name}`} icon={<LockOpen />} />
+          ) : (
+            questions?.map((question, i) => {
+              return (
+                <QuestionEntry
+                  key={question.id}
+                  socialData={socialData}
+                  question={question}
+                  isOwnChat={isOwnProfile}
+                  refetch={refetch}
+                  index={`${questions.length - i}/${questions.length}`}
+                />
+              );
+            })
+          )}
         </Flex>
       )}
     </Flex>

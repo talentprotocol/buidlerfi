@@ -67,7 +67,10 @@ export function BottomNav() {
             textDecoration: "none",
             height: "64px",
             width: "100%",
-            backgroundColor: item.check(pathname) ? "neutral.100" : "background"
+            backgroundColor: item.check(pathname) ? "neutral.100" : "background",
+            ":hover": {
+              textDecoration: "none"
+            }
           }}
         >
           {item.label}
