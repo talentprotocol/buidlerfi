@@ -60,10 +60,10 @@ export const updateUserSocialProfiles = async (user: User) => {
   }
 
   const defaultAvatar =
-    talentProtocolProfile?.talent.profile_picture_url ||
     farcasterProfile?.profileImage ||
     lensProfile?.profileImage ||
-    ensProfile.avatar;
+    ensProfile.avatar ||
+    talentProtocolProfile?.talent.profile_picture_url;
   const defaultName =
     talentProtocolProfile?.talent.name || farcasterProfile?.profileName || lensProfile?.profileName || ensProfile.name;
 
