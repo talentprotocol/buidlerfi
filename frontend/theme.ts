@@ -30,6 +30,11 @@ const theme = extendTheme({
     }
   },
   components: {
+    JoySkeleton: {
+      defaultProps: {
+        animation: "wave"
+      }
+    },
     JoyTabPanel: {
       styleOverrides: {
         root: props => ({

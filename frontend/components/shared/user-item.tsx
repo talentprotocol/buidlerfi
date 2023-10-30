@@ -26,12 +26,13 @@ export function UserItem({ address, numberOfHolders, buyPrice }: Props) {
       yc
       py={1}
       px={2}
-      sx={{ ":hover": { backgroundColor: "neutral.100" } }}
-      className="transition-all cursor-pointer"
+      sx={{ cursor: "pointer", ":hover": { backgroundColor: "neutral.100" } }}
       onClick={() => router.push(`/${address}`)}
     >
       <Flex x yc gap2>
-        <Avatar size="sm" src={socialData.avatar} />
+        <Avatar size="sm" src={socialData.avatar}>
+          <Skeleton loading={socialData.isLoading} />
+        </Avatar>
         <Flex y gap={0.5}>
           <Typography textColor={"neutral.800"} fontWeight={600} level="body-sm">
             <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>

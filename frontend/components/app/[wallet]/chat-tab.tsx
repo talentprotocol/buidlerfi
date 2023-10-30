@@ -50,34 +50,22 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
 
   if (!ownsKeys && !isOwnProfile) {
     return (
-      <Flex p={2}>
-        <PageMessage
-          title="Unlock Q&A"
-          icon={<LockOutlined />}
-          text={`Hold at least one key to ask ${socialData.name} a question and access the answers.`}
-        />
-      </Flex>
+      <PageMessage
+        title="Unlock Q&A"
+        icon={<LockOutlined />}
+        text={`Hold at least one key to ask ${socialData.name} a question and access the answers.`}
+      />
     );
   }
 
   if (!ownsKeys && isOwnProfile) {
     return (
-      <Flex p={2}>
-        <PageMessage
-          icon={<Lock />}
-          text="Buy the first key to allow others to trade your keys and ask you questions."
-        />
-      </Flex>
+      <PageMessage icon={<Lock />} text="Buy the first key to allow others to trade your keys and ask you questions." />
     );
   }
 
   if (isOwnProfile && !questions?.length) {
-    return (
-      <Flex p={2}>
-        {" "}
-        <PageMessage icon={<Chat />} text="Questions asked by holders of your keys will appear here." />
-      </Flex>
-    );
+    return <PageMessage icon={<Chat />} text="Questions asked by holders of your keys will appear here." />;
   }
 
   return (

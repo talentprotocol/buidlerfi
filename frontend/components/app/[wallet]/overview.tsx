@@ -168,20 +168,24 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
           })}
         </Flex>
 
-        <Flex x gap2>
-          <Typography level="body-sm">
-            Holder{" "}
-            <Box fontWeight={600} component="span">
-              {supporterNumber}/{totalSupply?.toString()}
-            </Box>
-          </Typography>
-          <Typography level="body-sm">
-            You own{" "}
-            <Box fontWeight={600} component="span">
-              {supporterKeys?.toString()} key
-            </Box>
-          </Typography>
-        </Flex>
+        {supporterNumber === undefined ? (
+          <Typography level="body-sm">You don&apos;t own any keys</Typography>
+        ) : (
+          <Flex x gap2>
+            <Typography level="body-sm">
+              Holder{" "}
+              <Box fontWeight={600} component="span">
+                {supporterNumber}/{totalSupply?.toString()}
+              </Box>
+            </Typography>
+            <Typography level="body-sm">
+              You own{" "}
+              <Box fontWeight={600} component="span">
+                {supporterKeys?.toString()} key
+              </Box>
+            </Typography>
+          </Flex>
+        )}
         <Button
           sx={{ alignSelf: "flex-start" }}
           onClick={() => setOpenBuy(true)}

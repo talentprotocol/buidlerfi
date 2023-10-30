@@ -17,7 +17,7 @@ export const useSocialData = (address: `0x${string}`): SocialData => {
   const { data: user, isLoading } = useGetUser(address);
   return {
     address: address,
-    avatar: user?.avatarUrl || DEFAULT_PROFILE_PICTURE,
+    avatar: isLoading ? "" : user?.avatarUrl || DEFAULT_PROFILE_PICTURE,
     name: user?.displayName || shortAddress(address),
     socialsList:
       user?.socialProfiles?.map(social => ({ dappName: social.type, profileName: social.profileName })) || [],

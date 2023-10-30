@@ -34,7 +34,7 @@ export function Topbar() {
       borderBottom={"1px solid var(--neutral-outlined-border, #CDD7E1)"}
     >
       <Image
-        className="cursor-pointer"
+        style={{ cursor: "pointer" }}
         onClick={() => router.push("/home")}
         alt="App logo"
         src={isSm ? LOGO_SMALL : LOGO}
