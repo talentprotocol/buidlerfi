@@ -1,6 +1,6 @@
 "use client";
 import { useSocialData } from "@/hooks/useSocialData";
-import { Typography } from "@mui/joy";
+import { Skeleton, Typography } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -28,10 +28,12 @@ export function AirstackUserItem({ address, dappName }: Props) {
       onClick={() => router.push(`/${address}`)}
     >
       <Flex x yc gap2>
-        <Avatar size="sm" src={socialData.avatar} />
+        <Avatar size="sm" src={socialData.avatar}>
+          <Skeleton loading={socialData.isLoading} />
+        </Avatar>
         <Flex y gap={0.5}>
-          <Typography fontWeight={700} level="body-sm">
-            {socialData.name}
+          <Typography textColor={"neutral.800"} fontWeight={600} level="body-sm">
+            <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
           </Typography>
           <Typography textColor={"neutral.500"} level="body-sm">
             {dappName}

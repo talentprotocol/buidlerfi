@@ -6,7 +6,7 @@ import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
 import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import theme from "@/theme";
-import { Chat, Lock, LockOpen, LockOutlined } from "@mui/icons-material";
+import { Chat, KeyOutlined, LockOpen, LockOutlined } from "@mui/icons-material";
 import { Button, CircularProgress, Textarea, Typography } from "@mui/joy";
 import { useMediaQuery } from "@mui/material";
 import { FC, useState } from "react";
@@ -53,19 +53,29 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
       <PageMessage
         title="Unlock Q&A"
         icon={<LockOutlined />}
-        text={`Hold at least one key to ask ${socialData.name} a question and access the answers.`}
+        text={`Hold at least one key to ask ${socialData.name} a question and access the answers`}
       />
     );
   }
 
   if (!ownsKeys && isOwnProfile) {
     return (
-      <PageMessage icon={<Lock />} text="Buy the first key to allow others to trade your keys and ask you questions." />
+      <PageMessage
+        title={"Unlock Q&A"}
+        icon={<KeyOutlined />}
+        text="Launch your keys to allow others to trade your keys and ask you questions"
+      />
     );
   }
 
   if (isOwnProfile && !questions?.length) {
-    return <PageMessage icon={<Chat />} text="Questions asked by holders of your keys will appear here." />;
+    return (
+      <PageMessage
+        title="You don't have any questions"
+        icon={<Chat />}
+        text="Your Q&A will appear here as soon as one of your holders asks you a question"
+      />
+    );
   }
 
   return (

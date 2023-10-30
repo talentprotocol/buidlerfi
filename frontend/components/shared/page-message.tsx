@@ -11,7 +11,7 @@ interface Props {
 export const PageMessage: FC<Props> = ({ title, text, icon }) => {
   return (
     <Flex y yc xc grow gap1 p={2}>
-      {cloneElement(icon, { sx: { width: "40px", height: "40px", color: "neutral.500" } })}
+      {cloneElement(icon, { sx: { width: "40px", height: "40px", color: "primary.500" } })}
       <Flex y yc xc>
         <Typography fontWeight={600} level="h4" textColor="neutral.800">
           {title}
