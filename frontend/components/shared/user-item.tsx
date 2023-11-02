@@ -1,9 +1,9 @@
 "use client";
 import { useSocialData } from "@/hooks/useSocialData";
 import { tryParseBigInt } from "@/lib/utils";
+import { ChevronRight } from "@mui/icons-material";
 import { Skeleton, Typography } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
-import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatUnits } from "viem";
 import { Flex } from "./flex";
@@ -27,7 +27,7 @@ export function UserItem({ address, numberOfHolders, buyPrice }: Props) {
       py={1}
       px={2}
       sx={{ cursor: "pointer", ":hover": { backgroundColor: "neutral.100" } }}
-      onClick={() => router.push(`/${address}`)}
+      onClick={() => router.push(`/profile/${address}`)}
     >
       <Flex x yc gap2>
         <Avatar size="sm" src={socialData.avatar}>
@@ -42,7 +42,7 @@ export function UserItem({ address, numberOfHolders, buyPrice }: Props) {
           </Typography>
         </Flex>
       </Flex>
-      <ChevronRight className="h-4 w-4" />
+      <ChevronRight />
     </Flex>
   );
 }

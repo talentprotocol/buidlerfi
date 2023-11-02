@@ -6,16 +6,15 @@ import { PageMessage } from "@/components/shared/page-message";
 import { UserItem } from "@/components/shared/user-item";
 import { useGetHolders, useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useSocialData } from "@/hooks/useSocialData";
-import { tryParseBigInt } from "@/lib/utils";
+import { isEVMAddress, tryParseBigInt } from "@/lib/utils";
 import { Chat, Lock } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useAccount } from "wagmi";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
   const { address } = useAccount();
   const socialData = useSocialData(params.wallet);
-  const [selectedTab, setSelectedTab] = useState("chat");
 
   const holders = useGetHolders(params.wallet);
   const holdings = useGetHoldings(params.wallet);
@@ -23,7 +22,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   const isOwnProfile = address?.toLowerCase() === socialData?.address?.toLowerCase();
 
   const isValidWallet = useMemo(() => {
-    return /^0x[a-fA-F0-9]{40}$/gm.test(params.wallet);
+    return isEVMAddress(params.wallet);
   }, [params]);
 
   useEffect(() => {
@@ -35,22 +34,16 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   return (
     <Flex component={"main"} y grow gap2>
       <Overview socialData={socialData} isOwnProfile={isOwnProfile} />
-      <Tabs value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)} sx={{ flexGrow: 1 }}>
+      <Tabs defaultValue={"chat"}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
           <Tab value="chat">Q&A</Tab>
           <Tab value="holders">Holders({holders.data?.length})</Tab>
           <Tab value="holding">Holding({holdings.data?.length})</Tab>
         </TabList>
-        <TabPanel
-          value="chat"
-          sx={{ display: selectedTab === "chat" ? "flex" : "none", flexGrow: 1, flexDirection: "column", p: 0 }}
-        >
+        <TabPanel value="chat" sx={{ p: 0 }}>
           <ChatTab socialData={socialData} isOwnProfile={isOwnProfile} />
         </TabPanel>
-        <TabPanel
-          value="holding"
-          sx={{ flexDirection: "column", display: selectedTab === "holding" ? "flex" : "none", flexGrow: 1 }}
-        >
+        <TabPanel value="holding">
           {holdings.data?.length === 0 && isOwnProfile && (
             <PageMessage
               icon={<Chat />}
@@ -66,10 +59,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
             />
           ))}
         </TabPanel>
-        <TabPanel
-          value="holders"
-          sx={{ flexDirection: "column", display: selectedTab === "holders" ? "flex" : "none", flexGrow: 1 }}
-        >
+        <TabPanel value="holders">
           {holders.data?.length === 0 && isOwnProfile && (
             <PageMessage
               icon={<Lock />}

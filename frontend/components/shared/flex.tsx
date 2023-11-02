@@ -1,6 +1,6 @@
 import { Box, Skeleton, type BoxProps } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
-import type { FC, ReactNode } from "react";
+import { forwardRef, type ReactNode } from "react";
 
 interface Props extends BoxProps {
   children?: ReactNode;
@@ -40,83 +40,91 @@ interface Props extends BoxProps {
   fullwidth?: boolean;
 }
 
-export const Flex: FC<Props> = ({
-  children,
-  x,
-  y,
-  xs,
-  xc,
-  xe,
-  ys,
-  yc,
-  ye,
-  xsb,
-  ysb,
-  gap,
-  gap1,
-  gap2,
-  gap3,
-  sx,
-  xsa,
-  ysa,
-  fullwidth,
-  wrap,
-  grow,
-  loading,
-  ...rest
-}) => {
-  const style: SxProps = { display: "flex" };
-  if (x) style.flexDirection = "row";
-  if (y) style.flexDirection = "column";
-  if (xs) style[x ? "justifyContent" : "alignItems"] = "flex-start";
-  if (xc) style[x ? "justifyContent" : "alignItems"] = "center";
-  if (xe) style[x ? "justifyContent" : "alignItems"] = "flex-end";
-  if (xsb) style[x ? "justifyContent" : "alignItems"] = "space-between";
-  if (xsa) style[x ? "justifyContent" : "alignItems"] = "space-around";
+const Flex = forwardRef<HTMLDivElement, Props>(
+  (
+    {
+      children,
+      x,
+      y,
+      xs,
+      xc,
+      xe,
+      ys,
+      yc,
+      ye,
+      xsb,
+      ysb,
+      gap,
+      gap1,
+      gap2,
+      gap3,
+      sx,
+      xsa,
+      ysa,
+      fullwidth,
+      wrap,
+      grow,
+      loading,
+      ...rest
+    },
+    ref
+  ) => {
+    const style: SxProps = { display: "flex" };
+    if (x) style.flexDirection = "row";
+    if (y) style.flexDirection = "column";
+    if (xs) style[x ? "justifyContent" : "alignItems"] = "flex-start";
+    if (xc) style[x ? "justifyContent" : "alignItems"] = "center";
+    if (xe) style[x ? "justifyContent" : "alignItems"] = "flex-end";
+    if (xsb) style[x ? "justifyContent" : "alignItems"] = "space-between";
+    if (xsa) style[x ? "justifyContent" : "alignItems"] = "space-around";
 
-  if (ys) style[y ? "justifyContent" : "alignItems"] = "flex-start";
-  if (yc) style[y ? "justifyContent" : "alignItems"] = "center";
-  if (ye) style[y ? "justifyContent" : "alignItems"] = "flex-end";
-  if (ysb) style[y ? "justifyContent" : "alignItems"] = "space-between";
-  if (ysa) style[y ? "justifyContent" : "alignItems"] = "space-around";
+    if (ys) style[y ? "justifyContent" : "alignItems"] = "flex-start";
+    if (yc) style[y ? "justifyContent" : "alignItems"] = "center";
+    if (ye) style[y ? "justifyContent" : "alignItems"] = "flex-end";
+    if (ysb) style[y ? "justifyContent" : "alignItems"] = "space-between";
+    if (ysa) style[y ? "justifyContent" : "alignItems"] = "space-around";
 
-  if (gap1) {
-    style.columnGap = 1;
-    style.rowGap = 1;
+    if (gap1) {
+      style.columnGap = 1;
+      style.rowGap = 1;
+    }
+
+    if (gap2) {
+      style.columnGap = 2;
+      style.rowGap = 2;
+    }
+
+    if (gap3) {
+      style.columnGap = 3;
+      style.rowGap = 3;
+    }
+
+    if (gap) {
+      style.columnGap = gap;
+      style.rowGap = gap;
+    }
+
+    if (fullwidth) {
+      style.width = "100%";
+    }
+
+    if (wrap) {
+      style.flexWrap = "wrap";
+    }
+
+    if (grow) {
+      style.flexGrow = 1;
+    }
+
+    return (
+      <Skeleton animation="wave" loading={loading || false}>
+        <Box ref={ref} {...rest} sx={{ ...style, ...sx }}>
+          {children}
+        </Box>
+      </Skeleton>
+    );
   }
+);
 
-  if (gap2) {
-    style.columnGap = 2;
-    style.rowGap = 2;
-  }
-
-  if (gap3) {
-    style.columnGap = 3;
-    style.rowGap = 3;
-  }
-
-  if (gap) {
-    style.columnGap = gap;
-    style.rowGap = gap;
-  }
-
-  if (fullwidth) {
-    style.width = "100%";
-  }
-
-  if (wrap) {
-    style.flexWrap = "wrap";
-  }
-
-  if (grow) {
-    style.flexGrow = 1;
-  }
-
-  return (
-    <Skeleton animation="wave" loading={loading || false}>
-      <Box {...rest} sx={{ ...style, ...sx }}>
-        {children}
-      </Box>
-    </Skeleton>
-  );
-};
+Flex.displayName = "Flex";
+export { Flex };

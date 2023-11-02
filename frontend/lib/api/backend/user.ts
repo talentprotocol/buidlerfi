@@ -16,8 +16,18 @@ export const updateUserSocialProfiles = async (user: User) => {
   const farcasterProfile = airstackData.socials?.find(social => social.dappName === "farcaster");
 
   if (ensProfile.name) {
-    await prisma.socialProfile.create({
-      data: {
+    await prisma.socialProfile.upsert({
+      where: {
+        userId_type: {
+          userId: user.id,
+          type: SocialProfileType.ENS
+        }
+      },
+      update: {
+        profileName: ensProfile.name,
+        profileImage: ensProfile.avatar
+      },
+      create: {
         profileName: ensProfile.name,
         profileImage: ensProfile.avatar,
         type: SocialProfileType.ENS,
@@ -27,8 +37,18 @@ export const updateUserSocialProfiles = async (user: User) => {
   }
 
   if (talentProtocolProfile) {
-    await prisma.socialProfile.create({
-      data: {
+    await prisma.socialProfile.upsert({
+      where: {
+        userId_type: {
+          userId: user.id,
+          type: SocialProfileType.TALENT_PROTOCOL
+        }
+      },
+      update: {
+        profileName: talentProtocolProfile.talent.name,
+        profileImage: talentProtocolProfile.talent.profile_picture_url
+      },
+      create: {
         profileName: talentProtocolProfile.talent.name,
         profileImage: talentProtocolProfile.talent.profile_picture_url,
         type: SocialProfileType.TALENT_PROTOCOL,
@@ -38,8 +58,18 @@ export const updateUserSocialProfiles = async (user: User) => {
   }
 
   if (lensProfile) {
-    await prisma.socialProfile.create({
-      data: {
+    await prisma.socialProfile.upsert({
+      where: {
+        userId_type: {
+          userId: user.id,
+          type: SocialProfileType.LENS
+        }
+      },
+      update: {
+        profileName: lensProfile.profileName,
+        profileImage: lensProfile.profileImage
+      },
+      create: {
         profileName: lensProfile.profileName,
         profileImage: lensProfile.profileImage,
         type: SocialProfileType.LENS,
@@ -49,8 +79,18 @@ export const updateUserSocialProfiles = async (user: User) => {
   }
 
   if (farcasterProfile) {
-    await prisma.socialProfile.create({
-      data: {
+    await prisma.socialProfile.upsert({
+      where: {
+        userId_type: {
+          userId: user.id,
+          type: SocialProfileType.FARCASTER
+        }
+      },
+      update: {
+        profileName: farcasterProfile.profileName,
+        profileImage: farcasterProfile.profileImage
+      },
+      create: {
         profileName: farcasterProfile.profileName,
         profileImage: farcasterProfile.profileImage,
         type: SocialProfileType.FARCASTER,

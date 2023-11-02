@@ -1,19 +1,18 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
+import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { SocialData } from "@/hooks/useSocialData";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
-import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
-import { BASE_GOERLI_TESTNET } from "@/lib/constants";
 import { formatEth, shortAddress } from "@/lib/utils";
 import { ContentCopy, KeyOutlined, Refresh } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
 import { SocialProfileType } from "@prisma/client";
 import Image from "next/image";
-import { FC, useCallback, useMemo, useState } from "react";
-import { useAccount, useContractRead } from "wagmi";
-import { BuyShareModal } from "./buy-share-modal";
+import { FC, useMemo, useState } from "react";
+import { useAccount } from "wagmi";
+import { TradeKeyModal } from "./trade-key-modal";
 
 interface Props {
   socialData: SocialData;
@@ -45,83 +44,72 @@ const socialInfo = {
 
 export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
   const { address } = useAccount();
-  const [openBuy, setOpenBuy] = useState(false);
+  const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
 
   const holders = useGetHolders(socialData?.address);
-  const supporterNumber = useMemo(() => {
-    if (!holders?.data) return undefined;
+  const [supporterNumber, ownedKeysCount] = useMemo(() => {
+    if (!holders?.data) return [undefined, undefined];
 
     const holder = holders.data.find(holder => holder.holder.owner.toLowerCase() === address?.toLowerCase());
-    if (!holder) return undefined;
-
-    return Number(holder.supporterNumber);
+    if (!holder) return [undefined, 0];
+    else return [holder.supporterNumber, Number(holder.heldKeyNumber)];
   }, [address, holders.data]);
 
-  const { data: totalSupply, refetch: refetchTotalSupply } = useContractRead({
-    address: BASE_GOERLI_TESTNET,
-    abi: builderFIV1Abi,
-    functionName: "builderCardsSupply",
-    args: [socialData.address]
-  });
-
-  const {
-    data: buyPrice,
-    isLoading: isLoadingBuyPrice,
-    refetch: refetchBuyPrice
-  } = useContractRead({
-    address: BASE_GOERLI_TESTNET,
-    abi: builderFIV1Abi,
-    functionName: "getBuyPrice",
-    args: [socialData.address]
-  });
-
-  const { data: sellPrice, refetch: refetchSellprice } = useContractRead({
-    address: BASE_GOERLI_TESTNET,
-    abi: builderFIV1Abi,
-    functionName: "getSellPrice",
-    args: [socialData.address, BigInt(1)]
-  });
-
-  const { data: supporterKeys, refetch: refetchKeys } = useContractRead({
-    address: BASE_GOERLI_TESTNET,
-    abi: builderFIV1Abi,
-    functionName: "builderCardsBalance",
-    args: [socialData.address, address!],
-    enabled: !!address
-  });
-
-  const refetchAll = useCallback(async () => {
-    refetchTotalSupply();
-    refetchBuyPrice();
-    refetchSellprice();
-    refetchKeys();
-  }, [refetchBuyPrice, refetchKeys, refetchSellprice, refetchTotalSupply]);
+  const { buyPrice, sellPrice, refetch, isLoading, supply, buyPriceAfterFee } = useGetBuilderInfo(socialData.address);
 
   const refreshData = useRefreshCurrentUser();
 
-  const hasKeys = useMemo(() => !!supporterKeys && supporterKeys > 0, [supporterKeys]);
+  const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount]);
   return (
     <>
-      <BuyShareModal
-        open={openBuy}
-        socialData={socialData}
-        supporterKeysCount={supporterKeys}
-        hasKeys={hasKeys}
-        buyPrice={buyPrice}
-        sellPrice={sellPrice}
-        close={() => {
-          refetchAll();
-          setOpenBuy(false);
-        }}
-      />
+      {buyModalState !== "closed" && (
+        <TradeKeyModal
+          socialData={socialData}
+          supporterKeysCount={ownedKeysCount || 0}
+          hasKeys={hasKeys}
+          buyPrice={buyPrice}
+          sellPrice={sellPrice}
+          buyPriceWithFees={buyPriceAfterFee}
+          side={buyModalState}
+          close={() => {
+            refetch();
+            setBuyModalState("closed");
+          }}
+        />
+      )}
 
       <Flex y gap2 p={2}>
+        <Flex x xsb mb={-1}>
+          <Avatar size="lg" src={socialData.avatar}>
+            <Skeleton loading={socialData.isLoading} />
+          </Avatar>
+          <Flex x yc gap1>
+            {hasKeys && (
+              <Button
+                variant="outlined"
+                color="neutral"
+                sx={{ alignSelf: "flex-start" }}
+                onClick={() => setBuyModalState("sell")}
+                disabled={supply === BigInt(0) && !isOwnProfile}
+              >
+                Sell
+              </Button>
+            )}
+
+            <Button
+              sx={{ alignSelf: "flex-start" }}
+              onClick={() => setBuyModalState("buy")}
+              disabled={supply === BigInt(0) && !isOwnProfile}
+            >
+              {isOwnProfile && holders.data?.length === 0 ? "Create keys" : "Buy"}
+            </Button>
+          </Flex>
+        </Flex>
         <Flex x yc gap1>
-          <Avatar size="lg" src={socialData.avatar} />
           <Flex y>
             <Flex x yc>
               <Typography level="h3" className="font-bold">
-                {socialData.name}
+                <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
               </Typography>
               {shortAddress(socialData.address) === socialData.name && (
                 <IconButton size="sm" onClick={() => window.navigator.clipboard.writeText(socialData.address)}>
@@ -150,7 +138,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
 
         <Flex y gap1>
           <Typography level="body-sm" startDecorator={<KeyOutlined fontSize="small" />}>
-            <Skeleton loading={isLoadingBuyPrice}>{formatEth(buyPrice)}</Skeleton>
+            <Skeleton loading={isLoading}>{formatEth(buyPrice)}</Skeleton>
           </Typography>
           {socialData.socialsList.map(social => {
             const additionalData = socialInfo[social.dappName as keyof typeof socialInfo];
@@ -175,24 +163,17 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
             <Typography level="body-sm">
               Holder{" "}
               <Box fontWeight={600} component="span">
-                {supporterNumber}/{totalSupply?.toString()}
+                {supporterNumber}/{supply?.toString()}
               </Box>
             </Typography>
             <Typography level="body-sm">
               You own{" "}
               <Box fontWeight={600} component="span">
-                {supporterKeys?.toString()} key
+                {ownedKeysCount?.toString()} key
               </Box>
             </Typography>
           </Flex>
         )}
-        <Button
-          sx={{ alignSelf: "flex-start" }}
-          onClick={() => setOpenBuy(true)}
-          disabled={totalSupply === BigInt(0) && !isOwnProfile}
-        >
-          {hasKeys ? "Trade" : "Buy"}
-        </Button>
       </Flex>
     </>
   );

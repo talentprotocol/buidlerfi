@@ -51,6 +51,9 @@ model SocialProfile {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  //Only 1 profile type per user
+  @@unique([userId, type])
 }
 
 model Question {

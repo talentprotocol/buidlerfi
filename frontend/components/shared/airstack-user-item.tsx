@@ -1,8 +1,8 @@
 "use client";
 import { useSocialData } from "@/hooks/useSocialData";
+import { ChevronRight } from "@mui/icons-material";
 import { Skeleton, Typography } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
-import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Flex } from "./flex";
 
@@ -40,7 +40,7 @@ export function AirstackUserItem({ address, dappName }: Props) {
           </Typography>
         </Flex>
       </Flex>
-      <ChevronRight className="h-4 w-4" />
+      <ChevronRight />
     </Flex>
   );
 }

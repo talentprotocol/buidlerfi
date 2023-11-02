@@ -1,10 +1,4 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { formatUnits } from "viem";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export const shortAddress = (address: string) => {
   return `${address.toLowerCase().slice(0, 6)}...${address.toLowerCase().slice(-4)}`;
@@ -26,6 +20,12 @@ export const tryParseBigInt = (value?: string | bigint | number) => {
   if (typeof value === "bigint") return value;
   if (!value) return BigInt(0);
   else return BigInt(value);
+};
+
+export const formatToDisplayString = (value?: string | bigint | number, decimals = 0) => {
+  const val = tryParseBigInt(value);
+  const nbr = decimals ? Number(formatUnits(val, decimals)) : Number(val);
+  return nbr.toLocaleString("en-us", { maximumFractionDigits: 5 });
 };
 
 export const formatError = (error: unknown) => {

@@ -1,61 +1,50 @@
 "use client";
 import { useUserContext } from "@/contexts/userContext";
-import { LOGO, LOGO_SMALL } from "@/lib/assets";
-import { shortAddress } from "@/lib/utils";
-import theme from "@/theme";
-import { AccountCircle } from "@mui/icons-material";
-import { Button } from "@mui/joy";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { usePrivy } from "@privy-io/react-auth";
+import { DEFAULT_PROFILE_PICTURE, LOGO_SMALL } from "@/lib/assets";
+import { Avatar, Skeleton } from "@mui/joy";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { FC, useRef } from "react";
 import { Flex } from "./flex";
 
-export function Topbar() {
-  const router = useRouter();
-  const isSm = useMediaQuery(theme.breakpoints.down("sm"));
-  const { address } = useUserContext();
-  const { logout } = usePrivy();
+interface Props {
+  setOpen: (isOpen: boolean) => void;
+}
 
-  const handleLogout = async () => {
-    await logout().then(() => router.push("/signup"));
-  };
-  // const { data: balance } = useBalance({
-  //   address
-  // });
+export const Topbar: FC<Props> = ({ setOpen }) => {
+  const router = useRouter();
+  const anchor = useRef<HTMLDivElement>(null);
+  const { user, isLoading } = useUserContext();
 
   return (
-    <Flex
-      x
-      xsb
-      yc
-      p={2}
-      sx={{ width: "calc(100% - 32px)", backgroundColor: "Background", position: "sticky", top: 0, zIndex: 2 }}
-      borderBottom={"1px solid var(--neutral-outlined-border, #CDD7E1)"}
-    >
-      <Image
-        style={{ cursor: "pointer" }}
-        onClick={() => router.push("/home")}
-        alt="App logo"
-        src={isSm ? LOGO_SMALL : LOGO}
-        height={40}
-        width={isSm ? 40 : 150}
-      />
+    <>
+      <Flex
+        x
+        xsb
+        yc
+        p={2}
+        sx={{ width: "calc(100% - 32px)", backgroundColor: "Background", position: "sticky", top: 0, zIndex: 2 }}
+        borderBottom={"1px solid var(--neutral-outlined-border, #CDD7E1)"}
+      >
+        <Avatar
+          ref={anchor}
+          src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
+          onClick={() => setOpen(true)}
+          sx={{ position: "relative", cursor: "pointer" }}
+        >
+          <Skeleton loading={isLoading} />
+        </Avatar>
+        <Image
+          style={{ cursor: "pointer" }}
+          onClick={() => router.push("/home")}
+          alt="App logo"
+          src={LOGO_SMALL}
+          height={40}
+          width={40}
+        />
 
-      {address && (
-        <Button startDecorator={<AccountCircle sx={{ fontSize: "24px" }} />} onClick={handleLogout}>
-          {shortAddress(address)}
-        </Button>
-      )}
-
-      {/* <Flex x yc gap2>
-        {balance && (
-          <Typography>
-            {parseFloat(balance?.formatted).toFixed(3)} {balance?.symbol}
-          </Typography>
-        )}
-        {address && <Button onClick={logout}>{shortAddress(address)}</Button>}
-      </Flex> */}
-    </Flex>
+        <Flex height={40} width={40} />
+      </Flex>
+    </>
   );
-}
+};

@@ -12,16 +12,16 @@ const theme = extendTheme({
       palette: {
         link: "#0B6BCB",
         primary: {
-          "50": "#fafafa",
-          "100": "#f4f4f5",
-          "200": "#e4e4e7",
-          "300": "#d4d4d8",
-          "400": "#a1a1aa",
-          "500": "#18181b",
-          "600": "#18181b",
-          "700": "#18181b",
-          "800": "#18181b",
-          "900": "#18181b"
+          "50": "#dbeafe",
+          "100": "#dbeafe",
+          "200": "#bfdbfe",
+          "300": "#93c5fd",
+          "400": "#60a5fa",
+          "500": "#0B6EF9",
+          "600": "#2563eb",
+          "700": "#1d4ed8",
+          "800": "#1e40af",
+          "900": "#12467B"
         }
       }
     },
@@ -30,15 +30,62 @@ const theme = extendTheme({
     }
   },
   components: {
+    JoyListItemButton: {
+      styleOverrides: {
+        root: props => ({
+          ".MuiTypography-root": {
+            fontWeight: theme.typography["title-lg"].fontWeight,
+            color: props.theme.palette.neutral[700]
+          },
+          ".MuiSvgIcon-root": {
+            color: props.theme.palette.neutral[700]
+          }
+        })
+      }
+    },
+    JoyCard: {
+      styleOverrides: {
+        root: props => ({
+          backgroundColor: props.theme.palette.primary[50],
+          ".MuiTypography-root": {
+            color: props.theme.palette.primary[900]
+          }
+        })
+      }
+    },
     JoySkeleton: {
       defaultProps: {
         animation: "wave"
       }
     },
+    JoyTabs: {
+      styleOverrides: {
+        root: props => ({
+          flexGrow: 1
+        })
+      }
+    },
+    JoyTab: {
+      defaultProps: {
+        variant: "plain"
+      },
+      styleOverrides: {
+        root: props => ({
+          backgroundColor: `${props.theme.palette.background.body} !important`,
+          "&::after": {
+            backgroundColor: props.ownerState.selected ? props.theme.palette.primary[500] : undefined
+          }
+        })
+      }
+    },
     JoyTabPanel: {
       styleOverrides: {
         root: props => ({
-          backgroundColor: props.theme.palette.background.body
+          backgroundColor: props.theme.palette.background.body,
+          display: props.ownerState.hidden ? "none" : "flex",
+          flexGrow: 1,
+          flexDirection: "column",
+          padding: 0
         })
       }
     }

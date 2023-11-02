@@ -9,7 +9,7 @@ import { useBuilderFIData } from "@/hooks/useBuilderFiApi";
 import { parseFollower } from "@/lib/airstack/parser";
 import { tryParseBigInt } from "@/lib/utils";
 import { SupervisorAccountOutlined } from "@mui/icons-material";
-import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { CircularProgress, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useMemo, useState } from "react";
 
 export default function Home() {
@@ -25,29 +25,17 @@ export default function Home() {
     [builderfiData]
   );
 
-  const { data: socialFollowers } = useGetSocialFollowers(address);
+  const { data: socialFollowers, isLoading } = useGetSocialFollowers(address);
   const followers = useMemo(() => socialFollowers?.Follower.map(f => parseFollower(f)) || [], [socialFollowers]);
 
   return (
     <Flex component={"main"} y grow>
-      <Tabs
-        defaultValue="top"
-        value={selectedTab}
-        onChange={(_, val) => val && setSelectedTab(val as string)}
-        sx={{ flexGrow: 1 }}
-      >
+      <Tabs defaultValue="top" value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)}>
         <TabList tabFlex={1} className="grid w-full grid-cols-2">
-          <Tab variant="soft" value="top">
-            Top
-          </Tab>
-          <Tab variant="soft" value="recommended">
-            Recommended
-          </Tab>
+          <Tab value="top">Top</Tab>
+          <Tab value="recommended">Recommended</Tab>
         </TabList>
-        <TabPanel
-          value="top"
-          sx={{ flexDirection: "column", display: selectedTab === "top" ? "flex" : "none", flexGrow: 1, p: 0 }}
-        >
+        <TabPanel value="top">
           {users.map(user => (
             <UserItem
               address={user.owner as `0x${string}`}
@@ -57,25 +45,28 @@ export default function Home() {
             />
           ))}
         </TabPanel>
-        <TabPanel
-          value="recommended"
-          sx={{ flexDirection: "column", display: selectedTab === "recommended" ? "flex" : "none", flexGrow: 1 }}
-        >
-          {followers.length == 0 && (
-            <PageMessage
-              title="Missing profiles on your wallet"
-              icon={<SupervisorAccountOutlined />}
-              text="Your wallet is missing lens or farcaster profiles, preventing us from suggesting any builders to you at
+        <TabPanel value="recommended">
+          {isLoading ? (
+            <CircularProgress />
+          ) : (
+            <>
+              {followers.length == 0 && (
+                <PageMessage
+                  title="Missing profiles on your wallet"
+                  icon={<SupervisorAccountOutlined />}
+                  text="Your wallet is missing lens or farcaster profiles, preventing us from suggesting any builders to you at
             the moment."
-            />
+                />
+              )}
+              {followers.map(item => (
+                <AirstackUserItem
+                  address={item.owner as `0x${string}`}
+                  dappName={item.dappName}
+                  key={`home-${item.owner}`}
+                />
+              ))}
+            </>
           )}
-          {followers.map(item => (
-            <AirstackUserItem
-              address={item.owner as `0x${string}`}
-              dappName={item.dappName}
-              key={`home-${item.owner}`}
-            />
-          ))}
         </TabPanel>
       </Tabs>
     </Flex>
