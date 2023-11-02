@@ -20,7 +20,7 @@ interface Props {
 
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user } = useUserContext();
-  const holders = useGetHolders();
+  const holders = useGetHolders(address);
   const { data: balance } = useBalance({
     address
   });
