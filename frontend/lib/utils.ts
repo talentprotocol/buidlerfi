@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { formatUnits } from "viem";
 
 export const shortAddress = (address: string) => {
@@ -30,9 +31,8 @@ export const formatToDisplayString = (value?: string | bigint | number, decimals
 
 export const formatError = (error: unknown) => {
   if (typeof error === "string") return error;
-  if (error instanceof Error) {
-    return error.message;
-  }
+  if (error instanceof AxiosError) return error.response?.data.error;
+  if (error instanceof Error) return error.message;
   return JSON.stringify(error);
 };
 

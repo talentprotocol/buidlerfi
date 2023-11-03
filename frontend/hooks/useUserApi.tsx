@@ -1,8 +1,13 @@
-import { ApiResponse } from "@/models/apiResponse.model";
-import { Prisma, User } from "@prisma/client";
+import {
+  createUserSA,
+  getCurrentUserSA,
+  getUserSA,
+  refreshCurrentUserProfileSA
+} from "@/backend/user/userServerActions";
+import { Prisma } from "@prisma/client";
 import { User as PrivyUser } from "@privy-io/react-auth";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useAxios } from "./useAxios";
+import { useServerActionMutation } from "./useServerActionMutation";
+import { useServerActionQuery } from "./useServerQuery";
 
 export type GetCurrentUserResponse = Prisma.UserGetPayload<{
   include: { inviteCodes: true; points: true; socialProfiles: true };
@@ -11,29 +16,19 @@ export type GetCurrentUserResponse = Prisma.UserGetPayload<{
 export type GetUserResponse = Prisma.UserGetPayload<{ include: { socialProfiles: true } }>;
 
 export const useCreateUser = () => {
-  const axios = useAxios();
-  return useMutation(({ privyUser, inviteCode }: { privyUser: PrivyUser; inviteCode: string }) =>
-    axios.post<ApiResponse<User>>("/api/users", { privyUser, inviteCode })
+  return useServerActionMutation(({ privyUser, inviteCode }: { privyUser: PrivyUser; inviteCode: string }, options) =>
+    createUserSA(privyUser, inviteCode, options)
   );
 };
 
 export const useGetUser = (address?: string) => {
-  const axios = useAxios();
-  return useQuery(
-    ["useGetUser", address],
-    () => axios.put<ApiResponse<GetUserResponse>>(`/api/users/${address}`).then(res => res.data.data),
-    { enabled: !!address }
-  );
+  return useServerActionQuery(["useGetUser", address], options => getUserSA(address!, options), { enabled: !!address });
 };
 
 export const useGetCurrentUser = () => {
-  const axios = useAxios();
-  return useQuery(["useGetCurrentUser"], () =>
-    axios.get<ApiResponse<GetCurrentUserResponse>>("/api/users/current").then(res => res.data.data)
-  );
+  return useServerActionQuery(["useGetCurrentUser"], getCurrentUserSA);
 };
 
 export const useRefreshCurrentUser = () => {
-  const axios = useAxios();
-  return useMutation(() => axios.put<ApiResponse<GetUserResponse>>("/api/users/current").then(res => res.data.data));
+  return useServerActionMutation((_, options) => refreshCurrentUserProfileSA(options));
 };

@@ -33,7 +33,7 @@ export const TradeKeyModal: FC<Props> = ({
     <Modal open={true} onClose={close}>
       <ModalDialog minWidth="400px">
         <Flex x xsb yc>
-          <DialogTitle>{side === "buy" ? "Buy" : "Sell"} 1 Card</DialogTitle>
+          <DialogTitle>{side === "buy" ? "Buy" : "Sell"} 1 Key</DialogTitle>
           <IconButton onClick={close}>
             <Close />
           </IconButton>

@@ -3,7 +3,8 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateUser } from "@/hooks/useUserApi";
-import { Button, Input, Typography } from "@mui/joy";
+import { formatError } from "@/lib/utils";
+import { Button, FormControl, FormHelperText, Input, Typography } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,7 +24,6 @@ export default function InvitationCode() {
 
     await createUser.mutateAsync({ privyUser, inviteCode });
     await refetch();
-    replace("/home");
   };
 
   const handleLogout = async () => {
@@ -42,12 +42,10 @@ export default function InvitationCode() {
             BuilderFi is currently in beta. Get an invite code from an existing user to sign up
           </Typography>
         </Flex>
-        <Input
-          fullWidth
-          value={inviteCode}
-          onChange={e => setInviteCode(e.target.value)}
-          placeholder="Enter invite code"
-        />
+        <FormControl error={!!createUser.error} sx={{ width: "100%" }}>
+          <Input value={inviteCode} onChange={e => setInviteCode(e.target.value)} placeholder="Enter invite code" />
+          {!!createUser.error && <FormHelperText>{formatError(createUser.error)}</FormHelperText>}
+        </FormControl>
       </Flex>
 
       <Flex y xc gap2 fullwidth>

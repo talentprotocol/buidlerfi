@@ -1,4 +1,5 @@
 "use client";
+import { AuthRoute } from "@/components/app/auth-route";
 import { Flex } from "@/components/shared/flex";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
@@ -79,21 +80,22 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
         config={{
           loginMethods: ["google", "email", "wallet", "github"],
-
+          supportedChains: [baseGoerli],
           embeddedWallets: {
             createOnLogin: "users-without-wallets"
           },
-          supportedChains: [baseGoerli],
           defaultChain: baseGoerli,
           appearance: {
             theme: "light",
-            accentColor: "#18181b",
+            accentColor: "#0B6EF9",
             logo: LOGO
           }
         }}
       >
         <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
-          <UserProvider>{children}</UserProvider>
+          <UserProvider>
+            <AuthRoute>{children}</AuthRoute>
+          </UserProvider>
         </PrivyWagmiConnector>
       </PrivyProvider>
     </Flex>
