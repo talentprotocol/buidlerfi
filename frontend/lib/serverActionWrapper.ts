@@ -37,6 +37,8 @@ export async function serverActionWrapper<T>(
       })
     : undefined;
   if (!payload?.payload.sub) return { error: ERRORS.UNAUTHORIZED };
-
-  return await fn({ userId: payload.payload.sub }).catch(() => ({ error: ERRORS.SOMETHING_WENT_WRONG }));
+  const res = await fn({ userId: payload.payload.sub })
+    .then(res => res)
+    .catch(() => ({ error: ERRORS.SOMETHING_WENT_WRONG } as ServerActionResponse<T>));
+  return res;
 }
