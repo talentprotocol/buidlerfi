@@ -17,7 +17,7 @@ export default function Invite() {
         Refer friends. <br /> Earn points.
       </Typography>
       <Typography level="body-sm" mt={1}>
-        Points are airdropped every Friday and will have future uses in BuilderFi
+        Points are airdropped every Friday and will have future uses in BuilderFi.<br/>Invites are not the only way to earn points.
       </Typography>
       <Flex x gap2 py={2}>
         <Card sx={{ flexGrow: 1, gap: 0 }} variant="soft">
