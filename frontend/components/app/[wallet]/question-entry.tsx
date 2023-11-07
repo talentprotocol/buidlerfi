@@ -71,7 +71,7 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
                 overflow: "hidden",
                 textOverflow: "ellipsis"
               }}
-              textColor={question.reply ? "neutral.800" : "neutral.600"}
+              textColor={question.reply ? "neutral.800" : "neutral.400"}
               level="body-sm"
               maxWidth="100%"
             >
