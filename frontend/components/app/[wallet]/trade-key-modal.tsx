@@ -3,8 +3,9 @@ import { useTradeKey } from "@/hooks/useBuilderFiContract";
 import { SocialData } from "@/hooks/useSocialData";
 import { formatEth } from "@/lib/utils";
 import { Close } from "@mui/icons-material";
+import { useBalance, useAccount } from "wagmi";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
 interface Props {
   hasKeys: boolean;
@@ -28,6 +29,25 @@ export const TradeKeyModal: FC<Props> = ({
   side
 }) => {
   const tx = useTradeKey(side);
+  const { address } = useAccount();
+  const { data: balance } = useBalance({
+    address
+  });
+
+  const hasEnoughBalance = useMemo(() => {
+    if (side === "sell") return true;
+    if (!balance) return false;
+    if (!buyPriceWithFees) return true;
+
+    return (balance.value || BigInt(0)) >= buyPriceWithFees
+  }, [side, balance, buyPriceWithFees]);
+
+  const enableTradeButton = () => {
+    if(side === "sell") return true;
+    if(!buyPriceWithFees) return false;
+
+    return hasEnoughBalance;
+  }
 
   return (
     <Modal open={true} onClose={close}>
@@ -49,6 +69,13 @@ export const TradeKeyModal: FC<Props> = ({
             </Typography>
             <Typography level="title-lg">{formatEth(side === "buy" ? buyPrice : sellPrice)} ETH</Typography>
           </Flex>
+          {!hasEnoughBalance && (
+            <Flex x yc>
+              <Typography level="body-md" textColor="danger.400">
+                Insufficient funds. Please top up your wallet.
+              </Typography>
+            </Flex>
+          )}
           <Flex y gap1 mt={2}>
             <Flex x yc gap1 alignSelf="flex-end">
               <Button variant="outlined" color="neutral" onClick={() => close()} disabled={tx.isLoading}>
@@ -62,6 +89,7 @@ export const TradeKeyModal: FC<Props> = ({
                     ? tx.executeTx({ args: [socialData.address, BigInt(1)] })
                     : tx.executeTx({ args: [socialData.address], value: buyPriceWithFees })
                 }
+                disabled={!enableTradeButton()}
               >
                 {side === "buy" ? "Buy" : "Sell"} 1 key
               </Button>
