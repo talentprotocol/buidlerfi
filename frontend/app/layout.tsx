@@ -21,7 +21,6 @@ import { baseGoerli } from "viem/chains";
 import { configureChains } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
-// const projectId = "530148d9ddb07d128a40fc21cc9ffdd9";
 const configureChainsConfig = configureChains([baseGoerli], [publicProvider()]);
 
 const queryClient = new QueryClient({

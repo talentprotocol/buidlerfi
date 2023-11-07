@@ -45,7 +45,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         path: "/wallet"
       },
       {
-        text: "Airdrop",
+        text: "Invite",
         icon: <ParachuteIcon />,
         path: "/invite"
       }

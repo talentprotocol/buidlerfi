@@ -33,7 +33,7 @@ export const useGetUser = (address?: string) => {
 export const useGetCurrentUser = () => {
   const { getAccessToken } = usePrivy();
   return useQuery(["useGetCurrentUser"], async () =>
-    getCurrentUserSA({ authorization: (await getAccessToken()) || undefined }).then(res => res.data)
+    getCurrentUserSA({ authorization: (await getAccessToken()) || undefined }).then(res => res.data || {data: undefined})
   );
 };
 
