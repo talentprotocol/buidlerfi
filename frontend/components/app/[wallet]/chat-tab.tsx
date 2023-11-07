@@ -81,7 +81,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
   return (
     <Flex y grow>
       {!isOwnProfile && (
-        <Flex y grow gap={0.5} p={2} borderBottom={"1px solid " + theme.palette.divider}>
+        <Flex y gap={0.5} p={2} borderBottom={"1px solid " + theme.palette.divider}>
           <Flex y={isSm} yc gap2>
             <Textarea
               value={chatValue}
