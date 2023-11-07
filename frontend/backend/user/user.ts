@@ -173,6 +173,14 @@ export const updateUserSocialProfiles = async (user: User) => {
   }
 
   if (talentProtocolProfile) {
+    let url = "";
+    try {
+      const imageUrl = new URL(talentProtocolProfile.talent.profile_picture_url);
+      url = imageUrl.origin + imageUrl.pathname;
+    } catch {
+      // ignore, leave empty
+    }
+
     await prisma.socialProfile.upsert({
       where: {
         userId_type: {
@@ -182,11 +190,11 @@ export const updateUserSocialProfiles = async (user: User) => {
       },
       update: {
         profileName: talentProtocolProfile.talent.name,
-        profileImage: talentProtocolProfile.talent.profile_picture_url
+        profileImage: url
       },
       create: {
         profileName: talentProtocolProfile.talent.name,
-        profileImage: talentProtocolProfile.talent.profile_picture_url,
+        profileImage: url,
         type: SocialProfileType.TALENT_PROTOCOL,
         userId: user.id
       }
@@ -236,10 +244,10 @@ export const updateUserSocialProfiles = async (user: User) => {
   }
 
   const defaultAvatar =
+    talentProtocolProfile?.talent.profile_picture_url ||
     farcasterProfile?.profileImage ||
     lensProfile?.profileImage ||
-    ensProfile.avatar ||
-    talentProtocolProfile?.talent.profile_picture_url;
+    ensProfile.avatar;
   const defaultName =
     talentProtocolProfile?.talent.name || farcasterProfile?.profileName || lensProfile?.profileName || ensProfile.name;
 
