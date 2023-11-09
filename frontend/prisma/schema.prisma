@@ -12,15 +12,16 @@ datasource db {
 
 model User {
   //wallet that will be used for transactions
-  wallet       String  @unique @db.VarChar(50)
+  wallet                String  @unique @db.VarChar(50)
   //Wallet that will be used to fetch social info of the user
-  socialWallet String? @unique @db.VarChar(50)
-  privyUserId  String? @unique
+  socialWallet          String? @unique @db.VarChar(50)
+  privyUserId           String? @unique
   //Each social platform can have it's own avatar and name. One will be chosen as the main one
-  displayName  String? @db.VarChar(255)
-  avatarUrl    String? @db.VarChar(500)
-  isActive     Boolean @default(false)
-  isAdmin      Boolean @default(false)
+  displayName           String? @db.VarChar(255)
+  avatarUrl             String? @db.VarChar(500)
+  isActive              Boolean @default(false)
+  isAdmin               Boolean @default(false)
+  hasFinishedOnboarding Boolean @default(false)
 
   questions      Question[]      @relation("questioner")
   replies        Question[]      @relation("replier")

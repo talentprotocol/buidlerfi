@@ -34,6 +34,8 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       return redirect("/signup");
     } else if (user.privyUser && !user.isAuthenticatedAndActive) {
       return redirect("/signup/invitation");
+    } else if (user.privyUser && user.isAuthenticatedAndActive && user.privyUser.wallet?.walletClientType === "privy") {
+      return redirect("/signup/linkwallet");
     }
     return false;
   }, [redirect, user.isAuthenticatedAndActive, user.privyUser]);
