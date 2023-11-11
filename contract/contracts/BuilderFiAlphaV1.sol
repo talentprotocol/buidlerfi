@@ -3,13 +3,14 @@
 pragma solidity ^0.8.19;
 
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-// BuilderFiV1 is a smart contract for managing trades of builder keys.
+// BuilderFiAlphaV1 is a smart contract for managing trades of builder keys.
 // It includes functionality for buying and selling shares, managing fees, and enabling/disabling trading.
-contract BuilderFiV1 is AccessControl {
+contract BuilderFiAlphaV1 is AccessControl, ReentrancyGuard {
   // Custom errors for specific revert conditions
   error FundsTransferFailed();
-  error OnlySharesSubjectCanBuyFirstShare();
+  error OnlySharesBuilderCanBuyFirstShare();
   error CannotSellLastShare();
   error InsufficientPayment();
   error InsufficientShares();
@@ -19,7 +20,7 @@ contract BuilderFiV1 is AccessControl {
 
   // Fee percentages
   uint256 public protocolFeePercent;
-  uint256 public subjectFeePercent;
+  uint256 public builderFeePercent;
 
   // Flag to enable or disable trading
   bool public tradingEnabled;
@@ -27,21 +28,27 @@ contract BuilderFiV1 is AccessControl {
   // Event emitted on trade execution
   event Trade(
     address trader,
-    address subject,
+    address builder,
     bool isBuy,
     uint256 shareAmount,
     uint256 ethAmount,
     uint256 protocolEthAmount,
-    uint256 subjectEthAmount,
+    uint256 builderEthAmount,
     uint256 supply,
     uint256 nextPrice
   );
+
+  // Mapping to track pending payouts
+  mapping(address => uint256) public pendingPayouts;
 
   // Mapping to track balances of builder keys for each holder
   mapping(address => mapping(address => uint256)) public builderKeysBalance;
 
   // Mapping to track total supply of builder keys per builder
   mapping(address => uint256) public builderKeysSupply;
+
+  // Mapping to track all holders
+  mapping(address => address[]) public builderKeysHolders;
 
   // Constructor to set the initial admin role
   constructor(address _owner) {
@@ -66,11 +73,12 @@ contract BuilderFiV1 is AccessControl {
     protocolFeePercent = _feePercent;
   }
 
-  function setSubjectFeePercent(uint256 _feePercent) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    subjectFeePercent = _feePercent;
+  function setBuilderFeePercent(uint256 _feePercent) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    builderFeePercent = _feePercent;
   }
 
   // Functions to enable or disable trading
+  // This will be used in order to migrate the contract state to a new version after the alpha stage
   function enableTrading() public onlyRole(DEFAULT_ADMIN_ROLE) {
     tradingEnabled = true;
   }
@@ -91,101 +99,124 @@ contract BuilderFiV1 is AccessControl {
   }
 
   // Functions to get buying and selling prices, considering fees
-  function getBuyPrice(address sharesSubject) public view returns (uint256) {
-    return getPrice(builderKeysSupply[sharesSubject], 1);
+  function getBuyPrice(address builder) public view returns (uint256) {
+    return getPrice(builderKeysSupply[builder], 1);
   }
 
-  function getSellPrice(address sharesSubject, uint256 amount) public view returns (uint256) {
-    return getPrice(builderKeysSupply[sharesSubject] - amount, amount);
+  function getSellPrice(address builder, uint256 amount) public view returns (uint256) {
+    return getPrice(builderKeysSupply[builder] - amount, amount);
   }
 
-  function getBuyPriceAfterFee(address sharesSubject) public view returns (uint256) {
-    uint256 price = getBuyPrice(sharesSubject);
+  function getBuyPriceAfterFee(address builder) public view returns (uint256) {
+    uint256 price = getBuyPrice(builder);
     uint256 protocolFee = price * protocolFeePercent / 1 ether;
-    uint256 subjectFee = price * subjectFeePercent / 1 ether;
-    return price + protocolFee + subjectFee;
+    uint256 builderFee = price * builderFeePercent / 1 ether;
+    return price + protocolFee + builderFee;
   }
 
-  function getSellPriceAfterFee(address sharesSubject, uint256 amount) public view returns (uint256) {
-    uint256 price = getSellPrice(sharesSubject, amount);
+  function getSellPriceAfterFee(address builder, uint256 amount) public view returns (uint256) {
+    uint256 price = getSellPrice(builder, amount);
     uint256 protocolFee = price * protocolFeePercent / 1 ether;
-    uint256 subjectFee = price * subjectFeePercent / 1 ether;
-    return price - protocolFee - subjectFee;
+    uint256 builderFee = price * builderFeePercent / 1 ether;
+    return price - protocolFee - builderFee;
   }
 
+  /// Function to buy shares
+  /// Includes checks for trading status, payment sufficiency, and first share purchase conditions
   /// @notice Can only buy one share at a time
-  function buyShares(address sharesSubject) public payable {
+  function buyShares(address builder) public payable nonReentrant {
     require(tradingEnabled == true, "Trading is not enabled");
 
-    uint256 supply = builderKeysSupply[sharesSubject];
-    if(supply == 0 && sharesSubject != msg.sender) revert OnlySharesSubjectCanBuyFirstShare();
+    uint256 supply = builderKeysSupply[builder];
+    if(supply == 0 && builder != msg.sender) revert OnlySharesBuilderCanBuyFirstShare();
 
     uint256 price = getPrice(supply, 1);
     uint256 nextPrice = getPrice(supply + 1, 1);
+
     uint256 protocolFee = price * protocolFeePercent / 1 ether;
-    uint256 subjectFee = price * subjectFeePercent / 1 ether;
-    if(msg.value < price + protocolFee + subjectFee) revert InsufficientPayment();
+    uint256 builderFee = price * builderFeePercent / 1 ether;
+
+    if(msg.value < price + protocolFee + builderFee) revert InsufficientPayment();
     
-    builderKeysBalance[sharesSubject][msg.sender]++;
-    builderKeysSupply[sharesSubject]++;
+    builderKeysBalance[builder][msg.sender]++;
+    builderKeysSupply[builder]++;
     emit Trade(
       msg.sender, 
-      sharesSubject, 
+      builder, 
       true, 
       1, 
       price, 
       protocolFee, 
-      subjectFee, 
+      builderFee, 
       supply + 1,
       nextPrice
     );
 
-    (bool success1, ) = protocolFeeDestination.call{value: protocolFee}("");
-    (bool success2, ) = sharesSubject.call{value: subjectFee}("");
-
-    if(!(success1 && success2)) revert FundsTransferFailed();
+    payout(protocolFeeDestination, protocolFee);
+    payout(builder, builderFee);
   }
 
-  function sellShares(address sharesSubject, uint256 amount) public payable {
+  /// Function to sell shares
+  /// Includes checks for trading status, payment sufficiency, and first share purchase conditions
+  /// @notice Can only buy one share at a time
+  function sellShares(address builder) public payable nonReentrant {
     require(tradingEnabled == true, "Trading is not enabled");
 
-    uint256 supply = builderKeysSupply[sharesSubject];
-    if(supply <= amount) revert CannotSellLastShare();
-    if(builderKeysBalance[sharesSubject][msg.sender] < amount) revert InsufficientShares();
+    uint256 supply = builderKeysSupply[builder];
+    if(supply <= 1) revert CannotSellLastShare();
+    if(builderKeysBalance[builder][msg.sender] < 1) revert InsufficientShares();
 
-    uint256 price = getPrice(supply - amount, amount);
+    uint256 price = getPrice(supply - 1, 1);
     uint256 nextPrice = 0;
 
     if (price > 0) {
-      nextPrice = getPrice(supply - amount - 1, 1);
+      nextPrice = getPrice(supply - 2, 1);
     }
-    uint256 protocolFee = price * protocolFeePercent / 1 ether;
-    uint256 subjectFee = price * subjectFeePercent / 1 ether;
 
-    builderKeysBalance[sharesSubject][msg.sender] -= amount;
-    builderKeysSupply[sharesSubject] = supply - amount;
+    uint256 protocolFee = price * protocolFeePercent / 1 ether;
+    uint256 builderFee = price * builderFeePercent / 1 ether;
+
+    builderKeysBalance[builder][msg.sender] -= 1;
+    builderKeysSupply[builder] = supply - 1;
+    
     emit Trade(
       msg.sender,
-      sharesSubject,
+      builder,
       false,
-      amount,
+      1,
       price,
       protocolFee,
-      subjectFee,
-      supply - amount,
+      builderFee,
+      supply - 1,
       nextPrice
     );
-    (bool success1, ) = msg.sender.call{value: price - protocolFee - subjectFee}("");
-    (bool success2, ) = protocolFeeDestination.call{value: protocolFee}("");
-    (bool success3, ) = sharesSubject.call{value: subjectFee}("");
 
-    if(!(success1 && success2 && success3)) revert FundsTransferFailed();
+    payout(msg.sender, price - protocolFee - builderFee);
+    payout(protocolFeeDestination, protocolFee);
+    payout(builder, builderFee);
   }
 
+  function payout(address payee, uint256 amount) internal {
+    (bool success, ) = payee.call{value: amount}("");
+    if (!success) {
+      pendingPayouts[payee] += amount;
+    }
+  }
+
+  // This will be used in order to migrate the liquidity to a new smart contract
+  // after the alpha stage
   function migrateLiquidity(address newContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(newContract != address(0), "Invalid address");
     uint256 contractBalance = address(this).balance;
     (bool success, ) = newContract.call{value: contractBalance}("");
     require(success, "Transfer failed");
+  }
+
+  // claim any payouts that weren't able to be claimed
+  function claimPendingPayouts() public nonReentrant {
+    uint256 pendingPayout = pendingPayouts[msg.sender];
+    pendingPayouts[msg.sender] = 0;
+    (bool success, ) = msg.sender.call{value: pendingPayout}("");
+    require(success, "Could not payout pending payout");
   }
 }
