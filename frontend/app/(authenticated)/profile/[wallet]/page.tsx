@@ -31,14 +31,30 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   if (!isValidWallet) return <></>;
 
+  const holderNumber = () => {
+    if (holders.data?.length) {
+      return `(${holders.data?.length})`;
+    } else {
+      return null;
+    }
+  };
+
+  const holdingNumber = () => {
+    if (holdings.data?.length) {
+      return `(${holdings.data?.length})`;
+    } else {
+      return null;
+    }
+  };
+
   return (
     <Flex component={"main"} y grow gap2>
       <Overview socialData={socialData} isOwnProfile={isOwnProfile} />
       <Tabs defaultValue={"chat"}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
           <Tab value="chat">Q&A</Tab>
-          <Tab value="holders">Holders({holders.data?.length})</Tab>
-          <Tab value="holding">Holding({holdings.data?.length})</Tab>
+          <Tab value="holders">Holders{holderNumber()}</Tab>
+          <Tab value="holding">Holding{holdingNumber()}</Tab>
         </TabList>
         <TabPanel value="chat" sx={{ p: 0 }}>
           <ChatTab socialData={socialData} isOwnProfile={isOwnProfile} />
