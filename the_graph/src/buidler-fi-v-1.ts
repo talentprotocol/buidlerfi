@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { Trade as TradeEvent } from "../generated/BuidlerFiV1/BuidlerFiV1";
+import { Trade as TradeEvent } from "../generated/BuilderFiAlphaV1/BuilderFiAlphaV1";
 import { ShareParticipant, ShareRelationship, Trade } from "../generated/schema";
 
 const ONE_BI = BigInt.fromI32(1);
@@ -9,13 +9,12 @@ export function handleTrade(event: TradeEvent): void {
   // CREATE TRANSACTION INFO
   let entity = new Trade(event.transaction.hash.concatI32(event.logIndex.toI32()));
   entity.trader = event.params.trader;
-  entity.subject = event.params.subject;
+  entity.builder = event.params.builder;
   entity.isBuy = event.params.isBuy;
   entity.shareAmount = event.params.shareAmount;
   entity.ethAmount = event.params.ethAmount;
   entity.protocolEthAmount = event.params.protocolEthAmount;
-  entity.subjectEthAmount = event.params.subjectEthAmount;
-  entity.hodlerEthAmount = event.params.hodlerEthAmount;
+  entity.builderEthAmount = event.params.builderEthAmount;
   entity.supply = event.params.supply;
 
   entity.blockNumber = event.block.number;
@@ -34,22 +33,21 @@ export function handleTrade(event: TradeEvent): void {
     buyer.numberOfHolders = ZERO_BI;
     buyer.supply = ZERO_BI;
     buyer.owner = event.params.trader.toHexString();
-    buyer.tradingFeesAmount = event.params.hodlerEthAmount;
-  } else {
-    buyer.tradingFeesAmount = buyer.tradingFeesAmount.plus(event.params.hodlerEthAmount);
   }
 
   // CREATE SUBJECT INFO
 
-  let subject = ShareParticipant.load(event.params.subject.toHexString());
+  let subject = ShareParticipant.load(event.params.builder.toHexString());
   // load subject
   if (subject === null) {
-    subject = new ShareParticipant(event.params.subject.toHexString());
+    subject = new ShareParticipant(event.params.builder.toHexString());
     subject.supply = ONE_BI;
     subject.numberOfHolders = ZERO_BI;
     subject.numberOfHoldings = ZERO_BI;
-    subject.owner = event.params.subject.toHexString();
+    subject.owner = event.params.builder.toHexString();
+    subject.tradingFeesAmount = event.params.builderEthAmount;
   } else {
+    subject.tradingFeesAmount = subject.tradingFeesAmount.plus(event.params.builderEthAmount);
     if (event.params.isBuy) {
       subject.supply = subject.supply.plus(ONE_BI);
     } else {
@@ -63,11 +61,11 @@ export function handleTrade(event: TradeEvent): void {
   if (subject.id == buyer.id) {
     buyer.buyPrice = subject.buyPrice;
     buyer.sellPrice = subject.sellPrice;
-    subject.tradingFeesAmount = buyer.tradingFeesAmount;
+    buyer.tradingFeesAmount = subject.tradingFeesAmount;
   }
 
   // CREATE RELATIONSHIP INFO
-  let relationshipID = event.params.trader.toHexString() + "-" + event.params.subject.toHexString();
+  let relationshipID = event.params.trader.toHexString() + "-" + event.params.builder.toHexString();
   let relationship = ShareRelationship.load(relationshipID);
   if (relationship === null) {
     relationship = new ShareRelationship(relationshipID);
