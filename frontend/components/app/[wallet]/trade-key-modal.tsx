@@ -37,7 +37,6 @@ export const TradeKeyModal: FC<Props> = ({
   const tx = useTradeKey(side, () => close());
 
   const handleBuy = () => {
-    console.log({ buyPriceWithFees, balance: balance });
     if (!buyPriceWithFees || !balance) return;
 
     if (buyPriceWithFees > balance.value) {

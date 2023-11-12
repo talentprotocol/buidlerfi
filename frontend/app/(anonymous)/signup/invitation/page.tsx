@@ -16,8 +16,6 @@ export default function InvitationCode() {
   const [inviteCode, setInviteCode] = useState<string>("");
   const createUser = useCreateUser();
 
-  console.log(createUser.error);
-
   const handleOnClickProceed = async () => {
     if (!privyUser) {
       replace("/signup");
