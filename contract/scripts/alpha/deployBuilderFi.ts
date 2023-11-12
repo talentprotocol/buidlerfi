@@ -8,8 +8,6 @@ async function main() {
 
   const builderFi = await ethers.deployContract("BuilderFiAlphaV1", [creator.address]);
 
-  await builderFi.waitForDeployment();
-
   console.log("BuilderFi Contract Deployed at " + builderFi.target);
 
   console.log("BuilderFi address is: ", builderFi.address);
