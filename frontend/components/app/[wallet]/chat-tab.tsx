@@ -24,7 +24,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
   const { data: supporterKeys } = useContractRead({
     address: BASE_GOERLI_TESTNET,
     abi: builderFIV1Abi,
-    functionName: "builderCardsBalance",
+    functionName: "builderKeysBalance",
     args: [socialData.address, address!],
     enabled: !!address
   });

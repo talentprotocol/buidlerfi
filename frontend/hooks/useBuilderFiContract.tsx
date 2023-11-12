@@ -40,7 +40,7 @@ export const useGetBuilderInfo = (address: string) => {
     isLoading: isLoadingSupply
   } = useContractRead({
     ...BUILDERFI_CONTRACT,
-    functionName: "builderCardsSupply",
+    functionName: "builderKeysSupply",
     args: [address as `0x${string}`],
     enabled: !!address
   });

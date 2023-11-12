@@ -53,7 +53,7 @@ export const TradeKeyModal: FC<Props> = ({
   };
 
   const handleSell = () => {
-    tx.executeTx({ args: [socialData.address, BigInt(1)] });
+    tx.executeTx({ args: [socialData.address] });
   };
 
   const hasEnoughBalance = useMemo(() => {
