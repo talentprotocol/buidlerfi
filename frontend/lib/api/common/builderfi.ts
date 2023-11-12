@@ -18,7 +18,7 @@ const gqlShare = `
 
 const query = `
   {
-    shareParticipants(first: 100) {
+    shareParticipants(first: 100, orderBy: supply, orderDirection:desc) {
       ${gqlShare}
     }
     shareRelationships(first: 100) {
