@@ -61,6 +61,12 @@ const config: HardhatUserConfig = {
       accounts: deployer,
       chainId: 84531,
       gasMultiplier: 1.1
+    },
+    base: {
+      url: "https://mainnet.base.org/",
+      accounts: deployer,
+      chainId: 8453,
+      gasMultiplier: 1.1
     }
   },
   gasReporter: {

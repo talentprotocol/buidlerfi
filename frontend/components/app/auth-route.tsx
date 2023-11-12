@@ -7,8 +7,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { toHex } from "viem";
-import { baseGoerli } from "viem/chains";
+import { base, baseGoerli } from "viem/chains";
 import { Flex } from "../shared/flex";
+
+const supportedChain = process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? base : baseGoerli;
 
 export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
@@ -68,14 +70,14 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   if (
     user.isAuthenticatedAndActive &&
     user.privyUser?.wallet?.walletClientType !== "privy" &&
-    chain !== toHex(baseGoerli.id)
+    chain !== toHex(supportedChain.id)
   ) {
     return (
       <Flex y yc xc grow gap3>
         <Typography>Wrong Network</Typography>
         <Button
           onClick={() =>
-            switchNetwork(baseGoerli.id)
+            switchNetwork(supportedChain.id)
               .then(() => location.reload())
               .catch(err => toast.error(formatError(err)))
           }
