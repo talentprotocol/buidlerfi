@@ -3,12 +3,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: BuidlerFiV1
-    network: base-testnet
+    name: BuilderFiAlphaV1
+    network: base
     source:
-      address: "0x8b35b89ed2df3682b9783db65136211aee8bdd08"
-      abi: BuidlerFiV1
-      startBlock: 10709220
+      address: "0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7"
+      abi: BuilderFiAlphaV1
+      startBlock: 6495600
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -17,9 +17,9 @@ dataSources:
         - OwnershipTransferred
         - Trade
       abis:
-        - name: BuidlerFiV1
-          file: ./abis/BuilderFiV1.json
+        - name: BuilderFiAlphaV1
+          file: ./abis/BuilderFiAlphaV1.json
       eventHandlers:
-        - event: Trade(address,address,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
+        - event: Trade(address,address,bool,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleTrade
       file: ./src/buidler-fi-v-1.ts
