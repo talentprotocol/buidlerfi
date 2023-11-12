@@ -11,5 +11,6 @@ export const BASE_GOERLI_GRAPH_URL = "https://api.thegraph.com/subgraphs/name/fr
 export const BASE_MAINNET_GRAPH_URL = "https://api.studio.thegraph.com/query/8098/builder-fi/version/latest";
 export const BUILDERFI_CONTRACT = {
   address: process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET : BASE_GOERLI_TESTNET,
-  abi: builderFIV1Abi
+  abi: builderFIV1Abi,
+  chain_id: process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? 8453 : 84531;
 } as const;
