@@ -33,6 +33,7 @@ export function handleTrade(event: TradeEvent): void {
     buyer.numberOfHolders = ZERO_BI;
     buyer.supply = ZERO_BI;
     buyer.owner = event.params.trader.toHexString();
+    buyer.tradingFeesAmount = ZERO_BI;
   }
 
   // CREATE SUBJECT INFO
