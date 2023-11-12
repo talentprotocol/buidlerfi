@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useContractRead, useContractWrite, useWaitForTransaction } from "wagmi";
 
 export const useGetBuilderInfo = (address: string) => {
-  const { data: buyPriceAfterFee } = useContractRead({
+  const { data: buyPriceAfterFee, refetch: refetchBuyPriceAfterFee } = useContractRead({
     ...BUILDERFI_CONTRACT,
     functionName: "getBuyPriceAfterFee",
     args: [address as `0x${string}`],
@@ -49,6 +49,7 @@ export const useGetBuilderInfo = (address: string) => {
     refetchTotalSupply();
     refetchBuyPrice();
     refetchSellprice();
+    refetchBuyPriceAfterFee();
   };
 
   return {
