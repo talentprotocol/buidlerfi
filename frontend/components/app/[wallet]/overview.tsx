@@ -139,7 +139,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
           </Flex>
         </Flex>
 
-        <Flex x gap2>
+        <Flex x gap2 flexWrap={"wrap"}>
           {socialData.socialsList.map(social => {
             const additionalData = socialInfo[social.dappName as keyof typeof socialInfo];
             return (
