@@ -37,6 +37,11 @@ export const TradeKeyModal: FC<Props> = ({
   const tx = useTradeKey(side, () => close());
 
   const handleBuy = () => {
+    if (isFirstKey) {
+      tx.executeTx({ args: [socialData.address], value: buyPriceWithFees });
+      return;
+    }
+
     if (!buyPriceWithFees || !balance) return;
 
     if (buyPriceWithFees > balance.value) {

@@ -36,10 +36,17 @@ export default function InvitationCode() {
       <Flex y xs gap3 fullwidth>
         <Flex y gap1>
           <Typography textAlign="start" level="title-md">
-            Got an invite code ?
+            Got an invite code?
           </Typography>
           <Typography level="body-sm" textColor="neutral.500">
-            BuilderFi is currently in beta. Get an invite code from an existing user to sign up
+            builder.fi is currently invite-only. Explore how can you get an early access{" "}
+            <a
+              href="https://www.notion.so/talentprotocol/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39"
+              target="_blank"
+            >
+              here
+            </a>
+            .
           </Typography>
         </Flex>
         <FormControl error={!!createUser.error} sx={{ width: "100%" }}>
