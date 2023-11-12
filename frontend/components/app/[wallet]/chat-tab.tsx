@@ -4,7 +4,7 @@ import { PageMessage } from "@/components/shared/page-message";
 import { useGetQuestions, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { BASE_GOERLI_TESTNET } from "@/lib/constants";
+import { BUILDERFI_CONTRACT } from "@/lib/constants";
 import theme from "@/theme";
 import { Chat, KeyOutlined, LockOpen, LockOutlined } from "@mui/icons-material";
 import { Button, CircularProgress, Textarea, Typography } from "@mui/joy";
@@ -22,7 +22,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
   const [chatValue, setChatValue] = useState<string>("");
   const { address } = useAccount();
   const { data: supporterKeys } = useContractRead({
-    address: BASE_GOERLI_TESTNET,
+    address: BUILDERFI_CONTRACT.address,
     abi: builderFIV1Abi,
     functionName: "builderKeysBalance",
     args: [socialData.address, address!],
