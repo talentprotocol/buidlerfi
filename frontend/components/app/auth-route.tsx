@@ -59,6 +59,14 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     setIsReady(true);
   }, [handleAnonymousRedirect, pathname, redirect, router, user]);
 
+  const changeNetwork = () => {
+    if (switchNetwork) {
+      switchNetwork(supportedChain.id)
+        .then(() => location.reload())
+        .catch(err => toast.error(formatError(err)));
+    }
+  };
+
   if (user.isLoading || !isReady) {
     return (
       <Flex y yc xc grow>
@@ -75,15 +83,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     return (
       <Flex y yc xc grow gap3>
         <Typography>Wrong Network</Typography>
-        <Button
-          onClick={() =>
-            switchNetwork(supportedChain.id)
-              .then(() => location.reload())
-              .catch(err => toast.error(formatError(err)))
-          }
-        >
-          Switch Network
-        </Button>
+        <Button onClick={() => changeNetwork()}>Switch Network</Button>
       </Flex>
     );
   }

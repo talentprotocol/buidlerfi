@@ -1,7 +1,10 @@
+import { BUILDERFI_CONTRACT } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
+import { useSwitchNetwork as useSwitchNetworkWagmi } from "@privy-io/wagmi-connector";
 import { useCallback, useEffect, useState } from "react";
 import { toHex } from "viem";
 import * as all from "viem/chains";
+import { useNetwork } from "wagmi";
 
 // @ts-expect-error this is a "hack" to retrieve a chain from viem by chainId
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,6 +20,7 @@ function getChain(chainId: number) {
 }
 
 export const useSwitchNetwork = () => {
+  const { switchNetworkAsync: switchNetworkWagmi } = useSwitchNetworkWagmi({ chainId: BUILDERFI_CONTRACT.chain_id });
   const switchNetwork = useCallback(async (chainId: number) => {
     try {
       await window.ethereum.request({
@@ -51,11 +55,12 @@ export const useSwitchNetwork = () => {
     }
   }, []);
 
-  return switchNetwork;
+  return window.ethereum ? switchNetwork : switchNetworkWagmi;
 };
 
 export const useGetActiveNetwork = () => {
   const [chainId, setChainId] = useState<string>();
+  const { chain } = useNetwork();
 
   useEffect(() => {
     const getNetwork = async () => {
@@ -66,6 +71,8 @@ export const useGetActiveNetwork = () => {
         } catch (error) {
           console.error("Error fetching chain ID:", error);
         }
+      } else if (chain) {
+        setChainId(toHex(chain.id));
       }
     };
 
@@ -81,7 +88,7 @@ export const useGetActiveNetwork = () => {
     return () => {
       window.ethereum?.removeListener("chainChanged", handleChainChanged);
     };
-  }, []);
+  }, [chainId]);
 
   return chainId;
 };
