@@ -1,5 +1,6 @@
 import { Flex } from "@/components/shared/flex";
 import { Metadata } from "next";
+import Script from "next/script";
 import InnerLayout from "./innerLayout";
 
 export const metadata: Metadata = {
@@ -22,6 +23,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <Flex lang="en" component={"html"} suppressHydrationWarning grow>
       <InnerLayout> {children}</InnerLayout>
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-DSXS61BZPF" />
+      <Script id="google-analytics">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-DSXS61BZPF');
+        `}
+      </Script>
     </Flex>
   );
 }
