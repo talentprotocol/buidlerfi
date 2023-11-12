@@ -7,9 +7,9 @@ async function main() {
   console.log(creator.address);
   const provider = new ethers.providers.JsonRpcProvider("https://mainnet.base.org/");
   const feeData = await provider.getFeeData();
-  const contract = new ethers.Contract("0xd7b907aD64E23593561c852F74ca4fc7ed0b3fAf", BuilderFiAlphaV1.abi, creator);
+  const contract = new ethers.Contract("0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7", BuilderFiAlphaV1.abi, creator);
 
-  await contract.setFeeDestination("0x6e42d3f06CcA58e33cDFCfF74ec66FC0cA1D80aa", {
+  await contract.setFeeDestination("0x68cD449ac4008DFD1E008aA253Cb5f139631a8D4", {
     gasPrice: feeData.gasPrice?.mul(2)
   });
 

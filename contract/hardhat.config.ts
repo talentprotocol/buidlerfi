@@ -78,7 +78,8 @@ const config: HardhatUserConfig = {
       celo: process.env.CELO_API_KEY || "",
       alfajores: process.env.CELO_API_KEY || "",
       polygon: process.env.POLYGON_API_KEY || "",
-      polygonMumbai: process.env.POLYGON_API_KEY || ""
+      polygonMumbai: process.env.POLYGON_API_KEY || "",
+      base: process.env.BASE_API_KEY || ""
     },
     // Custom chains that are not supported by default
     customChains: [
@@ -96,6 +97,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.celoscan.io/api",
           browserURL: "https://celoscan.io/"
+        }
+      },
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org"
         }
       }
     ]
