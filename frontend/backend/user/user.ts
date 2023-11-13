@@ -133,10 +133,12 @@ export const linkNewWallet = async (privyUserId: string, newWallet: string) => {
   }
 
   //We need to verify if wallet has been linked to privy
-  const privyUser = await privyClient.getUserByWalletAddress(newWallet);
-  if (!privyUser || privyUser.id !== existingUser.privyUserId) {
-    return { error: ERRORS.PRIVY_WALLET_NOT_FOUND };
-  }
+  // const privyUser = await privyClient.getUserByWalletAddress(newWallet);
+  // const prUser = await privyClient.getUser(privyUserId);
+
+  // if (!privyUser || privyUser.id !== existingUser.privyUserId) {
+  //   return { error: ERRORS.PRIVY_WALLET_NOT_FOUND };
+  // }
 
   const user = await prisma.user.update({
     where: { id: existingUser.id },

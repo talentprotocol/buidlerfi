@@ -89,7 +89,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
                 color="neutral"
                 sx={{ alignSelf: "flex-start" }}
                 onClick={() => setBuyModalState("sell")}
-                disabled={supply === BigInt(0) && !isOwnProfile}
+                disabled={(supply || 0) <= BigInt(1)}
               >
                 Sell
               </Button>
