@@ -64,7 +64,6 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
     <>
       {buyModalState !== "closed" && (
         <TradeKeyModal
-          socialData={socialData}
           supporterKeysCount={ownedKeysCount || 0}
           hasKeys={hasKeys}
           sellPrice={sellPrice}
@@ -108,7 +107,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
         <Flex x yc gap1>
           <Flex y>
             <Flex x yc>
-              <Typography level="h3" className="font-bold">
+              <Typography level="h3">
                 <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
               </Typography>
               {shortAddress(socialData.address) === socialData.name && (

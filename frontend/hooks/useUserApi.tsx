@@ -1,13 +1,15 @@
+import { UpdateUserArgs } from "@/backend/user/user";
 import {
   checkUsersExistSA,
   createUserSA,
   getCurrentUserSA,
   getUserSA,
-  refreshCurrentUserProfileSA
+  linkNewWalletSA,
+  refreshCurrentUserProfileSA,
+  updateUserSA
 } from "@/backend/user/userServerActions";
-import { ServerActionOptions } from "@/lib/serverActionWrapper";
 import { Prisma } from "@prisma/client";
-import { User as PrivyUser, usePrivy } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
 
@@ -18,11 +20,9 @@ export type GetCurrentUserResponse = Prisma.UserGetPayload<{
 export type GetUserResponse = Prisma.UserGetPayload<{ include: { socialProfiles: true } }>;
 
 export const useCreateUser = () => {
-  return useMutationSA(
-    async (options: ServerActionOptions, { privyUser, inviteCode }: { privyUser: PrivyUser; inviteCode: string }) => {
-      return createUserSA(privyUser, inviteCode, options);
-    }
-  );
+  return useMutationSA(async (options, inviteCode: string) => {
+    return createUserSA(inviteCode, options);
+  });
 };
 
 export const useGetUser = (address?: string) => {
@@ -42,4 +42,12 @@ export const useCheckUsersExist = (wallets?: string[]) => {
   return useQuerySA(["useCheckUsersExist", wallets], async options => checkUsersExistSA(wallets!, options), {
     enabled: !!wallets
   });
+};
+
+export const useLinkWallet = () => {
+  return useMutationSA(async (options, wallet: string) => linkNewWalletSA(wallet, options));
+};
+
+export const useUpdateUser = () => {
+  return useMutationSA(async (options, updatedUser: UpdateUserArgs) => updateUserSA(updatedUser, options));
 };

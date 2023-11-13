@@ -1,12 +1,12 @@
 import { useUserContext } from "@/contexts/userContext";
+import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { useGetActiveNetwork, useSwitchNetwork } from "@/hooks/useNetworkUtils";
 import { formatError } from "@/lib/utils";
 import { Button, CircularProgress, Typography } from "@mui/joy";
-import { usePrivy } from "@privy-io/react-auth";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { toHex } from "viem";
+import { parseEther, toHex } from "viem";
 import { base, baseGoerli } from "viem/chains";
 import { Flex } from "../shared/flex";
 
@@ -14,11 +14,11 @@ const supportedChain = process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? b
 
 export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
-
+  const holders = useGetHolders();
   const user = useUserContext();
   const pathname = usePathname();
   const router = useRouter();
-  const {} = usePrivy();
+  const searchParams = useSearchParams();
   const switchNetwork = useSwitchNetwork();
   const chain = useGetActiveNetwork();
 
@@ -36,30 +36,43 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       return redirect("/signup");
     } else if (user.privyUser && !user.isAuthenticatedAndActive) {
       return redirect("/signup/invitation");
-    } else if (user.privyUser && user.isAuthenticatedAndActive && user.privyUser.wallet?.walletClientType === "privy") {
-      return redirect("/signup/linkwallet");
     }
     return false;
   }, [redirect, user.isAuthenticatedAndActive, user.privyUser]);
 
+  const handleOnboardingRedirect = useCallback(() => {
+    if (!user.user?.socialWallet && searchParams.get("skiplink") !== "1") {
+      return redirect("/onboarding/linkwallet");
+    } else if (
+      user.balance !== undefined &&
+      user.balance < parseEther("0.01") &&
+      searchParams.get("skipfund") !== "1"
+    ) {
+      return redirect("/onboarding/fund");
+    } else if (!holders.data?.length) {
+      return redirect("/onboarding/buykey");
+    }
+  }, [holders.data?.length, redirect, searchParams, user.balance, user.user?.socialWallet]);
+
   useEffect(() => {
     if (user.isLoading) return;
     if (!user.isAuthenticatedAndActive) {
-      const redirected = handleAnonymousRedirect();
-      if (redirected) return;
+      if (handleAnonymousRedirect()) return;
     } else {
+      if (!user.user?.hasFinishedOnboarding) {
+        if (handleOnboardingRedirect()) return;
+      }
+
       if (pathname.startsWith("/signup") || pathname === "/") {
-        const redirected = redirect("/home");
-        if (redirected) return;
+        if (redirect("/home")) return;
       }
 
       if (pathname.startsWith("/admin") && !user.user?.isAdmin) {
-        const redirected = redirect("/home");
-        if (redirected) return;
+        if (redirect("/home")) return;
       }
     }
     setIsReady(true);
-  }, [handleAnonymousRedirect, pathname, redirect, router, user]);
+  }, [handleAnonymousRedirect, handleOnboardingRedirect, pathname, redirect, router, user]);
 
   if (user.isLoading || !isReady) {
     return (

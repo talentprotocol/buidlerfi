@@ -13,6 +13,7 @@ CREATE TABLE "User" (
     "avatarUrl" VARCHAR(500),
     "isActive" BOOLEAN NOT NULL DEFAULT false,
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "hasFinishedOnboarding" BOOLEAN NOT NULL DEFAULT false,
     "invitedById" INTEGER,
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

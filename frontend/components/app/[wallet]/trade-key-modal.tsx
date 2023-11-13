@@ -1,7 +1,6 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useTradeKey } from "@/hooks/useBuilderFiContract";
-import { SocialData } from "@/hooks/useSocialData";
 import { formatToDisplayString } from "@/lib/utils";
 import { Close } from "@mui/icons-material";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
@@ -14,7 +13,6 @@ interface Props {
   close: () => void;
   sellPrice?: bigint;
   buyPriceWithFees?: bigint;
-  socialData: SocialData;
   supporterKeysCount?: number;
   side: "buy" | "sell";
   isFirstKey: boolean;
@@ -24,7 +22,6 @@ export const TradeKeyModal: FC<Props> = ({
   hasKeys,
   close,
   sellPrice,
-  socialData,
   supporterKeysCount,
   buyPriceWithFees,
   isFirstKey,
@@ -38,7 +35,7 @@ export const TradeKeyModal: FC<Props> = ({
 
   const handleBuy = () => {
     if (isFirstKey) {
-      tx.executeTx({ args: [socialData.address], value: buyPriceWithFees });
+      tx.executeTx({ args: [address!], value: buyPriceWithFees });
       return;
     }
 
@@ -54,11 +51,11 @@ export const TradeKeyModal: FC<Props> = ({
       return;
     }
 
-    tx.executeTx({ args: [socialData.address], value: buyPriceWithFees });
+    tx.executeTx({ args: [address!], value: buyPriceWithFees });
   };
 
   const handleSell = () => {
-    tx.executeTx({ args: [socialData.address] });
+    tx.executeTx({ args: [address!] });
   };
 
   const hasEnoughBalance = useMemo(() => {

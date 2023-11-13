@@ -41,28 +41,26 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
   useEffect(() => setMounted(true), []);
   const materialTheme = materialExtendTheme();
   return (
-    <Flex lang="en" component={"html"} suppressHydrationWarning grow>
-      <Flex
-        y
-        component={"body"}
-        grow
-        m={0}
-        sx={{
-          maxWidth: "500px",
-          margin: "auto",
-          minHeight: "100vh",
-          border: theme => "1px solid " + theme.palette.neutral[300]
-        }}
-      >
-        <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
-          <CssVarsProvider theme={theme}>
-            <QueryClientProvider client={queryClient}>
-              <LayoutContextProvider>{mounted && <InnerProviders>{children}</InnerProviders>}</LayoutContextProvider>
-            </QueryClientProvider>
-            <ToastContainer />
-          </CssVarsProvider>
-        </MaterialCssVarsProvider>
-      </Flex>
+    <Flex
+      y
+      component={"body"}
+      grow
+      m={0}
+      sx={{
+        maxWidth: "500px",
+        margin: "auto",
+        minHeight: "100vh",
+        border: theme => "1px solid " + theme.palette.neutral[300]
+      }}
+    >
+      <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
+        <CssVarsProvider theme={theme}>
+          <QueryClientProvider client={queryClient}>
+            <LayoutContextProvider>{mounted && <InnerProviders>{children}</InnerProviders>}</LayoutContextProvider>
+          </QueryClientProvider>
+          <ToastContainer />
+        </CssVarsProvider>
+      </MaterialCssVarsProvider>
     </Flex>
   );
 }

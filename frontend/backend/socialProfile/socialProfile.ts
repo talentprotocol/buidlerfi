@@ -3,7 +3,7 @@ import { getEnsProfile } from "@/lib/api/common/ens";
 import prisma from "@/lib/prisma";
 import { ipfsToURL } from "@/lib/utils";
 import { GetTalentResponse } from "@/models/talentProtocol.model";
-import { SocialProfileType, User } from "@prisma/client";
+import { SocialProfileType } from "@prisma/client";
 import axios from "axios";
 
 interface airstackSocial {
@@ -12,18 +12,18 @@ interface airstackSocial {
   profileImage: string;
 }
 
-export const updateUserSocialProfiles = async (user: User) => {
+export const updateUserSocialProfiles = async (userId: number, wallet: string) => {
   let ensProfile: { name?: string | null; avatar?: string } = {};
   let talentProtocolProfile: GetTalentResponse | undefined;
   let lensProfile: airstackSocial | undefined;
   let farcasterProfile: airstackSocial | undefined;
   try {
-    ensProfile = await getEnsProfile(user.wallet as `0x${string}`);
+    ensProfile = await getEnsProfile(wallet as `0x${string}`);
     if (ensProfile.name) {
       await prisma.socialProfile.upsert({
         where: {
           userId_type: {
-            userId: user.id,
+            userId: userId,
             type: SocialProfileType.ENS
           }
         },
@@ -35,7 +35,7 @@ export const updateUserSocialProfiles = async (user: User) => {
           profileName: ensProfile.name,
           profileImage: ensProfile.avatar,
           type: SocialProfileType.ENS,
-          userId: user.id
+          userId: userId
         }
       });
     }
@@ -45,7 +45,7 @@ export const updateUserSocialProfiles = async (user: User) => {
 
   try {
     talentProtocolProfile = await axios
-      .get<GetTalentResponse>(`${process.env.TALENT_PROTOCOL_API_BASE_URL}/talents/${user.wallet}`)
+      .get<GetTalentResponse>(`${process.env.TALENT_PROTOCOL_API_BASE_URL}/talents/${wallet}`)
       .then(res => res.data)
       .catch(() => undefined);
     if (talentProtocolProfile) {
@@ -59,7 +59,7 @@ export const updateUserSocialProfiles = async (user: User) => {
       await prisma.socialProfile.upsert({
         where: {
           userId_type: {
-            userId: user.id,
+            userId: userId,
             type: SocialProfileType.TALENT_PROTOCOL
           }
         },
@@ -71,7 +71,7 @@ export const updateUserSocialProfiles = async (user: User) => {
           profileName: talentProtocolProfile.talent.name,
           profileImage: talentProtocolProfile.talent.profile_picture_url,
           type: SocialProfileType.TALENT_PROTOCOL,
-          userId: user.id
+          userId: userId
         }
       });
     }
@@ -80,7 +80,7 @@ export const updateUserSocialProfiles = async (user: User) => {
   }
 
   try {
-    const airstackData = await getAirstackSocialData(user.wallet);
+    const airstackData = await getAirstackSocialData(wallet);
     lensProfile = airstackData?.socials?.find(social => social.dappName === "lens");
     if (lensProfile?.profileName) {
       lensProfile.profileName = lensProfile?.profileName.replace("lens/@", "");
@@ -98,7 +98,7 @@ export const updateUserSocialProfiles = async (user: User) => {
       await prisma.socialProfile.upsert({
         where: {
           userId_type: {
-            userId: user.id,
+            userId: userId,
             type: SocialProfileType.LENS
           }
         },
@@ -110,7 +110,7 @@ export const updateUserSocialProfiles = async (user: User) => {
           profileName: lensProfile.profileName,
           profileImage: lensProfile.profileImage,
           type: SocialProfileType.LENS,
-          userId: user.id
+          userId: userId
         }
       });
     }
@@ -119,7 +119,7 @@ export const updateUserSocialProfiles = async (user: User) => {
       await prisma.socialProfile.upsert({
         where: {
           userId_type: {
-            userId: user.id,
+            userId: userId,
             type: SocialProfileType.FARCASTER
           }
         },
@@ -131,7 +131,7 @@ export const updateUserSocialProfiles = async (user: User) => {
           profileName: farcasterProfile.profileName,
           profileImage: farcasterProfile.profileImage,
           type: SocialProfileType.FARCASTER,
-          userId: user.id
+          userId: userId
         }
       });
     }
@@ -148,7 +148,7 @@ export const updateUserSocialProfiles = async (user: User) => {
     talentProtocolProfile?.talent.name || farcasterProfile?.profileName || lensProfile?.profileName || ensProfile.name;
 
   return await prisma.user.update({
-    where: { id: user.id },
+    where: { id: userId },
     data: {
       avatarUrl: defaultAvatar,
       displayName: defaultName

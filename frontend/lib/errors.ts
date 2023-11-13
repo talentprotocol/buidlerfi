@@ -6,5 +6,9 @@ export const ERRORS = {
   USER_NOT_FOUND: "User not found",
   QUESTION_NOT_FOUND: "Question not found",
   MUST_HOLD_KEY: "You must hold a key to ask a question to this user",
-  INVALID_REQUEST: "Invalid request"
+  INVALID_REQUEST: "Invalid request",
+  WALLET_MISSING: "Wallet missing",
+  USER_ALREADY_EXISTS: "User already exists",
+  PRIVY_WALLET_NOT_FOUND: "Privy wallet not found",
+  NO_SOCIAL_PROFILE_FOUND: "No social profile found"
 } as const;

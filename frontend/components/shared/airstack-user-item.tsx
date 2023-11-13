@@ -31,8 +31,8 @@ export function AirstackUserItem({ dappName, airstackUser }: Props) {
         yc
         px={{ xs: 0, sm: 2 }}
         py={1}
-        sx={{ ":hover": { backgroundColor: "neutral.100" } }}
-        className="transition-all cursor-pointer"
+        sx={{ ":hover": { backgroundColor: "neutral.100" }, cursor: "pointer" }}
+        className="transition-all"
         onClick={() => user && router.push(`/profile/${user.wallet}`)}
       >
         <Flex x yc gap2>
