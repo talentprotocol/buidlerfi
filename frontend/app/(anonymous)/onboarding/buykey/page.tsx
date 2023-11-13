@@ -14,8 +14,6 @@ export default function BuyKeyPage() {
   const { buyPriceAfterFee } = useGetBuilderInfo(address!);
   const updateUser = useUpdateUser();
 
-  console.log(address);
-
   const finishOnboarding = useMutation(async () => {
     await updateUser.mutateAsync({ hasFinishedOnboarding: true });
     await refetch();

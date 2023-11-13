@@ -134,7 +134,6 @@ export const linkNewWallet = async (privyUserId: string, newWallet: string) => {
 
   //We need to verify if wallet has been linked to privy
   const privyUser = await privyClient.getUserByWalletAddress(newWallet);
-  console.log({ privyUser, newWallet });
   if (!privyUser || privyUser.id !== existingUser.privyUserId) {
     return { error: ERRORS.PRIVY_WALLET_NOT_FOUND };
   }
