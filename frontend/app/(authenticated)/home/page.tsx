@@ -17,10 +17,7 @@ export default function Home() {
   const [selectedTab, setSelectedTab] = useState("top");
 
   const users = useMemo(
-    () =>
-      [...(builderfiData.data?.shareParticipants || [])]
-        .filter(user => Number(user.numberOfHolders) > 0)
-        .sort((a, b) => (a.numberOfHolders > b.numberOfHolders ? -1 : 1)),
+    () => [...(builderfiData.data?.shareParticipants || [])].filter(user => Number(user.numberOfHolders) > 0),
     [builderfiData]
   );
 

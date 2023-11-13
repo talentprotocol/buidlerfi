@@ -69,6 +69,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
           hasKeys={hasKeys}
           sellPrice={sellPrice}
           buyPriceWithFees={buyPriceAfterFee}
+          isFirstKey={isOwnProfile && holders.data?.length === 0}
           side={buyModalState}
           close={() => {
             refetch();
@@ -138,7 +139,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
           </Flex>
         </Flex>
 
-        <Flex x gap2>
+        <Flex x gap2 flexWrap={"wrap"}>
           {socialData.socialsList.map(social => {
             const additionalData = socialInfo[social.dappName as keyof typeof socialInfo];
             return (

@@ -17,11 +17,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { baseGoerli } from "viem/chains";
+import { base, baseGoerli } from "viem/chains";
 import { configureChains } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
-const configureChainsConfig = configureChains([baseGoerli], [publicProvider()]);
+const supportedChain = process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? base : baseGoerli;
+const configureChainsConfig = configureChains([supportedChain], [publicProvider()]);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,11 +80,11 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
         config={{
           loginMethods: ["google", "email", "wallet", "github"],
-          supportedChains: [baseGoerli],
+          supportedChains: [supportedChain],
           embeddedWallets: {
             createOnLogin: "users-without-wallets"
           },
-          defaultChain: baseGoerli,
+          defaultChain: supportedChain,
           appearance: {
             theme: "light",
             accentColor: "#0B6EF9",

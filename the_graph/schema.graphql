@@ -1,13 +1,12 @@
 type Trade @entity(immutable: true) {
 	id: Bytes!
-	trader: Bytes! # address
-	subject: Bytes! # address
+	trader: Bytes # address
+	builder: Bytes # address
 	isBuy: Boolean # bool
 	shareAmount: BigInt # uint256
 	ethAmount: BigInt # uint256
 	protocolEthAmount: BigInt # uint256
-	subjectEthAmount: BigInt # uint256
-	hodlerEthAmount: BigInt # uint256
+	builderEthAmount: BigInt # uint256
 	supply: BigInt # uint256
 	blockNumber: BigInt
 	blockTimestamp: BigInt

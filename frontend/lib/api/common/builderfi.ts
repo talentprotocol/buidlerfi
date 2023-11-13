@@ -1,6 +1,9 @@
-import { GRAPH_URL } from "@/lib/constants";
+import { BASE_GOERLI_GRAPH_URL, BASE_MAINNET_GRAPH_URL } from "@/lib/constants";
 import { Share } from "@/models/share.model";
 import { ShareRelationship } from "@/models/shareRelationship.model";
+
+const GRAPH_URL =
+  process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_GRAPH_URL : BASE_GOERLI_GRAPH_URL;
 
 const gqlShare = `
   id
@@ -15,7 +18,7 @@ const gqlShare = `
 
 const query = `
   {
-    shareParticipants(first: 100) {
+    shareParticipants(first: 100, orderBy: supply, orderDirection:desc) {
       ${gqlShare}
     }
     shareRelationships(first: 100) {

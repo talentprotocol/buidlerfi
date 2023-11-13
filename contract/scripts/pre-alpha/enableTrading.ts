@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import * as BuilderFiV1Artifact from "../artifacts/contracts/BuilderFiV1.sol/BuilderFiV1.json";
+import * as BuilderFiV1Artifact from "../../artifacts/contracts/BuilderFiV1.sol/BuilderFiV1.json";
 const { exit } = process;
 
 async function main() {

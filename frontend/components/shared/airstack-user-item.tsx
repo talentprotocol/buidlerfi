@@ -18,7 +18,6 @@ export function AirstackUserItem({ dappName, airstackUser }: Props) {
   const router = useRouter();
   const [address, avatar, name] = useMemo(() => {
     const profile = airstackUser.socials.find(item => item.dappName === dappName);
-    console.log(airstackUser.addresses);
     return [airstackUser.addresses[0], ipfsToURL(profile?.profileImage), profile?.profileName];
   }, [airstackUser, dappName]);
 

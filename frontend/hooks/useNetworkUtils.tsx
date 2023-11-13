@@ -44,7 +44,6 @@ export const useSwitchNetwork = () => {
             }
           ]
         });
-        console.log("try add chain");
       } else if (switchError.code === 4001) {
         throw new Error("Network change has been rejected by the user.");
       } else throw new Error("Could not switch the network: " + formatError(switchError));
