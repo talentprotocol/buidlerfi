@@ -6,7 +6,7 @@ dataSources:
     name: BuilderFiAlphaV1
     network: base
     source:
-      address: "0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7"
+      address: "0x6b0Cb2eB1F2BE16675E2C54e3556f99652a40D40"
       abi: BuilderFiAlphaV1
       startBlock: 6495600
     mapping:
