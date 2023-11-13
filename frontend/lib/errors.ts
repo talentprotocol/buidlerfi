@@ -10,5 +10,8 @@ export const ERRORS = {
   WALLET_MISSING: "Wallet missing",
   USER_ALREADY_EXISTS: "User already exists",
   PRIVY_WALLET_NOT_FOUND: "Privy wallet not found",
-  NO_SOCIAL_PROFILE_FOUND: "No social profile found"
+  NO_SOCIAL_PROFILE_FOUND: "No social profile found",
+  CANNOT_CHOSE_USERNAME: "Cannot chose username if you have an on-chain social profile",
+  USERNAME_INVALID_FORMAT:
+    "Username should contain between 3 and 20 alphanumeric characters or underscores, and start with a letter"
 } as const;

@@ -2,6 +2,7 @@
 
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useLinkWallet } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE, EXAMPLE_PROFILE_PICTURE } from "@/lib/assets";
 import { formatError, shortAddress } from "@/lib/utils";
@@ -9,22 +10,21 @@ import { ArrowDownward } from "@mui/icons-material";
 import { Avatar, Button, Typography } from "@mui/joy";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "react-toastify";
 
 export default function CreateWallet() {
-  const router = useRouter();
+  const router = useBetterRouter();
   const { refetch } = useUserContext();
   const { linkWallet } = usePrivy();
   const { wallets } = useWallets();
   const { user } = useUserContext();
 
-  const { mutateAsync: linkNewWallet, isLoading } = useLinkWallet();
+  const { mutateAsync: linkNewWallet } = useLinkWallet();
 
   const linkedWallet = useMemo(() => wallets.find(wal => wal.connectorType !== "embedded"), [wallets]);
   //We use useQuery to ensure function is executed only once, and only when a wallet is found.
-  const {} = useQuery(
+  const { isLoading } = useQuery(
     ["linkNewWallet", linkedWallet?.address],
     () => {
       return linkNewWallet(linkedWallet!.address)
@@ -76,7 +76,11 @@ export default function CreateWallet() {
         <Button loading={isLoading} onClick={handleLinkWallet}>
           Link your wallet
         </Button>
-        <Button disabled={isLoading} variant="plain" onClick={() => router.push("/onboarding/fund?skiplink=1")}>
+        <Button
+          disabled={isLoading}
+          variant="plain"
+          onClick={() => router.push({ searchParams: { skiplink: "1" } }, { preserveSearchParams: true })}
+        >
           Skip
         </Button>
       </Flex>

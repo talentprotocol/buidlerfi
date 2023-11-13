@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import { URLSearchParams } from "url";
 import { formatUnits } from "viem";
 
 export const shortAddress = (address: string) => {
@@ -77,3 +78,9 @@ export const ipfsToURL = (ipfsAddress?: string): string => {
   }
   return "https://cloudflare-ipfs.com/" + ipfsAddress.replace("://", "/");
 };
+
+export function convertParamsToString(searchParams: Record<string, string>) {
+  return Object.entries(searchParams)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join("&");
+}
