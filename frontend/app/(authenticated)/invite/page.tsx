@@ -18,7 +18,7 @@ export default function Invite() {
         Refer friends. <br /> Earn points.
       </Typography>
       <Typography level="body-sm" mt={1}>
-        Points are airdropped every Friday and will have future uses in BuilderFi.
+        Points are airdropped every Friday and will have future uses in builder.fi.
         <br />
         Invites are not the only way to earn points.
       </Typography>
