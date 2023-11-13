@@ -9,7 +9,6 @@ export function useMutationSA<TResponse, TArgs = void>(
   return useMutation(async (args: TArgs) => {
     const token = await getAccessToken();
     const res = await mutationFn({ authorization: token }, args);
-    console.log(res);
     if (res.error) throw new Error(res.error);
     return res.data;
   });

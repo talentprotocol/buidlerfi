@@ -7,6 +7,11 @@ interface CustomUrl {
   searchParams?: Record<string, string>;
 }
 
+interface BetterRouterOptions {
+  // If true, will preserve the current search params
+  preserveSearchParams?: boolean;
+}
+
 export const useBetterRouter = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -15,7 +20,7 @@ export const useBetterRouter = () => {
   const searchParamsDict = Object.fromEntries(searchParams.entries());
 
   const formatUrl = useCallback(
-    (url: CustomUrl | string, options?: { preserveSearchParams?: boolean }) => {
+    (url: CustomUrl | string, options?: BetterRouterOptions) => {
       if (typeof url === "string") url = { pathname: url, searchParams: {} };
       if (!url.pathname) url.pathname = pathname;
       if (options?.preserveSearchParams) {
@@ -30,7 +35,7 @@ export const useBetterRouter = () => {
   );
 
   const replace = useCallback(
-    (url: CustomUrl | string, options?: { preserveSearchParams?: boolean }) => {
+    (url: CustomUrl | string, options?: BetterRouterOptions) => {
       const formattedUrl = formatUrl(url, options);
       nextRouter.replace(formattedUrl);
     },
@@ -38,7 +43,7 @@ export const useBetterRouter = () => {
   );
 
   const push = useCallback(
-    (url: CustomUrl | string, options?: { preserveSearchParams?: boolean }) => {
+    (url: CustomUrl | string, options?: BetterRouterOptions) => {
       const formattedUrl = formatUrl(url, options);
       nextRouter.push(formattedUrl);
     },
