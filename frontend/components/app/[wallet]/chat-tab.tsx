@@ -63,7 +63,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
       <PageMessage
         title={"Unlock Q&A"}
         icon={<KeyOutlined />}
-        text="Launch your keys to allow others to trade your keys and ask you questions"
+        text="Create your keys to allow others to ask you direct questions."
       />
     );
   }

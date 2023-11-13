@@ -30,7 +30,7 @@ export function BottomNav() {
       {
         path: "/invite",
         check: (pathname: string) => pathname === "/invite",
-        label: "Invite"
+        label: "Points"
       }
     ],
     [address]

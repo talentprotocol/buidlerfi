@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, store } from "@graphprotocol/graph-ts";
 import { Trade as TradeEvent } from "../generated/BuilderFiAlphaV1/BuilderFiAlphaV1";
 import { ShareParticipant, ShareRelationship, Trade } from "../generated/schema";
 
@@ -102,5 +102,10 @@ export function handleTrade(event: TradeEvent): void {
 
   buyer.save();
   subject.save();
-  relationship.save();
+
+  if (relationship.heldKeyNumber == ZERO_BI) {
+    store.remove("ShareRelationship", relationshipID);
+  } else {
+    relationship.save();
+  }
 }

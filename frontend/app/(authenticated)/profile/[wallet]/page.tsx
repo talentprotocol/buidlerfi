@@ -63,7 +63,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
           {holdings.data?.length === 0 && isOwnProfile && (
             <PageMessage
               icon={<Chat />}
-              text={"Buy other people's cards to ask them a question and access all answers."}
+              text={"Buy other people's keys to ask them a question and access all answers."}
             />
           )}
           {holdings.data?.map(holdingItem => (
@@ -77,10 +77,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
         </TabPanel>
         <TabPanel value="holders">
           {holders.data?.length === 0 && isOwnProfile && (
-            <PageMessage
-              icon={<Lock />}
-              text="Buy the first card to allow others to trade your cards and ask you questions."
-            />
+            <PageMessage icon={<Lock />} text="Create your keys to allow others to ask you direct questions." />
           )}
           {holders.data?.map(holdingItem => (
             <UserItem

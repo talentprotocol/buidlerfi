@@ -50,7 +50,7 @@ export default function ChatsPage() {
         <Flex grow component={Card} sx={{ gap: 0 }}>
           <KeyOutlined htmlColor={theme.palette.primary[300]} />
           <Typography level="h4">{formatToDisplayString(portfolio, 18)} ETH</Typography>
-          <Typography level="body-sm">Keys holding</Typography>
+          <Typography level="body-sm">Portfolio value</Typography>
         </Flex>
         <Flex grow component={Card} sx={{ gap: 0 }}>
           <TransitEnterexitOutlined htmlColor={theme.palette.primary[300]} />
