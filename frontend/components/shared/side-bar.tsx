@@ -177,7 +177,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           </Typography>
           <Typography textColor={"neutral.600"} level="body-sm">
             <>
-              {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders
+              {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders have signed up already
             </>
           </Typography>
         </div>
