@@ -184,7 +184,7 @@ contract BuilderFiAlphaV1 is AccessControl, ReentrancyGuard {
       builder,
       false,
       1,
-      price,
+      price - protocolFee - builderFee,
       protocolFee,
       builderFee,
       supply - 1,

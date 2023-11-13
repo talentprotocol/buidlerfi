@@ -1,4 +1,4 @@
-import { BASE_GOERLI_GRAPH_URL, BASE_MAINNET_GRAPH_URL } from "@/lib/constants";
+import { BASE_GOERLI_GRAPH_URL, BASE_MAINNET_GRAPH_URL, BUILDERFI_CONTRACT } from "@/lib/constants";
 import { Share } from "@/models/share.model";
 import { ShareRelationship } from "@/models/shareRelationship.model";
 
@@ -67,6 +67,34 @@ query MyQuery($address: ID = "owner") {
 }
 `;
 
+const getContractAnalytic = `
+query GetContract($id: ID!) {
+  contractAnalytic(id: $id) {
+    id
+    totalNumberOfBuilders
+    totalNumberOfHolders
+    totalNumberOfKeys
+    totalProtocolFees
+    totalBuilderFees
+    totalValueLocked
+  }
+}
+`;
+
+interface BuilderFiContractDataResponse {
+  data: {
+    contractAnalytic: {
+      totalNumberOfBuilders: string;
+      totalNumberOfHolders: string;
+      totalNumberOfKeys: string;
+      totalProtocolFees: string;
+      totalBuilderFees: string;
+      totalValueLocked: string;
+      id: string;
+    };
+  };
+}
+
 interface BuilderFiDataResponse {
   data: {
     shareParticipants: Share[];
@@ -126,4 +154,20 @@ export const fetchHolders = async (address: string) => {
   }).then(res => res.json());
 
   return res.data.shareRelationships;
+};
+
+export const fetchContractData = async () => {
+  const res: BuilderFiContractDataResponse = await fetch(GRAPH_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      query: getContractAnalytic,
+      variables: {
+        id: BUILDERFI_CONTRACT.address
+      }
+    }),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  }).then(res => res.json());
+  return res.data.contractAnalytic;
 };

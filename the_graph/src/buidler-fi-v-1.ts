@@ -1,6 +1,6 @@
 import { BigInt, store } from "@graphprotocol/graph-ts";
 import { Trade as TradeEvent } from "../generated/BuilderFiAlphaV1/BuilderFiAlphaV1";
-import { ContractAnalytics, ShareParticipant, ShareRelationship, Trade } from "../generated/schema";
+import { ContractAnalytic, ShareParticipant, ShareRelationship, Trade } from "../generated/schema";
 
 const ONE_BI = BigInt.fromI32(1);
 const ZERO_BI = BigInt.fromI32(0);
@@ -24,9 +24,9 @@ export function handleTrade(event: TradeEvent): void {
   entity.save();
 
   // store metadata
-  let contract_analytics = ContractAnalytics.load("0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7");
+  let contract_analytics = ContractAnalytic.load("0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7");
   if (contract_analytics === null) {
-    contract_analytics = new ContractAnalytics("0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7");
+    contract_analytics = new ContractAnalytic("0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7");
     contract_analytics.totalNumberOfBuilders = ZERO_BI;
     contract_analytics.totalNumberOfHolders = ZERO_BI;
     contract_analytics.totalNumberOfKeys = ZERO_BI;
@@ -130,8 +130,11 @@ export function handleTrade(event: TradeEvent): void {
   subject.save();
 
   if (relationship.heldKeyNumber == ZERO_BI) {
+    contract_analytics.totalNumberOfHolders = contract_analytics.totalNumberOfHolders.minus(ONE_BI);
     store.remove("ShareRelationship", relationshipID);
   } else {
     relationship.save();
   }
+
+  contract_analytics.save();
 }

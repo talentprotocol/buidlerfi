@@ -1,4 +1,4 @@
-import { fetchBuilderfiData, fetchHolders, fetchHoldings } from "@/lib/api/common/builderfi";
+import { fetchBuilderfiData, fetchContractData, fetchHolders, fetchHoldings } from "@/lib/api/common/builderfi";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { useQuery } from "@tanstack/react-query";
 
@@ -20,4 +20,8 @@ export const useGetHolders = (address?: `0x${string}`, options?: SimpleUseQueryO
     enabled: !!address,
     ...options
   });
+};
+
+export const useGetContractData = () => {
+  return useQuery(["useGetContractData"], () => fetchContractData());
 };

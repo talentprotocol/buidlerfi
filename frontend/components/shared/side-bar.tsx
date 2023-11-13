@@ -1,5 +1,5 @@
 import { useUserContext } from "@/contexts/userContext";
-import { useGetHolders } from "@/hooks/useBuilderFiApi";
+import { useGetContractData, useGetHolders } from "@/hooks/useBuilderFiApi";
 import { DEFAULT_PROFILE_PICTURE, LOGO } from "@/lib/assets";
 import { formatToDisplayString, shortAddress } from "@/lib/utils";
 import {
@@ -38,8 +38,9 @@ interface Props {
 
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user } = useUserContext();
-  const theme = useTheme();
   const holders = useGetHolders(address);
+  const theme = useTheme();
+  const contractData = useGetContractData();
   const { data: balance } = useBalance({
     address
   });
@@ -77,6 +78,36 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     ],
     [address, user?.isAdmin]
   );
+
+  const batchNumber = () => {
+    const numberOfBuilders = BigInt(contractData.data?.totalNumberOfBuilders || 0);
+    if (numberOfBuilders < 100n) {
+      return 1;
+    } else if (numberOfBuilders < 500n) {
+      return 2;
+    } else if (numberOfBuilders < 1000n) {
+      return 3;
+    } else if (numberOfBuilders < 3000n) {
+      return 4;
+    }
+    {
+      return "5+";
+    }
+  };
+  const batchCount = () => {
+    const number = batchNumber();
+    if (number === 1) {
+      return "100";
+    } else if (number === 2) {
+      return "500";
+    } else if (number === 3) {
+      return "1,000";
+    } else if (number === 4) {
+      return "3,000";
+    } else {
+      return "10,000";
+    }
+  };
 
   if (!user) return <></>;
 
@@ -137,6 +168,19 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         </ListItem>
       </List>
       <Flex y xs p={2} gap3>
+        <div>
+          <Typography textColor={"neutral.600"} level="body-sm">
+            <>
+              Batch {"#"}
+              {batchNumber()}
+            </>
+          </Typography>
+          <Typography textColor={"neutral.600"} level="body-sm">
+            <>
+              {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders
+            </>
+          </Typography>
+        </div>
         <Button
           variant="soft"
           onClick={() => window.open("https://twitter.com/messages/compose?recipient_id=1709427051135160320")}

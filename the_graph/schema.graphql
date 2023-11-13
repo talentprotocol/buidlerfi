@@ -32,7 +32,7 @@ type ShareRelationship @entity {
 	heldKeyNumber: BigInt! # uint256
 }
 
-type ContractAnalytics @entity {
+type ContractAnalytic @entity {
 	id: ID!
 	totalNumberOfBuilders: BigInt!
 	totalNumberOfHolders: BigInt!
