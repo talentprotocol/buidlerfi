@@ -64,11 +64,11 @@ export const updateUserSocialProfiles = async (user: User) => {
           }
         },
         update: {
-          profileName: talentProtocolProfile.talent.name,
+          profileName: talentProtocolProfile.talent.username,
           profileImage: talentProtocolProfile.talent.profile_picture_url
         },
         create: {
-          profileName: talentProtocolProfile.talent.name,
+          profileName: talentProtocolProfile.talent.username,
           profileImage: talentProtocolProfile.talent.profile_picture_url,
           type: SocialProfileType.TALENT_PROTOCOL,
           userId: user.id

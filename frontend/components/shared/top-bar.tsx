@@ -53,7 +53,13 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
         />
 
         <Flex basis="100%" y xe gap1>
-          <Avatar size="md" ref={anchor} src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE} sx={{ position: "relative" }}>
+          <Avatar
+            size="md"
+            ref={anchor}
+            src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
+            sx={{ position: "relative" }}
+            onClick={() => router.push("/profile/" + address)}
+          >
             <Skeleton loading={isLoading} />
           </Avatar>
           <Typography level="body-xs">{formatToDisplayString(balance?.value)} ETH</Typography>
