@@ -22,7 +22,7 @@ export default function InvitationCode() {
       return;
     }
 
-    await createUser.mutateAsync({ privyUser, inviteCode });
+    await createUser.mutateAsync(inviteCode);
     await refetch();
   };
 
