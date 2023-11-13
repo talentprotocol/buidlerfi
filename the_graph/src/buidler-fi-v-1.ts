@@ -1,6 +1,6 @@
 import { BigInt, store } from "@graphprotocol/graph-ts";
 import { Trade as TradeEvent } from "../generated/BuilderFiAlphaV1/BuilderFiAlphaV1";
-import { ShareParticipant, ShareRelationship, Trade } from "../generated/schema";
+import { ContractAnalytics, ShareParticipant, ShareRelationship, Trade } from "../generated/schema";
 
 const ONE_BI = BigInt.fromI32(1);
 const ZERO_BI = BigInt.fromI32(0);
@@ -23,6 +23,30 @@ export function handleTrade(event: TradeEvent): void {
 
   entity.save();
 
+  // store metadata
+  let contract_analytics = ContractAnalytics.load("0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7");
+  if (contract_analytics === null) {
+    contract_analytics = new ContractAnalytics("0x7e82c2965716E0dc8e789A7Fb13d6B4BAfD565A7");
+    contract_analytics.totalNumberOfBuilders = ZERO_BI;
+    contract_analytics.totalNumberOfHolders = ZERO_BI;
+    contract_analytics.totalNumberOfKeys = ZERO_BI;
+    contract_analytics.totalProtocolFees = ZERO_BI;
+    contract_analytics.totalBuilderFees = ZERO_BI;
+    contract_analytics.totalValueLocked = ZERO_BI;
+  }
+
+  if (event.params.isBuy) {
+    contract_analytics.totalProtocolFees = contract_analytics.totalBuilderFees.plus(event.params.protocolEthAmount);
+    contract_analytics.totalBuilderFees = contract_analytics.totalBuilderFees.plus(event.params.builderEthAmount);
+    contract_analytics.totalValueLocked = contract_analytics.totalBuilderFees.plus(event.params.ethAmount);
+    contract_analytics.totalNumberOfKeys = contract_analytics.totalNumberOfKeys.plus(event.params.shareAmount);
+  } else {
+    contract_analytics.totalProtocolFees = contract_analytics.totalBuilderFees.minus(event.params.protocolEthAmount);
+    contract_analytics.totalBuilderFees = contract_analytics.totalBuilderFees.minus(event.params.builderEthAmount);
+    contract_analytics.totalValueLocked = contract_analytics.totalBuilderFees.minus(event.params.ethAmount);
+    contract_analytics.totalNumberOfKeys = contract_analytics.totalNumberOfKeys.minus(event.params.shareAmount);
+  }
+
   // CREATE BUYER INFO
 
   let buyer = ShareParticipant.load(event.params.trader.toHexString());
@@ -34,6 +58,7 @@ export function handleTrade(event: TradeEvent): void {
     buyer.supply = ZERO_BI;
     buyer.owner = event.params.trader.toHexString();
     buyer.tradingFeesAmount = ZERO_BI;
+    contract_analytics.totalNumberOfHolders = contract_analytics.totalNumberOfHolders.plus(ONE_BI);
   }
 
   // CREATE SUBJECT INFO
@@ -47,6 +72,7 @@ export function handleTrade(event: TradeEvent): void {
     subject.numberOfHoldings = ZERO_BI;
     subject.owner = event.params.builder.toHexString();
     subject.tradingFeesAmount = event.params.builderEthAmount;
+    contract_analytics.totalNumberOfBuilders = contract_analytics.totalNumberOfBuilders.plus(ONE_BI);
   } else {
     subject.tradingFeesAmount = subject.tradingFeesAmount.plus(event.params.builderEthAmount);
     if (event.params.isBuy) {

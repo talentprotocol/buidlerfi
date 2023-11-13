@@ -31,3 +31,13 @@ type ShareRelationship @entity {
 	supporterNumber: BigInt # uint256
 	heldKeyNumber: BigInt! # uint256
 }
+
+type ContractAnalytics @entity {
+	id: ID!
+	totalNumberOfBuilders: BigInt!
+	totalNumberOfHolders: BigInt!
+	totalNumberOfKeys: BigInt!
+	totalProtocolFees: BigInt!
+	totalBuilderFees: BigInt!
+	totalValueLocked: BigInt!
+}
