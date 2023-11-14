@@ -12,14 +12,21 @@ export const GET = async (req: NextRequest) => {
 	const users = await getAllUsers();
 
 	for await (const user of users.data) {
+		// 1. fetch user onchain graph
 		const recommendedUsers = await fetchOnChainGraphData(user.wallet);
+
+		// 2. get only the ones with score higher than SCORE_THRESHOLD
 		const topRecommendedUsers = recommendedUsers.filter(user => user._score >= SCORE_THRESHOLD);
+
+		// 3. check if these recommended users are on builder.fi
 		const topRecommendedUsersAddresses = topRecommendedUsers.flatMap(u => u.addresses);
 		const topRecommendedUsersOnBuilderFI = await getUsersByAddresses(topRecommendedUsersAddresses as string[]);
+
+		// 4. map builder.fi userIds with score
 		const usersWithScore = topRecommendedUsersOnBuilderFI.data.map(user => {
 			const score = topRecommendedUsers.find(u => u.addresses?.includes(user.wallet))?._score
 			if (!score) {
-				console.error("No match between builderfi and score")
+				console.error("No match between builderfi and score");
 				return null;
 			}
 			return {
@@ -27,6 +34,8 @@ export const GET = async (req: NextRequest) => {
 				score
 			}
 		})
+
+		// 5. sync recommended users list for current user.id
 		await syncRecommendedUsers(user.id, usersWithScore.filter(Boolean).map(userWithScore => ({
 			sourceUserId: user.id,
 				recommendedUserId: userWithScore!.userId,
