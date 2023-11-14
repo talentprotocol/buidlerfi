@@ -16,6 +16,7 @@ interface Props {
   supporterKeysCount?: number;
   side: "buy" | "sell";
   isFirstKey: boolean;
+  targetBuilderAddress: `0x${string}`;
 }
 
 export const TradeKeyModal: FC<Props> = ({
@@ -25,7 +26,8 @@ export const TradeKeyModal: FC<Props> = ({
   supporterKeysCount,
   buyPriceWithFees,
   isFirstKey,
-  side
+  side,
+  targetBuilderAddress
 }) => {
   const { address } = useUserContext();
   const { data: balance } = useBalance({
@@ -35,7 +37,7 @@ export const TradeKeyModal: FC<Props> = ({
 
   const handleBuy = () => {
     if (isFirstKey) {
-      tx.executeTx({ args: [address!], value: buyPriceWithFees });
+      tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceWithFees });
       return;
     }
 
@@ -51,11 +53,11 @@ export const TradeKeyModal: FC<Props> = ({
       return;
     }
 
-    tx.executeTx({ args: [address!], value: buyPriceWithFees });
+    tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceWithFees });
   };
 
   const handleSell = () => {
-    tx.executeTx({ args: [address!] });
+    tx.executeTx({ args: [targetBuilderAddress!] });
   };
 
   const hasEnoughBalance = useMemo(() => {

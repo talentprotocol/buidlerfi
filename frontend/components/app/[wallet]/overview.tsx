@@ -74,6 +74,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
             refetch();
             setBuyModalState("closed");
           }}
+          targetBuilderAddress={socialData.address}
         />
       )}
 
