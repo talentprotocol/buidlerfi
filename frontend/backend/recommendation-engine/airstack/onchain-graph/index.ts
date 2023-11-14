@@ -11,22 +11,22 @@ import sortByScore from './sort';
 export const fetchOnChainGraphData = async (address: string) => {
   let recommendedUsers: RecommendedUser[] = [];
 
-  console.log('Fetching Common Poaps Holders...');
+  console.log(`Fetching Common Poaps Holders for ${address}...`);
   recommendedUsers = await fetchPoapsData(address);
 
-  console.log('Fetching Farcaster Followings...');
+  console.log(`Fetching Farcaster Followings for ${address}...`);
   recommendedUsers = await fetchFarcasterFollowings(address, recommendedUsers);
 
-  console.log('Fetching Lens Followings...');
+  console.log(`Fetching Lens Followings for ${address}...`);
   recommendedUsers = await fetchLensFollowings(address, recommendedUsers);
 
-  console.log('Fetching Farcaster Followers...');
+  console.log(`Fetching Farcaster Followers for ${address}...`);
   recommendedUsers = await fetchFarcasterFollowers(address, recommendedUsers);
 
-  console.log('Fetching Lens Followers...');
+  console.log(`Fetching Lens Followers for ${address}...`);
   recommendedUsers = await fetchLensFollowers(address, recommendedUsers);
 
-  console.log('Fetching TalentProtocol connections...');
+  console.log(`Fetching TalentProtocol connections for ${address}...`);
   recommendedUsers = await fetchTalentProtocolConnectionsData(address, recommendedUsers);
 
   console.log('Computing score...');
