@@ -2,6 +2,7 @@
 import { ChatTab } from "@/components/app/[wallet]/chat-tab";
 import { Overview } from "@/components/app/[wallet]/overview";
 import { Flex } from "@/components/shared/flex";
+import { HolderItem } from "@/components/shared/holder-item";
 import { PageMessage } from "@/components/shared/page-message";
 import { UserItem } from "@/components/shared/user-item";
 import { useGetHolders, useGetHoldings } from "@/hooks/useBuilderFiApi";
@@ -80,10 +81,10 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
             <PageMessage icon={<Lock />} text="Create your keys to allow others to ask you direct questions." />
           )}
           {holders.data?.map(holdingItem => (
-            <UserItem
+            <HolderItem
               address={holdingItem.holder.owner as `0x${string}`}
-              buyPrice={tryParseBigInt(holdingItem.owner.buyPrice)}
-              numberOfHolders={Number(holdingItem.owner.numberOfHolders)}
+              numberOfKeys={Number(holdingItem.heldKeyNumber)}
+              holderNumber={Number(holdingItem.supporterNumber)}
               key={`home-${holdingItem.id}`}
             />
           ))}
