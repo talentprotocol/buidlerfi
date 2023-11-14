@@ -1,17 +1,11 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
-import { useGetActiveNetwork, useSwitchNetwork } from "@/hooks/useNetworkUtils";
-import { formatError } from "@/lib/utils";
-import { Button, CircularProgress, Typography } from "@mui/joy";
+import { CircularProgress } from "@mui/joy";
 import { usePathname } from "next/navigation";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import { parseEther, toHex } from "viem";
-import { base, baseGoerli } from "viem/chains";
+import { parseEther } from "viem";
 import { Flex } from "../shared/flex";
-
-const supportedChain = process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? base : baseGoerli;
 
 export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
@@ -19,8 +13,6 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const user = useUserContext();
   const pathname = usePathname();
   const router = useBetterRouter();
-  const switchNetwork = useSwitchNetwork();
-  const chain = useGetActiveNetwork();
 
   const redirect = useCallback(
     (path: string) => {
@@ -88,27 +80,6 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     return (
       <Flex y yc xc grow>
         <CircularProgress />
-      </Flex>
-    );
-  }
-
-  if (
-    user.isAuthenticatedAndActive &&
-    user.privyUser?.wallet?.walletClientType !== "privy" &&
-    chain !== toHex(supportedChain.id)
-  ) {
-    return (
-      <Flex y yc xc grow gap3>
-        <Typography>Wrong Network</Typography>
-        <Button
-          onClick={() =>
-            switchNetwork(supportedChain.id)
-              .then(() => location.reload())
-              .catch(err => toast.error(formatError(err)))
-          }
-        >
-          Switch Network
-        </Button>
       </Flex>
     );
   }
