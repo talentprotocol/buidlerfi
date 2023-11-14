@@ -2,7 +2,7 @@ import { usePrevious } from "@/hooks/usePrevious";
 import { useGetCurrentUser } from "@/hooks/useUserApi";
 import { User as PrivyUser, usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
-import { ReactNode, createContext, useContext, useEffect, useMemo } from "react";
+import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useBalance } from "wagmi";
 
 interface UserContextType {
@@ -11,6 +11,7 @@ interface UserContextType {
   isAuthenticatedAndActive: boolean;
   isLoading: boolean;
   address?: `0x${string}`;
+  socialAddress?: `0x${string}`;
   refetch: () => Promise<unknown>;
   refetchBalance: () => Promise<unknown>;
   balance?: bigint;
@@ -37,12 +38,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   } = useBalance({ address: user.data?.wallet as `0x${string}` });
   const { wallets } = useWallets();
   const { setActiveWallet } = usePrivyWagmi();
+  const [socialWallet, setSocialWallet] = useState<string | undefined>(undefined);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
     const found = wallets.find(wal => wal.connectorType === "embedded");
     if (found) setActiveWallet(found);
   }, [setActiveWallet, wallets]);
+
+  //Get the non embed wallet
+  useEffect(() => {
+    const socialW = wallets.find(wal => wal.connectorType !== "embedded");
+    if (socialW) setSocialWallet(socialW.address);
+  }, [setSocialWallet, wallets]);
 
   const previousPrivyUser = usePrevious(privyUser);
 
@@ -59,6 +67,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       isLoading: !ready || (!!privyUser && user.isLoading),
       isAuthenticatedAndActive: ready && !user.isLoading && !!user.data && user.data.isActive && privyAuthenticated,
       address: user.data?.wallet ? (user.data?.wallet as `0x${string}`) : undefined,
+      socialAddress: socialWallet as `0x${string}`,
       refetch: user.refetch,
       balance: balance?.value,
       refetchBalance,

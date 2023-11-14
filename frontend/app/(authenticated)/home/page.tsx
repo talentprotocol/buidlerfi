@@ -12,7 +12,7 @@ import { CircularProgress, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useMemo, useState } from "react";
 
 export default function Home() {
-  const { address } = useUserContext();
+  const { user } = useUserContext();
   const builderfiData = useBuilderFIData();
   const [selectedTab, setSelectedTab] = useState("top");
 
@@ -21,10 +21,11 @@ export default function Home() {
     [builderfiData]
   );
 
-  const { data: socialFollowers, isLoading } = useGetSocialFollowers(address);
+  const { data: socialFollowers, isLoading } = useGetSocialFollowers(user?.socialWallet as `0x${string}`);
   const { data: filteredSocialFollowers } = useCheckUsersExist(
     socialFollowers?.Follower.filter(
-      follower => !follower.followerAddress.addresses.some(addr => addr.toLowerCase() === address?.toLowerCase())
+      follower =>
+        !follower.followerAddress.addresses.some(addr => addr.toLowerCase() === user?.socialWallet?.toLowerCase())
     ).flatMap(follower => follower.followerAddress.addresses)
   );
 
