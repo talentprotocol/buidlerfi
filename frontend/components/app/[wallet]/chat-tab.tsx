@@ -83,6 +83,14 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
     );
   }
 
+  if (isLoading) {
+    return (
+      <Flex y xc yc grow>
+        <CircularProgress />
+      </Flex>
+    );
+  }
+
   return (
     <Flex y grow>
       {!isOwnProfile && (
@@ -107,28 +115,24 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
           <Typography level="body-sm">{chatValue.length}/500</Typography>
         </Flex>
       )}
-      {isLoading ? (
-        <CircularProgress />
-      ) : (
-        <Flex y grow>
-          {ownsKeys && !questions?.length ? (
-            <PageMessage text={`Congratulations. You can now chat with ${socialData.name}`} icon={<LockOpen />} />
-          ) : (
-            questions?.map((question, i) => {
-              return (
-                <QuestionEntry
-                  key={question.id}
-                  socialData={socialData}
-                  question={question}
-                  isOwnChat={isOwnProfile}
-                  refetch={refetch}
-                  index={`${questions.length - i}/${questions.length}`}
-                />
-              );
-            })
-          )}
-        </Flex>
-      )}
+      <Flex y grow>
+        {ownsKeys && !questions?.length ? (
+          <PageMessage text={`Congratulations. You can now chat with ${socialData.name}`} icon={<LockOpen />} />
+        ) : (
+          questions?.map((question, i) => {
+            return (
+              <QuestionEntry
+                key={question.id}
+                socialData={socialData}
+                question={question}
+                isOwnChat={isOwnProfile}
+                refetch={refetch}
+                index={`${questions.length - i}/${questions.length}`}
+              />
+            );
+          })
+        )}
+      </Flex>
     </Flex>
   );
 };

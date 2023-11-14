@@ -69,8 +69,9 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
             <Typography
               ref={answerRef}
               sx={{
-                whiteSpace: isShowMore ? "pre-line" : "nowrap",
-                textOverflow: "ellipsis"
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: isShowMore ? "pre-line" : "nowrap"
               }}
               textColor={question.reply ? "neutral.800" : "neutral.400"}
               level="body-sm"

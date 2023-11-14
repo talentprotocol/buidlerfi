@@ -30,7 +30,6 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
         yc
         p={1}
         sx={{
-          width: "calc(100% - 32px)",
           backgroundColor: theme => theme.palette.background.body,
           position: "sticky",
           top: 0,
@@ -52,9 +51,9 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
           width={40}
         />
 
-        <Flex basis="100%" y xe gap1>
+        <Flex basis="100%" y xe px={1}>
           <Avatar
-            size="md"
+            size="sm"
             ref={anchor}
             src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
             sx={{ position: "relative", cursor: "pointer" }}
