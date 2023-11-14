@@ -151,7 +151,8 @@ export const updateUserSocialProfiles = async (userId: number, wallet: string) =
     where: { id: userId },
     data: {
       avatarUrl: defaultAvatar,
-      displayName: defaultName
+      //defaultName || undefined to avoid setting displayName to empty string and erasing user-defined username
+      displayName: defaultName || undefined
     },
     include: {
       socialProfiles: true

@@ -7,6 +7,7 @@ export interface SocialData {
   socialAddress: string | undefined | null;
   avatar: string;
   name: string;
+  hasDisplayName: boolean;
   socialsList: {
     dappName: string;
     profileName: string;
@@ -21,6 +22,7 @@ export const useSocialData = (address: `0x${string}`): SocialData => {
     socialAddress: user?.socialWallet,
     avatar: isLoading ? "" : user?.avatarUrl || DEFAULT_PROFILE_PICTURE,
     name: user?.displayName || shortAddress(address),
+    hasDisplayName: !!user?.displayName,
     socialsList:
       user?.socialProfiles?.map(social => ({ dappName: social.type, profileName: social.profileName })) || [],
     isLoading: isLoading

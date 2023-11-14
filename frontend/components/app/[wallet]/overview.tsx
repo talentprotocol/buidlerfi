@@ -1,22 +1,24 @@
 "use client";
+import { useProfileContext } from "@/app/(authenticated)/profile/[wallet]/layout";
 import { Flex } from "@/components/shared/flex";
-import { useGetHolders } from "@/hooks/useBuilderFiApi";
+import { WalletAddress } from "@/components/shared/wallet-address";
+import { useUserContext } from "@/contexts/userContext";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { SocialData } from "@/hooks/useSocialData";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
-import { formatEth, shortAddress } from "@/lib/utils";
-import { ContentCopy, KeyOutlined, Refresh } from "@mui/icons-material";
+import { formatEth } from "@/lib/utils";
+import { KeyOutlined, Refresh } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
 import { SocialProfileType } from "@prisma/client";
 import Image from "next/image";
-import { FC, useMemo, useState } from "react";
-import { useAccount } from "wagmi";
-import { TradeKeyModal } from "./trade-key-modal";
+import { FC } from "react";
+import { toast } from "react-toastify";
 
 interface Props {
   socialData: SocialData;
   isOwnProfile: boolean;
+  setBuyModalState: (state: "closed" | "buy" | "sell") => void;
 }
 
 const socialInfo = {
@@ -42,42 +44,14 @@ const socialInfo = {
   }
 };
 
-export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
-  const { address } = useAccount();
-  const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
+export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState }) => {
+  const { refetch } = useUserContext();
+  const { hasKeys, holders, ownedKeysCount, supporterNumber } = useProfileContext();
 
-  const holders = useGetHolders(socialData?.address);
-  const [supporterNumber, ownedKeysCount] = useMemo(() => {
-    if (!holders?.data) return [undefined, undefined];
-
-    const holder = holders.data.find(holder => holder.holder.owner.toLowerCase() === address?.toLowerCase());
-    if (!holder) return [undefined, 0];
-    else return [holder.supporterNumber, Number(holder.heldKeyNumber)];
-  }, [address, holders.data]);
-
-  const { buyPrice, sellPrice, refetch, isLoading, supply, buyPriceAfterFee } = useGetBuilderInfo(socialData.address);
-
+  const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData.address);
   const refreshData = useRefreshCurrentUser();
-
-  const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount]);
   return (
     <>
-      {buyModalState !== "closed" && (
-        <TradeKeyModal
-          supporterKeysCount={ownedKeysCount || 0}
-          hasKeys={hasKeys}
-          sellPrice={sellPrice}
-          buyPriceWithFees={buyPriceAfterFee}
-          isFirstKey={isOwnProfile && holders.data?.length === 0}
-          side={buyModalState}
-          close={() => {
-            refetch();
-            setBuyModalState("closed");
-          }}
-          targetBuilderAddress={socialData.address}
-        />
-      )}
-
       <Flex y gap2 p={2}>
         <Flex x xsb mb={-1}>
           <Avatar size="lg" src={socialData.avatar}>
@@ -101,41 +75,46 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
               onClick={() => setBuyModalState("buy")}
               disabled={supply === BigInt(0) && !isOwnProfile}
             >
-              {isOwnProfile && holders.data?.length === 0 ? "Create keys" : "Buy"}
+              {isOwnProfile && holders?.length === 0 ? "Create keys" : "Buy"}
             </Button>
           </Flex>
         </Flex>
         <Flex x yc gap1>
           <Flex y>
             <Flex x yc>
-              <Typography level="h3">
-                <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
-              </Typography>
-              {shortAddress(socialData.address) === socialData.name && (
-                <IconButton size="sm" onClick={() => window.navigator.clipboard.writeText(socialData.address)}>
-                  <ContentCopy sx={{ fontSize: "0.9rem" }} />
-                </IconButton>
+              {socialData.hasDisplayName ? (
+                <Typography level="h3">
+                  <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
+                </Typography>
+              ) : (
+                <WalletAddress address={socialData.address} level="h3" />
               )}
               {isOwnProfile && (
-                <IconButton onClick={() => refreshData.mutate()}>
+                <IconButton
+                  disabled={refreshData.isLoading}
+                  onClick={() =>
+                    refreshData
+                      .mutateAsync()
+                      .then(() => refetch())
+                      .then(() => toast.success("Profile refreshed"))
+                  }
+                >
                   <Refresh />
                 </IconButton>
               )}
             </Flex>
             {/* Only display if user has a display name */}
-            {shortAddress(socialData.address) !== socialData.name && (
-              <Flex x yc gap={0.5} height="20px">
-                <Typography level="body-sm" startDecorator={<KeyOutlined fontSize="small" />}>
-                  <Skeleton loading={isLoading}>{formatEth(buyPrice)}</Skeleton>
-                </Typography>
-                <Typography level="body-sm" textColor="neutral.600">
-                  • {shortAddress(socialData.address)}
-                </Typography>
-                <IconButton size="sm" onClick={() => window.navigator.clipboard.writeText(socialData.address)}>
-                  <ContentCopy sx={{ fontSize: "0.9rem" }} />
-                </IconButton>
-              </Flex>
-            )}
+            <Flex x yc gap={0.5} height="20px">
+              <Typography level="body-sm" startDecorator={<KeyOutlined fontSize="small" />}>
+                <Skeleton loading={isLoading}>{formatEth(buyPrice)} ETH</Skeleton>
+              </Typography>
+              {socialData.hasDisplayName && (
+                <>
+                  •
+                  <WalletAddress address={socialData.address} level="body-sm" />
+                </>
+              )}
+            </Flex>
           </Flex>
         </Flex>
 
@@ -156,7 +135,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
           })}
         </Flex>
 
-        {supporterNumber === undefined ? (
+        {ownedKeysCount === 0 ? (
           <Typography level="body-sm">You don&apos;t own any keys</Typography>
         ) : (
           <Flex x gap2>

@@ -5,6 +5,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { ContentCopy } from "@mui/icons-material";
 import { Card, IconButton, Typography } from "@mui/joy";
 import { useMemo } from "react";
+import { toast } from "react-toastify";
 
 export default function Invite() {
   const { user } = useUserContext();
@@ -47,7 +48,13 @@ export default function Invite() {
                 <Typography level="h4" sx={{ textDecoration: code.used >= code.maxUses ? "strikethrough" : undefined }}>
                   {code.code}
                 </Typography>
-                <IconButton size="sm" onClick={() => window.navigator.clipboard.writeText(code.code)}>
+                <IconButton
+                  size="sm"
+                  onClick={() => {
+                    window.navigator.clipboard.writeText(code.code);
+                    toast.success("Copied invite code to clipboard");
+                  }}
+                >
                   <ContentCopy sx={{ fontSize: "0.9rem" }} />
                 </IconButton>
               </Flex>

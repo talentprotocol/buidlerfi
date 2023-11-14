@@ -1,14 +1,16 @@
 import { useUserContext } from "@/contexts/userContext";
-import { useGetContractData, useGetHolders } from "@/hooks/useBuilderFiApi";
+import { useGetContractData } from "@/hooks/useBuilderFiApi";
+import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE, LOGO } from "@/lib/assets";
-import { formatToDisplayString, shortAddress } from "@/lib/utils";
+import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
-  ContentCopy,
   Logout,
   PersonOutlineOutlined,
-  SearchOutlined
+  Refresh,
+  SearchOutlined,
+  WalletOutlined
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -19,6 +21,7 @@ import {
   List,
   ListItem,
   ListItemButton,
+  Skeleton,
   Typography,
   useTheme
 } from "@mui/joy";
@@ -27,9 +30,11 @@ import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FC, useMemo } from "react";
+import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 import { ParachuteIcon } from "../icons/parachute";
 import { Flex } from "./flex";
+import { WalletAddress } from "./wallet-address";
 
 interface Props {
   isOpen: boolean;
@@ -37,10 +42,10 @@ interface Props {
 }
 
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
-  const { address, user } = useUserContext();
-  const holders = useGetHolders(address);
+  const { address, user, isLoading, refetch } = useUserContext();
   const theme = useTheme();
   const contractData = useGetContractData();
+  const refreshData = useRefreshCurrentUser();
   const { data: balance } = useBalance({
     address
   });
@@ -119,22 +124,48 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           onClick={() => setOpen(false)}
           sx={{ position: "relative" }}
         />
-        <Flex y gap={0.5}>
+        <Flex y>
           <Flex x yc>
-            <Typography textColor={"neutral.800"} fontWeight={600} level="body-sm">
-              {user.displayName || shortAddress(user.wallet)}
-            </Typography>
-            <IconButton size="sm" onClick={() => window.navigator.clipboard.writeText(user.wallet)}>
-              <ContentCopy sx={{ fontSize: "0.9rem" }} />
+            {user.displayName ? (
+              <Typography level="h3">
+                <Skeleton loading={isLoading}>{user.displayName}</Skeleton>
+              </Typography>
+            ) : (
+              <WalletAddress address={address!} level="h3" />
+            )}
+            <IconButton
+              disabled={refreshData.isLoading}
+              onClick={() =>
+                refreshData
+                  .mutateAsync()
+                  .then(() => refetch())
+                  .then(() => toast.success("Profile refreshed"))
+              }
+            >
+              <Refresh fontSize="small" />
             </IconButton>
           </Flex>
-          <Typography textColor={"neutral.600"} level="body-sm">
-            {holders.data?.length || 0} holders • Balance {formatToDisplayString(balance?.value)} ETH
-          </Typography>
-          <Button variant="plain" onClick={() => window.open("https://bridge.base.org/deposit")}>
-            Deposit Funds
-          </Button>
+          {/* Only display if user has a display name */}
+          <Flex x yc gap={0.5} height="20px">
+            <Typography level="body-sm" startDecorator={<WalletOutlined fontSize="small" />}>
+              <Skeleton loading={isLoading}>{formatToDisplayString(balance?.value)} ETH</Skeleton>
+            </Typography>
+            {user.displayName && (
+              <>
+                •
+                <WalletAddress address={address!} level="body-sm" />
+              </>
+            )}
+          </Flex>
         </Flex>
+        <Button
+          variant="outlined"
+          onClick={() =>
+            window.open("https://www.sushi.com/swap/cross-chain?chainId1=8453&token1=NATIVE&swapAmount=0.01")
+          }
+        >
+          Bridge to base
+        </Button>
       </Flex>
       <List>
         {navItems
@@ -177,7 +208,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           </Typography>
           <Typography textColor={"neutral.600"} level="body-sm">
             <>
-              {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders have signed up already
+              {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders joined
             </>
           </Typography>
         </div>

@@ -1,26 +1,34 @@
 "use client";
 import { ChatTab } from "@/components/app/[wallet]/chat-tab";
 import { Overview } from "@/components/app/[wallet]/overview";
+import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
 import { Flex } from "@/components/shared/flex";
 import { HolderItem } from "@/components/shared/holder-item";
 import { PageMessage } from "@/components/shared/page-message";
 import { UserItem } from "@/components/shared/user-item";
-import { useGetHolders, useGetHoldings } from "@/hooks/useBuilderFiApi";
+import { useGetHoldings } from "@/hooks/useBuilderFiApi";
+import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useSocialData } from "@/hooks/useSocialData";
 import { isEVMAddress, tryParseBigInt } from "@/lib/utils";
 import { Chat, Lock } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
+import { useProfileContext } from "./layout";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
   const { address } = useAccount();
   const socialData = useSocialData(params.wallet);
 
-  const holders = useGetHolders(params.wallet);
   const holdings = useGetHoldings(params.wallet);
 
   const isOwnProfile = address?.toLowerCase() === socialData?.address?.toLowerCase();
+
+  const { sellPrice, refetch, buyPriceAfterFee } = useGetBuilderInfo(socialData.address);
+
+  const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
+
+  const { hasKeys, holders, ownedKeysCount, refetch: refetchProfileInfo } = useProfileContext();
 
   const isValidWallet = useMemo(() => {
     return isEVMAddress(params.wallet);
@@ -33,8 +41,8 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   if (!isValidWallet) return <></>;
 
   const holderNumber = () => {
-    if (holders.data?.length) {
-      return `(${holders.data?.length})`;
+    if (holders?.length) {
+      return `(${holders?.length})`;
     } else {
       return null;
     }
@@ -50,7 +58,24 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   return (
     <Flex component={"main"} y grow gap2>
-      <Overview socialData={socialData} isOwnProfile={isOwnProfile} />
+      {buyModalState !== "closed" && (
+        <TradeKeyModal
+          supporterKeysCount={ownedKeysCount || 0}
+          hasKeys={hasKeys}
+          sellPrice={sellPrice}
+          buyPriceWithFees={buyPriceAfterFee}
+          isFirstKey={isOwnProfile && holders?.length === 0}
+          side={buyModalState}
+          close={async () => {
+            await refetch();
+            await refetchProfileInfo();
+            setBuyModalState("closed");
+          }}
+          targetBuilderAddress={socialData.address}
+        />
+      )}
+
+      <Overview setBuyModalState={setBuyModalState} socialData={socialData} isOwnProfile={isOwnProfile} />
       <Tabs defaultValue={"chat"}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
           <Tab value="chat">Q&A</Tab>
@@ -58,7 +83,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
           <Tab value="holding">Holding{holdingNumber()}</Tab>
         </TabList>
         <TabPanel value="chat" sx={{ p: 0 }}>
-          <ChatTab socialData={socialData} isOwnProfile={isOwnProfile} />
+          <ChatTab socialData={socialData} isOwnProfile={isOwnProfile} onBuyKeyClick={() => setBuyModalState("buy")} />
         </TabPanel>
         <TabPanel value="holding">
           {holdings.data?.length === 0 && isOwnProfile && (
@@ -77,10 +102,10 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
           ))}
         </TabPanel>
         <TabPanel value="holders">
-          {holders.data?.length === 0 && isOwnProfile && (
+          {holders?.length === 0 && isOwnProfile && (
             <PageMessage icon={<Lock />} text="Create your keys to allow others to ask you direct questions." />
           )}
-          {holders.data?.map(holdingItem => (
+          {holders?.map(holdingItem => (
             <HolderItem
               address={holdingItem.holder.owner as `0x${string}`}
               numberOfKeys={Number(holdingItem.heldKeyNumber)}

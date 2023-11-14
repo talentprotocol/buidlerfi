@@ -57,7 +57,7 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
             size="md"
             ref={anchor}
             src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
-            sx={{ position: "relative" }}
+            sx={{ position: "relative", cursor: "pointer" }}
             onClick={() => router.push("/profile/" + address)}
           >
             <Skeleton loading={isLoading} />

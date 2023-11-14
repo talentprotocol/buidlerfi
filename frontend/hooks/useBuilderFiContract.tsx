@@ -45,11 +45,8 @@ export const useGetBuilderInfo = (address: string) => {
     enabled: !!address
   });
 
-  const refetch = () => {
-    refetchTotalSupply();
-    refetchBuyPrice();
-    refetchSellprice();
-    refetchBuyPriceAfterFee();
+  const refetch = async () => {
+    return Promise.all([refetchTotalSupply(), refetchBuyPrice(), refetchSellprice(), refetchBuyPriceAfterFee()]);
   };
 
   return {
