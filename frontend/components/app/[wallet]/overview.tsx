@@ -145,7 +145,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
             return (
               <JoyLink
                 key={social.dappName}
-                href={additionalData.url(social.profileName, socialData.address)}
+                href={additionalData.url(social.profileName, socialData.socialAddress || "")}
                 target="_blank"
                 startDecorator={additionalData.icon}
                 textColor={"link"}
@@ -163,7 +163,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile }) => {
             <Typography level="body-sm">
               Holder{" "}
               <Box fontWeight={600} component="span">
-                {supporterNumber}/{supply?.toString()}
+                {`#${supporterNumber}`}
               </Box>
             </Typography>
             <Typography level="body-sm">

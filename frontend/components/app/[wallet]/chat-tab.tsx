@@ -31,7 +31,6 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile }) => {
     enabled: !!address
   });
 
-  console.log(user);
   const ownsKeys = (supporterKeys !== undefined && supporterKeys > BigInt(0)) || user?.isAdmin;
 
   const { data: questions, refetch, isLoading } = useGetQuestions(socialData.address);

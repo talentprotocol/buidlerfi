@@ -38,9 +38,6 @@ export default function CreateWallet() {
     linkWallet();
   };
 
-  console.log("Linked wallet: ", linkedWallet);
-  console.log({ isLoading, error, data });
-
   return (
     <Flex y ysb>
       <Flex y gap1>

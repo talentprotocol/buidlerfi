@@ -4,6 +4,7 @@ import { useGetUser } from "./useUserApi";
 
 export interface SocialData {
   address: `0x${string}`;
+  socialAddress: string | undefined | null;
   avatar: string;
   name: string;
   socialsList: {
@@ -17,6 +18,7 @@ export const useSocialData = (address: `0x${string}`): SocialData => {
   const { data: user, isLoading } = useGetUser(address);
   return {
     address: address,
+    socialAddress: user?.socialWallet,
     avatar: isLoading ? "" : user?.avatarUrl || DEFAULT_PROFILE_PICTURE,
     name: user?.displayName || shortAddress(address),
     socialsList:

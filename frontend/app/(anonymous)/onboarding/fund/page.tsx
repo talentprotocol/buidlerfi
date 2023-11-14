@@ -20,8 +20,8 @@ export default function FundPage() {
           Get some ETH on Base.
         </Typography>
         <Typography level="body-sm" mt={1}>
-          You will use ETH, the official currency of Base, when you buy and sell keys. We recommend adding atleast 0.001
-          ETH to your wallet to get started.
+          You will use ETH, the official currency of Base, when you buy and sell keys. We recommend adding at least
+          0.001 ETH to your wallet to get started.
         </Typography>
       </Flex>
 

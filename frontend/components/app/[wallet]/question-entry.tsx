@@ -35,7 +35,6 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
   };
 
   useLayoutEffect(() => {
-    console.log({ container: containerRef?.current?.scrollWidth, answer: answerRef?.current?.clientWidth });
     if (!containerRef.current || !answerRef.current) return;
     if (containerRef.current.clientWidth < answerRef.current.scrollWidth) {
       setIsAnswerTooLong(true);
