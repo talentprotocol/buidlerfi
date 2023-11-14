@@ -47,7 +47,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       return redirect("/onboarding/username");
     } else if (
       user.balance !== undefined &&
-      user.balance < parseEther("0.01") &&
+      user.balance < parseEther("0.001") &&
       router.searchParams.skipfund !== "1"
     ) {
       return redirect("/onboarding/fund");
