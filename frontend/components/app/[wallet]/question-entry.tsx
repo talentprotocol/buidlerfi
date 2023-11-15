@@ -8,6 +8,7 @@ import { KeyboardArrowDown, KeyboardArrowUp, LockOutlined } from "@mui/icons-mat
 import { Avatar, Button, Textarea, Typography } from "@mui/joy";
 import { useMediaQuery } from "@mui/material";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 import { FC, useLayoutEffect, useRef, useState } from "react";
 
 interface Props {
@@ -20,11 +21,11 @@ interface Props {
 }
 export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialData, index, ownsKeys }) => {
   const answerRef = useRef<HTMLDivElement>(null);
-
   const [isAnswerTooLong, setIsAnswerTooLong] = useState(false);
   const [reply, setReply] = useState("");
   const [isShowMore, setIsShowMore] = useState(false);
   const putQuestion = usePutQuestion();
+  const router = useRouter();
 
   const replyQuestion = async () => {
     await putQuestion.mutateAsync({
@@ -55,10 +56,22 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
     <Flex y gap2 p={2} borderBottom={"1px solid " + theme.palette.divider}>
       <Flex x xsb>
         <Flex x ys gap1>
-          <Avatar size="sm" src={question.questioner?.avatarUrl || DEFAULT_PROFILE_PICTURE} />
+          <Avatar
+            size="sm"
+            sx={{ cursor: "pointer" }}
+            src={question.questioner?.avatarUrl || DEFAULT_PROFILE_PICTURE}
+            onClick={() => router.push("/profile/" + question.questioner.wallet)}
+          />
           <Flex y key={question.id}>
             <Flex x yc gap1>
-              <Typography fontWeight={500} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
+              <Typography
+                fontWeight={500}
+                level="body-sm"
+                whiteSpace="pre-line"
+                textColor={"neutral.800"}
+                sx={{ cursor: "pointer" }}
+                onClick={() => router.push("/profile/" + question.questioner.wallet)}
+              >
                 {question.questioner.displayName || shortAddress(question.questioner.wallet as `0x${string}`)}
               </Typography>
               <Typography level="body-sm">{format(question.createdAt, "MMM dd,yyyy")}</Typography>
@@ -71,11 +84,27 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
         <Typography level="body-sm">{index}</Typography>
       </Flex>
       <Flex x ys gap1>
-        {ownsKeys ? <Avatar size="sm" src={socialData.avatar || DEFAULT_PROFILE_PICTURE} /> : <LockOutlined />}
+        {ownsKeys ? (
+          <Avatar
+            size="sm"
+            src={socialData.avatar || DEFAULT_PROFILE_PICTURE}
+            sx={{ cursor: "pointer" }}
+            onClick={() => router.push("/profile/" + socialData.address)}
+          />
+        ) : (
+          <LockOutlined />
+        )}
         {question.reply || !isOwnChat ? (
           <Flex y sx={{ overflow: "hidden" }}>
             {ownsKeys && (
-              <Typography fontWeight={500} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
+              <Typography
+                fontWeight={500}
+                level="body-sm"
+                whiteSpace="pre-line"
+                textColor={"neutral.800"}
+                sx={{ cursor: "pointer" }}
+                onClick={() => router.push("profile/" + question.questioner.wallet)}
+              >
                 {socialData.name || shortAddress(socialData.address as `0x${string}`)}{" "}
               </Typography>
             )}
