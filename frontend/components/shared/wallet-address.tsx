@@ -8,21 +8,24 @@ import { Flex } from "./flex";
 interface Props {
   address: string;
   level?: "inherit" | keyof TypographySystem;
+  removeCopyButton?: boolean;
 }
 
-export const WalletAddress: FC<Props> = ({ address, level }) => {
+export const WalletAddress: FC<Props> = ({ address, level, removeCopyButton = false }) => {
   return (
     <Flex x yc gap1>
       <Typography level={level}>{shortAddress(address)}</Typography>
-      <IconButton
-        size="sm"
-        onClick={() => {
-          window.navigator.clipboard.writeText(address);
-          toast.success("Copied address to clipboard");
-        }}
-      >
-        <ContentCopy sx={{ fontSize: "0.9rem" }} />
-      </IconButton>
+      {!removeCopyButton && (
+        <IconButton
+          size="sm"
+          onClick={() => {
+            window.navigator.clipboard.writeText(address);
+            toast.success("Copied address to clipboard");
+          }}
+        >
+          <ContentCopy sx={{ fontSize: "0.9rem" }} />
+        </IconButton>
+      )}
     </Flex>
   );
 };

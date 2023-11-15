@@ -87,7 +87,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
                   <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
                 </Typography>
               ) : (
-                <WalletAddress address={socialData.address} level="h3" />
+                <WalletAddress address={socialData.address} level="h3" removeCopyButton={!isOwnProfile} />
               )}
               {isOwnProfile && (
                 <>
@@ -114,7 +114,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
               {socialData.hasDisplayName && (
                 <>
                   •
-                  <WalletAddress address={socialData.address} level="body-sm" />
+                  <WalletAddress address={socialData.address} level="body-sm" removeCopyButton={!isOwnProfile} />
                 </>
               )}
             </Flex>
