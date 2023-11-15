@@ -51,9 +51,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
     setChatValue("");
   };
 
-  const displayForAdmin = user?.isAdmin && process.env.NODE_ENV !== "production";
-
-  if (!ownsKeys && !displayForAdmin && !isOwnProfile) {
+  if (!ownsKeys && !isOwnProfile && !questions?.length) {
     return (
       <PageMessage
         title="Unlock Q&A"
@@ -97,7 +95,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
 
   return (
     <Flex y grow>
-      {!isOwnProfile && (
+      {!isOwnProfile && ownsKeys && (
         <Flex y gap={0.5} p={2} borderBottom={"1px solid " + theme.palette.divider}>
           <Flex y={isSm} yc gap2>
             <Textarea
@@ -130,6 +128,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
                 socialData={socialData}
                 question={question}
                 isOwnChat={isOwnProfile}
+                ownsKeys={ownsKeys}
                 refetch={refetch}
                 index={`${questions.length - i}/${questions.length}`}
               />
