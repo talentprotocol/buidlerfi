@@ -17,7 +17,7 @@ export default function BuyKeyPage() {
   const finishOnboarding = useMutation(async () => {
     await updateUser.mutateAsync({ hasFinishedOnboarding: true });
     await refetch();
-    router.replace("/home");
+    router.replace("/welcome");
   });
 
   const tx = useTradeKey("buy", finishOnboarding.mutate);
@@ -30,14 +30,15 @@ export default function BuyKeyPage() {
     <Flex y gap={5}>
       <Flex y>
         <Typography textColor="neutral.800" level="h2" whiteSpace="pre-line">
-          Buy your first key, it&apos;s free
+          Launch your key, it&apos;s free!
         </Typography>
         <Typography level="body-sm" mt={1}>
-          By buying your first key, you will allow other users to buy your keys, and ask you questions
+          Unlock your builder.fi journey by creating your first key. This allows other builders to trade your keys and
+          ask private questions. Launching your key is free, you only have to pay gas fees.
         </Typography>
       </Flex>
       <Flex y gap1>
-        <Button onClick={handleBuy}>Buy key</Button>
+        <Button onClick={handleBuy}>Create key</Button>
         <Button loading={finishOnboarding.isLoading} onClick={() => finishOnboarding.mutate()} variant="plain">
           Skip
         </Button>

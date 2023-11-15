@@ -20,7 +20,7 @@ export default function UsernamePage() {
           Select your username.
         </Typography>
         <Typography level="body-sm" mt={1}>
-          We couldn&apos;t find any on-chain data about you. Please select a username to continue.
+          We couldn&apos;t find any onchain data about you. Please select a username to continue.
         </Typography>
       </Flex>
 

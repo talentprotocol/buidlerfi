@@ -42,11 +42,11 @@ export default function CreateWallet() {
     <Flex y ysb>
       <Flex y gap1>
         <Typography textColor="neutral.800" level="h2" whiteSpace="pre-line">
-          builder.fi is better with friends.
+          Link your web3 socials
         </Typography>
         <Typography level="body-sm" mt={1}>
-          A wallet has been generated for you by builder.fi. However, you can still link your main wallet to display
-          your Lens or Farcaster profile and get recommendations.
+          Connect your main web3 wallet to verify your onchain identity and import your profile info. This also makes it
+          easier for your Farcaster and Lens friends to discover and trade your keys.
         </Typography>
       </Flex>
       <Flex y yc xc py={4} gap2>
@@ -73,7 +73,7 @@ export default function CreateWallet() {
       </Flex>
 
       <Flex y gap1>
-        <Button onClick={handleLinkWallet}>Link your wallet</Button>
+        <Button onClick={handleLinkWallet}>Connect your wallet</Button>
         <Button
           variant="plain"
           onClick={() => router.push({ searchParams: { skiplink: "1" } }, { preserveSearchParams: true })}

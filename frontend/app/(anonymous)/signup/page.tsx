@@ -46,8 +46,16 @@ export default function Signup() {
       <Flex y xc gap2>
         <Image alt="App logo" src={LOGO} height={40} width={150} />
         <Typography level="body-sm" textColor="neutral.500">
-          Monetize Your Knowledge
+          Monetize your Knowledge
+          <br />
+          Support the next builders
         </Typography>
+      </Flex>
+
+      <Flex y xc gap3>
+        <Button size="lg" onClick={() => login()}>
+          Sign in
+        </Button>
         <Flex y xc>
           <Typography level="body-sm" textColor="neutral.500">
             Batch {"#"}
@@ -57,12 +65,6 @@ export default function Signup() {
             {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders
           </Typography>
         </Flex>
-      </Flex>
-
-      <Flex y xc gap3>
-        <Button size="lg" onClick={() => login()}>
-          Sign in
-        </Button>
       </Flex>
     </Flex>
   );

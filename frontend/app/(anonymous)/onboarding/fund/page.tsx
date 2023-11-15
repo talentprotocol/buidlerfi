@@ -20,9 +20,8 @@ export default function FundPage() {
           Deposit funds
         </Typography>
         <Typography level="body-sm" mt={1}>
-          Builder.fi is built on Base and uses ETH as a currency to buy and sell keys. You need to transfer at least
-          0.001 ETH to your builder.fi address. If you don&apos;t have funds on Base, please bridge from other network
-          first.
+          Builder.fi is built on Base and uses ETH to buy and sell keys. You need to transfer at least 0.001 ETH to your
+          new builder.fi address. If you don&apos;t have funds on Base, please bridge from other network first.
         </Typography>
       </Flex>
 
@@ -32,7 +31,7 @@ export default function FundPage() {
             <CopyAll fontSize="large" />
             <Flex y gap1>
               <Typography level="title-md">Step 1: Add ETH to Base</Typography>
-              <Typography level="body-sm">If you don&apos;t already have ETH</Typography>
+              <Typography level="body-sm">If you don&apos;t have any ETH on Base</Typography>
             </Flex>
           </Flex>
           <NextLink

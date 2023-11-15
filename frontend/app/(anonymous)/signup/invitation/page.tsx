@@ -57,7 +57,7 @@ export default function InvitationCode() {
 
       <Flex y xc gap2 fullwidth>
         <Button loading={createUser.isLoading} fullWidth size="lg" onClick={handleOnClickProceed}>
-          Proceed
+          Continue
         </Button>
         <Button disabled={createUser.isLoading} fullWidth onClick={handleLogout} variant="plain">
           Log out
