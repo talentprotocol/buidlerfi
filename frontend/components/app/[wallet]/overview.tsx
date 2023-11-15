@@ -1,7 +1,7 @@
 "use client";
-import { useProfileContext } from "@/app/(authenticated)/profile/[wallet]/layout";
 import { Flex } from "@/components/shared/flex";
 import { WalletAddress } from "@/components/shared/wallet-address";
+import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { SocialData } from "@/hooks/useSocialData";

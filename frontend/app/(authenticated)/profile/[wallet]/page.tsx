@@ -6,6 +6,7 @@ import { Flex } from "@/components/shared/flex";
 import { HolderItem } from "@/components/shared/holder-item";
 import { PageMessage } from "@/components/shared/page-message";
 import { UserItem } from "@/components/shared/user-item";
+import { useProfileContext } from "@/contexts/profileContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useSocialData } from "@/hooks/useSocialData";
@@ -14,7 +15,6 @@ import { Chat, Lock } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
-import { useProfileContext } from "./layout";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
   const { address } = useAccount();
