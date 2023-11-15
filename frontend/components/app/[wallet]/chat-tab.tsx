@@ -1,7 +1,6 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
 import { PageMessage } from "@/components/shared/page-message";
-import { useUserContext } from "@/contexts/userContext";
 import { useGetQuestions, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
@@ -23,7 +22,6 @@ interface Props {
 export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) => {
   const [chatValue, setChatValue] = useState<string>("");
   const { address } = useAccount();
-  const { user } = useUserContext();
   const { data: supporterKeys } = useContractRead({
     address: BUILDERFI_CONTRACT.address,
     abi: builderFIV1Abi,
