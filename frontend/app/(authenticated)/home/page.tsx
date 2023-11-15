@@ -23,10 +23,7 @@ export default function Home() {
 
   const { data: socialFollowers, isLoading } = useGetSocialFollowers(user?.socialWallet as `0x${string}`);
   const { data: filteredSocialFollowers } = useCheckUsersExist(
-    socialFollowers?.Follower.filter(
-      follower =>
-        !follower.followerAddress.addresses.some(addr => addr.toLowerCase() === user?.socialWallet?.toLowerCase())
-    ).flatMap(follower => follower.followerAddress.addresses)
+    socialFollowers?.Follower?.flatMap(follower => follower.followerAddress.addresses)
   );
 
   return (
