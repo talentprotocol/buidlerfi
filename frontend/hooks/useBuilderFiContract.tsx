@@ -83,8 +83,10 @@ export const useTradeKey = (side: "buy" | "sell", successFn?: () => void) => {
     onSuccess: () => {
       toastId.current = toast("Transaction submitted!", { isLoading: true });
     },
-    onError: (err: unknown) => {
-      toast.error("There was an error processing your transaction: " + formatError(err));
+    onError: (err: any) => {
+      if (err?.shortMessage !== "User rejected the request.") {
+        toast.error("There was an error processing your transaction: " + formatError(err));
+      }
     }
   });
 
