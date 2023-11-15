@@ -8,13 +8,14 @@ import { useOnchainUsers } from "@/hooks/useBuilderFiApi";
 import { useCheckUsersExist } from "@/hooks/useUserApi";
 import { THE_GRAPH_PAGE_SIZE } from "@/lib/constants";
 import { tryParseBigInt } from "@/lib/utils";
+import { Share } from "@/models/share.model";
 import { SupervisorAccountOutlined } from "@mui/icons-material";
 import { Button, CircularProgress, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
   const { user } = useUserContext();
-  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<Share[]>([]);
   const { data: usersPaginated, nextPage, isInitialLoading } = useOnchainUsers();
   const [selectedTab, setSelectedTab] = useState("top");
 
