@@ -114,6 +114,7 @@ export const createUser = async (privyUserId: string, inviteCode: string) => {
     const newUser = await tx.user.create({
       data: {
         privyUserId: privyUser.id,
+        invitedById: existingCode.id,
         wallet: address,
         isActive: true
       }
