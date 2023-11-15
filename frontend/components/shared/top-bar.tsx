@@ -6,7 +6,6 @@ import { Avatar, IconButton, Skeleton } from "@mui/joy";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FC, useRef } from "react";
-import { useBalance } from "wagmi";
 import { Flex } from "./flex";
 
 interface Props {
@@ -17,9 +16,6 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
   const router = useRouter();
   const anchor = useRef<HTMLDivElement>(null);
   const { user, address, isLoading } = useUserContext();
-  const { data: balance } = useBalance({
-    address
-  });
 
   return (
     <>
