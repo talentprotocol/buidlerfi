@@ -153,19 +153,11 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             {user.displayName && (
               <>
                 •
-                <WalletAddress address={address!} level="body-sm" />
+                <WalletAddress address={address!} level="body-sm" removeCopyButton={true} />
               </>
             )}
           </Flex>
         </Flex>
-        <Button
-          variant="outlined"
-          onClick={() =>
-            window.open("https://www.sushi.com/swap/cross-chain?chainId1=8453&token1=NATIVE&swapAmount=0.01")
-          }
-        >
-          Bridge to base
-        </Button>
       </Flex>
       <List>
         {navItems
