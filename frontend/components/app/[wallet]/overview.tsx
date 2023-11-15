@@ -90,17 +90,20 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
                 <WalletAddress address={socialData.address} level="h3" />
               )}
               {isOwnProfile && (
-                <IconButton
-                  disabled={refreshData.isLoading}
-                  onClick={() =>
-                    refreshData
-                      .mutateAsync()
-                      .then(() => refetch())
-                      .then(() => toast.success("Profile refreshed"))
-                  }
-                >
-                  <Refresh />
-                </IconButton>
+                <>
+                  <IconButton
+                    disabled={refreshData.isLoading}
+                    onClick={() =>
+                      refreshData
+                        .mutateAsync()
+                        .then(() => refetch())
+                        .then(() => toast.success("Profile refreshed"))
+                    }
+                  >
+                    <Refresh />
+                    <Typography level="body-sm">Refresh social data</Typography>
+                  </IconButton>
+                </>
               )}
             </Flex>
             {/* Only display if user has a display name */}
