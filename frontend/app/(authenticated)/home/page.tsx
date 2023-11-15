@@ -69,9 +69,7 @@ export default function Home() {
           )}
           {showLoadMore() && (
             <Flex x xc>
-              <Button disabled={isGraphQLLoading} onClick={() => nextPage()}>
-                Load More
-              </Button>
+              <Button onClick={() => nextPage()}>Load More</Button>
             </Flex>
           )}
         </TabPanel>
