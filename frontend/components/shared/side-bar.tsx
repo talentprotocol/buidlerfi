@@ -204,9 +204,19 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             </>
           </Typography>
         </div>
-        <Button variant="soft" onClick={() => window.open("https://t.me/+7FGAfQx66Z8xOThk")}>
-          Give Feedback
-        </Button>
+        <Flex x gap2>
+          <Button
+            variant="outlined"
+            onClick={() =>
+              window.open("https://talentprotocol.notion.site/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39?pvs=4")
+            }
+          >
+            FAQ
+          </Button>
+          <Button variant="soft" onClick={() => window.open("https://t.me/+7FGAfQx66Z8xOThk")}>
+            Give Feedback
+          </Button>
+        </Flex>
         <Image src={LOGO} alt="App logo" height={40} width={120} />
       </Flex>
     </Drawer>
