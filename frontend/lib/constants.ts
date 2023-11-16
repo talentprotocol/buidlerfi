@@ -17,3 +17,4 @@ export const BUILDERFI_CONTRACT = {
   address: process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET : BASE_GOERLI_TESTNET,
   abi: builderFIV1Abi
 } as const;
+export const THE_GRAPH_PAGE_SIZE = 50;

@@ -19,9 +19,8 @@ export default function Invite() {
         Refer friends. <br /> Earn points.
       </Typography>
       <Typography level="body-sm" mt={1}>
-        Points are airdropped every Friday and will have future uses in builder.fi.
-        <br />
-        Invites are not the only way to earn points.
+        Points are airdropped every Friday and will have future uses in builder.fi. Earn points by asking and answering
+        questions, depositing funds, trading keys or inviting friends.
       </Typography>
       <Flex x gap2 py={2}>
         <Card sx={{ flexGrow: 1, gap: 0 }} variant="soft">
@@ -34,7 +33,7 @@ export default function Invite() {
           <Typography fontWeight={600} level="h4">
             {invitedCount}
           </Typography>
-          <Typography>Invited people</Typography>
+          <Typography>Builders invited</Typography>
         </Card>
       </Flex>
       <Flex y xs py={2}>

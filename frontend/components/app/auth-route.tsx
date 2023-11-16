@@ -33,16 +33,12 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   }, [redirect, user.isAuthenticatedAndActive, user.privyUser]);
 
   const handleOnboardingRedirect = useCallback(() => {
-    if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
+    if (user.balance !== undefined && user.balance < parseEther("0.001")) {
+      return redirect("/onboarding/fund");
+    } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
     } else if (!user.user?.displayName && user.user?.socialProfiles.length === 0) {
       return redirect("/onboarding/username");
-    } else if (
-      user.balance !== undefined &&
-      user.balance < parseEther("0.001") &&
-      router.searchParams.skipfund !== "1"
-    ) {
-      return redirect("/onboarding/fund");
     } else if (!holders.data?.length) {
       return redirect("/onboarding/buykey");
     }

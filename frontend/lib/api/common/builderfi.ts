@@ -1,4 +1,9 @@
-import { BASE_GOERLI_GRAPH_URL, BASE_MAINNET_GRAPH_URL, BUILDERFI_CONTRACT } from "@/lib/constants";
+import {
+  BASE_GOERLI_GRAPH_URL,
+  BASE_MAINNET_GRAPH_URL,
+  BUILDERFI_CONTRACT,
+  THE_GRAPH_PAGE_SIZE
+} from "@/lib/constants";
 import { Share } from "@/models/share.model";
 import { ShareRelationship } from "@/models/shareRelationship.model";
 
@@ -18,10 +23,10 @@ const gqlShare = `
 
 const query = `
   {
-    shareParticipants(first: 100, orderBy: supply, orderDirection:desc) {
+    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, orderBy: supply, orderDirection:desc) {
       ${gqlShare}
     }
-    shareRelationships(first: 100) {
+    shareRelationships(first: ${THE_GRAPH_PAGE_SIZE}) {
       id
       holder {
         ${gqlShare}
@@ -31,6 +36,14 @@ const query = `
       }
       supporterNumber
       heldKeyNumber
+    }
+  }
+`;
+
+const getUsersQuery = (offset: number) => `
+  {
+    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, skip: ${offset}, orderBy: supply, orderDirection:desc) {
+      ${gqlShare}
     }
   }
 `;
@@ -107,6 +120,20 @@ export const fetchBuilderfiData = async () => {
     method: "POST",
     body: JSON.stringify({
       query
+    }),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  }).then(res => res.json());
+
+  return res.data;
+};
+
+export const fetchUsers = async (offset: number) => {
+  const res: BuilderFiDataResponse = await fetch(GRAPH_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      query: getUsersQuery(offset)
     }),
     headers: {
       "Content-Type": "application/json"

@@ -1,13 +1,11 @@
 "use client";
 import { useUserContext } from "@/contexts/userContext";
 import { DEFAULT_PROFILE_PICTURE, LOGO_SMALL } from "@/lib/assets";
-import { formatToDisplayString } from "@/lib/utils";
 import { Menu } from "@mui/icons-material";
-import { Avatar, IconButton, Skeleton, Typography } from "@mui/joy";
+import { Avatar, IconButton, Skeleton } from "@mui/joy";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FC, useRef } from "react";
-import { useBalance } from "wagmi";
 import { Flex } from "./flex";
 
 interface Props {
@@ -18,9 +16,6 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
   const router = useRouter();
   const anchor = useRef<HTMLDivElement>(null);
   const { user, address, isLoading } = useUserContext();
-  const { data: balance } = useBalance({
-    address
-  });
 
   return (
     <>
@@ -53,7 +48,7 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
 
         <Flex basis="100%" y xe px={1}>
           <Avatar
-            size="sm"
+            size="md"
             ref={anchor}
             src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
             sx={{ position: "relative", cursor: "pointer" }}
@@ -61,7 +56,6 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
           >
             <Skeleton loading={isLoading} />
           </Avatar>
-          <Typography level="body-xs">{formatToDisplayString(balance?.value)} ETH</Typography>
         </Flex>
       </Flex>
     </>

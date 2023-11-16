@@ -1,7 +1,6 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
 import { PageMessage } from "@/components/shared/page-message";
-import { useUserContext } from "@/contexts/userContext";
 import { useGetQuestions, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
@@ -23,7 +22,6 @@ interface Props {
 export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) => {
   const [chatValue, setChatValue] = useState<string>("");
   const { address } = useAccount();
-  const { user } = useUserContext();
   const { data: supporterKeys } = useContractRead({
     address: BUILDERFI_CONTRACT.address,
     abi: builderFIV1Abi,
@@ -51,9 +49,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
     setChatValue("");
   };
 
-  const displayForAdmin = user?.isAdmin && process.env.NODE_ENV !== "production";
-
-  if (!ownsKeys && !displayForAdmin && !isOwnProfile) {
+  if (!ownsKeys && !isOwnProfile && !questions?.length) {
     return (
       <PageMessage
         title="Unlock Q&A"
@@ -97,7 +93,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
 
   return (
     <Flex y grow>
-      {!isOwnProfile && (
+      {!isOwnProfile && ownsKeys && (
         <Flex y gap={0.5} p={2} borderBottom={"1px solid " + theme.palette.divider}>
           <Flex y={isSm} yc gap2>
             <Textarea
@@ -130,6 +126,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
                 socialData={socialData}
                 question={question}
                 isOwnChat={isOwnProfile}
+                ownsKeys={ownsKeys}
                 refetch={refetch}
                 index={`${questions.length - i}/${questions.length}`}
               />
