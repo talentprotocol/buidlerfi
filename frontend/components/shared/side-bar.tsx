@@ -1,11 +1,13 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useGetContractData } from "@/hooks/useBuilderFiApi";
+import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE, LOGO } from "@/lib/assets";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
+  Cable,
   Logout,
   PersonOutlineOutlined,
   Refresh,
@@ -15,6 +17,7 @@ import {
 import {
   Avatar,
   Button,
+  CircularProgress,
   Divider,
   Drawer,
   IconButton,
@@ -50,6 +53,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     address
   });
   const router = useRouter();
+  const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
 
   const { logout } = usePrivy();
   const handleLogout = async () => {
@@ -79,9 +83,14 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         icon: <AdminPanelSettings />,
         path: "/admin",
         hidden: !user?.isAdmin
+      },
+      {
+        text: "Link wallet",
+        icon: isLoadingLinkWallet ? <CircularProgress size="sm" /> : <Cable />,
+        onClick: () => linkWallet()
       }
     ],
-    [address, user?.isAdmin]
+    [address, isLoadingLinkWallet, linkWallet, user?.isAdmin]
   );
 
   const batchNumber = () => {
@@ -166,8 +175,12 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             <ListItem key={item.text}>
               <ListItemButton
                 onClick={() => {
-                  router.push(item.path);
-                  setOpen(false);
+                  if (item.path) {
+                    router.push(item.path);
+                    setOpen(false);
+                  } else if (item.onClick) {
+                    item.onClick();
+                  }
                 }}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>

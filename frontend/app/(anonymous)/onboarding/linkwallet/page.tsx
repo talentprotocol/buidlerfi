@@ -3,63 +3,16 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGenerateChallenge, useLinkWallet } from "@/hooks/useUserApi";
+import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { DEFAULT_PROFILE_PICTURE, EXAMPLE_PROFILE_PICTURE } from "@/lib/assets";
-import { formatError, shortAddress } from "@/lib/utils";
+import { shortAddress } from "@/lib/utils";
 import { ArrowDownward } from "@mui/icons-material";
 import { Avatar, Button, Typography } from "@mui/joy";
-import { ConnectedWallet, useConnectWallet } from "@privy-io/react-auth";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { toast } from "react-toastify";
 
 export default function CreateWallet() {
-  const [walletToSign, setWalletToSign] = useState<ConnectedWallet>();
-  const [isLoading, setIsLoading] = useState(false);
   const router = useBetterRouter();
-  const { refetch } = useUserContext();
   const { user } = useUserContext();
-  // const { wallets } = useWallets();
-  const linkNewWallet = useLinkWallet();
-  const generateChallenge = useGenerateChallenge();
-  const { connectWallet } = useConnectWallet({
-    onSuccess: async wallet => {
-      setWalletToSign(wallet as ConnectedWallet);
-    },
-    onError: () => {
-      setIsLoading(false);
-    }
-  });
-
-  const handleLinkWallet = () => {
-    setIsLoading(true);
-    connectWallet();
-  };
-
-  useQuery(
-    ["requestLinkWallet"],
-    async () => {
-      try {
-        const challenge = await generateChallenge.mutateAsync(walletToSign!.address);
-        if (!challenge) {
-          return;
-        }
-        const signature = await walletToSign!.sign(challenge.message);
-        const user = await linkNewWallet.mutateAsync(signature);
-        if (user?.socialWallet) toast.success("Wallet successfully linked");
-        refetch();
-        return user;
-      } catch (err) {
-        toast.error("An error occured while linking wallet: " + formatError(err));
-        return err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    {
-      enabled: !!walletToSign
-    }
-  );
+  const { isLoading, linkWallet } = useLinkExternalWallet();
 
   return (
     <Flex y ysb>
@@ -96,7 +49,7 @@ export default function CreateWallet() {
       </Flex>
 
       <Flex y gap1>
-        <Button loading={isLoading} onClick={handleLinkWallet}>
+        <Button loading={isLoading} onClick={linkWallet}>
           Connect your wallet
         </Button>
         <Button
