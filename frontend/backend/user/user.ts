@@ -58,7 +58,7 @@ export const checkUsersExist = async (wallets: string[]) => {
   const addresses = wallets.map(wallet => wallet.toLowerCase());
   const res = await prisma.user.findMany({
     where: {
-      socialWallet: {
+      wallet: {
         in: addresses
       }
     }
@@ -218,40 +218,33 @@ export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArg
   return { data: res };
 };
 
-export const generateChallenge = async () => {
-  await prisma.recommendedUser.create({
-    data: {
-      recommendationScore: 1,
-      recommendedUserWallet: "0x00",
-      sourceUserId: 1
+export const generateChallenge = async (privyUserId: string, publicKey: string) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      privyUserId
     }
   });
-  // const user = await prisma.user.findUniqueOrThrow({
-  //   where: {
-  //     privyUserId
-  //   }
-  // });
 
-  // const challenge = `
-  // I'm verifying the ownership of this wallet for builderfi.
-  // Timestamp: ${Date.now()}
-  // Wallet: ${publicKey}
-  // `;
+  const challenge = `
+I'm verifying the ownership of this wallet for builderfi.
+Timestamp: ${Date.now()}
+Wallet: ${publicKey}
+  `;
 
-  // const res = await prisma.signingChallenge.upsert({
-  //   where: {
-  //     userId: user.id
-  //   },
-  //   update: {
-  //     message: challenge,
-  //     publicKey
-  //   },
-  //   create: {
-  //     message: challenge,
-  //     userId: user.id,
-  //     publicKey
-  //   }
-  // });
+  const res = await prisma.signingChallenge.upsert({
+    where: {
+      userId: user.id
+    },
+    update: {
+      message: challenge,
+      publicKey
+    },
+    create: {
+      message: challenge,
+      userId: user.id,
+      publicKey
+    }
+  });
 
-  // return { data: res };
+  return { data: res };
 };

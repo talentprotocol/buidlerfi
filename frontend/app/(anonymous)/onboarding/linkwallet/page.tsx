@@ -8,41 +8,58 @@ import { DEFAULT_PROFILE_PICTURE, EXAMPLE_PROFILE_PICTURE } from "@/lib/assets";
 import { formatError, shortAddress } from "@/lib/utils";
 import { ArrowDownward } from "@mui/icons-material";
 import { Avatar, Button, Typography } from "@mui/joy";
-import { useConnectWallet } from "@privy-io/react-auth";
+import { ConnectedWallet, useConnectWallet } from "@privy-io/react-auth";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "react-toastify";
-import { useSignMessage } from "wagmi";
 
 export default function CreateWallet() {
+  const [walletToSign, setWalletToSign] = useState<ConnectedWallet>();
+  const [isLoading, setIsLoading] = useState(false);
   const router = useBetterRouter();
   const { refetch } = useUserContext();
   const { user } = useUserContext();
-
+  // const { wallets } = useWallets();
   const linkNewWallet = useLinkWallet();
-  const { signMessageAsync } = useSignMessage();
   const generateChallenge = useGenerateChallenge();
   const { connectWallet } = useConnectWallet({
     onSuccess: async wallet => {
-      try {
-        const challenge = await generateChallenge.mutateAsync(wallet.address);
-        if (!challenge) {
-          return;
-        }
-        console.log(challenge);
-        const signature = await signMessageAsync({ message: challenge.message });
-        console.log(signature);
-        const user = await linkNewWallet.mutateAsync(signature);
-        console.log(user);
-        if (user?.socialWallet) toast.success("Wallet successfully linked");
-        refetch();
-      } catch (err) {
-        toast.error("An error occured while linking wallet: " + formatError(err));
-      }
+      setWalletToSign(wallet as ConnectedWallet);
+    },
+    onError: () => {
+      setIsLoading(false);
     }
   });
 
   const handleLinkWallet = () => {
+    setIsLoading(true);
     connectWallet();
   };
+
+  useQuery(
+    ["requestLinkWallet"],
+    async () => {
+      try {
+        const challenge = await generateChallenge.mutateAsync(walletToSign!.address);
+        if (!challenge) {
+          return;
+        }
+        const signature = await walletToSign!.sign(challenge.message);
+        const user = await linkNewWallet.mutateAsync(signature);
+        if (user?.socialWallet) toast.success("Wallet successfully linked");
+        refetch();
+        return user;
+      } catch (err) {
+        toast.error("An error occured while linking wallet: " + formatError(err));
+        return err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    {
+      enabled: !!walletToSign
+    }
+  );
 
   return (
     <Flex y ysb>
@@ -79,7 +96,9 @@ export default function CreateWallet() {
       </Flex>
 
       <Flex y gap1>
-        <Button onClick={handleLinkWallet}>Connect your wallet</Button>
+        <Button loading={isLoading} onClick={handleLinkWallet}>
+          Connect your wallet
+        </Button>
         <Button
           variant="plain"
           onClick={() => router.push({ searchParams: { skiplink: "1" } }, { preserveSearchParams: true })}
