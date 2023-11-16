@@ -3,39 +3,45 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useLinkWallet } from "@/hooks/useUserApi";
+import { useGenerateChallenge, useLinkWallet } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE, EXAMPLE_PROFILE_PICTURE } from "@/lib/assets";
 import { formatError, shortAddress } from "@/lib/utils";
 import { ArrowDownward } from "@mui/icons-material";
 import { Avatar, Button, Typography } from "@mui/joy";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useConnectWallet } from "@privy-io/react-auth";
 import { toast } from "react-toastify";
+import { useSignMessage } from "wagmi";
 
 export default function CreateWallet() {
   const router = useBetterRouter();
   const { refetch } = useUserContext();
-  const { linkWallet } = usePrivy();
-  const { wallets } = useWallets();
   const { user } = useUserContext();
 
-  const { mutateAsync: linkNewWallet } = useLinkWallet();
-
-  const linkedWallet = useMemo(() => wallets.find(wal => wal.connectorType !== "embedded"), [wallets]);
-  //We use useQuery to ensure function is executed only once, and only when a wallet is found.
-  const {} = useQuery(
-    ["linkNewWallet", linkedWallet?.address],
-    () => {
-      return linkNewWallet(linkedWallet!.address)
-        .catch(err => toast.error(formatError(err)))
-        .then(() => refetch());
-    },
-    { enabled: !!linkedWallet?.address }
-  );
+  const linkNewWallet = useLinkWallet();
+  const { signMessageAsync } = useSignMessage();
+  const generateChallenge = useGenerateChallenge();
+  const { connectWallet } = useConnectWallet({
+    onSuccess: async wallet => {
+      try {
+        const challenge = await generateChallenge.mutateAsync(wallet.address);
+        if (!challenge) {
+          return;
+        }
+        console.log(challenge);
+        const signature = await signMessageAsync({ message: challenge.message });
+        console.log(signature);
+        const user = await linkNewWallet.mutateAsync(signature);
+        console.log(user);
+        if (user?.socialWallet) toast.success("Wallet successfully linked");
+        refetch();
+      } catch (err) {
+        toast.error("An error occured while linking wallet: " + formatError(err));
+      }
+    }
+  });
 
   const handleLinkWallet = () => {
-    linkWallet();
+    connectWallet();
   };
 
   return (

@@ -38,9 +38,10 @@ model User {
   recommendedTo    RecommendedUser[] @relation("recommendationTarget")
   recommendedUsers RecommendedUser[] @relation("recommendationSource")
 
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               Int                @id @default(autoincrement())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  SigningChallenge SigningChallenge[]
 }
 
 enum SocialProfileType {
@@ -160,4 +161,15 @@ model RecommendedUser {
   updatedAt DateTime @updatedAt
 
   @@unique([sourceUserId, recommendedUserWallet])
+}
+
+model SigningChallenge {
+  message   String
+  user      User   @relation(fields: [userId], references: [id])
+  userId    Int    @unique
+  publicKey String
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

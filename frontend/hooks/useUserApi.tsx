@@ -2,6 +2,7 @@ import { UpdateUserArgs } from "@/backend/user/user";
 import {
   checkUsersExistSA,
   createUserSA,
+  generateChallengeSA,
   getCurrentUserSA,
   getUserSA,
   linkNewWalletSA,
@@ -45,9 +46,13 @@ export const useCheckUsersExist = (wallets?: string[]) => {
 };
 
 export const useLinkWallet = () => {
-  return useMutationSA(async (options, wallet: string) => linkNewWalletSA(wallet, options));
+  return useMutationSA(async (options, signature: string) => linkNewWalletSA(signature, options));
 };
 
 export const useUpdateUser = () => {
   return useMutationSA(async (options, updatedUser: UpdateUserArgs) => updateUserSA(updatedUser, options));
+};
+
+export const useGenerateChallenge = () => {
+  return useMutationSA(async (options, publicKey: string) => generateChallengeSA(publicKey, options));
 };

@@ -5,6 +5,7 @@ import {
   UpdateUserArgs,
   checkUsersExist,
   createUser,
+  generateChallenge,
   getCurrentUser,
   getUser,
   linkNewWallet,
@@ -38,10 +39,14 @@ export const refreshAllUsersProfileSA = (options: ServerActionOptions) => {
   return serverActionWrapper(() => refreshAllUsersProfile(), options, true);
 };
 
-export const linkNewWalletSA = (wallet: string, options: ServerActionOptions) => {
-  return serverActionWrapper(data => linkNewWallet(data.privyUserId, wallet), options);
+export const linkNewWalletSA = (signature: string, options: ServerActionOptions) => {
+  return serverActionWrapper(data => linkNewWallet(data.privyUserId, signature), options);
 };
 
 export const updateUserSA = (updatedUser: UpdateUserArgs, options: ServerActionOptions) => {
   return serverActionWrapper(data => updateUser(data.privyUserId, updatedUser), options);
+};
+
+export const generateChallengeSA = (publicKey: string, options: ServerActionOptions) => {
+  return serverActionWrapper(data => generateChallenge(data.privyUserId, publicKey), options);
 };

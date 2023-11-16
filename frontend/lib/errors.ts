@@ -13,5 +13,7 @@ export const ERRORS = {
   NO_SOCIAL_PROFILE_FOUND: "No social profile found",
   CANNOT_CHOSE_USERNAME: "Cannot chose username if you have an on-chain social profile",
   USERNAME_INVALID_FORMAT:
-    "Username should contain between 3 and 20 alphanumeric characters or underscores, and start with a letter"
+    "Username should contain between 3 and 20 alphanumeric characters or underscores, and start with a letter",
+  CHALLENGE_EXPIRED: "Challenge expired",
+  INVALID_SIGNATURE: "Invalid signature"
 } as const;
