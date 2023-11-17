@@ -84,7 +84,7 @@ export default function Home() {
                 <PageMessage
                   title="No friends here yet…"
                   icon={<SupervisorAccountOutlined />}
-                  text="- Either the wallet you connected is missing Lens and Farcaster profiles, or none of your friends is using [builder.fi](http://builder.fi) yet."
+                  text="Either the wallet you connected is missing Lens and Farcaster profiles, or none of your friends is using builder.fi yet."
                 />
               ) : (
                 filteredSocialFollowers.map(user => (

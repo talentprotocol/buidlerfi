@@ -58,7 +58,7 @@ export const checkUsersExist = async (wallets: string[]) => {
   const addresses = wallets.map(wallet => wallet.toLowerCase());
   const res = await prisma.user.findMany({
     where: {
-      wallet: {
+      socialWallet: {
         in: addresses
       }
     }
