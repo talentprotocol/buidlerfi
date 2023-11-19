@@ -36,6 +36,7 @@ import { FC, useMemo } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 import { ParachuteIcon } from "../icons/parachute";
+import { AddToHomePage } from "./add-to-home-page";
 import { Flex } from "./flex";
 import { WalletAddress } from "./wallet-address";
 
@@ -217,6 +218,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             </>
           </Typography>
         </div>
+        <AddToHomePage />
         <Flex x gap2>
           <Button
             variant="outlined"
