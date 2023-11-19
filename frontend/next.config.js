@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {};
 
-module.exports = nextConfig;
+// Injected content via PWA below
 
+const withPWA = require("next-pwa")({
+  dest: "public"
+});
+
+module.exports = withPWA(nextConfig);
 
 // Injected content via Sentry wizard below
 
@@ -17,7 +22,7 @@ module.exports = withSentryConfig(
     // Suppresses source map uploading logs during build
     silent: true,
     org: "talentprotocol",
-    project: "javascript-nextjs",
+    project: "javascript-nextjs"
   },
   {
     // For all available options, see:
@@ -36,6 +41,6 @@ module.exports = withSentryConfig(
     hideSourceMaps: true,
 
     // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
+    disableLogger: true
   }
 );

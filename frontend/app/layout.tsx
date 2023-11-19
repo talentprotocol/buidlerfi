@@ -17,7 +17,8 @@ export const metadata: Metadata = {
   twitter: {
     images: ["https://builder.fi/thumbnail.jpg?2"],
     card: "summary_large_image"
-  }
+  },
+  manifest: "/manifest.json"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
