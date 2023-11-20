@@ -36,6 +36,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
 
   const postQuestion = usePostQuestion();
 
+  // TODO: is this relevant still?
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
 
   const sendQuestion = async () => {

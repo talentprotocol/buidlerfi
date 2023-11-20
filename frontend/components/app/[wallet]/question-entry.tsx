@@ -47,6 +47,8 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
   const contentForAnswer = () => {
     if (ownsKeys) {
       return question.reply || "Waiting for answer";
+    } else if (question.repliedOn) {
+      return "Hold a key so you are notified when an answer is given";
     } else {
       return "Hold at least one key to access the answers";
     }
