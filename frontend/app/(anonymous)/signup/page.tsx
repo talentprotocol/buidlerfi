@@ -3,6 +3,7 @@
 import { Flex } from "@/components/shared/flex";
 import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { LOGO } from "@/lib/assets";
+import { FAQ_LINK } from "@/lib/constants";
 import { Button, Typography } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
@@ -63,6 +64,12 @@ export default function Signup() {
           </Typography>
           <Typography level="body-sm" textColor="neutral.500">
             {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders
+          </Typography>
+          <Typography level="body-sm" textColor="neutral.500" marginTop={16}>
+            Check out our{" "}
+            <a target="_blank" href={FAQ_LINK}>
+              FAQ
+            </a>
           </Typography>
         </Flex>
       </Flex>
