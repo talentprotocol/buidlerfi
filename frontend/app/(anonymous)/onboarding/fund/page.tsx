@@ -31,11 +31,6 @@ export default function FundPage() {
     const transak = new Transak(transakConfig);
 
     transak.init();
-
-    // Cleanup code
-    return () => {
-      transak.close();
-    };
   };
 
   const closeAndRefresh = () => {
@@ -105,10 +100,7 @@ export default function FundPage() {
       </Button>
 
       <Flex y gap2>
-        <Button
-          disabled={(balance || 0) < 1000000000000000n}
-          onClick={() => router.replace({ searchParams: { skipfund: "1" } }, { preserveSearchParams: true })}
-        >
+        <Button disabled={(balance || 0) < 1000000000000000n} onClick={() => router.push("/onboarding/buykey")}>
           {(balance || 0) < 1000000000000000n ? "Deposit at least 0.001 ETH" : "Continue"}
         </Button>
 

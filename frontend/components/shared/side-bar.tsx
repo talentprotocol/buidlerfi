@@ -9,6 +9,7 @@ import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
   Cable,
+  Help,
   Logout,
   PersonOutlineOutlined,
   Refresh,
@@ -192,6 +193,14 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           ))}
         <Divider sx={{ my: 1 }} />
         <ListItem>
+          <ListItemButton onClick={() => window.open(FAQ_LINK)}>
+            <ListItemIcon>
+              <Help />
+            </ListItemIcon>
+            <ListItemText primary="FAQ" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
           <ListItemButton
             onClick={() => {
               handleLogout();
@@ -221,9 +230,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         </div>
         <AddToHomePage />
         <Flex x gap2>
-          <Button variant="outlined" onClick={() => window.open(FAQ_LINK)}>
-            FAQ
-          </Button>
           <Button variant="soft" onClick={() => window.open("https://t.me/+7FGAfQx66Z8xOThk")}>
             Give Feedback
           </Button>

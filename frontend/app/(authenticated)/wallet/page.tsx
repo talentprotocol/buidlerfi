@@ -8,6 +8,7 @@ import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
 import { KeyOutlined, TransitEnterexitOutlined } from "@mui/icons-material";
 import { Button, Card, CircularProgress, Divider, Typography, useTheme } from "@mui/joy";
+import { Transak, TransakConfig } from "@transak/transak-sdk";
 import { useMemo, useState } from "react";
 import { useAccount, useBalance } from "wagmi";
 
@@ -37,6 +38,22 @@ export default function ChatsPage() {
       </Flex>
     );
   }
+
+  const openTransak = () => {
+    const transakConfig: TransakConfig = {
+      apiKey: process.env.NEXT_PUBLIC_TRANSAK_KEY || "", // (Required)
+      environment: Transak.ENVIRONMENTS.PRODUCTION,
+      defaultNetwork: "base",
+      network: "base",
+      walletAddress: address,
+      productsAvailed: "buy",
+      cryptoCurrencyList: ["ETH"]
+    };
+
+    const transak = new Transak(transakConfig);
+
+    transak.init();
+  };
 
   return (
     <Flex y grow gap2 component={"main"}>
@@ -70,15 +87,17 @@ export default function ChatsPage() {
       </Flex>
       <Flex x xc p={2} gap1>
         <Button
-          size="lg"
           onClick={() =>
             window.open("https://www.sushi.com/swap/cross-chain?chainId1=8453&token1=NATIVE&swapAmount=0.01")
           }
         >
           Bridge
         </Button>
-        <Button size="lg" variant="outlined" color="neutral" onClick={() => setOpenWithdraw(true)}>
+        <Button variant="soft" onClick={() => setOpenWithdraw(true)}>
           Withdraw
+        </Button>
+        <Button variant="outlined" onClick={() => openTransak()}>
+          Deposit
         </Button>
       </Flex>
       <Divider />

@@ -16,6 +16,7 @@ export default function InvitationCode() {
   const { refetch } = useUserContext();
   const [inviteCode, setInviteCode] = useState<string>("");
   const createUser = useCreateUser();
+  const [overrideLoading, setOverrideLoading] = useState<boolean>(false);
 
   const handleOnClickProceed = async () => {
     if (!privyUser) {
@@ -23,8 +24,10 @@ export default function InvitationCode() {
       return;
     }
 
+    setOverrideLoading(true);
     await createUser.mutateAsync(inviteCode);
     await refetch();
+    setOverrideLoading(false);
   };
 
   const handleLogout = async () => {
@@ -54,7 +57,7 @@ export default function InvitationCode() {
       </Flex>
 
       <Flex y xc gap2 fullwidth>
-        <Button loading={createUser.isLoading} fullWidth size="lg" onClick={handleOnClickProceed}>
+        <Button loading={createUser.isLoading || overrideLoading} fullWidth size="lg" onClick={handleOnClickProceed}>
           Continue
         </Button>
         <Button disabled={createUser.isLoading} fullWidth onClick={handleLogout} variant="plain">
