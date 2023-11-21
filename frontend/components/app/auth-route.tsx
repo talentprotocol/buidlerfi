@@ -39,12 +39,12 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       if (pathname.includes("fund") || pathname.includes("loading")) return;
 
       return redirect("/onboarding/welcome");
+    } else if (!holders.data?.length) {
+      return redirect("/onboarding/buykey");
     } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
     } else if (!user.user?.displayName && user.user?.socialProfiles.length === 0) {
       return redirect("/onboarding/username");
-    } else if (!holders.data?.length) {
-      return redirect("/onboarding/buykey");
     }
   }, [
     holders.data?.length,

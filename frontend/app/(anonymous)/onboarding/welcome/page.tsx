@@ -2,28 +2,29 @@
 import { Flex } from "@/components/shared/flex";
 import { Button, Typography } from "@mui/joy";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function WelcomePage() {
   const router = useRouter();
+  const [buttonLoading, setButtonLoading] = useState(false);
+
+  const navigateToFund = () => {
+    setButtonLoading(true);
+    router.push("/onboarding/fund");
+  };
+
   return (
-    <Flex y grow gap2 component={"main"} px={4} py={2} mt={4}>
-      <Typography level="h3">builder.fi is in private alpha!</Typography>
+    <Flex y grow gap2 component={"main"} px={4} py={2}>
+      <Typography level="h3">Generating your builder.fi wallet</Typography>
       <Flex y mb={4} mt={2} gap2>
-        <Typography level="body-md">Thanks for being an early supporter and helping us test the app.</Typography>
-        <Typography level="body-md">
-          Now find someone interesting, buy their key and ask them a thoughtful question.
+        <Typography level="body-md" mb={12}>
+          You'll have your own wallet address within builder.fi. You'll be able to deposit and withdraw ETH in Base and
+          to make the experience of trading keys very smooth!
         </Typography>
-        <Typography level="body-md">
-          Soon you will have invites to share with friends. You can find these codes in the Points tab.
-        </Typography>
+        <Button loading={buttonLoading} onClick={() => navigateToFund()}>
+          Create wallet
+        </Button>
       </Flex>
-      <Button onClick={() => router.push("/onboarding/loading")}>Get started</Button>
-      <Typography level="body-sm">
-        If you have any feedback, please let us know on Twitter{" "}
-        <a href="https://twitter.com/BuilderFi" target="_blank">
-          @builderfi
-        </a>
-      </Typography>
     </Flex>
   );
 }
