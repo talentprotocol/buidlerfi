@@ -34,7 +34,11 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
 
   const handleOnboardingRedirect = useCallback(() => {
     if (user.balance !== undefined && user.balance < parseEther("0.001")) {
-      return redirect("/onboarding/fund");
+      const { pathname } = window.location;
+
+      if (pathname.includes("fund") || pathname.includes("loading")) return;
+
+      return redirect("/onboarding/welcome");
     } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
     } else if (!user.user?.displayName && user.user?.socialProfiles.length === 0) {

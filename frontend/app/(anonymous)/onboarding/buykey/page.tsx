@@ -17,7 +17,7 @@ export default function BuyKeyPage() {
   const finishOnboarding = useMutation(async () => {
     await updateUser.mutateAsync({ hasFinishedOnboarding: true });
     await refetch();
-    router.replace("/welcome");
+    router.replace("/home");
   });
 
   const tx = useTradeKey("buy", finishOnboarding.mutate);
