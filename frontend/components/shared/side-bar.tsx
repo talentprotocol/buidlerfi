@@ -87,7 +87,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         hidden: !user?.isAdmin
       },
       {
-        text: "Link wallet",
+        text: "Connect Web3 Socials",
         icon: isLoadingLinkWallet ? <CircularProgress size="sm" /> : <Cable />,
         onClick: () => linkWallet()
       }

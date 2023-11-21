@@ -50,7 +50,7 @@ export default function CreateWallet() {
 
       <Flex y gap1>
         <Button loading={isLoading} onClick={linkWallet}>
-          Connect your wallet
+          connect web3 social
         </Button>
         <Button
           variant="plain"

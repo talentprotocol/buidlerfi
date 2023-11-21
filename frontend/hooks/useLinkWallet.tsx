@@ -16,6 +16,7 @@ export const useLinkExternalWallet = () => {
   const { connectWallet } = useConnectWallet({
     onSuccess: async wallet => {
       setWalletToSign(wallet as ConnectedWallet);
+      setIsLoading(false);
     },
     onError: () => {
       setIsLoading(false);
@@ -39,9 +40,11 @@ export const useLinkExternalWallet = () => {
         const user = await linkNewWallet.mutateAsync(signature);
         if (user?.socialWallet) toast.success("Wallet successfully linked");
         refetch();
+        setIsLoading(false);
         return user;
       } catch (err) {
         toast.error("An error occured while linking wallet: " + formatError(err));
+        setIsLoading(false);
         return err;
       } finally {
         setIsLoading(false);
