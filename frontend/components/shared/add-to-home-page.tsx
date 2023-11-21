@@ -3,7 +3,7 @@ import { Button } from "@mui/joy";
 import { useEffect, useState } from "react";
 
 type InstallEvent = {
-  prompt: () => void;
+  prompt?: () => void;
   userChoice?: Promise<{ outcome: string }>;
   preventDefault: () => void;
 };
@@ -12,7 +12,7 @@ export function AddToHomePage() {
   const [installEvent, setInstallEvent] = useState<InstallEvent | null>(null);
 
   useEffect(() => {
-    const beforeInstallPromptHandler = (e: any) => {
+    const beforeInstallPromptHandler = (e: InstallEvent) => {
       if (e) {
         e.preventDefault();
         setInstallEvent(e);
@@ -29,7 +29,9 @@ export function AddToHomePage() {
   const handleInstallClick = () => {
     if (!installEvent) return;
 
-    installEvent.prompt();
+    if (installEvent.prompt) {
+      installEvent?.prompt();
+    }
     if (!installEvent.userChoice) return;
 
     installEvent.userChoice.then(choiceResult => {
