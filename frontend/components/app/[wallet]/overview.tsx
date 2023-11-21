@@ -50,6 +50,14 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
 
   const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData.address);
   const refreshData = useRefreshCurrentUser();
+
+  const keysPlural = () => {
+    if (ownedKeysCount != 0) {
+      return "keys";
+    } else {
+      return "key";
+    }
+  };
   return (
     <>
       <Flex y gap2 p={2}>
@@ -151,7 +159,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
             <Typography level="body-sm">
               You own{" "}
               <Box fontWeight={600} component="span">
-                {ownedKeysCount?.toString()} key
+                {ownedKeysCount?.toString()} {keysPlural()}
               </Box>
             </Typography>
           </Flex>
