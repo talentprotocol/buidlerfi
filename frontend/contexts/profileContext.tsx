@@ -37,9 +37,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
   const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount]);
 
+  const sortedHolders = useMemo(
+    () => holders?.sort((a, b) => Number(a.supporterNumber) - Number(b.supporterNumber)),
+    [holders]
+  );
+
   const value = useMemo(() => {
     return {
-      holders,
+      holders: sortedHolders,
       supporterNumber: supporterNumber,
       ownedKeysCount: ownedKeysCount || 0,
       hasKeys,

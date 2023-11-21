@@ -50,7 +50,7 @@ const getUsersQuery = (offset: number) => `
 
 const getHoldingsQuery = `
 query RelationshipsQuery($address: ID = "owner") {
-  shareRelationships(where: {holder_: {owner: $address}, heldKeyNumber_gt: 0}) {
+  shareRelationships(where: {holder_: {owner: $address}, heldKeyNumber_gt: 0}, orderBy: supporterNumber, orderDirection:asc) {
     heldKeyNumber
     id
     supporterNumber
@@ -66,7 +66,7 @@ query RelationshipsQuery($address: ID = "owner") {
 
 const getHoldersQuery = `
 query MyQuery($address: ID = "owner") {
-  shareRelationships(where: {owner_: {owner: $address}}) {
+  shareRelationships(where: {owner_: {owner: $address}}, orderBy: supporterNumber, orderDirection:asc) {
     heldKeyNumber
     id
     supporterNumber

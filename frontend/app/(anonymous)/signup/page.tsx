@@ -21,18 +21,16 @@ export default function Signup() {
         </Typography>
       </Flex>
 
-      <Flex y xc gap3>
+      <Flex y xc mt={4}>
         <Button size="lg" onClick={() => login()}>
           Sign in
         </Button>
-        <Flex y xc>
-          <Typography level="body-sm" textColor="neutral.500" marginTop={16}>
-            Check out our{" "}
-            <a target="_blank" href={FAQ_LINK}>
-              FAQ
-            </a>
-          </Typography>
-        </Flex>
+        <Typography level="body-sm" textColor="neutral.500" mt={4}>
+          Check out our{" "}
+          <a target="_blank" href={FAQ_LINK}>
+            FAQ
+          </a>
+        </Typography>
       </Flex>
     </Flex>
   );
