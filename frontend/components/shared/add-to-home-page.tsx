@@ -12,18 +12,16 @@ export function AddToHomePage() {
   const [installEvent, setInstallEvent] = useState<InstallEvent | null>(null);
 
   useEffect(() => {
-    const beforeInstallPromptHandler = (e: InstallEvent) => {
+    const beforeInstallPromptHandler = (e: any) => {
       if (e) {
         e.preventDefault();
         setInstallEvent(e);
       }
     };
 
-    // @ts-ignore
     window.addEventListener("beforeinstallprompt", beforeInstallPromptHandler);
 
     return () => {
-      // @ts-ignore
       return window.removeEventListener("beforeinstallprompt", beforeInstallPromptHandler);
     };
   }, []);
