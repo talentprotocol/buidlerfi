@@ -3,6 +3,7 @@ import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE, LOGO } from "@/lib/assets";
+import { FAQ_LINK } from "@/lib/constants";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
@@ -220,12 +221,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         </div>
         <AddToHomePage />
         <Flex x gap2>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              window.open("https://talentprotocol.notion.site/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39?pvs=4")
-            }
-          >
+          <Button variant="outlined" onClick={() => window.open(FAQ_LINK)}>
             FAQ
           </Button>
           <Button variant="soft" onClick={() => window.open("https://t.me/+7FGAfQx66Z8xOThk")}>

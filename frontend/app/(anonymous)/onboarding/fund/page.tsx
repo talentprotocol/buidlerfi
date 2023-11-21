@@ -3,6 +3,7 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { FAQ_LINK } from "@/lib/constants";
 import { formatToDisplayString, shortAddress } from "@/lib/utils";
 import { ContentCopy, CopyAll, Refresh } from "@mui/icons-material";
 import { Button, Card, IconButton, Link, Skeleton, Typography, useTheme } from "@mui/joy";
@@ -23,10 +24,7 @@ export default function FundPage() {
           Builder.fi is built on Base and uses ETH to buy and sell keys. You need to transfer at least 0.001 ETH to your
           new builder.fi address. If you don&apos;t have funds on Base, please bridge from other network first.
           Don&apos;t know how? Check this{" "}
-          <a
-            href="https://www.notion.so/talentprotocol/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39#0ca25dc581354952abe8a2b327360f94"
-            target="_blank"
-          >
+          <a href={FAQ_LINK} target="_blank">
             guide
           </a>
           .

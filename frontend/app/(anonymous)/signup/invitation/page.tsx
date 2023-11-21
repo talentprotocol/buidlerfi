@@ -3,6 +3,7 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateUser } from "@/hooks/useUserApi";
+import { FAQ_LINK } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
 import { Button, FormControl, FormHelperText, Input, Typography } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
@@ -40,10 +41,7 @@ export default function InvitationCode() {
           </Typography>
           <Typography level="body-sm" textColor="neutral.500">
             builder.fi is currently invite-only. Explore how can you get an early access{" "}
-            <a
-              href="https://www.notion.so/talentprotocol/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39"
-              target="_blank"
-            >
+            <a href={FAQ_LINK} target="_blank">
               here
             </a>
             .
