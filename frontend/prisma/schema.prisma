@@ -151,11 +151,11 @@ model RecommendedUser {
   sourceUser   User @relation(fields: [sourceUserId], references: [id], name: "recommendationSource")
   sourceUserId Int
 
-  recommendedUser       User?  @relation(fields: [recommendedUserId], references: [id], name: "recommendationTarget")
+  recommendedUser       User?   @relation(fields: [recommendedUserId], references: [id], name: "recommendationTarget")
   recommendedUserId     Int?
   recommendedUserWallet String
-  avatarUrl             String
-  name                  String
+  avatarUrl             String?
+  name                  String?
 
   recommendationScore Int
 
