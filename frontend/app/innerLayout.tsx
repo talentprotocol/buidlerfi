@@ -73,7 +73,7 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <Flex y grow sx={{ position: "relative", overflow: "hidden" }} ref={rootContainerRef}>
+    <Flex y grow sx={{ position: "relative" }} ref={rootContainerRef}>
       <PrivyProvider
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
         config={{

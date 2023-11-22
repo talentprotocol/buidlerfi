@@ -8,7 +8,9 @@ export function useMutationSA<TResponse, TArgs = void>(
   const { getAccessToken } = usePrivy();
   return useMutation(async (args: TArgs) => {
     const token = await getAccessToken();
+    if (process.env.NODE_ENV === "development") console.log("Request Log (Mutation) - Start: ", args);
     const res = await mutationFn({ authorization: token }, args);
+    if (process.env.NODE_ENV === "development") console.log("Request Log (Mutation) - End: ", res);
     if (res.error) throw new Error(res.error);
     return res.data;
   });

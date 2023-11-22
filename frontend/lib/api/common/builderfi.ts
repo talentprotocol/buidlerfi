@@ -1,14 +1,6 @@
-import {
-  BASE_GOERLI_GRAPH_URL,
-  BASE_MAINNET_GRAPH_URL,
-  BUILDERFI_CONTRACT,
-  THE_GRAPH_PAGE_SIZE
-} from "@/lib/constants";
+import { BUILDERFI_CONTRACT, GRAPH_URL, THE_GRAPH_PAGE_SIZE } from "@/lib/constants";
 import { Share } from "@/models/share.model";
 import { ShareRelationship } from "@/models/shareRelationship.model";
-
-const GRAPH_URL =
-  process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_GRAPH_URL : BASE_GOERLI_GRAPH_URL;
 
 const gqlShare = `
   id
@@ -125,7 +117,6 @@ export const fetchBuilderfiData = async () => {
       "Content-Type": "application/json"
     }
   }).then(res => res.json());
-
   return res.data;
 };
 

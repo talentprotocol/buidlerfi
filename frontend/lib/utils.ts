@@ -24,6 +24,10 @@ export const tryParseBigInt = (value?: string | bigint | number) => {
   else return BigInt(value);
 };
 
+export const toEthNumber = (value?: string | bigint | number) => {
+  return Number(formatEth(tryParseBigInt(value)));
+};
+
 export const formatToDisplayString = (value?: string | bigint | number, decimals = 18, significantDigits = 6) => {
   const val = tryParseBigInt(value);
   const nbr = decimals ? Number(formatUnits(val, decimals)) : Number(val);

@@ -6,6 +6,7 @@ import {
   checkUsersExist,
   createUser,
   generateChallenge,
+  getBulkUsers,
   getCurrentUser,
   getUser,
   linkNewWallet,
@@ -49,4 +50,8 @@ export const updateUserSA = (updatedUser: UpdateUserArgs, options: ServerActionO
 
 export const generateChallengeSA = (publicKey: string, options: ServerActionOptions) => {
   return serverActionWrapper(data => generateChallenge(data.privyUserId, publicKey), options);
+};
+
+export const getBulkUsersSA = (addresses: string[], options: ServerActionOptions) => {
+  return serverActionWrapper(() => getBulkUsers(addresses), options);
 };

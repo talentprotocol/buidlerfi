@@ -13,10 +13,11 @@ export interface SocialData {
     profileName: string;
   }[];
   isLoading: boolean;
+  refetch: () => Promise<unknown>;
 }
 
-export const useSocialData = (address: `0x${string}`): SocialData => {
-  const { data: user, isLoading } = useGetUser(address);
+export const useSocialData = (address: `0x${string}`, options?: { enabled?: boolean }): SocialData => {
+  const { data: user, isLoading, refetch } = useGetUser(address, options);
   return {
     address: address,
     socialAddress: user?.socialWallet,
@@ -25,6 +26,7 @@ export const useSocialData = (address: `0x${string}`): SocialData => {
     hasDisplayName: !!user?.displayName,
     socialsList:
       user?.socialProfiles?.map(social => ({ dappName: social.type, profileName: social.profileName })) || [],
-    isLoading: isLoading
+    isLoading: isLoading,
+    refetch
   };
 };

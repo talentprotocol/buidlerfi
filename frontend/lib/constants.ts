@@ -9,6 +9,8 @@ export const BASE_GOERLI_TESTNET = "0x6A8F7499CB4A07FE88F91a29303c6fD396480dAf";
 export const BASE_MAINNET = "0x6b0Cb2eB1F2BE16675E2C54e3556f99652a40D40";
 export const BASE_GOERLI_GRAPH_URL = "https://api.thegraph.com/subgraphs/name/francisco-leal/builder-fi-base-testnet";
 export const BASE_MAINNET_GRAPH_URL = "https://api.studio.thegraph.com/query/8098/builder-fi/version/latest";
+export const GRAPH_URL =
+  process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_GRAPH_URL : BASE_GOERLI_GRAPH_URL;
 export const BASE_MAINNET_CHAIN_ID = 8453;
 export const BASE_TESTNET_CHAIN_ID = 84531;
 export const IN_USE_CHAIN_ID =

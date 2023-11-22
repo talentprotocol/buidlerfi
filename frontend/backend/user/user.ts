@@ -248,3 +248,11 @@ Wallet: ${publicKey}
 
   return { data: res };
 };
+
+export const getBulkUsers = async (addresses: string[]) => {
+  return {
+    data: await prisma.user.findMany({
+      where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true }
+    })
+  };
+};

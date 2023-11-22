@@ -26,8 +26,11 @@ export const useCreateUser = () => {
   });
 };
 
-export const useGetUser = (address?: string) => {
-  return useQuerySA(["useGetUser", address], async options => getUserSA(address!, options), { enabled: !!address });
+export const useGetUser = (address?: string, reactQueryOptions?: { enabled?: boolean }) => {
+  return useQuerySA(["useGetUser", address], async options => getUserSA(address!, options), {
+    enabled: !!address,
+    ...reactQueryOptions
+  });
 };
 
 export const useGetCurrentUser = () => {

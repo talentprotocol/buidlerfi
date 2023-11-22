@@ -5,7 +5,7 @@ import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
 import { Flex } from "@/components/shared/flex";
 import { HolderItem } from "@/components/shared/holder-item";
 import { PageMessage } from "@/components/shared/page-message";
-import { UserItem } from "@/components/shared/user-item";
+import { UserItemFromAddress } from "@/components/shared/user-item";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
@@ -93,7 +93,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
             />
           )}
           {holdings.data?.map(holdingItem => (
-            <UserItem
+            <UserItemFromAddress
               address={holdingItem.owner.owner as `0x${string}`}
               buyPrice={tryParseBigInt(holdingItem.owner.buyPrice)}
               numberOfHolders={Number(holdingItem.owner.numberOfHolders)}

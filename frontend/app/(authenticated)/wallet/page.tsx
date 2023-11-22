@@ -1,7 +1,7 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
 import { PageMessage } from "@/components/shared/page-message";
-import { UserItem } from "@/components/shared/user-item";
+import { UserItemFromAddress } from "@/components/shared/user-item";
 import { WalletAddress } from "@/components/shared/wallet-address";
 import { WithdrawDialog } from "@/components/shared/withdraw-modal";
 import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
@@ -94,7 +94,7 @@ export default function ChatsPage() {
           />
         ) : (
           allHolding.map(item => (
-            <UserItem
+            <UserItemFromAddress
               address={item.owner.owner as `0x${string}`}
               buyPrice={tryParseBigInt(item.owner.buyPrice)}
               numberOfHolders={Number(item.owner.numberOfHolders)}

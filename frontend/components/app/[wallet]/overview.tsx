@@ -4,12 +4,13 @@ import { WalletAddress } from "@/components/shared/wallet-address";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
+import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { SocialData } from "@/hooks/useSocialData";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
 import { formatEth } from "@/lib/utils";
-import { KeyOutlined, Refresh } from "@mui/icons-material";
-import { Avatar, Box, Button, IconButton, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
+import { KeyOutlined } from "@mui/icons-material";
+import { Avatar, Box, Button, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
 import { SocialProfileType } from "@prisma/client";
 import Image from "next/image";
 import { FC } from "react";
@@ -22,20 +23,20 @@ interface Props {
 }
 
 const socialInfo = {
-  [SocialProfileType.LENS]: {
-    name: "Lens",
-    icon: <Image width={20} height={20} src={LENS_LOGO} alt="Lens logo" />,
-    url: (username: string) => `https://hey.xyz/u/${username.replace("lens/@", "")}`
+  [SocialProfileType.TALENT_PROTOCOL]: {
+    name: "Talent Protocol",
+    icon: <Image width={20} height={20} src={TALENT_PROTOCOL_LOGO} alt="Talent Protocol logo" />,
+    url: (_: string, address: string) => `https://beta.talentprotocol.com/u/${address}`
   },
   [SocialProfileType.FARCASTER]: {
     name: "Farcaster",
     icon: <Image width={20} height={20} src={FARCASTER_LOGO} alt="Farcaster logo" />,
     url: (username: string) => `https://warpcast.com/${username}`
   },
-  [SocialProfileType.TALENT_PROTOCOL]: {
-    name: "Talent Protocol",
-    icon: <Image width={20} height={20} src={TALENT_PROTOCOL_LOGO} alt="Talent Protocol logo" />,
-    url: (_: string, address: string) => `https://beta.talentprotocol.com/u/${address}`
+  [SocialProfileType.LENS]: {
+    name: "Lens",
+    icon: <Image width={20} height={20} src={LENS_LOGO} alt="Lens logo" />,
+    url: (username: string) => `https://hey.xyz/u/${username.replace("lens/@", "")}`
   },
   [SocialProfileType.ENS]: {
     name: "ENS",
@@ -43,13 +44,31 @@ const socialInfo = {
     url: (username: string) => `https://app.ens.domains/${username}`
   }
 };
+const socialsOrder = Object.keys(socialInfo);
 
 export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState }) => {
-  const { refetch } = useUserContext();
+  const { refetch, user } = useUserContext();
   const { hasKeys, holders, ownedKeysCount, supporterNumber } = useProfileContext();
+
+  const refetchAll = async () => {
+    await refetch();
+    await socialData.refetch();
+  };
+
+  const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
 
   const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData.address);
   const refreshData = useRefreshCurrentUser();
+
+  const handleLinkOrRefreshWallet = async () => {
+    if (user?.socialWallet) {
+      await refreshData.mutateAsync();
+      await refetchAll();
+      toast.success("Profile info imported from Talent Protocol/Farcaster/Lens/ENS");
+    } else {
+      linkWallet(refetchAll);
+    }
+  };
   return (
     <>
       <Flex y gap2 p={2}>
@@ -80,32 +99,14 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
           </Flex>
         </Flex>
         <Flex x yc gap1>
-          <Flex y>
-            <Flex x yc>
-              {socialData.hasDisplayName ? (
-                <Typography level="h3">
-                  <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
-                </Typography>
-              ) : (
-                <WalletAddress address={socialData.address} level="h3" removeCopyButton={!isOwnProfile} />
-              )}
-              {isOwnProfile && (
-                <>
-                  <IconButton
-                    disabled={refreshData.isLoading}
-                    onClick={() =>
-                      refreshData
-                        .mutateAsync()
-                        .then(() => refetch())
-                        .then(() => toast.success("Profile refreshed"))
-                    }
-                  >
-                    <Refresh />
-                    <Typography level="body-sm">Refresh social data</Typography>
-                  </IconButton>
-                </>
-              )}
-            </Flex>
+          <Flex y fullwidth>
+            {socialData.hasDisplayName ? (
+              <Typography level="h3">
+                <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
+              </Typography>
+            ) : (
+              <WalletAddress address={socialData.address} level="h3" removeCopyButton={!isOwnProfile} />
+            )}
             {/* Only display if user has a display name */}
             <Flex x yc gap={0.5} height="20px">
               <Typography level="body-sm" startDecorator={<KeyOutlined fontSize="small" />}>
@@ -121,21 +122,37 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
           </Flex>
         </Flex>
 
+        {isOwnProfile && (
+          <Button
+            sx={{ alignSelf: "flex-start" }}
+            variant="soft"
+            loading={user?.socialWallet ? refreshData.isLoading : isLoadingLinkWallet}
+            onClick={handleLinkOrRefreshWallet}
+          >
+            <Typography level="body-sm">
+              {user?.socialWallet ? "Refresh social data" : "Connect web3 socials"}
+            </Typography>
+          </Button>
+        )}
+
         <Flex x gap2 flexWrap={"wrap"}>
-          {socialData.socialsList.map(social => {
-            const additionalData = socialInfo[social.dappName as keyof typeof socialInfo];
-            return (
-              <JoyLink
-                key={social.dappName}
-                href={additionalData.url(social.profileName, socialData.socialAddress || "")}
-                target="_blank"
-                startDecorator={additionalData.icon}
-                textColor={"link"}
-              >
-                {social.profileName}
-              </JoyLink>
-            );
-          })}
+          {socialData.socialsList
+            .sort((a, b) => {
+              return socialsOrder.indexOf(a.dappName) - socialsOrder.indexOf(b.dappName);
+            })
+            .map(social => {
+              const additionalData = socialInfo[social.dappName as keyof typeof socialInfo];
+              return (
+                <JoyLink
+                  key={social.dappName}
+                  href={additionalData.url(social.profileName, socialData.socialAddress || "")}
+                  target="_blank"
+                  textColor={"link"}
+                >
+                  {additionalData.icon}
+                </JoyLink>
+              );
+            })}
         </Flex>
 
         {ownedKeysCount === 0 ? (
