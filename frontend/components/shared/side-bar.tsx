@@ -3,11 +3,13 @@ import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE, LOGO } from "@/lib/assets";
+import { FAQ_LINK } from "@/lib/constants";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
   Cable,
+  Help,
   Logout,
   PersonOutlineOutlined,
   Refresh,
@@ -36,6 +38,7 @@ import { FC, useMemo } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 import { ParachuteIcon } from "../icons/parachute";
+import { AddToHomePage } from "./add-to-home-page";
 import { Flex } from "./flex";
 import { WalletAddress } from "./wallet-address";
 
@@ -85,7 +88,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         hidden: !user?.isAdmin
       },
       {
-        text: "Link wallet",
+        text: "Connect Web3 Socials",
         icon: isLoadingLinkWallet ? <CircularProgress size="sm" /> : <Cable />,
         onClick: () => linkWallet()
       }
@@ -190,6 +193,14 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           ))}
         <Divider sx={{ my: 1 }} />
         <ListItem>
+          <ListItemButton onClick={() => window.open(FAQ_LINK)}>
+            <ListItemIcon>
+              <Help />
+            </ListItemIcon>
+            <ListItemText primary="FAQ" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
           <ListItemButton
             onClick={() => {
               handleLogout();
@@ -217,15 +228,8 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             </>
           </Typography>
         </div>
+        <AddToHomePage />
         <Flex x gap2>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              window.open("https://talentprotocol.notion.site/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39?pvs=4")
-            }
-          >
-            FAQ
-          </Button>
           <Button variant="soft" onClick={() => window.open("https://t.me/+7FGAfQx66Z8xOThk")}>
             Give Feedback
           </Button>

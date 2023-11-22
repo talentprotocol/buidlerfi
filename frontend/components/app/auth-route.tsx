@@ -1,18 +1,26 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetHolders } from "@/hooks/useBuilderFiApi";
+import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
+import { BUILDERFI_CONTRACT } from "@/lib/constants";
 import { CircularProgress } from "@mui/joy";
 import { usePathname } from "next/navigation";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { parseEther } from "viem";
+import { useContractRead } from "wagmi";
 import { Flex } from "../shared/flex";
 
 export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
-  const holders = useGetHolders();
   const user = useUserContext();
   const pathname = usePathname();
   const router = useBetterRouter();
+  const { data: supporterKeys } = useContractRead({
+    address: BUILDERFI_CONTRACT.address,
+    abi: builderFIV1Abi,
+    functionName: "builderKeysBalance",
+    args: [user.user?.wallet as `0x${string}`, user.user?.wallet as `0x${string}`],
+    enabled: !!user.user?.wallet
+  });
 
   const redirect = useCallback(
     (path: string) => {
@@ -33,17 +41,21 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   }, [redirect, user.isAuthenticatedAndActive, user.privyUser]);
 
   const handleOnboardingRedirect = useCallback(() => {
-    if (user.balance !== undefined && user.balance < parseEther("0.001")) {
-      return redirect("/onboarding/fund");
+    if (user.balance !== undefined && user.balance < parseEther("0.0005")) {
+      const { pathname } = window.location;
+
+      if (pathname.includes("fund") || pathname.includes("loading")) return;
+
+      return redirect("/onboarding/welcome");
+    } else if (Number(supporterKeys) === 0) {
+      return redirect("/onboarding/buykey");
     } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
     } else if (!user.user?.displayName && user.user?.socialProfiles.length === 0) {
       return redirect("/onboarding/username");
-    } else if (!holders.data?.length) {
-      return redirect("/onboarding/buykey");
     }
   }, [
-    holders.data?.length,
+    supporterKeys,
     redirect,
     router,
     user.balance,

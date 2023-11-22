@@ -4,7 +4,7 @@ import { PageMessage } from "@/components/shared/page-message";
 import { useGetQuestions, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { BUILDERFI_CONTRACT } from "@/lib/constants";
+import { BUILDERFI_CONTRACT, MAX_QUESTION_SIZE } from "@/lib/constants";
 import theme from "@/theme";
 import { Chat, KeyOutlined, LockOpen, LockOutlined } from "@mui/icons-material";
 import { Button, CircularProgress, Textarea, Typography } from "@mui/joy";
@@ -36,6 +36,7 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
 
   const postQuestion = usePostQuestion();
 
+  // TODO: is this relevant still?
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
 
   const sendQuestion = async () => {
@@ -99,12 +100,12 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
             <Textarea
               value={chatValue}
               onChange={e => setChatValue(e.target.value)}
-              error={chatValue.length > 500}
+              error={chatValue.length > MAX_QUESTION_SIZE}
               placeholder={`Ask a question to ${socialData.name}`}
               sx={{ flexGrow: 1 }}
             />
             <Button
-              disabled={chatValue.length > 500}
+              disabled={chatValue.length > MAX_QUESTION_SIZE}
               className="appearance-none"
               loading={postQuestion.isLoading}
               onClick={() => sendQuestion()}
@@ -112,7 +113,9 @@ export const ChatTab: FC<Props> = ({ socialData, isOwnProfile, onBuyKeyClick }) 
               Ask
             </Button>
           </Flex>
-          <Typography level="body-sm">{chatValue.length}/500</Typography>
+          <Typography level="body-sm">
+            {chatValue.length}/{MAX_QUESTION_SIZE}
+          </Typography>
         </Flex>
       )}
       <Flex y grow>

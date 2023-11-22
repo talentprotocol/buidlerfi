@@ -10,6 +10,10 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
     }
 
+    if (questionContent.length > 280) {
+      return Response.json({ error: ERRORS.QUESTION_TOO_LONG }, { status: 400 });
+    }
+
     const questioner = await prisma.user.findUnique({ where: { privyUserId: req.headers.get("privyUserId")! } });
     const replier = await prisma.user.findUnique({ where: { wallet: replierWallet.toLowerCase() } });
     if (!questioner || !replier) {

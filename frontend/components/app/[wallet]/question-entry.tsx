@@ -47,6 +47,8 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
   const contentForAnswer = () => {
     if (ownsKeys) {
       return question.reply || "Waiting for answer";
+    } else if (question.repliedOn) {
+      return "Hold a key so you are notified when an answer is given";
     } else {
       return "Hold at least one key to access the answers";
     }
@@ -76,7 +78,13 @@ export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialD
               </Typography>
               <Typography level="body-sm">{format(question.createdAt, "MMM dd,yyyy")}</Typography>
             </Flex>
-            <Typography fontWeight={300} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
+            <Typography
+              fontWeight={300}
+              level="body-sm"
+              whiteSpace="pre-line"
+              textColor={"neutral.800"}
+              textTransform={"none"}
+            >
               {question.questionContent}
             </Typography>
           </Flex>

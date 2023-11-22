@@ -1,3 +1,5 @@
+import { MAX_QUESTION_SIZE } from "./constants";
+
 export const ERRORS = {
   UNAUTHORIZED: "Unauthorized",
   INVALID_INVITE_CODE: "Invalid invite code",
@@ -15,5 +17,6 @@ export const ERRORS = {
   USERNAME_INVALID_FORMAT:
     "Username should contain between 3 and 20 alphanumeric characters or underscores, and start with a letter",
   CHALLENGE_EXPIRED: "Challenge expired",
-  INVALID_SIGNATURE: "Invalid signature"
+  INVALID_SIGNATURE: "Invalid signature",
+  QUESTION_TOO_LONG: `Question too long. Maximum ${MAX_QUESTION_SIZE} characters`
 } as const;

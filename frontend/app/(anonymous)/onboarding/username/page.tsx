@@ -13,6 +13,7 @@ export default function UsernamePage() {
   const { refetch } = useUserContext();
   const [username, setUsername] = useState("");
   const updateUser = useUpdateUser();
+
   return (
     <Flex y gap3>
       <Flex y>
@@ -31,9 +32,9 @@ export default function UsernamePage() {
       <Button
         onClick={() =>
           updateUser
-            .mutateAsync({ displayName: username })
+            .mutateAsync({ displayName: username, hasFinishedOnboarding: true })
             .then(() => refetch())
-            .then(() => router.refresh())
+            .then(() => router.replace("/home"))
         }
       >
         Continue

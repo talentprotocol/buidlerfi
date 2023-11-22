@@ -3,24 +3,15 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
-import { useUpdateUser } from "@/hooks/useUserApi";
 import { Button, Typography } from "@mui/joy";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 export default function BuyKeyPage() {
   const router = useRouter();
-  const { address, refetch } = useUserContext();
+  const { address } = useUserContext();
   const { buyPriceAfterFee } = useGetBuilderInfo(address!);
-  const updateUser = useUpdateUser();
 
-  const finishOnboarding = useMutation(async () => {
-    await updateUser.mutateAsync({ hasFinishedOnboarding: true });
-    await refetch();
-    router.replace("/welcome");
-  });
-
-  const tx = useTradeKey("buy", finishOnboarding.mutate);
+  const tx = useTradeKey("buy", () => router.replace("/onboarding/linkwallet"));
 
   const handleBuy = () => {
     tx.executeTx({ args: [address!], value: buyPriceAfterFee });
@@ -39,9 +30,6 @@ export default function BuyKeyPage() {
       </Flex>
       <Flex y gap1>
         <Button onClick={handleBuy}>Create key</Button>
-        <Button loading={finishOnboarding.isLoading} onClick={() => finishOnboarding.mutate()} variant="plain">
-          Skip
-        </Button>
       </Flex>
     </Flex>
   );

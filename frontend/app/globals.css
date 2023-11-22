@@ -2,3 +2,12 @@
 * {
 	text-transform: lowercase !important;
 }
+
+@keyframes revealKey {
+	from {
+		width: 0;
+	}
+	to {
+		width: 100%;
+	}
+}

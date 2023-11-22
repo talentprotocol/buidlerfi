@@ -17,6 +17,14 @@ export function HolderItem({ address, numberOfKeys, holderNumber }: Props) {
 
   const socialData = useSocialData(address);
 
+  const keysPlural = () => {
+    if (numberOfKeys != 1) {
+      return "keys";
+    } else {
+      return "key";
+    }
+  };
+
   return (
     <Flex
       x
@@ -36,7 +44,7 @@ export function HolderItem({ address, numberOfKeys, holderNumber }: Props) {
             <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
           </Typography>
           <Typography textColor={"neutral.600"} level="body-sm">
-            {numberOfKeys} keys • Holder {`#${holderNumber}`}
+            {numberOfKeys} {keysPlural()} • Holder {`#${holderNumber}`}
           </Typography>
         </Flex>
       </Flex>
