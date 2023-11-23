@@ -151,11 +151,15 @@ model RecommendedUser {
   for   User @relation(fields: [forId], references: [id])
   forId Int
 
-  user      User?   @relation(fields: [userId], references: [id], name: "recommendationTarget")
-  userId    Int?
-  wallet    String
-  avatarUrl String?
-  name      String?
+  user           User?   @relation(fields: [userId], references: [id], name: "recommendationTarget")
+  userId         Int?
+  wallet         String
+  avatarUrl      String?
+  name           String?
+  ens            String?
+  farcaster      String?
+  lens           String?
+  talentProtocol String?
 
   recommendationScore Int
 
