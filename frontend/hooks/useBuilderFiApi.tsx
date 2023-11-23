@@ -59,7 +59,6 @@ export const useOnchainUsers = () => {
   };
 
   const nextPage = async () => {
-    console.log("try nextpage");
     if (isLoading || !hasMoreUsers) return;
 
     setIsLoading(true);
