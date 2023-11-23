@@ -40,7 +40,7 @@ model User {
   updatedAt        DateTime           @updatedAt
   SigningChallenge SigningChallenge[]
   recommendedTo    RecommendedUser[]  @relation("recommendationTarget")
-  recommendedUsers RecommendedUser[]
+  recommendedUsers RecommendedUser[]  @relation("recommendationSource")
 }
 
 enum SocialProfileType {
@@ -148,14 +148,13 @@ model Points {
 
 model RecommendedUser {
   id    Int  @id @default(autoincrement())
-  for   User @relation(fields: [forId], references: [id])
+  for   User @relation(fields: [forId], references: [id], name: "recommendationSource")
   forId Int
 
   user           User?   @relation(fields: [userId], references: [id], name: "recommendationTarget")
   userId         Int?
   wallet         String
   avatarUrl      String?
-  name           String?
   ens            String?
   farcaster      String?
   lens           String?
