@@ -30,7 +30,7 @@ export default function Signup() {
       setSkip(true);
     }
     setIsInstalled(false);
-  });
+  }, []);
 
   return (
     <Flex y ysb xc height="300px">
@@ -59,7 +59,7 @@ export default function Signup() {
               2. Scroll down
             </Typography>
             <Typography level="body-sm" textColor="neutral.500">
-              3. Click "Add to Home Screen"
+              3. Click &quot;Add to Home Screen&quot;
             </Typography>
           </Flex>
           <Button variant="plain" sx={{ marginTop: 2 }} onClick={() => setSkip(true)}>

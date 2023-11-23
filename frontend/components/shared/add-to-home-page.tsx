@@ -19,7 +19,7 @@ export function AddToHomePage() {
       setIsInstalled(true);
     }
     setIsInstalled(false);
-  });
+  }, []);
 
   if (isInstalled) return null;
 
@@ -50,7 +50,7 @@ export function AddToHomePage() {
             2. Scroll down
           </Typography>
           <Typography level="body-sm" textColor="neutral.500">
-            3. Click "Add to Home Screen"
+            3. Click &quot;Add to Home Screen&quot;
           </Typography>
         </ModalDialog>
       </Modal>
