@@ -2,3 +2,4 @@
 frontend/.env
 todo.md
 frontend/.env.dev
+dumps/*
