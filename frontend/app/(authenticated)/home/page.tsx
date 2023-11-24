@@ -97,6 +97,7 @@ export default function Home() {
               ) : (
                 recommendedUsers.map(user => (
                   <UserItemInner
+                    key={user.wallet}
                     wallet={user.wallet}
                     avatarUrl={user.avatarUrl || ""}
                     displayName={
