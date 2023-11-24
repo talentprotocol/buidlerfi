@@ -55,7 +55,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
     await socialData.refetch();
   };
 
-  const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
+  const { linkWallet } = useLinkExternalWallet();
 
   const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData.address);
   const refreshData = useRefreshCurrentUser();
