@@ -66,7 +66,13 @@ export default function Home() {
           ) : (
             users.map((user, index) => (
               <div key={user.id} ref={users.length === index + 1 ? lastUserElementRef : undefined}>
-                <UserItem user={user} />
+                <UserItem
+                  user={{
+                    ...user,
+                    avatarUrl: user.avatarUrl || undefined,
+                    displayName: user.displayName || undefined
+                  }}
+                />
               </div>
             ))
           )}

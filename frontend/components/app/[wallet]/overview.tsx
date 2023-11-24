@@ -5,7 +5,6 @@ import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
-import { SocialData } from "@/hooks/useSocialData";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
 import { formatEth } from "@/lib/utils";
@@ -17,8 +16,6 @@ import { FC } from "react";
 import { toast } from "react-toastify";
 
 interface Props {
-  socialData: SocialData;
-  isOwnProfile: boolean;
   setBuyModalState: (state: "closed" | "buy" | "sell") => void;
 }
 
@@ -46,9 +43,9 @@ const socialInfo = {
 };
 const socialsOrder = Object.keys(socialInfo);
 
-export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState }) => {
+export const Overview: FC<Props> = ({ setBuyModalState }) => {
   const { refetch, user } = useUserContext();
-  const { hasKeys, holders, ownedKeysCount, supporterNumber } = useProfileContext();
+  const { hasKeys, holders, ownedKeysCount, supporterNumber, isOwnProfile, socialData } = useProfileContext();
 
   const refetchAll = async () => {
     await refetch();
@@ -57,7 +54,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
 
   const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
 
-  const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData.address);
+  const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData.wallet);
   const refreshData = useRefreshCurrentUser();
 
   const handleLinkOrRefreshWallet = async () => {
@@ -82,7 +79,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
     <>
       <Flex y gap2 p={2}>
         <Flex x xsb mb={-1}>
-          <Avatar size="lg" src={socialData.avatar}>
+          <Avatar size="lg" src={socialData.avatarUrl}>
             <Skeleton loading={socialData.isLoading} />
           </Avatar>
           <Flex x yc gap1>
@@ -111,10 +108,10 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
           <Flex y fullwidth>
             {socialData.hasDisplayName ? (
               <Typography level="h3">
-                <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
+                <Skeleton loading={socialData.isLoading}>{socialData.displayName}</Skeleton>
               </Typography>
             ) : (
-              <WalletAddress address={socialData.address} level="h3" removeCopyButton={!isOwnProfile} />
+              <WalletAddress address={socialData.wallet} level="h3" removeCopyButton={!isOwnProfile} />
             )}
             {/* Only display if user has a display name */}
             <Flex x yc gap={0.5} height="20px">
@@ -124,7 +121,7 @@ export const Overview: FC<Props> = ({ socialData, isOwnProfile, setBuyModalState
               {socialData.hasDisplayName && (
                 <>
                   •
-                  <WalletAddress address={socialData.address} level="body-sm" removeCopyButton={!isOwnProfile} />
+                  <WalletAddress address={socialData.wallet} level="body-sm" removeCopyButton={!isOwnProfile} />
                 </>
               )}
             </Flex>

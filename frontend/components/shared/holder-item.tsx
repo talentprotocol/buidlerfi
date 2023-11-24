@@ -36,12 +36,12 @@ export function HolderItem({ address, numberOfKeys, holderNumber }: Props) {
       onClick={() => router.push(`/profile/${address}`)}
     >
       <Flex x yc gap2>
-        <Avatar size="sm" src={socialData.avatar}>
+        <Avatar size="sm" src={socialData.avatarUrl}>
           <Skeleton loading={socialData.isLoading} />
         </Avatar>
         <Flex y gap={0.5}>
           <Typography textColor={"neutral.800"} fontWeight={600} level="body-sm">
-            <Skeleton loading={socialData.isLoading}>{socialData.name}</Skeleton>
+            <Skeleton loading={socialData.isLoading}>{socialData.displayName}</Skeleton>
           </Typography>
           <Typography textColor={"neutral.600"} level="body-sm">
             {numberOfKeys} {keysPlural()} • Holder {`#${holderNumber}`}

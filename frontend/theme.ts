@@ -4,6 +4,9 @@ declare module "@mui/joy/styles" {
   interface Palette {
     link: string;
   }
+  interface TypographySystemOverrides {
+    helper: true;
+  }
 }
 
 const theme = extendTheme({
@@ -27,6 +30,12 @@ const theme = extendTheme({
     },
     dark: {
       palette: {}
+    }
+  },
+  typography: {
+    helper: {
+      color: "var(--joy-palette-neutral-600)",
+      fontSize: "var(--joy-fontSize-sm)"
     }
   },
   components: {

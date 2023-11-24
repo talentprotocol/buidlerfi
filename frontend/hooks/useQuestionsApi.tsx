@@ -1,34 +1,35 @@
-import { ApiResponse } from "@/models/apiResponse.model";
-import { Prisma } from "@prisma/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  addReactionSA,
+  createQuestionSA,
+  deleteReactionSA,
+  getQuestionSA,
+  getQuestionsSA
+} from "@/backend/question/questionServerActions";
+import { ReactionType } from "@prisma/client";
+import { useMutation } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
+import { useMutationSA } from "./useMutationSA";
+import { useQuerySA } from "./useQuerySA";
 
-export type GetQuestionsResponse = Prisma.QuestionGetPayload<{
-  include: { questioner: true; reactions: true; comments: true };
-}>;
+export const useGetQuestion = (id?: number) => {
+  return useQuerySA(["useGetQuestion", id], options => getQuestionSA(id!, options), {
+    enabled: !!id
+  });
+};
 
-export const useGetQuestions = (replierWallet?: string, questionerWallet?: string) => {
-  const axios = useAxios();
-  return useQuery(
-    ["useGetQuestions", questionerWallet, replierWallet],
-    () =>
-      axios
-        .get<ApiResponse<GetQuestionsResponse[]>>(`/api/questions`, { params: { questionerWallet, replierWallet } })
-        .then(res => res.data.data),
-    { enabled: !!replierWallet }
+export const useGetQuestions = (userId?: number) => {
+  return useQuerySA(
+    ["useGetQuestions", userId],
+    options => getQuestionsSA(userId!, options),
+
+    { enabled: !!userId }
   );
 };
 
-interface PostQuestionParams {
-  questionContent: string;
-  replierWallet: string;
-}
-
 export const usePostQuestion = () => {
-  const axios = useAxios();
-  return useMutation((params: PostQuestionParams) => {
-    return axios.post("/api/questions", params);
-  });
+  return useMutationSA((options, params: { replierId: number; questionContent: string }) =>
+    createQuestionSA(params.questionContent, params.replierId, options)
+  );
 };
 
 interface PutQuestionParams {
@@ -41,4 +42,16 @@ export const usePutQuestion = () => {
   return useMutation((params: PutQuestionParams) => {
     return axios.put(`/api/questions/${params.id}`, params);
   });
+};
+
+export const useAddReaction = () => {
+  return useMutationSA((options, params: { questionId: number; reactionType: ReactionType }) =>
+    addReactionSA(params.questionId, params.reactionType, options)
+  );
+};
+
+export const useDeleteReaction = () => {
+  return useMutationSA((options, params: { questionId: number; reactionType: ReactionType }) =>
+    deleteReactionSA(params.questionId, params.reactionType, options)
+  );
 };

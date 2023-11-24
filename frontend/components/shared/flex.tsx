@@ -39,6 +39,7 @@ interface Props extends BoxProps {
   loading?: boolean;
   fullwidth?: boolean;
   basis?: string;
+  pointer?: boolean;
 }
 
 const Flex = forwardRef<HTMLDivElement, Props>(
@@ -67,6 +68,7 @@ const Flex = forwardRef<HTMLDivElement, Props>(
       grow,
       loading,
       basis,
+      pointer,
       ...rest
     },
     ref
@@ -120,6 +122,10 @@ const Flex = forwardRef<HTMLDivElement, Props>(
 
     if (basis) {
       style.flexBasis = basis;
+    }
+
+    if (pointer) {
+      style.cursor = "pointer";
     }
 
     return (

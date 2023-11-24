@@ -1,4 +1,5 @@
 "use client";
+import { AskQuestionModal } from "@/components/app/[wallet]/ask-question-modal";
 import { ChatTab } from "@/components/app/[wallet]/chat-tab";
 import { Overview } from "@/components/app/[wallet]/overview";
 import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
@@ -9,26 +10,27 @@ import { UserItemFromAddress } from "@/components/shared/user-item";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
-import { useSocialData } from "@/hooks/useSocialData";
 import { isEVMAddress, tryParseBigInt } from "@/lib/utils";
-import { Chat, Lock } from "@mui/icons-material";
-import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { Add, Chat, Lock } from "@mui/icons-material";
+import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useMemo, useState } from "react";
-import { useAccount } from "wagmi";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
-  const { address } = useAccount();
-  const socialData = useSocialData(params.wallet);
+  const {
+    hasKeys,
+    holders,
+    ownedKeysCount,
+    refetch: refetchProfileInfo,
+    socialData,
+    isOwnProfile
+  } = useProfileContext();
 
   const holdings = useGetHoldings(params.wallet);
 
-  const isOwnProfile = address?.toLowerCase() === socialData?.address?.toLowerCase();
-
-  const { sellPrice, refetch, buyPriceAfterFee } = useGetBuilderInfo(socialData.address);
+  const { sellPrice, refetch, buyPriceAfterFee } = useGetBuilderInfo(socialData?.wallet);
 
   const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
-
-  const { hasKeys, holders, ownedKeysCount, refetch: refetchProfileInfo } = useProfileContext();
+  const [isAskingQuestion, setIsAskingQuestion] = useState(false);
 
   const isValidWallet = useMemo(() => {
     return isEVMAddress(params.wallet);
@@ -58,6 +60,17 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   return (
     <Flex component={"main"} y grow gap2>
+      {hasKeys && !isOwnProfile && (
+        <Button
+          sx={{ zIndex: 3, position: "absolute", bottom: "16px", right: "16px", height: "48px", width: "48px" }}
+          onClick={() => setIsAskingQuestion(true)}
+        >
+          <Add fontSize="small" />
+        </Button>
+      )}
+      {isAskingQuestion && (
+        <AskQuestionModal refetch={() => refetchProfileInfo()} close={() => setIsAskingQuestion(false)} />
+      )}
       {buyModalState !== "closed" && (
         <TradeKeyModal
           supporterKeysCount={ownedKeysCount || 0}
@@ -71,11 +84,11 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
             await refetchProfileInfo();
             setBuyModalState("closed");
           }}
-          targetBuilderAddress={socialData.address}
+          targetBuilderAddress={socialData.wallet}
         />
       )}
 
-      <Overview setBuyModalState={setBuyModalState} socialData={socialData} isOwnProfile={isOwnProfile} />
+      <Overview setBuyModalState={setBuyModalState} />
       <Tabs defaultValue={"chat"}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
           <Tab value="chat">Q&A</Tab>
@@ -83,7 +96,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
           <Tab value="holding">Holding{holdingNumber()}</Tab>
         </TabList>
         <TabPanel value="chat" sx={{ p: 0 }}>
-          <ChatTab socialData={socialData} isOwnProfile={isOwnProfile} onBuyKeyClick={() => setBuyModalState("buy")} />
+          <ChatTab onBuyKeyClick={() => setBuyModalState("buy")} />
         </TabPanel>
         <TabPanel value="holding">
           {holdings.data?.length === 0 && isOwnProfile && (

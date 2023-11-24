@@ -28,6 +28,10 @@ export const useBetterRouter = () => {
           ([key, value]) => key && value && ((url as CustomUrl).searchParams![key] = value)
         );
       }
+      //It means it's a relative path. Prepend the current route
+      if (url.pathname.startsWith("./")) {
+        url.pathname = pathname + url.pathname.substring(1);
+      }
       if (Object.entries(url.searchParams!).length === 0) return url.pathname;
       else return `${url.pathname}?${convertParamsToString(url.searchParams!)}`;
     },

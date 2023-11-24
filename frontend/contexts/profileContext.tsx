@@ -1,6 +1,8 @@
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
+import { useGetQuestions } from "@/hooks/useQuestionsApi";
+import { SocialData, useSocialData } from "@/hooks/useSocialData";
 import { useParams } from "next/navigation";
-import { ReactNode, createContext, useContext, useMemo } from "react";
+import { ReactNode, createContext, useCallback, useContext, useMemo } from "react";
 import { useAccount } from "wagmi";
 
 interface ProfileContextType {
@@ -10,6 +12,9 @@ interface ProfileContextType {
   hasKeys: boolean;
   isLoading: boolean;
   refetch: () => Promise<unknown>;
+  socialData: SocialData;
+  isOwnProfile: boolean;
+  questions: ReturnType<typeof useGetQuestions>["data"];
 }
 
 const ProfileContext = createContext<ProfileContextType>({
@@ -18,7 +23,20 @@ const ProfileContext = createContext<ProfileContextType>({
   ownedKeysCount: 0,
   supporterNumber: 0,
   isLoading: true,
-  refetch: () => Promise.resolve()
+  refetch: () => Promise.resolve(),
+  questions: [],
+  socialData: {
+    userId: 0,
+    wallet: "0x",
+    avatarUrl: "",
+    hasDisplayName: false,
+    isLoading: true,
+    displayName: "",
+    refetch: () => Promise.resolve(),
+    socialAddress: "",
+    socialsList: []
+  },
+  isOwnProfile: false
 });
 
 export const useProfileContext = () => useContext(ProfileContext);
@@ -26,6 +44,12 @@ export const useProfileContext = () => useContext(ProfileContext);
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const { address } = useAccount();
   const { wallet } = useParams();
+  const socialData = useSocialData(wallet as `0x${string}`);
+  const {
+    data: questions,
+    refetch: refetchQuestions,
+    isLoading: isQuestionsLoading
+  } = useGetQuestions(socialData.userId);
   const { data: holders, isLoading, refetch } = useGetHolders(wallet as `0x${string}`);
   const [supporterNumber, ownedKeysCount] = useMemo(() => {
     if (!holders) return [undefined, undefined];
@@ -42,16 +66,35 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     [holders]
   );
 
+  const refetchAll = useCallback(async () => {
+    await Promise.all([refetch(), refetchQuestions()]);
+  }, [refetch, refetchQuestions]);
+
   const value = useMemo(() => {
     return {
       holders: sortedHolders,
       supporterNumber: supporterNumber,
       ownedKeysCount: ownedKeysCount || 0,
       hasKeys,
-      isLoading,
-      refetch
+      isLoading: isLoading || isQuestionsLoading,
+      questions,
+      refetch: refetchAll,
+      socialData,
+      isOwnProfile: address?.toLowerCase() === (wallet as string).toLowerCase()
     };
-  }, [hasKeys, holders, isLoading, ownedKeysCount, supporterNumber, refetch]);
+  }, [
+    sortedHolders,
+    supporterNumber,
+    ownedKeysCount,
+    hasKeys,
+    isLoading,
+    isQuestionsLoading,
+    questions,
+    refetchAll,
+    socialData,
+    address,
+    wallet
+  ]);
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 };

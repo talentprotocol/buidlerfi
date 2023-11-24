@@ -78,6 +78,7 @@ model Question {
   repliedOn       DateTime?
   comments        Comment[]
   reactions       Reaction[]
+  replyReactions  Reaction[] @relation("ReplyReaction")
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -97,28 +98,26 @@ model Comment {
 }
 
 enum ReactionType {
+  UPVOTE
+  DOWNVOTE
   LIKE
-  DISLIKE
-  LOVE
-  HATE
-  LAUGH
-  CRY
-  ANGRY
-  SURPRISED
 }
 
 model Reaction {
   reactionType ReactionType
   user         User         @relation(fields: [userId], references: [id])
   userId       Int
-  question     Question     @relation(fields: [questionId], references: [id])
-  questionId   Int
+  question     Question?    @relation(fields: [questionId], references: [id])
+  questionId   Int?
+  reply        Question?    @relation(fields: [replyId], references: [id], name: "ReplyReaction")
+  replyId      Int?
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([userId, questionId])
+  @@unique([userId, replyId])
 }
 
 model InviteCode {

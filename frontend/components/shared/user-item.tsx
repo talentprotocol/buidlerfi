@@ -1,64 +1,74 @@
 "use client";
-import { UserWithOnchainData } from "@/hooks/useBuilderFiApi";
 import { useSocialData } from "@/hooks/useSocialData";
-import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { formatToDisplayString, shortAddress } from "@/lib/utils";
+import { formatToDisplayString } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
-import { Skeleton, Typography } from "@mui/joy";
+import { Skeleton, Typography, TypographySystem } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { Flex } from "./flex";
 
-export const UserItem: FC<{ user: UserWithOnchainData }> = ({ user }) => {
+interface CommonProps {
+  px?: number;
+  py?: number;
+  isButton?: boolean;
+  nameLevel?: keyof TypographySystem;
+}
+
+interface UserItemProps extends CommonProps {
+  user: {
+    wallet: string;
+    avatarUrl?: string;
+    displayName?: string;
+    isLoading?: boolean;
+    buyPrice?: string | bigint;
+    numberOfHolders?: string | number;
+  };
+}
+
+export const UserItem: FC<UserItemProps> = ({ user, ...props }) => {
   return (
     <UserItemInner
-      address={user.wallet}
-      avatar={user.avatarUrl || DEFAULT_PROFILE_PICTURE}
-      name={user.displayName || shortAddress(user.wallet)}
-      buyPrice={BigInt(user.buyPrice)}
+      {...user}
+      {...props}
+      buyPrice={BigInt(user.buyPrice || "0")}
       numberOfHolders={Number(user.numberOfHolders)}
     />
   );
 };
 
-interface Props {
+interface Props extends CommonProps {
   address: `0x${string}`;
   numberOfHolders?: number;
   buyPrice?: bigint;
 }
 
-export const UserItemFromAddress: FC<Props> = ({ address, numberOfHolders, buyPrice }) => {
+export const UserItemFromAddress: FC<Props> = ({ address, numberOfHolders, buyPrice, ...props }) => {
   const socialData = useSocialData(address);
 
-  return (
-    <UserItemInner
-      address={socialData.address}
-      avatar={socialData.avatar}
-      buyPrice={buyPrice}
-      isLoading={socialData.isLoading}
-      name={socialData.name}
-      numberOfHolders={numberOfHolders}
-    />
-  );
+  return <UserItemInner {...socialData} {...props} buyPrice={buyPrice} numberOfHolders={numberOfHolders} />;
 };
 
-interface UserItemInnerProps {
-  address: string;
-  avatar: string;
-  name: string;
+interface UserItemInnerProps extends CommonProps {
+  wallet: string;
+  avatarUrl?: string;
+  displayName?: string;
   isLoading?: boolean;
   buyPrice?: bigint;
   numberOfHolders?: number;
 }
 
-export const UserItemInner: FC<UserItemInnerProps> = ({
-  address,
-  avatar,
-  name,
+const UserItemInner: FC<UserItemInnerProps> = ({
+  wallet: address,
+  avatarUrl: avatar,
+  displayName: name,
   isLoading = false,
   buyPrice,
-  numberOfHolders
+  numberOfHolders,
+  px = 2,
+  py = 1,
+  isButton = true,
+  nameLevel = "body-sm"
 }) => {
   const router = useRouter();
   return (
@@ -66,17 +76,26 @@ export const UserItemInner: FC<UserItemInnerProps> = ({
       x
       xsb
       yc
-      py={1}
-      px={2}
-      sx={{ cursor: "pointer", ":hover": { backgroundColor: "neutral.100" } }}
-      onClick={() => router.push(`/profile/${address}`)}
+      py={py}
+      px={px}
+      sx={{
+        cursor: isButton ? "pointer" : undefined,
+        ":hover": { backgroundColor: isButton ? "neutral.100" : undefined }
+      }}
+      onClick={isButton ? () => router.push(`/profile/${address}`) : undefined}
     >
       <Flex x yc gap2>
-        <Avatar size="sm" src={avatar}>
+        <Avatar size="sm" src={avatar} sx={{ cursor: "pointer" }} onClick={() => router.push(`/profile/${address}`)}>
           <Skeleton loading={isLoading} />
         </Avatar>
-        <Flex y gap={0.5}>
-          <Typography textColor={"neutral.800"} fontWeight={600} level="body-sm">
+        <Flex y>
+          <Typography
+            textColor={"neutral.800"}
+            fontWeight={600}
+            level={nameLevel}
+            sx={{ cursor: "pointer" }}
+            onClick={() => router.push(`/profile/${address}`)}
+          >
             <Skeleton loading={isLoading}>{name}</Skeleton>
           </Typography>
           {numberOfHolders !== undefined && buyPrice !== undefined && (
@@ -86,7 +105,7 @@ export const UserItemInner: FC<UserItemInnerProps> = ({
           )}
         </Flex>
       </Flex>
-      <ChevronRight />
+      {isButton && <ChevronRight />}
     </Flex>
   );
 };

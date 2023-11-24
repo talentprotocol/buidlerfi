@@ -1,6 +1,7 @@
 "use client";
 import { AuthRoute } from "@/components/app/auth-route";
 import { Flex } from "@/components/shared/flex";
+import { DialogContainer } from "@/contexts/DialogContainer";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
 import { LOGO } from "@/lib/assets";
@@ -59,6 +60,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
             <LayoutContextProvider>{mounted && <InnerProviders>{children}</InnerProviders>}</LayoutContextProvider>
           </QueryClientProvider>
           <ToastContainer />
+          <DialogContainer />
         </CssVarsProvider>
       </MaterialCssVarsProvider>
     </Flex>

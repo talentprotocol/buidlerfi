@@ -1,158 +1,75 @@
 import { Flex } from "@/components/shared/flex";
-import { GetQuestionsResponse, usePutQuestion } from "@/hooks/useQuestionsApi";
+import { Reactions } from "@/components/shared/reactions";
+import { useProfileContext } from "@/contexts/profileContext";
+import { useDateDifferenceFromNow } from "@/hooks/useDateDifference";
+import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { shortAddress } from "@/lib/utils";
 import theme from "@/theme";
-import { KeyboardArrowDown, KeyboardArrowUp, LockOutlined } from "@mui/icons-material";
-import { Avatar, Button, Textarea, Typography } from "@mui/joy";
-import { useMediaQuery } from "@mui/material";
-import { format } from "date-fns";
-import { useRouter } from "next/navigation";
-import { FC, useLayoutEffect, useRef, useState } from "react";
+import { FileUpload } from "@mui/icons-material";
+import { Avatar, Chip, IconButton, Typography } from "@mui/joy";
+import { usePathname } from "next/navigation";
+import { FC } from "react";
+import { toast } from "react-toastify";
 
 interface Props {
-  question: GetQuestionsResponse;
+  question?: NonNullable<ReturnType<typeof useGetQuestions>["data"]>[0];
   isOwnChat: boolean;
   socialData: SocialData;
   refetch: () => void;
   index: string;
   ownsKeys: boolean;
+  onClick: () => void;
 }
-export const QuestionEntry: FC<Props> = ({ question, isOwnChat, refetch, socialData, index, ownsKeys }) => {
-  const answerRef = useRef<HTMLDivElement>(null);
-  const [isAnswerTooLong, setIsAnswerTooLong] = useState(false);
-  const [reply, setReply] = useState("");
-  const [isShowMore, setIsShowMore] = useState(false);
-  const putQuestion = usePutQuestion();
-  const router = useRouter();
+export const QuestionEntry: FC<Props> = ({ question, refetch, index, onClick }) => {
+  const { hasKeys } = useProfileContext();
+  const askedOn = useDateDifferenceFromNow(question?.createdAt || undefined);
+  const pathname = usePathname();
 
-  const replyQuestion = async () => {
-    await putQuestion.mutateAsync({
-      id: question.id,
-      answerContent: reply
-    });
-    refetch();
-  };
-
-  useLayoutEffect(() => {
-    if (!answerRef.current) return;
-    if (answerRef.current.clientWidth < answerRef.current.scrollWidth) {
-      setIsAnswerTooLong(true);
-    }
-  }, [answerRef]);
-
-  const isSm = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const contentForAnswer = () => {
-    if (ownsKeys) {
-      return question.reply || "Waiting for answer";
-    } else if (question.repliedOn) {
-      return "Hold a key so you are notified when an answer is given";
-    } else {
-      return "Hold at least one key to access the answers";
-    }
-  };
+  if (!question) return <></>;
 
   return (
-    <Flex y gap2 p={2} borderBottom={"1px solid " + theme.palette.divider}>
+    <Flex y gap2 p={2} borderBottom={"1px solid " + theme.palette.divider} onClick={onClick} pointer>
       <Flex x xsb>
         <Flex x ys gap1>
           <Avatar
             size="sm"
             sx={{ cursor: "pointer" }}
             src={question.questioner?.avatarUrl || DEFAULT_PROFILE_PICTURE}
-            onClick={() => router.push("/profile/" + question.questioner.wallet)}
           />
           <Flex y key={question.id}>
-            <Flex x yc gap1>
-              <Typography
-                fontWeight={500}
-                level="body-sm"
-                whiteSpace="pre-line"
-                textColor={"neutral.800"}
-                sx={{ cursor: "pointer" }}
-                onClick={() => router.push("/profile/" + question.questioner.wallet)}
-              >
+            <Flex x yc gap={0.5}>
+              <Typography level="title-sm" whiteSpace="pre-line" sx={{ cursor: "pointer" }}>
                 {question.questioner.displayName || shortAddress(question.questioner.wallet as `0x${string}`)}
               </Typography>
-              <Typography level="body-sm">{format(question.createdAt, "MMM dd,yyyy")}</Typography>
+              <Typography level="body-sm">•</Typography>
+              <Typography level="body-sm">{askedOn}</Typography>
+              {!question.reply && (
+                <Chip size="sm" color="neutral" variant="outlined">
+                  Waiting answer
+                </Chip>
+              )}
             </Flex>
-            <Typography
-              fontWeight={300}
-              level="body-sm"
-              whiteSpace="pre-line"
-              textColor={"neutral.800"}
-              textTransform={"none"}
-            >
+            <Typography fontWeight={400} level="body-sm" whiteSpace="pre-line" textTransform={"none"}>
               {question.questionContent}
             </Typography>
           </Flex>
         </Flex>
         <Typography level="body-sm">{index}</Typography>
       </Flex>
-      <Flex x ys gap1>
-        {ownsKeys ? (
-          <Avatar
-            size="sm"
-            src={socialData.avatar || DEFAULT_PROFILE_PICTURE}
-            sx={{ cursor: "pointer" }}
-            onClick={() => router.push("/profile/" + socialData.address)}
-          />
-        ) : (
-          <LockOutlined />
-        )}
-        {question.reply || !isOwnChat ? (
-          <Flex y sx={{ overflow: "hidden" }}>
-            {ownsKeys && (
-              <Typography
-                fontWeight={500}
-                level="body-sm"
-                whiteSpace="pre-line"
-                textColor={"neutral.800"}
-                sx={{ cursor: "pointer" }}
-                onClick={() => router.push("profile/" + question.questioner.wallet)}
-              >
-                {socialData.name || shortAddress(socialData.address as `0x${string}`)}{" "}
-              </Typography>
-            )}
-            <Typography
-              ref={answerRef}
-              sx={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: isShowMore ? "pre-line" : "nowrap"
-              }}
-              textColor={question.reply ? "neutral.800" : "neutral.400"}
-              level="body-sm"
-            >
-              {contentForAnswer()}
-            </Typography>
-            {isAnswerTooLong && ownsKeys && (
-              <Button
-                size="sm"
-                variant="plain"
-                onClick={() => setIsShowMore(curr => !curr)}
-                startDecorator={isShowMore ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                className="mt-2"
-              >
-                {isShowMore ? "Show less" : "Show more"}
-              </Button>
-            )}
-          </Flex>
-        ) : (
-          <Flex y={isSm} yc gap2 width={"100%"}>
-            <Textarea
-              sx={{ flexGrow: 1 }}
-              value={reply}
-              onChange={e => setReply(e.target.value)}
-              placeholder="Type your reply here"
-            />
-            <Button className="appearance-none" loading={putQuestion.isLoading} onClick={() => replyQuestion()}>
-              Post answer
-            </Button>
-          </Flex>
-        )}
+      <Flex x yc xsb grow>
+        {hasKeys ? <Reactions sx={{ ml: 4 }} question={question} refetch={refetch} /> : <Flex />}
+        <IconButton
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigator.clipboard.writeText(location.origin + pathname + `?question=${question.id}`);
+            toast.success("Copied share link to clipboard");
+          }}
+        >
+          <FileUpload fontSize="small" />
+        </IconButton>
       </Flex>
     </Flex>
   );
