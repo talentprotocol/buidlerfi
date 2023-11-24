@@ -10,19 +10,27 @@ import { shortAddress } from "@/lib/utils";
 import { ArrowDownward } from "@mui/icons-material";
 import { Avatar, Button, Typography } from "@mui/joy";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function CreateWallet() {
   const router = useBetterRouter();
   const { user, refetch } = useUserContext();
-  const { isLoading, linkWallet } = useLinkExternalWallet();
+  const { linkWallet } = useLinkExternalWallet();
+  const [forceLoader, setForceLoader] = useState(false);
 
   const updateUser = useUpdateUser();
 
   const finishOnboarding = useMutation(async () => {
-    await linkWallet();
-    await updateUser.mutateAsync({ hasFinishedOnboarding: true });
-    await refetch();
-    router.replace("/home");
+    setForceLoader(true);
+    try {
+      await linkWallet();
+      await updateUser.mutateAsync({ hasFinishedOnboarding: true });
+      await refetch();
+      router.replace("/home");
+      setForceLoader(false);
+    } catch {
+      setForceLoader(false);
+    }
   });
 
   return (
@@ -60,8 +68,8 @@ export default function CreateWallet() {
       </Flex>
 
       <Flex y gap1>
-        <Button loading={isLoading} onClick={() => finishOnboarding.mutate()}>
-          connect web3 social
+        <Button loading={forceLoader} onClick={() => finishOnboarding.mutate()}>
+          Import web3 social
         </Button>
         <Button
           variant="plain"

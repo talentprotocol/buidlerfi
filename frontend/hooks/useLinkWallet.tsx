@@ -17,6 +17,7 @@ export const useLinkExternalWallet = () => {
   const { connectWallet } = useConnectWallet({
     onSuccess: async wallet => {
       setWalletToSign(wallet as ConnectedWallet);
+      setIsLoading(false);
     },
     onError: () => {
       setIsLoading(false);
@@ -25,7 +26,6 @@ export const useLinkExternalWallet = () => {
 
   const linkWallet = (onSuccess?: () => Promise<void>) => {
     if (onSuccess) setSuccessCB(onSuccess);
-    setIsLoading(true);
     connectWallet();
   };
 
@@ -35,6 +35,7 @@ export const useLinkExternalWallet = () => {
       try {
         const challenge = await generateChallenge.mutateAsync(walletToSign!.address);
         if (!challenge) {
+          setIsLoading(false);
           return;
         }
         const signature = await walletToSign!.sign(challenge.message);

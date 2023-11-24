@@ -29,11 +29,11 @@ export function AddToHomePage() {
         <AddToHomeScreen />
         Add to Home Screen
       </Button>
-      <Modal open={instructionsOpen} onClose={() => setInstructionsOpen(true)}>
+      <Modal open={instructionsOpen} onClose={() => setInstructionsOpen(false)}>
         <ModalDialog minWidth="400px">
           <Flex x xsb yc>
             <DialogTitle>Add to Home Screen</DialogTitle>
-            <IconButton onClick={() => setInstructionsOpen(true)}>
+            <IconButton onClick={() => setInstructionsOpen(false)}>
               <Close />
             </IconButton>
           </Flex>
