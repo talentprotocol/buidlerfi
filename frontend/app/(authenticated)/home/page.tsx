@@ -1,11 +1,12 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
 import { PageMessage } from "@/components/shared/page-message";
-import { UserItem, UserItemFromAddress } from "@/components/shared/user-item";
+import { UserItem, UserItemInner } from "@/components/shared/user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetSocialFollowers } from "@/hooks/useAirstackApi";
 import { useOnchainUsers } from "@/hooks/useBuilderFiApi";
-import { useCheckUsersExist } from "@/hooks/useUserApi";
+import { useCheckUsersExist, useRecommendedUsers } from "@/hooks/useUserApi";
+import { shortAddress } from "@/lib/utils";
 import { SupervisorAccountOutlined } from "@mui/icons-material";
 import { Button, CircularProgress, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,6 +20,11 @@ export default function Home() {
   const { data: filteredSocialFollowers } = useCheckUsersExist(
     socialFollowers?.Follower?.flatMap(follower => follower.followerAddress?.addresses)
   );
+
+  const { data: recommendedUsers } = useRecommendedUsers(user?.wallet as `0x${string}`);
+
+  console.log({ wallet: user?.wallet });
+  console.log({ recommendedUsers });
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastUserElementRef = useCallback(
@@ -91,15 +97,24 @@ export default function Home() {
             </Flex>
           ) : (
             <>
-              {!filteredSocialFollowers || filteredSocialFollowers.length == 0 ? (
+              {!recommendedUsers || recommendedUsers.length == 0 ? (
                 <PageMessage
                   title="No friends here yet…"
                   icon={<SupervisorAccountOutlined />}
                   text="The wallet you connected is missing Web3 connections (Talent Protocol, lens, farcaster)."
                 />
               ) : (
-                filteredSocialFollowers.map(user => (
-                  <UserItemFromAddress address={user.wallet as `0x${string}`} key={`home-${user.wallet}`} />
+                recommendedUsers.map(user => (
+                  <UserItemInner
+                    address={user.wallet}
+                    avatar={user.avatarUrl || ""}
+                    name={user.talentProtocol || user.ens || user.farcaster || user.lens || shortAddress(user.wallet)}
+                    isLoading={false}
+                    buyPrice={0n}
+                    numberOfHolders={0}
+                    totalQuestions={!!user.user ? user.user._count.questions : 0}
+                    totalReplies={!!user.user ? user.user._count.replies : 0}
+                  />
                 ))
               )}
             </>

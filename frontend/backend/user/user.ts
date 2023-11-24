@@ -282,3 +282,40 @@ export const getBulkUsers = async (addresses: string[]) => {
     data: mergedUsers
   };
 };
+
+export const getRecommendedUsers = async (address: string) => {
+  const user = await prisma.user.findUnique({ where: { wallet: address.toLowerCase() } });
+  if (!user) return { error: ERRORS.USER_NOT_FOUND };
+
+  const recommendations = await prisma.recommendedUser.findMany({
+    where: { forId: user.id },
+    orderBy: { recommendationScore: "desc" },
+    include: { user: { include: { _count: { select: { replies: { where: { repliedOn: { not: null } } } } } } } }
+  });
+
+  const usersWithQuestionsCount = await prisma.user.findMany({
+    where: { id: { in: recommendations.map(i => i.id) }, isActive: true, hasFinishedOnboarding: true },
+    include: { _count: { select: { replies: true } } }
+  });
+
+  const mergedRecommendedUsers = recommendations.map(user => {
+    if (!user.user) {
+      return user;
+    }
+
+    return {
+      ...user,
+      user: {
+        ...user.user,
+        _count: {
+          ...user.user._count,
+          questions: usersWithQuestionsCount.find(u => u.id === user.id)?._count.replies
+        }
+      }
+    };
+  });
+
+  return {
+    data: mergedRecommendedUsers
+  };
+};
