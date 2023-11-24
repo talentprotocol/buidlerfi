@@ -23,9 +23,6 @@ export default function Home() {
 
   const { data: recommendedUsers } = useRecommendedUsers(user?.wallet as `0x${string}`);
 
-  console.log({ wallet: user?.wallet });
-  console.log({ recommendedUsers });
-
   const observer = useRef<IntersectionObserver | null>(null);
   const lastUserElementRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -76,7 +73,7 @@ export default function Home() {
                   user={{
                     ...user,
                     avatarUrl: user.avatarUrl || undefined,
-                    displayName: user.displayName || undefined
+                    displayName: user.displayName || shortAddress(user.wallet) || undefined
                   }}
                 />
               </div>
@@ -106,11 +103,12 @@ export default function Home() {
               ) : (
                 recommendedUsers.map(user => (
                   <UserItemInner
-                    address={user.wallet}
-                    avatar={user.avatarUrl || ""}
-                    name={user.talentProtocol || user.ens || user.farcaster || user.lens || shortAddress(user.wallet)}
+                    wallet={user.wallet}
+                    avatarUrl={user.avatarUrl || ""}
+                    displayName={
+                      user.talentProtocol || user.ens || user.farcaster || user.lens || shortAddress(user.wallet)
+                    }
                     isLoading={false}
-                    buyPrice={0n}
                     numberOfHolders={0}
                     totalQuestions={!!user.user ? user.user._count.questions : 0}
                     totalReplies={!!user.user ? user.user._count.replies : 0}

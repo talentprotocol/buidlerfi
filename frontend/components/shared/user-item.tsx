@@ -21,7 +21,6 @@ interface UserItemProps extends CommonProps {
     avatarUrl?: string;
     displayName?: string;
     isLoading?: boolean;
-    buyPrice?: string | bigint;
     numberOfHolders?: string | number;
   };
 }
@@ -31,7 +30,6 @@ export const UserItem: FC<UserItemProps> = ({ user, ...props }) => {
     <UserItemInner
       {...user}
       {...props}
-      buyPrice={BigInt(user.buyPrice || "0")}
       numberOfHolders={Number(user.numberOfHolders)}
       totalQuestions={user._count.questions}
       totalReplies={user._count.replies}
@@ -42,7 +40,6 @@ export const UserItem: FC<UserItemProps> = ({ user, ...props }) => {
 interface Props extends CommonProps {
   address: `0x${string}`;
   numberOfHolders?: number;
-  buyPrice?: bigint;
   totalQuestions?: number;
   totalReplies?: number;
 }
@@ -50,7 +47,6 @@ interface Props extends CommonProps {
 export const UserItemFromAddress: FC<Props> = ({
   address,
   numberOfHolders,
-  buyPrice,
   totalQuestions,
   totalReplies,
   ...props
@@ -61,7 +57,6 @@ export const UserItemFromAddress: FC<Props> = ({
     <UserItemInner
       {...socialData}
       {...props}
-      buyPrice={buyPrice}
       numberOfHolders={numberOfHolders}
       totalQuestions={totalQuestions}
       totalReplies={totalReplies}
@@ -74,18 +69,16 @@ interface UserItemInnerProps extends CommonProps {
   avatarUrl?: string;
   displayName?: string;
   isLoading?: boolean;
-  buyPrice?: bigint;
   numberOfHolders?: number;
   totalQuestions?: number;
   totalReplies?: number;
 }
 
-const UserItemInner: FC<UserItemInnerProps> = ({
+export const UserItemInner: FC<UserItemInnerProps> = ({
   wallet: address,
   avatarUrl: avatar,
   displayName: name,
   isLoading = false,
-  buyPrice,
   numberOfHolders,
   px = 2,
   py = 1,
@@ -95,6 +88,9 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   totalReplies = 0
 }) => {
   const router = useRouter();
+
+  const pluralHolders = () => (numberOfHolders === 1 ? "holder" : "holders");
+  const pluralAnswers = () => (totalReplies === 1 ? "answer" : "answers");
   return (
     <Flex
       x
@@ -114,9 +110,8 @@ const UserItemInner: FC<UserItemInnerProps> = ({
           src={avatar || DEFAULT_PROFILE_PICTURE}
           sx={{ cursor: "pointer" }}
           onClick={() => router.push(`/profile/${address}`)}
-        >
-          <Skeleton loading={isLoading} />
-        </Avatar>
+          alt={name}
+        />
         <Flex y>
           <Typography
             textColor={"neutral.800"}
@@ -127,9 +122,13 @@ const UserItemInner: FC<UserItemInnerProps> = ({
           >
             <Skeleton loading={isLoading}>{name}</Skeleton>
           </Typography>
-          {numberOfHolders !== undefined && buyPrice !== undefined && (
+          {numberOfHolders !== undefined && numberOfHolders > 0 ? (
             <Typography textColor={"neutral.600"} level="body-sm">
-              {numberOfHolders.toString()} holders • {totalReplies}/{totalQuestions} answers
+              {numberOfHolders.toString()} {pluralHolders()} • {totalReplies}/{totalQuestions} {pluralAnswers()}
+            </Typography>
+          ) : (
+            <Typography textColor={"neutral.600"} level="body-sm">
+              Not on builder.fi yet
             </Typography>
           )}
         </Flex>
