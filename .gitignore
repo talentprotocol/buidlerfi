@@ -1,3 +1,4 @@
 .DS_Store
 frontend/.env
 todo.md
+frontend/.env.dev

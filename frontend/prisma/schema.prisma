@@ -35,13 +35,12 @@ model User {
   reactions      Reaction[]
   socialProfiles SocialProfile[]
 
-  recommendedTo    RecommendedUser[] @relation("recommendationTarget")
-  recommendedUsers RecommendedUser[] @relation("recommendationSource")
-
   id               Int                @id @default(autoincrement())
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   SigningChallenge SigningChallenge[]
+  recommendedTo    RecommendedUser[]  @relation("recommendationTarget")
+  recommendedUsers RecommendedUser[]  @relation("recommendationSource")
 }
 
 enum SocialProfileType {
@@ -147,20 +146,25 @@ model Points {
 }
 
 model RecommendedUser {
-  sourceUser   User @relation(fields: [sourceUserId], references: [id], name: "recommendationSource")
-  sourceUserId Int
+  id    Int  @id @default(autoincrement())
+  for   User @relation(fields: [forId], references: [id], name: "recommendationSource")
+  forId Int
 
-  recommendedUser       User?  @relation(fields: [recommendedUserId], references: [id], name: "recommendationTarget")
-  recommendedUserId     Int?
-  recommendedUserWallet String
+  user           User?   @relation(fields: [userId], references: [id], name: "recommendationTarget")
+  userId         Int?
+  wallet         String
+  avatarUrl      String?
+  ens            String?
+  farcaster      String?
+  lens           String?
+  talentProtocol String?
 
   recommendationScore Int
 
-  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([sourceUserId, recommendedUserWallet])
+  @@unique([forId, wallet])
 }
 
 model SigningChallenge {
