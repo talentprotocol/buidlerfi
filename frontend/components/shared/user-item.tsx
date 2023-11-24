@@ -72,6 +72,7 @@ interface UserItemInnerProps extends CommonProps {
   numberOfHolders?: number;
   totalQuestions?: number;
   totalReplies?: number;
+  userId?: number;
 }
 
 export const UserItemInner: FC<UserItemInnerProps> = ({
@@ -80,6 +81,7 @@ export const UserItemInner: FC<UserItemInnerProps> = ({
   displayName: name,
   isLoading = false,
   numberOfHolders,
+  userId,
   px = 2,
   py = 1,
   isButton = true,
@@ -122,9 +124,9 @@ export const UserItemInner: FC<UserItemInnerProps> = ({
           >
             <Skeleton loading={isLoading}>{name}</Skeleton>
           </Typography>
-          {numberOfHolders !== undefined && numberOfHolders > 0 ? (
+          {(userId || 0) > 0 ? (
             <Typography textColor={"neutral.600"} level="body-sm">
-              {numberOfHolders.toString()} {pluralHolders()} • {totalReplies}/{totalQuestions} {pluralAnswers()}
+              {(numberOfHolders || 0).toString()} {pluralHolders()} • {totalReplies}/{totalQuestions} {pluralAnswers()}
             </Typography>
           ) : (
             <Typography textColor={"neutral.600"} level="body-sm">
