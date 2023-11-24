@@ -313,7 +313,15 @@ export const getRecommendedUsers = async (address: string) => {
 
   const mergedRecommendedUsers = recommendations.map(user => {
     if (!user.user) {
-      return user;
+      return {
+        ...user,
+        user: {
+          _count: {
+            replies: 0,
+            questions: 0
+          }
+        }
+      };
     }
 
     return {
