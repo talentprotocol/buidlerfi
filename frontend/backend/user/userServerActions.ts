@@ -8,6 +8,7 @@ import {
   generateChallenge,
   getBulkUsers,
   getCurrentUser,
+  getRecommendedUser,
   getRecommendedUsers,
   getUser,
   linkNewWallet,
@@ -22,6 +23,10 @@ export const getCurrentUserSA = (options: ServerActionOptions) => {
 
 export const getUserSA = (wallet: string, options: ServerActionOptions) => {
   return serverActionWrapper(() => getUser(wallet), options);
+};
+
+export const getRecommendedUserSA = (wallet: string, options: ServerActionOptions) => {
+  return serverActionWrapper(() => getRecommendedUser(wallet), options);
 };
 
 export const createUserSA = (inviteCode: string, options: ServerActionOptions) => {

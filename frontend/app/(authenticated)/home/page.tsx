@@ -3,9 +3,8 @@ import { Flex } from "@/components/shared/flex";
 import { PageMessage } from "@/components/shared/page-message";
 import { UserItem, UserItemInner } from "@/components/shared/user-item";
 import { useUserContext } from "@/contexts/userContext";
-import { useGetSocialFollowers } from "@/hooks/useAirstackApi";
 import { useOnchainUsers } from "@/hooks/useBuilderFiApi";
-import { useCheckUsersExist, useRecommendedUsers } from "@/hooks/useUserApi";
+import { useRecommendedUsers } from "@/hooks/useUserApi";
 import { shortAddress } from "@/lib/utils";
 import { SupervisorAccountOutlined } from "@mui/icons-material";
 import { Button, CircularProgress, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
@@ -16,12 +15,7 @@ export default function Home() {
   const { users, nextPage, isInitialLoading, hasMoreUsers, isLoading: isLoadingMoreUsers } = useOnchainUsers();
   const [selectedTab, setSelectedTab] = useState("friends");
 
-  const { data: socialFollowers, isLoading } = useGetSocialFollowers(user?.socialWallet as `0x${string}`);
-  const { data: filteredSocialFollowers } = useCheckUsersExist(
-    socialFollowers?.Follower?.flatMap(follower => follower.followerAddress?.addresses)
-  );
-
-  const { data: recommendedUsers } = useRecommendedUsers(user?.wallet as `0x${string}`);
+  const { isLoading, data: recommendedUsers } = useRecommendedUsers(user?.wallet as `0x${string}`);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastUserElementRef = useCallback(

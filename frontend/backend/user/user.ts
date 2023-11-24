@@ -82,6 +82,19 @@ export const getUser = async (wallet: string) => {
   return { data: res };
 };
 
+export const getRecommendedUser = async (wallet: string) => {
+  const address = wallet.toLowerCase();
+  const res = await prisma.recommendedUser.findFirst({
+    where: {
+      wallet: address
+    }
+  });
+
+  if (!res) return { error: ERRORS.USER_NOT_FOUND };
+
+  return { data: res };
+};
+
 export const createUser = async (privyUserId: string, inviteCode: string) => {
   const privyUser = await privyClient.getUser(privyUserId);
   if (!privyUser) {

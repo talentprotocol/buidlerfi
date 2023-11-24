@@ -4,6 +4,7 @@ import {
   createUserSA,
   generateChallengeSA,
   getCurrentUserSA,
+  getRecommendedUserSA,
   getRecommendedUsersSA,
   getUserSA,
   linkNewWalletSA,
@@ -31,6 +32,12 @@ export const useGetUser = (address?: string, reactQueryOptions?: { enabled?: boo
   return useQuerySA(["useGetUser", address], async options => getUserSA(address!, options), {
     enabled: !!address,
     ...reactQueryOptions
+  });
+};
+
+export const useGetRecommendedUser = (address?: string) => {
+  return useQuerySA(["useGetRecommendedUser", address], async options => getRecommendedUserSA(address!, options), {
+    enabled: !!address
   });
 };
 
