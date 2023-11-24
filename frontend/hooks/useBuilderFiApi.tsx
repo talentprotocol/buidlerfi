@@ -24,6 +24,10 @@ export const useBuilderFIData = () => {
 export interface UserWithOnchainData extends User {
   buyPrice: string;
   numberOfHolders: string;
+  _count: {
+    questions: number;
+    replies: number;
+  };
 }
 
 export const useOnchainUsers = () => {

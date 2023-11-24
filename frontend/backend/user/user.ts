@@ -256,9 +256,29 @@ Wallet: ${publicKey}
 };
 
 export const getBulkUsers = async (addresses: string[]) => {
+  const usersWithReplyCount = await prisma.user.findMany({
+    where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true },
+    include: { _count: { select: { replies: { where: { repliedOn: { not: null } } } } } }
+  });
+
+  // prisma does not allow two counts on the same relation ship, so we need to do this manually
+  const usersWithQuestionsCount = await prisma.user.findMany({
+    where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true },
+    include: { _count: { select: { replies: true } } }
+  });
+
+  // the goal is to show the number of questions asked vs the number of questions answered
+  // since the replierId is always set, we can use that to count the number of questions asked
+  // and the number of questions answered is the number of questions with a non null repliedOn
+  const mergedUsers = usersWithReplyCount.map(user => ({
+    ...user,
+    _count: {
+      ...user._count,
+      questions: usersWithQuestionsCount.find(u => u.wallet === user.wallet)?._count.replies
+    }
+  }));
+
   return {
-    data: await prisma.user.findMany({
-      where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true }
-    })
+    data: mergedUsers
   };
 };

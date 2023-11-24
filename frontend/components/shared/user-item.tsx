@@ -1,7 +1,6 @@
 "use client";
 import { useSocialData } from "@/hooks/useSocialData";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { formatToDisplayString } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Skeleton, Typography, TypographySystem } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
@@ -34,6 +33,8 @@ export const UserItem: FC<UserItemProps> = ({ user, ...props }) => {
       {...props}
       buyPrice={BigInt(user.buyPrice || "0")}
       numberOfHolders={Number(user.numberOfHolders)}
+      totalQuestions={user._count.questions}
+      totalReplies={user._count.replies}
     />
   );
 };
@@ -42,12 +43,30 @@ interface Props extends CommonProps {
   address: `0x${string}`;
   numberOfHolders?: number;
   buyPrice?: bigint;
+  totalQuestions?: number;
+  totalReplies?: number;
 }
 
-export const UserItemFromAddress: FC<Props> = ({ address, numberOfHolders, buyPrice, ...props }) => {
+export const UserItemFromAddress: FC<Props> = ({
+  address,
+  numberOfHolders,
+  buyPrice,
+  totalQuestions,
+  totalReplies,
+  ...props
+}) => {
   const socialData = useSocialData(address);
 
-  return <UserItemInner {...socialData} {...props} buyPrice={buyPrice} numberOfHolders={numberOfHolders} />;
+  return (
+    <UserItemInner
+      {...socialData}
+      {...props}
+      buyPrice={buyPrice}
+      numberOfHolders={numberOfHolders}
+      totalQuestions={totalQuestions}
+      totalReplies={totalReplies}
+    />
+  );
 };
 
 interface UserItemInnerProps extends CommonProps {
@@ -57,6 +76,8 @@ interface UserItemInnerProps extends CommonProps {
   isLoading?: boolean;
   buyPrice?: bigint;
   numberOfHolders?: number;
+  totalQuestions?: number;
+  totalReplies?: number;
 }
 
 const UserItemInner: FC<UserItemInnerProps> = ({
@@ -69,7 +90,9 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   px = 2,
   py = 1,
   isButton = true,
-  nameLevel = "body-sm"
+  nameLevel = "body-sm",
+  totalQuestions = 0,
+  totalReplies = 0
 }) => {
   const router = useRouter();
   return (
@@ -106,7 +129,7 @@ const UserItemInner: FC<UserItemInnerProps> = ({
           </Typography>
           {numberOfHolders !== undefined && buyPrice !== undefined && (
             <Typography textColor={"neutral.600"} level="body-sm">
-              {numberOfHolders.toString()} holders • Price {formatToDisplayString(buyPrice, 18)} ETH
+              {numberOfHolders.toString()} holders • {totalReplies}/{totalQuestions} answers
             </Typography>
           )}
         </Flex>

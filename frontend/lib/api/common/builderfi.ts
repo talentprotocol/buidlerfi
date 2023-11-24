@@ -34,7 +34,7 @@ const query = `
 
 const getUsersQuery = (offset: number) => `
   {
-    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, skip: ${offset}, orderBy: supply, orderDirection:desc) {
+    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, skip: ${offset}, orderBy: numberOfHolders, orderDirection:desc) {
       ${gqlShare}
     }
   }

@@ -13,7 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export default function Home() {
   const { user } = useUserContext();
   const { users, nextPage, isInitialLoading, hasMoreUsers, isLoading: isLoadingMoreUsers } = useOnchainUsers();
-  const [selectedTab, setSelectedTab] = useState("top");
+  const [selectedTab, setSelectedTab] = useState("friends");
 
   const { data: socialFollowers, isLoading } = useGetSocialFollowers(user?.socialWallet as `0x${string}`);
   const { data: filteredSocialFollowers } = useCheckUsersExist(
@@ -55,8 +55,8 @@ export default function Home() {
     <Flex component={"main"} y grow>
       <Tabs defaultValue="top" value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)}>
         <TabList tabFlex={1} className="grid w-full grid-cols-2">
+          <Tab value="friends">Friends</Tab>
           <Tab value="top">Top</Tab>
-          <Tab value="recommended">Recommended</Tab>
         </TabList>
         <TabPanel value="top">
           {isInitialLoading ? (
@@ -84,7 +84,7 @@ export default function Home() {
             </Flex>
           )}
         </TabPanel>
-        <TabPanel value="recommended">
+        <TabPanel value="friends">
           {isLoading ? (
             <Flex y grow yc xc>
               <CircularProgress />
@@ -95,7 +95,7 @@ export default function Home() {
                 <PageMessage
                   title="No friends here yet…"
                   icon={<SupervisorAccountOutlined />}
-                  text="Either the wallet you connected is missing Lens and Farcaster profiles, or none of your friends is using builder.fi yet."
+                  text="The wallet you connected is missing Web3 connections (Talent Protocol, lens, farcaster)."
                 />
               ) : (
                 filteredSocialFollowers.map(user => (
