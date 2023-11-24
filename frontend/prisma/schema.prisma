@@ -31,7 +31,7 @@ model User {
   comments       Comment[]
   invitedBy      InviteCode?     @relation("invitation", fields: [invitedById], references: [id])
   invitedById    Int?
-  points         Points[]
+  points         Point[]
   reactions      Reaction[]
   socialProfiles SocialProfile[]
 
@@ -134,7 +134,7 @@ model InviteCode {
   updatedAt DateTime @updatedAt
 }
 
-model Points {
+model Point {
   description String  @db.VarChar(500)
   user        User    @relation(fields: [userId], references: [id])
   userId      Int
