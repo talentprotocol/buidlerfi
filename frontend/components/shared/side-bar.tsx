@@ -100,11 +100,11 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     const numberOfBuilders = BigInt(contractData.data?.totalNumberOfBuilders || 0);
     if (numberOfBuilders < 100n) {
       return 1;
-    } else if (numberOfBuilders < 500n) {
+    } else if (numberOfBuilders < 200n) {
       return 2;
-    } else if (numberOfBuilders < 1000n) {
+    } else if (numberOfBuilders < 500n) {
       return 3;
-    } else if (numberOfBuilders < 3000n) {
+    } else if (numberOfBuilders < 1000n) {
       return 4;
     }
     {
@@ -116,11 +116,11 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     if (number === 1) {
       return "100";
     } else if (number === 2) {
-      return "500";
+      return "200";
     } else if (number === 3) {
-      return "1,000";
+      return "500";
     } else if (number === 4) {
-      return "3,000";
+      return "1,000";
     } else {
       return "10,000";
     }
