@@ -1,6 +1,7 @@
 import { Flex } from "@/components/shared/flex";
+import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
-import { useTradeKey } from "@/hooks/useBuilderFiContract";
+import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
 import { formatToDisplayString } from "@/lib/utils";
 import { Close } from "@mui/icons-material";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
@@ -35,6 +36,8 @@ export const TradeKeyModal: FC<Props> = ({
   });
   const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const { socialData } = useProfileContext();
+  const { refetch, buyPriceAfterFee } = useGetBuilderInfo(socialData?.wallet);
 
   const closeOrShowSuccessPurchase = () => {
     if (hasKeys) {
@@ -53,7 +56,7 @@ export const TradeKeyModal: FC<Props> = ({
     }
   };
 
-  const handleBuy = () => {
+  const handleBuy = async (recalculatePrice = false) => {
     if (isFirstKey) {
       tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceWithFees });
       return;
@@ -61,17 +64,23 @@ export const TradeKeyModal: FC<Props> = ({
 
     if (!buyPriceWithFees || !balance) return;
 
-    if (buyPriceWithFees > balance.value) {
+    let buyPrice = buyPriceWithFees;
+    if (recalculatePrice) {
+      await refetch();
+      buyPrice = buyPriceAfterFee || buyPriceWithFees;
+    }
+
+    if (buyPrice > balance.value) {
       toast.error(
         `Insufficient balance. You have: ${formatToDisplayString(
           balance.value,
           18
-        )} ETH. You need: ${formatToDisplayString(buyPriceWithFees, 18)} ETH`
+        )} ETH. You need: ${formatToDisplayString(buyPrice, 18)} ETH`
       );
       return;
     }
 
-    tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceWithFees });
+    tx.executeTx({ args: [targetBuilderAddress!], value: buyPrice });
   };
 
   const handleSell = () => {
@@ -107,17 +116,20 @@ export const TradeKeyModal: FC<Props> = ({
         {showSuccessMessage ? (
           <Flex y gap1>
             <Typography level="body-lg" textColor="neutral.600">
-              Congratulations, you bought your first key!
+              Congrats, you bought your first {socialData.displayName} key!
             </Typography>
             <Typography level="body-lg" textColor="neutral.600">
-              Next step is asking a question, If you are bullish on this person you can buy multiple keys
+              The next step is asking them a question.
+            </Typography>
+            <Typography level="body-lg" textColor="neutral.600">
+              If you're bullish on {socialData.displayName}, you can buy multiple keys!
             </Typography>
             <Flex x yc gap1 alignSelf="flex-end" mt={2}>
               <Button variant="outlined" onClick={() => close()}>
                 Close
               </Button>
-              <Button loading={tx.isLoading} onClick={() => handleBuy()} disabled={!enableTradeButton()}>
-                Buy More
+              <Button loading={tx.isLoading} onClick={() => handleBuy(true)} disabled={!enableTradeButton()}>
+                Buy 1 more
               </Button>
             </Flex>
           </Flex>
