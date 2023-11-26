@@ -128,7 +128,7 @@ export const TradeKeyModal: FC<Props> = ({
               The next step is asking them a question.
             </Typography>
             <Typography level="body-lg" textColor="neutral.600">
-              If you're bullish on {socialData.displayName}, you can buy multiple keys!
+              If you&apos;re bullish on {socialData.displayName}, you can buy multiple keys!
             </Typography>
             <Flex x yc gap1 alignSelf="flex-end" mt={2}>
               <Button variant="outlined" onClick={() => close()}>
