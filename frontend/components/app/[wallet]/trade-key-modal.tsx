@@ -103,11 +103,17 @@ export const TradeKeyModal: FC<Props> = ({
     return hasEnoughBalance;
   };
 
+  const modalTitle = () => {
+    if (showSuccessMessage) return "What's next?";
+    if (side === "buy") return "Buy 1 key";
+    return "Sell 1 key";
+  };
+
   return (
     <Modal open={true} onClose={close}>
       <ModalDialog minWidth="400px">
         <Flex x xsb yc>
-          <DialogTitle>{side === "buy" ? "Buy" : "Sell"} 1 Key</DialogTitle>
+          <DialogTitle>{modalTitle()}</DialogTitle>
           <IconButton onClick={close}>
             <Close />
           </IconButton>
