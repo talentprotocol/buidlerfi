@@ -65,12 +65,12 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
 
   const navItems = useMemo(
     () => [
-      { text: "Profile", icon: <PersonOutlineOutlined />, path: "/profile/" + address },
       {
         text: "Explore",
         icon: <SearchOutlined />,
         path: "/home"
       },
+      { text: "Profile", icon: <PersonOutlineOutlined />, path: "/profile/" + address },
       {
         text: "Wallet",
         icon: <AccountBalanceWalletOutlined />,
