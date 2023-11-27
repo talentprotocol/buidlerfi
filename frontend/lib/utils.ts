@@ -107,6 +107,6 @@ export function convertLinksToHyperlinks(text?: string): string {
     /(?<![@\w+\.])\b(https?:\/\/)?(?:www\.)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[-A-Z0-9+&@#\/%=~_|$](?:\.[A-Z]{2,}|\.com|\.org|\.net|\.edu|\.gov|\.mil|\.biz|\.info|\.mobi|\.name|\.aero|\.asia|\.jobs|\.museum|\.tech)\b/gi;
 
   return text.replace(urlRegex, function (url, protocol) {
-    return `<a href="${protocol ? url : "http://" + url}">${url}</a>`;
+    return `<a target="_blank" href="${protocol ? url : "http://" + url}">${url}</a>`;
   });
 }
