@@ -46,6 +46,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch }) => {
           <Flex x xsb yc>
             <Typography level="title-sm">Ask to {socialData.displayName}</Typography>
             <Button
+              loading={postQuestion.isLoading}
               disabled={questionContent.length < MIN_QUESTION_LENGTH || questionContent.length > MAX_QUESTION_LENGTH}
               onClick={sendQuestion}
             >

@@ -10,12 +10,13 @@ import { useProfileContext } from "@/contexts/profileContext";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { getDifference } from "@/lib/utils";
+import { convertLinksToHyperlinks, getDifference } from "@/lib/utils";
 import { FileUpload, LockOutlined } from "@mui/icons-material";
 import { Avatar, Button, Divider, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import sanitize from "sanitize-html";
 
 export default function QuestionModal({ questionId, close }: { questionId: number; close: () => void }) {
   const { data: question, refetch } = useGetQuestion(Number(questionId));
@@ -48,6 +49,13 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
     }
   };
 
+  const sanitizedContent = useMemo(
+    () => sanitize(convertLinksToHyperlinks(question?.questionContent)),
+    [question?.questionContent]
+  );
+
+  const sanitizedReply = useMemo(() => sanitize(convertLinksToHyperlinks(question?.reply || "")), [question?.reply]);
+
   if (!question) return <></>;
 
   return (
@@ -64,7 +72,11 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
               numberOfHolders={holders?.length}
               nameLevel="title-sm"
             />
-            {isOwnProfile && !question.reply && <Button onClick={replyQuestion}>Reply</Button>}
+            {isOwnProfile && !question.repliedOn && (
+              <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>
+                Reply
+              </Button>
+            )}
           </Flex>
           <Typography
             fontWeight={300}
@@ -73,7 +85,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
             textColor={"neutral.800"}
             textTransform={"none"}
           >
-            {question.questionContent}
+            <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
           </Typography>
           <Flex x yc xsb>
             <Reactions question={question} refetch={refetch} />
@@ -113,7 +125,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                   textColor={"neutral.800"}
                   textTransform={"none"}
                 >
-                  {question.reply}
+                  <div dangerouslySetInnerHTML={{ __html: sanitizedReply }} />
                 </Typography>
               </Flex>
             </Flex>

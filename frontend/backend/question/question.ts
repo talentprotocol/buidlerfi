@@ -3,6 +3,7 @@
 import { fetchHolders } from "@/lib/api/common/builderfi";
 import { MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
+import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
 import { ReactionType } from "@prisma/client";
 
@@ -28,26 +29,28 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
 };
 
 export const getQuestions = async (userId: number) => {
-  return {
-    data: await prisma.question.findMany({
-      where: {
-        replierId: userId
-      },
-      include: {
-        questioner: true,
-        replier: true,
-        reactions: true,
-        replyReactions: true
-      },
-      orderBy: {
-        id: "desc"
-      }
-    })
-  };
+  const questions = await prisma.question.findMany({
+    where: {
+      replierId: userId
+    },
+    include: {
+      questioner: true,
+      replier: true,
+      reactions: true,
+      replyReactions: true
+    },
+    orderBy: {
+      id: "desc"
+    }
+  });
+
+  return { data: exclude(questions, ["reply"]) };
 };
 
-export const getQuestion = async (questionId: number) => {
-  const res = await prisma.question.findUnique({
+export const getQuestion = async (privyUserId: string, questionId: number) => {
+  const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
+
+  const question = await prisma.question.findUniqueOrThrow({
     where: {
       id: questionId
     },
@@ -59,9 +62,10 @@ export const getQuestion = async (questionId: number) => {
     }
   });
 
-  if (!res) return { error: ERRORS.QUESTION_NOT_FOUND };
-
-  return { data: res };
+  const replierHolders = await fetchHolders(question.replier.wallet.toLowerCase());
+  const found = replierHolders.find(holder => holder.holder.owner.toLowerCase() === currentUser.wallet.toLowerCase());
+  if (found) return { data: question };
+  else return { data: exclude(question, ["reply"]) };
 };
 
 export const addReaction = async (privyUserId: string, questionId: number, reactionType: ReactionType) => {

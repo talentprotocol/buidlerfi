@@ -4,16 +4,17 @@ import { useProfileContext } from "@/contexts/profileContext";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { getDifference, shortAddress } from "@/lib/utils";
+import { convertLinksToHyperlinks, getDifference, shortAddress } from "@/lib/utils";
 import theme from "@/theme";
 import { FileUploadOutlined } from "@mui/icons-material";
 import { Avatar, Chip, IconButton, Typography } from "@mui/joy";
 import { usePathname } from "next/navigation";
 import { FC, useMemo } from "react";
 import { toast } from "react-toastify";
+import sanitize from "sanitize-html";
 
 interface Props {
-  question?: NonNullable<ReturnType<typeof useGetQuestions>["data"]>[0];
+  question?: NonNullable<ReturnType<typeof useGetQuestions>["data"]>[number];
   isOwnChat: boolean;
   socialData: SocialData;
   refetch: () => void;
@@ -26,6 +27,11 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
   const askedOn = useMemo(() => getDifference(question?.createdAt), [question?.createdAt]);
 
   const pathname = usePathname();
+
+  const sanitizedContent = useMemo(
+    () => sanitize(convertLinksToHyperlinks(question?.questionContent)),
+    [question?.questionContent]
+  );
 
   if (!question) return <></>;
 
@@ -42,7 +48,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
               <Typography level="body-sm">•</Typography>
               <Typography level="body-sm">{askedOn}</Typography>
             </Flex>
-            {!question.reply ? (
+            {!question.repliedOn ? (
               <Chip size="sm" color="neutral" variant="outlined">
                 Waiting answer
               </Chip>
@@ -53,7 +59,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
             )}
           </Flex>
           <Typography fontWeight={400} level="body-sm" whiteSpace="pre-line" textTransform={"none"}>
-            {question.questionContent}
+            <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
           </Typography>
         </Flex>
       </Flex>

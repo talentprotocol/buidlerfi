@@ -62,7 +62,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
     <Flex component={"main"} y grow gap2>
       {hasKeys && !isOwnProfile && (
         <Button
-          sx={{ zIndex: 3, position: "absolute", bottom: "16px", right: "16px", height: "48px", width: "48px" }}
+          sx={{ zIndex: 3, position: "fixed", bottom: "16px", right: "16px", height: "48px", width: "48px" }}
           onClick={() => setIsAskingQuestion(true)}
         >
           <Add fontSize="small" />

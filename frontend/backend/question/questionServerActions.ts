@@ -4,7 +4,7 @@ import { ReactionType } from "@prisma/client";
 import { addReaction, createQuestion, deleteReaction, getQuestion, getQuestions } from "./question";
 
 export const getQuestionSA = async (questionId: number, options: ServerActionOptions) => {
-  return serverActionWrapper(() => getQuestion(questionId), options);
+  return serverActionWrapper(data => getQuestion(data.privyUserId, questionId), options);
 };
 
 export const addReactionSA = async (questionId: number, reactionType: ReactionType, options: ServerActionOptions) => {
