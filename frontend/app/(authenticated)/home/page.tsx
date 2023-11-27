@@ -76,7 +76,7 @@ export default function Home() {
               </div>
             ))
           )}
-          {!isInitialLoading && hasMoreUsers && (
+          {!isInitialLoading && !isLoadingMoreUsers && hasMoreUsers && (
             <Flex x xc>
               <Button loading={isLoadingMoreUsers} onClick={() => nextPage()}>
                 Load More

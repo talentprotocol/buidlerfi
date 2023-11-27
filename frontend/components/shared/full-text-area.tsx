@@ -23,10 +23,12 @@ export const FullTextArea: FC<Props> = ({ avatarUrl, placeholder, value, onChang
             sx={{
               flexGrow: 1,
               border: "none",
-              backgroundColor: "inherit",
               boxShadow: "none",
               "::before": {
                 boxShadow: "none"
+              },
+              "&>*": {
+                textTransform: "none"
               }
             }}
             placeholder={placeholder}
