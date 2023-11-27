@@ -189,15 +189,13 @@ export interface UpdateUserArgs {
 }
 
 export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArgs) => {
-  if (updatedUser.displayName) {
+  const existingUser = await prisma.user.findUniqueOrThrow({
+    where: { privyUserId: privyUserId },
+    include: { socialProfiles: true }
+  });
+
+  if (updatedUser.displayName !== undefined) {
     //Only allow updating display name if no socialProfile found for user.
-    const existingUser = await prisma.user.findUnique({
-      where: { privyUserId: privyUserId },
-      include: { socialProfiles: true }
-    });
-    if (!existingUser) {
-      return { error: ERRORS.USER_NOT_FOUND };
-    }
     if (existingUser.socialProfiles.length > 0) {
       return { error: ERRORS.INVALID_REQUEST };
     }
@@ -207,7 +205,15 @@ export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArg
     }
   }
 
-  const res = prisma.user.update({
+  if (updatedUser.hasFinishedOnboarding) {
+    //Check if user has a display name. Should fail otherwise.
+    //We just need to check if displayName is empty or not. If it's defined, it will be checked by the above code.
+    if (!existingUser.displayName && !updatedUser.displayName) {
+      return { error: ERRORS.INVALID_REQUEST };
+    }
+  }
+
+  const res = await prisma.user.update({
     where: { privyUserId: privyUserId },
     data: {
       hasFinishedOnboarding: updatedUser.hasFinishedOnboarding,
