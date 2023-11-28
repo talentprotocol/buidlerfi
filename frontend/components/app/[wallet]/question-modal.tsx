@@ -13,6 +13,7 @@ import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { convertLinksToHyperlinks, getDifference } from "@/lib/utils";
 import { FileUpload, LockOutlined } from "@mui/icons-material";
 import { Avatar, Button, Divider, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
+import { format } from "date-fns";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -61,95 +62,100 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
   return (
     <Modal open={true} onClose={handleClose}>
       <ModalDialog layout="center" sx={{ width: "min(100vw, 500px)", padding: 0, overflowY: "auto" }}>
-        <Flex y gap2 p={2} grow>
-          <Flex x yc xsb>
-            <UserItemFromAddress
-              isButton={false}
-              px={0}
-              py={0}
-              address={question.questioner.wallet as `0x${string}`}
-              buyPrice={buyPrice}
-              numberOfHolders={holders?.length}
-              nameLevel="title-sm"
-            />
-            {isOwnProfile && !question.repliedOn && (
-              <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>
-                Reply
-              </Button>
-            )}
-          </Flex>
-          <Typography
-            fontWeight={300}
-            level="body-sm"
-            whiteSpace="pre-line"
-            textColor={"neutral.800"}
-            textTransform={"none"}
-          >
-            <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
-          </Typography>
-          <Flex x yc xsb>
-            <Reactions question={question} refetch={refetch} />
-            <IconButton
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                navigator.clipboard.writeText(location.origin + pathname + `?question=${question.id}`);
-                toast.success("question url copied to clipboard");
-              }}
-            >
-              <FileUpload fontSize="small" />
-            </IconButton>
-          </Flex>
-          <Divider sx={{ mx: -2 }} />
-          {isOwnProfile && !question.reply && (
-            <FullTextArea
-              placeholder={`Answer ${question.questioner.displayName} ...`}
-              avatarUrl={question.questioner.avatarUrl || undefined}
-              onChange={e => setReply(e.target.value)}
-              value={reply}
-            />
-          )}
-          {question.reply && hasKeys && (
-            <Flex x ys gap={1} grow>
-              <Avatar size="sm" src={question.replier.avatarUrl || DEFAULT_PROFILE_PICTURE} />
-              <Flex y gap={0.5}>
-                <Flex x yc gap={0.5}>
-                  <Typography level="title-sm">{question.replier.displayName} </Typography>
-                  <Typography level="body-sm">•</Typography>
-                  <Typography level="body-sm">{repliedOn}</Typography>
-                </Flex>
-                <Typography
-                  fontWeight={300}
-                  level="body-sm"
-                  whiteSpace="pre-line"
-                  textColor={"neutral.800"}
-                  textTransform={"none"}
-                >
-                  <div dangerouslySetInnerHTML={{ __html: sanitizedReply }} />
-                </Typography>
-              </Flex>
+        <Flex y grow>
+          <Flex y p={2} gap1>
+            <Flex x yc xsb>
+              <UserItemFromAddress
+                isButton={false}
+                px={0}
+                py={0}
+                address={question.questioner.wallet as `0x${string}`}
+                buyPrice={buyPrice}
+                numberOfHolders={holders?.length}
+                nameLevel="title-sm"
+              />
+              {isOwnProfile && !question.repliedOn && (
+                <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>
+                  Reply
+                </Button>
+              )}
             </Flex>
-          )}
-          {!hasKeys && question.reply && (
-            <PageMessage
-              title="Unlock answer"
-              icon={<LockOutlined />}
-              text={`Hold at least one key to ask ${socialData.displayName} a question and access all answers.`}
-            />
-          )}
+            <Typography
+              fontWeight={300}
+              level="body-sm"
+              whiteSpace="pre-line"
+              textColor={"neutral.800"}
+              textTransform={"none"}
+            >
+              <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+            </Typography>
+            <Typography level="helper">{format(question.createdAt, "MMM dd, yyyy")}</Typography>
+            <Flex x yc xsb>
+              <Reactions question={question} refetch={refetch} />
+              <IconButton
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(location.origin + pathname + `?question=${question.id}`);
+                  toast.success("question url copied to clipboard");
+                }}
+              >
+                <FileUpload fontSize="small" />
+              </IconButton>
+            </Flex>
+          </Flex>
+          <Divider />
+          <Flex y gap1 p={2}>
+            {isOwnProfile && !question.reply && (
+              <FullTextArea
+                placeholder={`Answer ${question.questioner.displayName} ...`}
+                avatarUrl={question.questioner.avatarUrl || undefined}
+                onChange={e => setReply(e.target.value)}
+                value={reply}
+              />
+            )}
+            {question.reply && hasKeys && (
+              <Flex x ys gap={1} grow>
+                <Avatar size="sm" src={question.replier.avatarUrl || DEFAULT_PROFILE_PICTURE} />
+                <Flex y gap={0.5}>
+                  <Flex x yc gap={0.5}>
+                    <Typography level="title-sm">{question.replier.displayName} </Typography>
+                    <Typography level="body-sm">•</Typography>
+                    <Typography level="body-sm">{repliedOn}</Typography>
+                  </Flex>
+                  <Typography
+                    fontWeight={300}
+                    level="body-sm"
+                    whiteSpace="pre-line"
+                    textColor={"neutral.800"}
+                    textTransform={"none"}
+                  >
+                    <div dangerouslySetInnerHTML={{ __html: sanitizedReply }} />
+                  </Typography>
+                </Flex>
+              </Flex>
+            )}
+            {!hasKeys && question.reply && (
+              <PageMessage
+                title="Unlock answer"
+                icon={<LockOutlined />}
+                text={`Hold at least one key to ask ${socialData.displayName} a question and access all answers.`}
+              />
+            )}
 
-          {!question.reply && !isOwnProfile && (
-            <PageMessage
-              title="Waiting for answer ..."
-              icon={<Avatar size="sm" src={socialData.avatarUrl} />}
-              text={
-                hasKeys
-                  ? `You will get notified when ${socialData.displayName} answers`
-                  : `Buy a key, and get notified when ${socialData.displayName} answers`
-              }
-            />
-          )}
-          {question.reply && hasKeys && <Reactions question={question} type="like" refetch={refetch} />}
+            {!question.reply && !isOwnProfile && (
+              <PageMessage
+                title="Waiting for answer ..."
+                icon={<Avatar size="sm" src={socialData.avatarUrl} />}
+                text={
+                  hasKeys
+                    ? `You will get notified when ${socialData.displayName} answers`
+                    : `Buy a key, and get notified when ${socialData.displayName} answers`
+                }
+              />
+            )}
+            {question.reply && hasKeys && <Reactions question={question} type="like" refetch={refetch} />}
+          </Flex>
         </Flex>
       </ModalDialog>
     </Modal>

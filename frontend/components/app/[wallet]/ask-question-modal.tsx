@@ -3,29 +3,62 @@ import { FullTextArea } from "@/components/shared/full-text-area";
 import { OpenDialog } from "@/contexts/DialogContainer";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
-import { usePostQuestion } from "@/hooks/useQuestionsApi";
+import { useEditQuestion, useGetQuestion, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
 import { FC, useState } from "react";
 
 interface Props {
+  questionToEdit?: number;
   close: () => void;
   refetch: () => Promise<unknown>;
 }
 
-export const AskQuestionModal: FC<Props> = ({ close, refetch }) => {
+export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) => {
   const { user } = useUserContext();
   const { socialData } = useProfileContext();
   const [questionContent, setQuestionContent] = useState("");
   const postQuestion = usePostQuestion();
+  const editQuestion = useEditQuestion();
+
+  const {} = useGetQuestion(questionToEdit!, {
+    enabled: !!questionToEdit,
+    //Need to fix this to add typescript inference
+    onSuccess: (data: unknown) => {
+      const questionData = data as { questionContent: string };
+      setQuestionContent(questionData.questionContent);
+    },
+    cacheTime: 0,
+    staleTime: 0
+  });
+
+  const isEditMode = questionToEdit !== undefined;
 
   const sendQuestion = async () => {
-    await postQuestion.mutateAsync({
-      questionContent: questionContent,
-      replierId: socialData.userId
-    });
-    await refetch();
-    close();
+    if (isEditMode) {
+      OpenDialog({
+        type: "confirm",
+        body: "Are you sure you want to edit this question ?",
+        title: "Edit question",
+        submit: () =>
+          editQuestion
+            .mutateAsync({
+              questionId: questionToEdit,
+              questionContent: questionContent
+            })
+            .then(() => {
+              refetch();
+              close();
+            })
+      });
+    } else {
+      await postQuestion.mutateAsync({
+        questionContent: questionContent,
+        replierId: socialData.userId
+      });
+      refetch();
+      close();
+    }
   };
 
   const handleClose = () => {
@@ -50,7 +83,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch }) => {
               disabled={questionContent.length < MIN_QUESTION_LENGTH || questionContent.length > MAX_QUESTION_LENGTH}
               onClick={sendQuestion}
             >
-              Ask
+              {isEditMode ? "Edit" : "Ask"}
             </Button>
           </Flex>
           <FullTextArea

@@ -1,11 +1,12 @@
 import { ServerActionOptions, ServerActionResponse } from "@/lib/serverActionWrapper";
+import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { usePrivy } from "@privy-io/react-auth";
 import { QueryKey, useQuery } from "@tanstack/react-query";
 
 export const useQuerySA = <TResponse, TQueryKey extends QueryKey = QueryKey>(
   key: TQueryKey,
   queryFn: (options: ServerActionOptions) => Promise<ServerActionResponse<TResponse>>,
-  options?: { enabled?: boolean; onSuccess?: (data: TResponse) => void }
+  options?: SimpleUseQueryOptions<TResponse>
 ) => {
   const { getAccessToken } = usePrivy();
   return useQuery(

@@ -68,6 +68,67 @@ export const getQuestion = async (privyUserId: string, questionId: number) => {
   else return { data: exclude(question, ["reply"]) };
 };
 
+export const deleteQuestion = async (privyUserId: string, questionId: number) => {
+  const question = await prisma.question.findUniqueOrThrow({
+    where: {
+      id: questionId
+    },
+    include: {
+      replier: true
+    }
+  });
+
+  if (question.repliedOn) {
+    return { error: ERRORS.ALREADY_REPLIED };
+  }
+
+  const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
+
+  if (question.questionerId !== currentUser.id) {
+    return { error: ERRORS.UNAUTHORIZED };
+  }
+
+  const res = await prisma.question.delete({
+    where: {
+      id: questionId
+    }
+  });
+
+  return { data: res };
+};
+
+export const editQuestion = async (privyUserId: string, questionId: number, questionContent: string) => {
+  const question = await prisma.question.findUniqueOrThrow({
+    where: {
+      id: questionId
+    },
+    include: {
+      replier: true
+    }
+  });
+
+  if (question.repliedOn) {
+    return { error: ERRORS.ALREADY_REPLIED };
+  }
+
+  const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
+
+  if (question.questionerId !== currentUser.id) {
+    return { error: ERRORS.UNAUTHORIZED };
+  }
+
+  const res = await prisma.question.update({
+    where: {
+      id: questionId
+    },
+    data: {
+      questionContent: questionContent
+    }
+  });
+
+  return { data: res };
+};
+
 export const addReaction = async (privyUserId: string, questionId: number, reactionType: ReactionType) => {
   const user = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
   const question = await prisma.question.findUniqueOrThrow({

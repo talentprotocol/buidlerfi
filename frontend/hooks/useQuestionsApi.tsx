@@ -1,29 +1,27 @@
 import {
   addReactionSA,
   createQuestionSA,
+  deleteQuestionSA,
   deleteReactionSA,
+  editQuestionSA,
   getQuestionSA,
   getQuestionsSA
 } from "@/backend/question/questionServerActions";
+import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { ReactionType } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
 import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
 
-export const useGetQuestion = (id?: number) => {
+export function useGetQuestion(id: number, queryOptions: SimpleUseQueryOptions) {
   return useQuerySA(["useGetQuestion", id], options => getQuestionSA(id!, options), {
-    enabled: !!id
+    ...queryOptions
   });
-};
+}
 
 export const useGetQuestions = (userId?: number) => {
-  return useQuerySA(
-    ["useGetQuestions", userId],
-    options => getQuestionsSA(userId!, options),
-
-    { enabled: !!userId }
-  );
+  return useQuerySA(["useGetQuestions", userId], options => getQuestionsSA(userId!, options), { enabled: !!userId });
 };
 
 export const usePostQuestion = () => {
@@ -53,5 +51,15 @@ export const useAddReaction = () => {
 export const useDeleteReaction = () => {
   return useMutationSA((options, params: { questionId: number; reactionType: ReactionType }) =>
     deleteReactionSA(params.questionId, params.reactionType, options)
+  );
+};
+
+export const useDeleteQuestion = () => {
+  return useMutationSA((options, questionId: number) => deleteQuestionSA(questionId, options));
+};
+
+export const useEditQuestion = () => {
+  return useMutationSA((options, params: { questionId: number; questionContent: string }) =>
+    editQuestionSA(params.questionId, params.questionContent, options)
   );
 };

@@ -32,7 +32,6 @@ const queryClient = new QueryClient({
       retry: 0,
       cacheTime: 10 * 60 * 1000,
       staleTime: 10 * 60 * 1000
-      // refetchOnMount: false,
     }
   }
 });

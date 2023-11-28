@@ -60,7 +60,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
                 </Chip>
               )}
 
-              <QuestionContextMenu />
+              <QuestionContextMenu question={question} />
             </Flex>
           </Flex>
           <Typography
