@@ -64,8 +64,8 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
       {router.searchParams.question && (
         <QuestionModal questionId={Number(router.searchParams.question)} close={() => router.replace("./")} />
       )}
-      <Flex y grow>
-        <Flex y grow>
+      <Flex y grow pb={6}>
+        <Flex y grow sx={{ "& > div:last-child": { border: "none" } }}>
           {hasKeys && !questions?.length ? (
             <PageMessage
               text={`Congratulations. You can now chat with ${socialData.displayName}`}

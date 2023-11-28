@@ -62,7 +62,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
         </Flex>
       </Flex>
       <Flex x yc xsb grow>
-        {hasKeys ? <Reactions sx={{ ml: 4 }} question={question} refetch={refetch} /> : <Flex />}
+        <Reactions sx={{ ml: 4 }} question={question} refetch={refetch} /> : <Flex />
         <IconButton
           onClick={e => {
             e.preventDefault();
