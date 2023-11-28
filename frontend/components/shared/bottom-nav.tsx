@@ -1,14 +1,15 @@
 import { isEVMAddress } from "@/lib/utils";
 import { Link as JoyLink } from "@mui/joy";
+import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
-import { useAccount } from "wagmi";
 import { Flex } from "./flex";
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { address } = useAccount();
+  const { user } = usePrivy();
+  const address = (user?.wallet?.address as `0x${string}`) || "0x0";
 
   const paths = useMemo(
     () => [

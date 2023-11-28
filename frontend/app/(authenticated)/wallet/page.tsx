@@ -8,16 +8,19 @@ import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
 import { KeyOutlined, TransitEnterexitOutlined } from "@mui/icons-material";
 import { Button, Card, CircularProgress, Divider, Typography, useTheme } from "@mui/joy";
+import { usePrivy } from "@privy-io/react-auth";
 import { Transak, TransakConfig } from "@transak/transak-sdk";
 import { useMemo, useState } from "react";
-import { useAccount, useBalance } from "wagmi";
+import { useBalance } from "wagmi";
 
 export default function ChatsPage() {
-  const { address } = useAccount();
+  const { user } = usePrivy();
+  const address = (user?.wallet?.address as `0x${string}`) || "0x0";
   const theme = useTheme();
   const { data: builderFiData, isLoading } = useBuilderFIData();
   const { data: balance } = useBalance({
-    address
+    address,
+    enabled: address !== "0x0"
   });
   const { data: allHolding } = useGetHoldings(address);
   const [openWithdraw, setOpenWithdraw] = useState<boolean>(false);

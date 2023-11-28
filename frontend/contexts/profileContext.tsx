@@ -1,9 +1,9 @@
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData, useSocialData } from "@/hooks/useSocialData";
+import { usePrivy } from "@privy-io/react-auth";
 import { useParams } from "next/navigation";
 import { ReactNode, createContext, useCallback, useContext, useMemo } from "react";
-import { useAccount } from "wagmi";
 
 interface ProfileContextType {
   holders: ReturnType<typeof useGetHolders>["data"];
@@ -42,7 +42,9 @@ const ProfileContext = createContext<ProfileContextType>({
 export const useProfileContext = () => useContext(ProfileContext);
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
-  const { address } = useAccount();
+  const { user } = usePrivy();
+  const address = (user?.wallet?.address as `0x${string}`) || "0x0";
+
   const { wallet } = useParams();
   const socialData = useSocialData(wallet as `0x${string}`);
   const {
