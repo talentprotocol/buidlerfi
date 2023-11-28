@@ -83,6 +83,8 @@ export const getUser = async (wallet: string) => {
 };
 
 export const createUser = async (privyUserId: string, inviteCode: string) => {
+  inviteCode = inviteCode.trim();
+
   const privyUser = await privyClient.getUser(privyUserId);
   if (!privyUser) {
     return { error: ERRORS.UNAUTHORIZED };
