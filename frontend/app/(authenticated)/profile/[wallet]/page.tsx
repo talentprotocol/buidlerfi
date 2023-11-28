@@ -11,7 +11,7 @@ import { useProfileContext } from "@/contexts/profileContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { isEVMAddress, tryParseBigInt } from "@/lib/utils";
-import { Add, Chat, Lock } from "@mui/icons-material";
+import { Chat, Lock } from "@mui/icons-material";
 import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useMemo, useState } from "react";
 
@@ -58,15 +58,36 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
     }
   };
 
+  console.log({
+    width: window.innerWidth,
+    diff: window.innerWidth - 500,
+    computedRight: (window.innerHeight - 500) / 2 + 37 + 16
+  });
+
   return (
     <Flex component={"main"} y grow gap2>
       {hasKeys && !isOwnProfile && (
-        <Button
-          sx={{ zIndex: 3, position: "fixed", bottom: "16px", right: "16px", height: "48px", width: "48px" }}
-          onClick={() => setIsAskingQuestion(true)}
+        <Flex
+          x
+          xe
+          ye
+          sx={{
+            pointerEvents: "none",
+            zIndex: 3,
+            position: "fixed",
+            width: "min(100vw, 500px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            top: 0,
+            bottom: 0,
+            mb: 2,
+            pr: 4
+          }}
         >
-          <Add fontSize="small" />
-        </Button>
+          <Button sx={{ pointerEvents: "auto" }} size="lg" onClick={() => setIsAskingQuestion(true)}>
+            Ask
+          </Button>
+        </Flex>
       )}
       {isAskingQuestion && (
         <AskQuestionModal refetch={() => refetchProfileInfo()} close={() => setIsAskingQuestion(false)} />

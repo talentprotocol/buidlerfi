@@ -7,6 +7,7 @@ import { Reactions } from "@/components/shared/reactions";
 import { UserItemFromAddress } from "@/components/shared/user-item";
 import { OpenDialog } from "@/contexts/DialogContainer";
 import { useProfileContext } from "@/contexts/profileContext";
+import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
@@ -21,10 +22,11 @@ import sanitize from "sanitize-html";
 
 export default function QuestionModal({ questionId, close }: { questionId: number; close: () => void }) {
   const { data: question, refetch } = useGetQuestion(Number(questionId));
-  const { hasKeys, socialData, isOwnProfile, holders } = useProfileContext();
+  const { hasKeys, socialData, isOwnProfile } = useProfileContext();
   const [reply, setReply] = useState("");
   const putQuestion = usePutQuestion();
   const { buyPrice } = useGetBuilderInfo(socialData.wallet);
+  const { data: holders } = useGetHolders(question?.questioner.wallet as `0x${string}`);
   const pathname = usePathname();
 
   const replyQuestion = async () => {

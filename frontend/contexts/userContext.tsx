@@ -80,6 +80,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       privyUser,
       ready,
       refetchBalance,
+      socialWallet,
       user.data,
       user.isLoading,
       user.refetch
