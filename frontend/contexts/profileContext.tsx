@@ -69,9 +69,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const holder = holders.find(holder => holder.holder.owner.toLowerCase() === address?.toLowerCase());
     if (!holder) return [undefined, 0];
     else return [Number(holder.supporterNumber), Number(holder.heldKeyNumber)];
-  }, [address, holders, user]);
+  }, [address, holders, address]);
 
-  const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount, user]);
+  const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount]);
 
   const sortedHolders = useMemo(
     () => holders?.sort((a, b) => Number(a.supporterNumber) - Number(b.supporterNumber)),
