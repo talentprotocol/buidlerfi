@@ -68,7 +68,7 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
         <Flex y grow>
           {hasKeys && !questions?.length ? (
             <PageMessage
-              text={`Congratulations. You can now chat with ${socialData.displayName}`}
+              text={`Congratulations. You can now ask ${socialData.displayName} a question.`}
               icon={<LockOpen />}
             />
           ) : (
