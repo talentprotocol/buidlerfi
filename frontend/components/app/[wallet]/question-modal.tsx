@@ -11,7 +11,7 @@ import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { getDifference } from "@/lib/utils";
-import { FileUpload, LockOutlined } from "@mui/icons-material";
+import { FileUploadOutlined, LockOutlined } from "@mui/icons-material";
 import { Avatar, Button, Divider, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
 import anchorme from "anchorme";
 import { usePathname } from "next/navigation";
@@ -101,7 +101,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                 toast.success("question url copied to clipboard");
               }}
             >
-              <FileUpload fontSize="small" />
+              <FileUploadOutlined fontSize="small" />
             </IconButton>
           </Flex>
           <Divider sx={{ mx: -2 }} />
