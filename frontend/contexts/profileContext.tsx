@@ -1,10 +1,10 @@
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData, useSocialData } from "@/hooks/useSocialData";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useParams } from "next/navigation";
-import { ReactNode, createContext, useCallback, useContext, useMemo } from "react";
-
+import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo } from "react";
 interface ProfileContextType {
   holders: ReturnType<typeof useGetHolders>["data"];
   supporterNumber?: number;
@@ -43,7 +43,16 @@ export const useProfileContext = () => useContext(ProfileContext);
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const { user } = usePrivy();
-  const address = (user?.wallet?.address as `0x${string}`) || "0x0";
+  const { wallet: activeWallet, setActiveWallet } = usePrivyWagmi();
+  const { wallets } = useWallets();
+
+  //Ensure the active wallet is the embedded wallet from Privy
+  useEffect(() => {
+    const found = wallets.find(wal => wal.connectorType === "embedded");
+    if (found) setActiveWallet(found);
+  }, [setActiveWallet, wallets]);
+
+  const address = (activeWallet?.address as `0x${string}`) || "0x0";
 
   const { wallet } = useParams();
   const socialData = useSocialData(wallet as `0x${string}`);
@@ -53,15 +62,16 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isQuestionsLoading
   } = useGetQuestions(socialData.userId);
   const { data: holders, isLoading, refetch } = useGetHolders(wallet as `0x${string}`);
+
   const [supporterNumber, ownedKeysCount] = useMemo(() => {
     if (!holders) return [undefined, undefined];
 
     const holder = holders.find(holder => holder.holder.owner.toLowerCase() === address?.toLowerCase());
     if (!holder) return [undefined, 0];
     else return [Number(holder.supporterNumber), Number(holder.heldKeyNumber)];
-  }, [address, holders]);
+  }, [address, holders, user]);
 
-  const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount]);
+  const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount, user]);
 
   const sortedHolders = useMemo(
     () => holders?.sort((a, b) => Number(a.supporterNumber) - Number(b.supporterNumber)),
