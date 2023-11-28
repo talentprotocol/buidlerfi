@@ -10,9 +10,10 @@ import { useProfileContext } from "@/contexts/profileContext";
 import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { convertLinksToHyperlinks, getDifference } from "@/lib/utils";
+import { getDifference } from "@/lib/utils";
 import { FileUpload, LockOutlined } from "@mui/icons-material";
 import { Avatar, Button, Divider, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
+import anchorme from "anchorme";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -50,11 +51,14 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
   };
 
   const sanitizedContent = useMemo(
-    () => sanitize(convertLinksToHyperlinks(question?.questionContent)),
+    () => (question?.questionContent ? sanitize(anchorme(question?.questionContent)) : ""),
     [question?.questionContent]
   );
 
-  const sanitizedReply = useMemo(() => sanitize(convertLinksToHyperlinks(question?.reply || "")), [question?.reply]);
+  const sanitizedReply = useMemo(
+    () => (question?.reply ? sanitize(anchorme(question?.reply || "")) : ""),
+    [question?.reply]
+  );
 
   if (!question) return <></>;
 

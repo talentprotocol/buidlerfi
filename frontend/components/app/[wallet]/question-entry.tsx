@@ -4,10 +4,11 @@ import { useProfileContext } from "@/contexts/profileContext";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { convertLinksToHyperlinks, getDifference, shortAddress } from "@/lib/utils";
+import { getDifference, shortAddress } from "@/lib/utils";
 import theme from "@/theme";
 import { FileUploadOutlined } from "@mui/icons-material";
 import { Avatar, Chip, IconButton, Typography } from "@mui/joy";
+import anchorme from "anchorme";
 import { usePathname } from "next/navigation";
 import { FC, useMemo } from "react";
 import { toast } from "react-toastify";
@@ -28,10 +29,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
 
   const pathname = usePathname();
 
-  const sanitizedContent = useMemo(
-    () => sanitize(convertLinksToHyperlinks(question?.questionContent)),
-    [question?.questionContent]
-  );
+  const sanitizedContent = useMemo(() => sanitize(anchorme(question?.questionContent)), [question?.questionContent]);
 
   if (!question) return <></>;
 
