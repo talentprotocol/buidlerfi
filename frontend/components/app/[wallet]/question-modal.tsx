@@ -101,7 +101,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
             </IconButton>
           </Flex>
           <Divider sx={{ mx: -2 }} />
-          {isOwnProfile && !question.reply && (
+          {isOwnProfile && !question.repliedOn && (
             <FullTextArea
               placeholder={`Answer ${question.questioner.displayName} ...`}
               avatarUrl={question.questioner.avatarUrl || undefined}
@@ -109,7 +109,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
               value={reply}
             />
           )}
-          {question.reply && hasKeys && (
+          {question.repliedOn && hasKeys && (
             <Flex x ys gap={1} grow>
               <Avatar size="sm" src={question.replier.avatarUrl || DEFAULT_PROFILE_PICTURE} />
               <Flex y gap={0.5}>
@@ -130,7 +130,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
               </Flex>
             </Flex>
           )}
-          {!hasKeys && question.reply && (
+          {!hasKeys && question.repliedOn && (
             <PageMessage
               title="Unlock answer"
               icon={<LockOutlined />}
@@ -138,7 +138,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
             />
           )}
 
-          {!question.reply && !isOwnProfile && (
+          {!question.repliedOn && !isOwnProfile && (
             <PageMessage
               title="Waiting for answer ..."
               icon={<Avatar size="sm" src={socialData.avatarUrl} />}
@@ -149,7 +149,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
               }
             />
           )}
-          {question.reply && hasKeys && <Reactions question={question} type="like" refetch={refetch} />}
+          {question.repliedOn && hasKeys && <Reactions question={question} type="like" refetch={refetch} />}
         </Flex>
       </ModalDialog>
     </Modal>
