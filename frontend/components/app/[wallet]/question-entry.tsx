@@ -1,6 +1,5 @@
 import { Flex } from "@/components/shared/flex";
 import { Reactions } from "@/components/shared/reactions";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
@@ -23,8 +22,6 @@ interface Props {
   onClick: () => void;
 }
 export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
-  const { hasKeys } = useProfileContext();
-
   const askedOn = useMemo(() => getDifference(question?.createdAt), [question?.createdAt]);
 
   const pathname = usePathname();
