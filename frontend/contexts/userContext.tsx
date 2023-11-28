@@ -64,7 +64,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       user: user.data,
       privyUser: privyUser || undefined,
-      isLoading: !ready || (!!privyUser && user.isLoading),
+      isLoading: !ready || user.isLoading,
       isAuthenticatedAndActive: ready && !user.isLoading && !!user.data && user.data.isActive && privyAuthenticated,
       address: user.data?.wallet ? (user.data?.wallet as `0x${string}`) : undefined,
       socialAddress: socialWallet as `0x${string}`,
