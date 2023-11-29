@@ -11,7 +11,7 @@ interface Props {
   removeCopyButton?: boolean;
 }
 
-export const WalletAddress: FC<Props> = ({ address, level, removeCopyButton = false }) => {
+export const WalletAddress: FC<Props> = ({ address = "", level, removeCopyButton = false }) => {
   return (
     <Flex x yc gap1>
       <Typography level={level}>{shortAddress(address)}</Typography>

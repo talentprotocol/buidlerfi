@@ -5,31 +5,50 @@ import { UserItemFromAddress } from "@/components/shared/user-item";
 import { WalletAddress } from "@/components/shared/wallet-address";
 import { WithdrawDialog } from "@/components/shared/withdraw-modal";
 import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
+import { useGetCurrentUser } from "@/hooks/useUserApi";
 import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
 import { KeyOutlined, TransitEnterexitOutlined } from "@mui/icons-material";
 import { Button, Card, CircularProgress, Divider, Typography, useTheme } from "@mui/joy";
+import { useWallets } from "@privy-io/react-auth";
+import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { Transak, TransakConfig } from "@transak/transak-sdk";
-import { useMemo, useState } from "react";
-import { useAccount, useBalance } from "wagmi";
+import { useEffect, useMemo, useState } from "react";
+import { useBalance } from "wagmi";
 
 export default function ChatsPage() {
-  const { address } = useAccount();
+  const user = useGetCurrentUser();
+  const { setActiveWallet } = usePrivyWagmi();
+  const { wallets } = useWallets();
+  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
+
+  //Ensure the active wallet is the embedded wallet from Privy
+  useEffect(() => {
+    const found = wallets.find(wal => wal.connectorType === "embedded");
+    if (found) {
+      setActiveWallet(found);
+      setMainWallet(found.address);
+    } else {
+      setMainWallet(user.data?.wallet);
+    }
+  }, [setActiveWallet, wallets]);
+
   const theme = useTheme();
   const { data: builderFiData, isLoading } = useBuilderFIData();
   const { data: balance } = useBalance({
-    address
+    address: mainWallet as `0x${string}`,
+    enabled: mainWallet !== "0x0"
   });
-  const { data: allHolding } = useGetHoldings(address);
+  const { data: allHolding } = useGetHoldings(mainWallet as `0x${string}`);
   const [openWithdraw, setOpenWithdraw] = useState<boolean>(false);
 
   const [portfolio, tradingFees] = useMemo(() => {
     if (!allHolding || !builderFiData) return [BigInt(0), BigInt(0)];
     const holding = allHolding.reduce((prev, curr) => prev + tryParseBigInt(curr.owner.buyPrice), BigInt(0));
     const tradingFees = builderFiData.shareParticipants.find(
-      user => user.owner == address?.toLowerCase()
+      user => user.owner == mainWallet?.toLowerCase()
     )?.tradingFeesAmount;
     return [holding, tradingFees];
-  }, [address, allHolding, builderFiData]);
+  }, [mainWallet, allHolding, builderFiData]);
 
   if (isLoading) {
     return (
@@ -45,7 +64,7 @@ export default function ChatsPage() {
       environment: Transak.ENVIRONMENTS.PRODUCTION,
       defaultNetwork: "base",
       network: "base",
-      walletAddress: address,
+      walletAddress: mainWallet,
       productsAvailed: "buy",
       cryptoCurrencyList: ["ETH"]
     };
@@ -83,7 +102,7 @@ export default function ChatsPage() {
         <Typography textAlign={"center"} level="h2">
           {formatToDisplayString(balance?.value, balance?.decimals)} ETH
         </Typography>
-        {!!address && <WalletAddress address={address} level="body-md" />}
+        {!!mainWallet && <WalletAddress address={mainWallet} level="body-md" />}
       </Flex>
       <Flex x xc p={2} gap1>
         <Button

@@ -14,7 +14,7 @@ import { useAxios } from "./useAxios";
 import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
 
-export function useGetQuestion(id: number, queryOptions: SimpleUseQueryOptions) {
+export function useGetQuestion(id: number, queryOptions?: SimpleUseQueryOptions) {
   return useQuerySA(["useGetQuestion", id], options => getQuestionSA(id!, options), {
     ...queryOptions
   });

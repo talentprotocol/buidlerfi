@@ -68,7 +68,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
   };
 
   const keysPlural = () => {
-    if (ownedKeysCount != 0) {
+    if (ownedKeysCount != 1) {
       return "keys";
     } else {
       return "key";

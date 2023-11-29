@@ -1,9 +1,11 @@
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData, useSocialData } from "@/hooks/useSocialData";
+import { useGetCurrentUser } from "@/hooks/useUserApi";
+import { useWallets } from "@privy-io/react-auth";
+import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useParams } from "next/navigation";
-import { ReactNode, createContext, useCallback, useContext, useMemo } from "react";
-import { useAccount } from "wagmi";
+import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 interface ProfileContextType {
   holders: ReturnType<typeof useGetHolders>["data"];
@@ -42,7 +44,28 @@ const ProfileContext = createContext<ProfileContextType>({
 export const useProfileContext = () => useContext(ProfileContext);
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
-  const { address } = useAccount();
+  const user = useGetCurrentUser();
+  const { setActiveWallet } = usePrivyWagmi();
+  const { wallets } = useWallets();
+  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
+
+  //Ensure the active wallet is the embedded wallet from Privy
+  useEffect(() => {
+    const found = wallets.find(wal => wal.connectorType === "embedded");
+    if (found) {
+      setActiveWallet(found);
+      setMainWallet(found.address);
+    } else {
+      setMainWallet(user.data?.wallet);
+    }
+  }, [setActiveWallet, wallets]);
+
+  //Ensure the active wallet is the embedded wallet from Privy
+  useEffect(() => {
+    const found = wallets.find(wal => wal.connectorType === "embedded");
+    if (found) setActiveWallet(found);
+  }, [setActiveWallet, wallets]);
+
   const { wallet } = useParams();
   const socialData = useSocialData(wallet as `0x${string}`);
   const {
@@ -51,13 +74,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isQuestionsLoading
   } = useGetQuestions(socialData.userId);
   const { data: holders, isLoading, refetch } = useGetHolders(wallet as `0x${string}`);
+
   const [supporterNumber, ownedKeysCount] = useMemo(() => {
     if (!holders) return [undefined, undefined];
 
-    const holder = holders.find(holder => holder.holder.owner.toLowerCase() === address?.toLowerCase());
+    const holder = holders.find(holder => holder.holder.owner.toLowerCase() === mainWallet?.toLowerCase());
     if (!holder) return [undefined, 0];
     else return [Number(holder.supporterNumber), Number(holder.heldKeyNumber)];
-  }, [address, holders]);
+  }, [mainWallet, holders]);
 
   const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount]);
 
@@ -80,7 +104,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       questions,
       refetch: refetchAll,
       socialData,
-      isOwnProfile: address?.toLowerCase() === (wallet as string).toLowerCase()
+      isOwnProfile: mainWallet?.toLowerCase() === (wallet as string).toLowerCase()
     };
   }, [
     sortedHolders,
@@ -92,7 +116,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     questions,
     refetchAll,
     socialData,
-    address,
+    mainWallet,
     wallet
   ]);
 

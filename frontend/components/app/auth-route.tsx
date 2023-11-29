@@ -31,15 +31,6 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     [pathname, router]
   );
 
-  const handleAnonymousRedirect = useCallback(() => {
-    if (!user.privyUser) {
-      return redirect("/signup");
-    } else if (user.privyUser && !user.isAuthenticatedAndActive) {
-      return redirect("/signup/invitation");
-    }
-    return false;
-  }, [redirect, user.isAuthenticatedAndActive, user.privyUser]);
-
   const handleOnboardingRedirect = useCallback(() => {
     if (user.balance !== undefined && user.balance < parseEther("0.0005")) {
       const { pathname } = window.location;
@@ -47,7 +38,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       if (pathname.includes("fund") || pathname.includes("loading")) return;
 
       return redirect("/onboarding/welcome");
-    } else if (Number(supporterKeys) === 0) {
+    } else if (Number(supporterKeys) === 0 && router.searchParams.skipLaunchingKeys !== "1") {
       return redirect("/onboarding/buykey");
     } else if (!user.user?.socialWallet && !user.user?.displayName && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
@@ -66,14 +57,36 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (user.isLoading) return;
-    if (!user.isAuthenticatedAndActive) {
-      if (handleAnonymousRedirect()) return;
-    } else {
-      if (!user.user?.hasFinishedOnboarding) {
-        if (handleOnboardingRedirect()) return;
+
+    // user has not logged in with privy yet so send him to the signup page
+    if (!user.privyUser) {
+      redirect("/signup");
+      setIsReady(true);
+      return;
+    }
+
+    // this means the user does not have an invite code
+    if (!user.user?.invitedById) {
+      redirect("/signup/invitation");
+      setIsReady(true);
+      return;
+    }
+
+    // this means that the user has not done the onboarding
+    if (!user.user?.hasFinishedOnboarding) {
+      if (handleOnboardingRedirect()) return;
+    }
+
+    // if the user has finished the onboarding then we should NEVER send him there again
+    if (user.user?.hasFinishedOnboarding) {
+      if (pathname === "/") {
+        if (redirect("/home")) return;
+      }
+      if (pathname.startsWith("/onboarding")) {
+        if (redirect("/home")) return;
       }
 
-      if (pathname.startsWith("/signup") || pathname === "/") {
+      if (pathname.startsWith("/signup")) {
         if (redirect("/home")) return;
       }
 
@@ -81,8 +94,9 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
         if (redirect("/home")) return;
       }
     }
+
     setIsReady(true);
-  }, [handleAnonymousRedirect, handleOnboardingRedirect, pathname, redirect, router, user]);
+  }, [handleOnboardingRedirect, pathname, redirect, router, user, user.isLoading, user.privyUser]);
 
   if (user.isLoading || !isReady) {
     return (

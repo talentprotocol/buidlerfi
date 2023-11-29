@@ -1,13 +1,13 @@
 import { Flex } from "@/components/shared/flex";
 import { Reactions } from "@/components/shared/reactions";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { convertLinksToHyperlinks, getDifference, shortAddress } from "@/lib/utils";
+import { getDifference, shortAddress } from "@/lib/utils";
 import theme from "@/theme";
 import { FileUploadOutlined } from "@mui/icons-material";
 import { Avatar, Chip, IconButton, Typography } from "@mui/joy";
+import anchorme from "anchorme";
 import { usePathname } from "next/navigation";
 import { FC, useMemo } from "react";
 import { toast } from "react-toastify";
@@ -23,16 +23,11 @@ interface Props {
   onClick: () => void;
 }
 export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
-  const { hasKeys } = useProfileContext();
-
   const askedOn = useMemo(() => getDifference(question?.createdAt), [question?.createdAt]);
 
   const pathname = usePathname();
 
-  const sanitizedContent = useMemo(
-    () => sanitize(convertLinksToHyperlinks(question?.questionContent)),
-    [question?.questionContent]
-  );
+  const sanitizedContent = useMemo(() => sanitize(anchorme(question?.questionContent)), [question?.questionContent]);
 
   if (!question) return <></>;
 
@@ -52,7 +47,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
             <Flex x yc gap2>
               {!question.repliedOn ? (
                 <Chip size="sm" color="neutral" variant="outlined">
-                  Waiting answer
+                  Awaiting answer
                 </Chip>
               ) : (
                 <Chip size="sm" color="primary" variant="outlined">
@@ -80,7 +75,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
         </Flex>
       </Flex>
       <Flex x yc xsb grow>
-        {hasKeys ? <Reactions sx={{ ml: 4 }} question={question} refetch={refetch} /> : <Flex />}
+        <Reactions sx={{ ml: 4 }} question={question} refetch={refetch} /> <Flex />
         <IconButton
           onClick={e => {
             e.preventDefault();

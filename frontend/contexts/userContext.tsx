@@ -39,11 +39,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { wallets } = useWallets();
   const { setActiveWallet } = usePrivyWagmi();
   const [socialWallet, setSocialWallet] = useState<string | undefined>(undefined);
+  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
     const found = wallets.find(wal => wal.connectorType === "embedded");
-    if (found) setActiveWallet(found);
+    if (found) {
+      setActiveWallet(found);
+      setMainWallet(found.address);
+    } else {
+      setMainWallet(user.data?.wallet);
+    }
   }, [setActiveWallet, wallets]);
 
   //Get the non embed wallet
@@ -66,7 +72,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       privyUser: privyUser || undefined,
       isLoading: !ready || (!!privyUser && user.isLoading),
       isAuthenticatedAndActive: ready && !user.isLoading && !!user.data && user.data.isActive && privyAuthenticated,
-      address: user.data?.wallet ? (user.data?.wallet as `0x${string}`) : undefined,
+      address: mainWallet ? (mainWallet as `0x${string}`) : undefined,
       socialAddress: socialWallet as `0x${string}`,
       refetch: user.refetch,
       balance: balance?.value,
@@ -80,9 +86,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       privyUser,
       ready,
       refetchBalance,
+      socialWallet,
       user.data,
       user.isLoading,
-      user.refetch
+      user.refetch,
+      mainWallet
     ]
   );
 
