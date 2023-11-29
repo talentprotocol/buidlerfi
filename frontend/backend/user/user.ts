@@ -6,6 +6,7 @@ import privyClient from "@/lib/privyClient";
 import viemClient from "@/lib/viemClient";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
+import { updateRecommendations } from "../socialProfile/recommendation";
 import { updateUserSocialProfiles } from "../socialProfile/socialProfile";
 
 export const refreshAllUsersProfile = async () => {
@@ -32,6 +33,7 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
   if (!user.socialWallet) return { error: ERRORS.NO_SOCIAL_PROFILE_FOUND };
 
   const res = await updateUserSocialProfiles(user.id, user.socialWallet);
+  updateRecommendations(user.socialWallet.toLowerCase());
   return { data: res };
 };
 
@@ -178,6 +180,7 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
 
   try {
     await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase());
+    updateRecommendations(challenge.publicKey.toLowerCase());
   } catch (err) {
     console.error("Error while updating social profiles: ", err);
   }
