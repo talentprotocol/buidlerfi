@@ -1,7 +1,7 @@
 "use client";
 import { useSocialData } from "@/hooks/useSocialData";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { formatToDisplayString } from "@/lib/utils";
+import { formatToDisplayString, shortAddress } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Skeleton, Typography, TypographySystem } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
@@ -24,6 +24,8 @@ interface UserItemProps extends CommonProps {
     isLoading?: boolean;
     buyPrice?: string | bigint;
     numberOfHolders?: string | number;
+    questions?: number;
+    replies?: number;
   };
 }
 
@@ -57,6 +59,8 @@ interface UserItemInnerProps extends CommonProps {
   isLoading?: boolean;
   buyPrice?: bigint;
   numberOfHolders?: number;
+  questions?: number;
+  replies?: number;
 }
 
 const UserItemInner: FC<UserItemInnerProps> = ({
@@ -66,12 +70,45 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   isLoading = false,
   buyPrice,
   numberOfHolders,
+  questions,
+  replies,
   px = 2,
   py = 1,
   isButton = true,
   nameLevel = "body-sm"
 }) => {
   const router = useRouter();
+
+  const pluralize = (word: string, amount: number) => {
+    return amount === 1 ? word : `${word}s`;
+  };
+
+  const renderDescription = () => {
+    if (questions !== undefined && replies !== undefined) {
+      if (numberOfHolders !== undefined) {
+        return (
+          <Typography textColor={"neutral.600"} level="body-sm">
+            {numberOfHolders.toString()} {pluralize("holder", numberOfHolders)} • {replies}/{questions}{" "}
+            {pluralize("question", questions)}
+          </Typography>
+        );
+      }
+      return (
+        <Typography textColor={"neutral.600"} level="body-sm">
+          {replies}/{questions} {pluralize("question", questions)}
+        </Typography>
+      );
+    } else if (numberOfHolders !== undefined && buyPrice !== undefined) {
+      return (
+        <Typography textColor={"neutral.600"} level="body-sm">
+          {numberOfHolders.toString()} {pluralize("holder", numberOfHolders)} • Price{" "}
+          {formatToDisplayString(buyPrice, 18)} ETH
+        </Typography>
+      );
+    }
+    return null;
+  };
+
   return (
     <Flex
       x
@@ -91,9 +128,8 @@ const UserItemInner: FC<UserItemInnerProps> = ({
           src={avatar || DEFAULT_PROFILE_PICTURE}
           sx={{ cursor: "pointer" }}
           onClick={() => router.push(`/profile/${address}`)}
-        >
-          <Skeleton loading={isLoading} />
-        </Avatar>
+          alt={name || shortAddress(address || "")}
+        />
         <Flex y>
           <Typography
             textColor={"neutral.800"}
@@ -102,13 +138,9 @@ const UserItemInner: FC<UserItemInnerProps> = ({
             sx={{ cursor: "pointer" }}
             onClick={() => router.push(`/profile/${address}`)}
           >
-            <Skeleton loading={isLoading}>{name}</Skeleton>
+            <Skeleton loading={isLoading}>{name || shortAddress(address || "")}</Skeleton>
           </Typography>
-          {numberOfHolders !== undefined && buyPrice !== undefined && (
-            <Typography textColor={"neutral.600"} level="body-sm">
-              {numberOfHolders.toString()} holders • Price {formatToDisplayString(buyPrice, 18)} ETH
-            </Typography>
-          )}
+          {renderDescription()}
         </Flex>
       </Flex>
       {isButton && <ChevronRight />}

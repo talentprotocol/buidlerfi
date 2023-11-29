@@ -282,15 +282,25 @@ export const getRecommendedUsers = async (address: string) => {
 
   const recommendations = await prisma.recommendedUser.findMany({
     where: { forId: user.id },
-    orderBy: { recommendationScore: "desc" },
-    include: { user: { include: { replies: true } } }
+    orderBy: { recommendationScore: "desc" }
   });
 
-  const users = recommendations.map(rec => ({
-    ...user,
-    questions: !!rec.user ? rec.user.replies.length : 0,
-    replies: !!rec.user ? rec.user.replies.filter(reply => !!reply.repliedOn).length : 0
-  }));
+  const usersFromRecommendations = await prisma.user.findMany({
+    where: { id: { in: recommendations.map(rec => rec.userId).filter(i => i !== null) as number[] } },
+    include: { replies: true }
+  });
+
+  const users = recommendations.map(rec => {
+    const foundUser = usersFromRecommendations.find(u => u.id === rec.userId);
+    return {
+      ...rec,
+      wallet: foundUser?.wallet || rec.wallet,
+      socialWallet: rec.wallet,
+      userId: rec.userId,
+      questions: !!foundUser ? foundUser.replies.length : 0,
+      replies: !!foundUser ? foundUser.replies.filter(reply => !!reply.repliedOn).length : 0
+    };
+  });
 
   return {
     data: users
