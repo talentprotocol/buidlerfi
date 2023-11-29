@@ -258,9 +258,54 @@ Wallet: ${publicKey}
 };
 
 export const getBulkUsers = async (addresses: string[]) => {
+  // get all users
+  const usersWithReplies = await prisma.user.findMany({
+    where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true },
+    include: { replies: true }
+  });
+
+  // split the count of replies and questions
+  const users = usersWithReplies.map(user => ({
+    ...user,
+    questions: user.replies.length,
+    replies: user.replies.filter(reply => !!reply.repliedOn).length
+  }));
+
   return {
-    data: await prisma.user.findMany({
-      where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true }
-    })
+    data: users
   };
+};
+
+export const getRecommendedUsers = async (address: string) => {
+  const user = await prisma.user.findUnique({ where: { wallet: address.toLowerCase() } });
+  if (!user) return { error: ERRORS.USER_NOT_FOUND };
+
+  const recommendations = await prisma.recommendedUser.findMany({
+    where: { forId: user.id },
+    orderBy: { recommendationScore: "desc" },
+    include: { user: { include: { replies: true } } }
+  });
+
+  const users = recommendations.map(rec => ({
+    ...user,
+    questions: !!rec.user ? rec.user.replies.length : 0,
+    replies: !!rec.user ? rec.user.replies.filter(reply => !!reply.repliedOn).length : 0
+  }));
+
+  return {
+    data: users
+  };
+};
+
+export const getRecommendedUser = async (wallet: string) => {
+  const address = wallet.toLowerCase();
+  const res = await prisma.recommendedUser.findFirst({
+    where: {
+      wallet: address
+    }
+  });
+
+  if (!res) return { error: ERRORS.USER_NOT_FOUND };
+
+  return { data: res };
 };

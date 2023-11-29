@@ -4,6 +4,8 @@ import {
   createUserSA,
   generateChallengeSA,
   getCurrentUserSA,
+  getRecommendedUserSA,
+  getRecommendedUsersSA,
   getUserSA,
   linkNewWalletSA,
   refreshCurrentUserProfileSA,
@@ -58,4 +60,14 @@ export const useUpdateUser = () => {
 
 export const useGenerateChallenge = () => {
   return useMutationSA(async (options, publicKey: string) => generateChallengeSA(publicKey, options));
+};
+
+export const useGetRecommendedUser = (address?: string) => {
+  return useQuerySA(["useGetRecommendedUser", address], async options => getRecommendedUserSA(address!, options), {
+    enabled: !!address
+  });
+};
+
+export const useRecommendedUsers = (wallet: string) => {
+  return useQuerySA(["useRecommendedUsers", wallet], async options => getRecommendedUsersSA(wallet, options));
 };

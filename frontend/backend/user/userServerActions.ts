@@ -8,6 +8,8 @@ import {
   generateChallenge,
   getBulkUsers,
   getCurrentUser,
+  getRecommendedUser,
+  getRecommendedUsers,
   getUser,
   linkNewWallet,
   refreshAllUsersProfile,
@@ -54,4 +56,12 @@ export const generateChallengeSA = (publicKey: string, options: ServerActionOpti
 
 export const getBulkUsersSA = (addresses: string[], options: ServerActionOptions) => {
   return serverActionWrapper(() => getBulkUsers(addresses), options);
+};
+
+export const getRecommendedUserSA = (wallet: string, options: ServerActionOptions) => {
+  return serverActionWrapper(() => getRecommendedUser(wallet), options);
+};
+
+export const getRecommendedUsersSA = (address: string, options: ServerActionOptions) => {
+  return serverActionWrapper(() => getRecommendedUsers(address), options);
 };

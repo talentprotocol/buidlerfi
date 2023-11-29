@@ -162,7 +162,9 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
         </Flex>
 
         {ownedKeysCount === 0 ? (
-          <Typography level="body-sm">You don&apos;t own any keys</Typography>
+          <Typography level="body-sm">
+            {socialData.userId ? "You don't own any keys" : `${socialData.displayName} is not on builder.fi yet`}
+          </Typography>
         ) : (
           <Flex x gap2>
             <Typography level="body-sm">

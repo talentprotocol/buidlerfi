@@ -15,7 +15,7 @@ const gqlShare = `
 
 const query = `
   {
-    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, orderBy: supply, orderDirection:desc) {
+    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, orderBy: numberOfHolders, orderDirection:desc) {
       ${gqlShare}
     }
     shareRelationships(first: ${THE_GRAPH_PAGE_SIZE}) {
@@ -34,7 +34,7 @@ const query = `
 
 const getUsersQuery = (offset: number) => `
   {
-    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, skip: ${offset}, orderBy: supply, orderDirection:desc) {
+    shareParticipants(first: ${THE_GRAPH_PAGE_SIZE}, skip: ${offset}, orderBy: numberOfHolders, orderDirection:desc) {
       ${gqlShare}
     }
   }
