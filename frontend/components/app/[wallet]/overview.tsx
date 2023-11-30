@@ -98,7 +98,8 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
       if (recommendedUser?.talentProtocol) {
         otherSocials.push({
           dappName: "TALENT_PROTOCOL",
-          profileName: recommendedUser.talentProtocol
+          profileName: recommendedUser.talentProtocol,
+          socialAddress: recommendedUser.wallet
         });
       }
       if (recommendedUser?.farcaster) {
@@ -127,9 +128,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
     <>
       <Flex y gap2 p={2}>
         <Flex x xsb mb={-1}>
-          <Avatar size="lg" src={avatarUrl} alt={""}>
-            <Skeleton loading={socialData.isLoading} />
-          </Avatar>
+          <Avatar size="lg" src={avatarUrl} alt={name}></Avatar>
           <Flex x yc gap1>
             {hasKeys && (
               <Button
@@ -207,7 +206,10 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
               return (
                 <JoyLink
                   key={social.dappName}
-                  href={additionalData.url(social.profileName, socialData.socialAddress || "")}
+                  href={additionalData.url(
+                    social.profileName,
+                    socialData.socialAddress || recommendedUser?.wallet || ""
+                  )}
                   target="_blank"
                   textColor={"link"}
                 >

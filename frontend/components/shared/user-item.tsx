@@ -89,13 +89,13 @@ const UserItemInner: FC<UserItemInnerProps> = ({
         return (
           <Typography textColor={"neutral.600"} level="body-sm">
             {numberOfHolders.toString()} {pluralize("holder", numberOfHolders)} • {replies}/{questions}{" "}
-            {pluralize("question", questions)}
+            {pluralize("answer", questions)}
           </Typography>
         );
       }
       return (
         <Typography textColor={"neutral.600"} level="body-sm">
-          {replies}/{questions} {pluralize("question", questions)}
+          {replies}/{questions} {pluralize("answer", questions)}
         </Typography>
       );
     } else if (numberOfHolders !== undefined && buyPrice !== undefined) {

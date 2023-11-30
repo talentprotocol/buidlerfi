@@ -305,20 +305,21 @@ export const getRecommendedUsers = async (address: string) => {
   });
 
   const usersFromRecommendations = await prisma.user.findMany({
-    where: { id: { in: recommendations.map(rec => rec.userId).filter(i => i !== null) as number[] } },
+    where: { socialWallet: { in: recommendations.map(rec => rec.wallet).filter(i => i !== null) as string[] } },
     include: { replies: true }
   });
 
   const users = recommendations.map(rec => {
-    const foundUser = usersFromRecommendations.find(u => u.id === rec.userId);
+    const foundUser = usersFromRecommendations.find(u => u.socialWallet === rec.wallet);
     return {
       ...rec,
       avatarUrl: sanitizeAvatarUrl(rec.avatarUrl || ""),
       wallet: foundUser?.wallet || rec.wallet,
       socialWallet: rec.wallet,
-      userId: rec.userId,
+      userId: !!foundUser ? foundUser.id : rec.userId,
       questions: !!foundUser ? foundUser.replies.length : 0,
-      replies: !!foundUser ? foundUser.replies.filter(reply => !!reply.repliedOn).length : 0
+      replies: !!foundUser ? foundUser.replies.filter(reply => !!reply.repliedOn).length : 0,
+      createdAt: !!foundUser ? foundUser.createdAt : rec.createdAt
     };
   });
 
@@ -337,5 +338,5 @@ export const getRecommendedUser = async (wallet: string) => {
 
   if (!res) return { error: ERRORS.USER_NOT_FOUND };
 
-  return { data: res };
+  return { data: { ...res, avatarUrl: sanitizeAvatarUrl(res.avatarUrl || "") } };
 };
