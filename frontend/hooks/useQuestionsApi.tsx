@@ -3,6 +3,7 @@ import {
   createQuestionSA,
   deleteQuestionSA,
   deleteReactionSA,
+  deleteReplySA,
   editQuestionSA,
   getQuestionSA,
   getQuestionsSA
@@ -62,4 +63,8 @@ export const useEditQuestion = () => {
   return useMutationSA((options, params: { questionId: number; questionContent: string }) =>
     editQuestionSA(params.questionId, params.questionContent, options)
   );
+};
+
+export const useDeleteReply = () => {
+  return useMutationSA((options, questionId: number) => deleteReplySA(questionId, options));
 };

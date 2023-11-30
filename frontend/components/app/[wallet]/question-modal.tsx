@@ -20,9 +20,11 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import sanitize from "sanitize-html";
+import { ReplyContextMenu } from "./reply-context-menu";
 
 export default function QuestionModal({ questionId, close }: { questionId: number; close: () => void }) {
   const { data: question, refetch } = useGetQuestion(Number(questionId));
+  const [isEditingReply, setIsEditingReply] = useState(false);
   const { hasKeys, socialData, isOwnProfile } = useProfileContext();
   const [reply, setReply] = useState("");
   const putQuestion = usePutQuestion();
@@ -37,6 +39,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
       answerContent: reply
     });
     setReply("");
+    setIsEditingReply(false);
     refetch();
   };
 
@@ -80,7 +83,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                 numberOfHolders={holders?.length}
                 nameLevel="title-sm"
               />
-              {isOwnProfile && !question.repliedOn && (
+              {isOwnProfile && (!question.repliedOn || isEditingReply) && (
                 <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>
                   Reply
                 </Button>
@@ -106,7 +109,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
           </Flex>
           <Divider />
           <Flex y gap1 p={2}>
-            {isOwnProfile && !question.repliedOn && (
+            {isOwnProfile && (!question.repliedOn || isEditingReply) && (
               <FullTextArea
                 placeholder={`Answer ${question.questioner.displayName} ...`}
                 avatarUrl={question.questioner.avatarUrl || undefined}
@@ -114,14 +117,23 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                 value={reply}
               />
             )}
-            {question.repliedOn && hasKeys && (
-              <Flex x ys gap={1} grow>
+            {question.repliedOn && hasKeys && !isEditingReply && (
+              <Flex x ys gap={1} grow fullwidth>
                 <Avatar size="sm" src={question.replier.avatarUrl || DEFAULT_PROFILE_PICTURE} />
-                <Flex y gap={0.5}>
-                  <Flex x yc gap={0.5}>
-                    <Typography level="title-sm">{question.replier.displayName} </Typography>
-                    <Typography level="body-sm">•</Typography>
-                    <Typography level="body-sm">{repliedOn}</Typography>
+                <Flex y gap={0.5} fullwidth>
+                  <Flex x yc xsb fullwidth>
+                    <Flex x yc gap={0.5}>
+                      <Typography level="title-sm">{question.replier.displayName} </Typography>
+                      <Typography level="body-sm">•</Typography>
+                      <Typography level="body-sm">{repliedOn}</Typography>
+                    </Flex>
+                    <Flex>
+                      <ReplyContextMenu
+                        question={question}
+                        refetchQuestion={() => refetch()}
+                        onEdit={() => setIsEditingReply(true)}
+                      />
+                    </Flex>
                   </Flex>
                   <Typography fontWeight={300} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
                     <div style={{ textTransform: "none" }} dangerouslySetInnerHTML={{ __html: sanitizedReply }} />
@@ -148,7 +160,9 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                 }
               />
             )}
-            {question.repliedOn && hasKeys && <Reactions question={question} type="like" refetch={refetch} />}
+            {question.repliedOn && hasKeys && !isEditingReply && (
+              <Reactions question={question} type="like" refetch={refetch} />
+            )}
           </Flex>
         </Flex>
       </ModalDialog>

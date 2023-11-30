@@ -97,6 +97,13 @@ const theme = extendTheme({
           padding: 0
         })
       }
+    },
+    JoyMenu: {
+      styleOverrides: {
+        root: props => ({
+          zIndex: props.ownerState.open ? 1300 : undefined
+        })
+      }
     }
   }
 });

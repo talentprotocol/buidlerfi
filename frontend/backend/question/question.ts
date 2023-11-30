@@ -88,10 +88,20 @@ export const deleteQuestion = async (privyUserId: string, questionId: number) =>
     return { error: ERRORS.UNAUTHORIZED };
   }
 
-  const res = await prisma.question.delete({
-    where: {
-      id: questionId
-    }
+  const res = await prisma.$transaction(async tx => {
+    const res = await prisma.question.delete({
+      where: {
+        id: questionId
+      }
+    });
+
+    //Make sure to delete reactions when deleting question
+    await tx.reaction.deleteMany({
+      where: {
+        questionId: questionId
+      }
+    });
+    return res;
   });
 
   return { data: res };
@@ -196,6 +206,41 @@ export const deleteReaction = async (privyUserId: string, questionId: number, re
               questionId: question.id
             }
           }
+  });
+
+  return { data: res };
+};
+
+export const deleteReply = async (privyUserId: string, questionId: number) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
+  const question = await prisma.question.findUniqueOrThrow({
+    where: {
+      id: questionId
+    }
+  });
+  if (user.id !== question.replierId) {
+    return { error: ERRORS.UNAUTHORIZED };
+  }
+
+  const res = await prisma.$transaction(async tx => {
+    const res = await tx.question.update({
+      where: {
+        id: questionId
+      },
+      data: {
+        repliedOn: null,
+        reply: null
+      }
+    });
+
+    //Make sure to delete reactions when deleting reply
+    await tx.reaction.deleteMany({
+      where: {
+        replyId: questionId
+      }
+    });
+
+    return res;
   });
 
   return { data: res };

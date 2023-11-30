@@ -6,6 +6,7 @@ import {
   createQuestion,
   deleteQuestion,
   deleteReaction,
+  deleteReply,
   editQuestion,
   getQuestion,
   getQuestions
@@ -41,4 +42,8 @@ export const deleteQuestionSA = async (questionId: number, options: ServerAction
 
 export const editQuestionSA = async (questionId: number, questionContent: string, options: ServerActionOptions) => {
   return serverActionWrapper(data => editQuestion(data.privyUserId, questionId, questionContent), options);
+};
+
+export const deleteReplySA = async (questionId: number, options: ServerActionOptions) => {
+  return serverActionWrapper(data => deleteReply(data.privyUserId, questionId), options);
 };

@@ -62,7 +62,13 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
   return (
     <>
       {router.searchParams.question && (
-        <QuestionModal questionId={Number(router.searchParams.question)} close={() => router.replace("./")} />
+        <QuestionModal
+          questionId={Number(router.searchParams.question)}
+          close={() => {
+            refetch();
+            router.replace("./");
+          }}
+        />
       )}
       <Flex y grow pb={6}>
         <Flex y grow sx={{ "& > div:last-child": { border: "none" } }}>
