@@ -86,14 +86,8 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                 </Button>
               )}
             </Flex>
-            <Typography
-              fontWeight={300}
-              level="body-sm"
-              whiteSpace="pre-line"
-              textColor={"neutral.800"}
-              textTransform={"none"}
-            >
-              <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+            <Typography fontWeight={300} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
+              <div style={{ textTransform: "none" }} dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
             </Typography>
             <Typography level="helper">{format(question.createdAt, "MMM dd, yyyy")}</Typography>
             <Flex x yc xsb>
@@ -129,14 +123,8 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                     <Typography level="body-sm">•</Typography>
                     <Typography level="body-sm">{repliedOn}</Typography>
                   </Flex>
-                  <Typography
-                    fontWeight={300}
-                    level="body-sm"
-                    whiteSpace="pre-line"
-                    textColor={"neutral.800"}
-                    textTransform={"none"}
-                  >
-                    <div dangerouslySetInnerHTML={{ __html: sanitizedReply }} />
+                  <Typography fontWeight={300} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>
+                    <div style={{ textTransform: "none" }} dangerouslySetInnerHTML={{ __html: sanitizedReply }} />
                   </Typography>
                 </Flex>
               </Flex>

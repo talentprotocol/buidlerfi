@@ -1,11 +1,11 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { useUpdateUser } from "@/hooks/useUserApi";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { BUILDERFI_CONTRACT } from "@/lib/constants";
+import { BUILDERFI_CONTRACT, MIN_BALANCE_ONBOARDING, ONBOARDING_WALLET_CREATED_KEY } from "@/lib/constants";
 import { CircularProgress } from "@mui/joy";
 import { usePathname } from "next/navigation";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { parseEther } from "viem";
 import { useContractRead } from "wagmi";
 import { Flex } from "../shared/flex";
 
@@ -14,6 +14,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const user = useUserContext();
   const pathname = usePathname();
   const router = useBetterRouter();
+  const updateUser = useUpdateUser();
   const { data: supporterKeys } = useContractRead({
     address: BUILDERFI_CONTRACT.address,
     abi: builderFIV1Abi,
@@ -32,31 +33,33 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   );
 
   const handleOnboardingRedirect = useCallback(() => {
-    if (user.balance !== undefined && user.balance < parseEther("0.0005")) {
-      const { pathname } = window.location;
-
-      if (pathname.includes("fund") || pathname.includes("loading")) return;
-
-      return redirect("/onboarding/welcome");
+    if (window.localStorage.getItem(ONBOARDING_WALLET_CREATED_KEY) !== "true") {
+      return redirect("/onboarding/createwallet");
+    } else if (
+      user.balance !== undefined &&
+      user.balance < MIN_BALANCE_ONBOARDING &&
+      router.searchParams.skipFund !== "1"
+    ) {
+      return redirect("/onboarding/fund");
     } else if (Number(supporterKeys) === 0 && router.searchParams.skipLaunchingKeys !== "1") {
       return redirect("/onboarding/buykey");
     } else if (!user.user?.socialWallet && !user.user?.displayName && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
-    } else if (!user.user?.displayName && user.user?.socialProfiles.length === 0) {
+    } else if (!user.user?.displayName) {
       return redirect("/onboarding/username");
+    } else {
+      updateUser
+        .mutateAsync({ hasFinishedOnboarding: true })
+        .then(() => user.refetch())
+        .then(() =>
+          router.replace({ pathname: "/home", searchParams: { welcome: "1" } }, { preserveSearchParams: false })
+        );
+      return false;
     }
-  }, [
-    supporterKeys,
-    redirect,
-    router,
-    user.balance,
-    user.user?.displayName,
-    user.user?.socialProfiles.length,
-    user.user?.socialWallet
-  ]);
+  }, [user, router, supporterKeys, redirect, updateUser]);
 
   useEffect(() => {
-    if (user.isLoading) return;
+    if (user.isLoading || updateUser.isLoading) return;
 
     // user has not logged in with privy yet so send him to the signup page
     if (!user.privyUser) {

@@ -3,7 +3,7 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateUser } from "@/hooks/useUserApi";
-import { FAQ_LINK } from "@/lib/constants";
+import { FAQ_LINK, WAITLIST_LINK } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
 import { Button, FormControl, FormHelperText, Input, Typography } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
@@ -25,7 +25,7 @@ export default function InvitationCode() {
     }
 
     setOverrideLoading(true);
-    await createUser.mutateAsync(inviteCode);
+    await createUser.mutateAsync(inviteCode).catch(() => setOverrideLoading(false));
     await refetch();
     setOverrideLoading(false);
   };
@@ -36,18 +36,16 @@ export default function InvitationCode() {
   };
 
   return (
-    <Flex y ysb xs height="300px" fullwidth>
-      <Flex y xs gap3 fullwidth>
-        <Flex y gap1>
-          <Typography textAlign="start" level="title-md">
-            Got an invite code?
-          </Typography>
-          <Typography level="body-sm" textColor="neutral.500">
-            builder.fi is currently invite-only. Explore how can you get an early access{" "}
-            <a href={FAQ_LINK} target="_blank">
-              here
-            </a>
-            .
+    <Flex y ysb grow fullwidth p={2}>
+      <Flex y gap={3}>
+        <Typography textAlign="center" level="body-sm" textColor="neutral.800">
+          Invite code
+        </Typography>
+        <Flex y>
+          <Typography level="h3">Welcome, builder</Typography>
+          <Typography level="body-md" textColor="neutral.600">
+            On builder.fi you can monetize your knowledge by answering questions from other builders. Discover how to
+            get early access in this <a href={FAQ_LINK}>blog post</a>.
           </Typography>
         </Flex>
         <FormControl error={!!createUser.error} sx={{ width: "100%" }}>
@@ -55,7 +53,19 @@ export default function InvitationCode() {
           {!!createUser.error && <FormHelperText>{formatError(createUser.error)}</FormHelperText>}
         </FormControl>
       </Flex>
+      <Flex y gap3>
+        <Typography textColor={"neutral.600"} textAlign="center">
+          Don&apos;t have an invite code ? <a href={WAITLIST_LINK}>Join waitlist</a>
+        </Typography>
+        <Button loading={createUser.isLoading || overrideLoading} fullWidth size="lg" onClick={handleOnClickProceed}>
+          Continue
+        </Button>
+      </Flex>
+    </Flex>
+  );
 
+  return (
+    <Flex y ysb xs height="300px" fullwidth>
       <Flex y xc gap2 fullwidth>
         <Button loading={createUser.isLoading || overrideLoading} fullWidth size="lg" onClick={handleOnClickProceed}>
           Continue

@@ -4,7 +4,7 @@ import { useCallback } from "react";
 
 interface CustomUrl {
   pathname?: string;
-  searchParams?: Record<string, string>;
+  searchParams?: Record<string, string | undefined>;
 }
 
 interface BetterRouterOptions {
@@ -25,7 +25,11 @@ export const useBetterRouter = () => {
       if (!url.pathname) url.pathname = pathname;
       if (options?.preserveSearchParams) {
         Array.from(searchParams.entries()).forEach(
-          ([key, value]) => key && value && ((url as CustomUrl).searchParams![key] = value)
+          ([key, value]) =>
+            key &&
+            value &&
+            !(key in (url as CustomUrl).searchParams!) &&
+            ((url as CustomUrl).searchParams![key] = value)
         );
       }
       //It means it's a relative path. Prepend the current route

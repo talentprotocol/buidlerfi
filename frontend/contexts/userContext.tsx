@@ -12,7 +12,7 @@ interface UserContextType {
   isLoading: boolean;
   address?: `0x${string}`;
   socialAddress?: `0x${string}`;
-  refetch: () => Promise<unknown>;
+  refetch: () => Promise<ReturnType<typeof useGetCurrentUser> | undefined>;
   refetchBalance: () => Promise<unknown>;
   balance?: bigint;
   balanceIsLoading: boolean;
@@ -23,7 +23,7 @@ const userContext = createContext<UserContextType>({
   isLoading: true,
   isAuthenticatedAndActive: false,
   address: undefined,
-  refetch: () => Promise.resolve(),
+  refetch: () => Promise.resolve(undefined),
   refetchBalance: () => Promise.resolve(),
   balanceIsLoading: false
 });
@@ -51,6 +51,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setMainWallet(user.data?.wallet);
     }
   }, [setActiveWallet, wallets]);
+
+  console.log({ privyUser, ready });
 
   //Get the non embed wallet
   useEffect(() => {

@@ -41,7 +41,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
               <Typography level="title-sm" whiteSpace="pre-line" sx={{ cursor: "pointer" }}>
                 {question.questioner.displayName || shortAddress(question.questioner.wallet as `0x${string}`)}
               </Typography>
-              <Typography level="body-sm">•</Typography>
+              <Typography level="helper">•</Typography>
               <Typography level="body-sm">{askedOn}</Typography>
             </Flex>
             <Flex x yc gap2>
@@ -68,9 +68,8 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
             fontWeight={400}
             level="body-sm"
             whiteSpace="pre-line"
-            textTransform={"none"}
           >
-            <span dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+            <span style={{ textTransform: "none" }} dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
           </Typography>
         </Flex>
       </Flex>

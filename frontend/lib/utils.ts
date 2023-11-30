@@ -84,9 +84,10 @@ export const ipfsToURL = (ipfsAddress?: string): string => {
   return "https://cloudflare-ipfs.com/" + ipfsAddress.replace("://", "/");
 };
 
-export function convertParamsToString(searchParams: Record<string, string>) {
+export function convertParamsToString(searchParams: Record<string, string | undefined>) {
   return Object.entries(searchParams)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .filter(([key, value]) => key && value !== undefined)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`)
     .join("&");
 }
 

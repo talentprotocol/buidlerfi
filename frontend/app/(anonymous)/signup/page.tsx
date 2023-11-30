@@ -1,12 +1,10 @@
 "use client";
 
 import { Flex } from "@/components/shared/flex";
-import { LOGO } from "@/lib/assets";
-import { FAQ_LINK, TWITTER_LINK } from "@/lib/constants";
-import { IosShare } from "@mui/icons-material";
-import { Button, Card, Typography } from "@mui/joy";
+import { INSTALL_PWA_IMAGE, LOGO_BLUE_BACK, LOGO_WITH_SHADOW, SIGN_IN_IMAGE } from "@/lib/assets";
+import { FAQ_LINK } from "@/lib/constants";
+import { Button, Typography } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface Navigator extends globalThis.Navigator {
@@ -32,59 +30,58 @@ export default function Signup() {
     setIsInstalled(false);
   }, []);
 
-  return (
-    <Flex y ysb xc height="300px">
-      <Flex y xc gap2>
-        <Image alt="App logo" src={LOGO} height={40} width={150} />
-        <Typography level="body-sm" textColor="neutral.500">
-          Monetize your knowledge,
-          <br />
-          support the next builders.
-        </Typography>
-      </Flex>
-
-      {!skip && !isInstalled ? (
-        <>
-          <Flex y mt={4} gap={2} component={Card} maxWidth={230}>
-            <Typography level="body-sm" textColor="neutral.500">
-              Add builder.fi to your home screen to get the best experience
-            </Typography>
-            <Flex x yc gap={2}>
-              <Typography level="body-sm" textColor="neutral.500">
-                1. Click the share button
-              </Typography>
-              <IosShare />
+  if (!skip && !isInstalled) {
+    return (
+      <Flex y yc grow>
+        <Flex y grow yc>
+          <Flex y yc xc pt={3} height="587px">
+            <Flex y xc gap2>
+              <img alt="App logo" src={LOGO_WITH_SHADOW} />
             </Flex>
-            <Typography level="body-sm" textColor="neutral.500">
-              2. Scroll down
-            </Typography>
-            <Typography level="body-sm" textColor="neutral.500">
-              3. Click &quot;Add to Home Screen&quot;
-            </Typography>
+            <Flex y mt={1} xc grow>
+              <Typography level="h3">Add to home screen</Typography>
+              <Typography textColor="neutral.600" level="body-md" mb={3}>
+                Install the app to get the best experience
+              </Typography>
+              <img src={INSTALL_PWA_IMAGE} width="100%" />
+            </Flex>
           </Flex>
-          <Button variant="plain" sx={{ marginTop: 2 }} onClick={() => setSkip(true)}>
-            Skip
-          </Button>
-        </>
-      ) : (
-        <Flex y xc mt={4}>
-          <Button size="lg" onClick={() => login()}>
-            Sign in
-          </Button>
-          <Typography level="body-sm" textColor="neutral.500" mt={4}>
-            Check out our{" "}
-            <a target="_blank" href={FAQ_LINK}>
-              FAQ
-            </a>
-          </Typography>
-          <Typography level="body-sm" textColor="neutral.500" mt={1}>
-            Follow us on{" "}
-            <a target="_blank" href={TWITTER_LINK}>
-              Twitter
-            </a>
-          </Typography>
         </Flex>
-      )}
+        <Flex y ye xc p={2}>
+          <Button fullWidth size="lg" variant="plain" onClick={() => setSkip(true)}>
+            Continue on web
+          </Button>
+        </Flex>
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex y ysb grow fullwidth p={2}>
+      <Typography mb={3} level="body-sm" startDecorator={<img src={LOGO_BLUE_BACK} />}>
+        Welcome to builder.fi
+      </Typography>
+      <Typography level="h2">
+        Monetize your
+        <br />
+        knowledge, support
+        <br />
+        the next builders.
+      </Typography>
+      <Flex grow>
+        <img src={SIGN_IN_IMAGE} width="100%" />
+      </Flex>
+      <Flex y gap1>
+        <Typography textAlign="center" textColor="neutral.600" level="body-md" my={2}>
+          Check our{" "}
+          <a target="_blank" href={FAQ_LINK}>
+            FAQ
+          </a>
+        </Typography>
+        <Button fullWidth size="lg" onClick={() => login()}>
+          Sign in
+        </Button>
+      </Flex>
     </Flex>
   );
 }

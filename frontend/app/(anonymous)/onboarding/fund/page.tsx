@@ -3,9 +3,10 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { MIN_BALANCE_ONBOARDING } from "@/lib/constants";
 import { formatToDisplayString, shortAddress } from "@/lib/utils";
-import { Close, CopyAll, CreditCard, Refresh, SwapHoriz, Wallet } from "@mui/icons-material";
-import { Button, Card, DialogTitle, IconButton, Modal, ModalDialog, Skeleton, Typography, useTheme } from "@mui/joy";
+import { Close, CopyAll, Refresh } from "@mui/icons-material";
+import { Button, Chip, DialogTitle, IconButton, Modal, ModalDialog, Skeleton, Typography, useTheme } from "@mui/joy";
 import { Transak, TransakConfig } from "@transak/transak-sdk";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -48,70 +49,113 @@ export default function FundPage() {
     setModalOpen(true);
   };
 
-  return (
-    <Flex y gap={4}>
-      <Flex y>
-        <Typography textColor="neutral.800" level="h2" whiteSpace="pre-line">
-          Top up your account
-        </Typography>
-        <Typography level="body-sm" mt={1}>
-          builder.fi is built on Base, an Ethereum L2, and uses ETH to buy and sell keys. You need to deposit at least
-          0.001 eth to create your account. Here are 3 options to quickly top up your builder.fi wallet:
-        </Typography>
-      </Flex>
+  const hasEnoughBalance = balance && balance >= MIN_BALANCE_ONBOARDING;
 
-      <Flex y gap2>
-        {address && (
-          <Button variant="plain" onClick={() => openTransak()} fullWidth style={{ padding: 0 }}>
-            <Flex x yc xsb component={Card} fullwidth>
+  return (
+    <Flex y ysb grow fullwidth>
+      <Flex y gap={3}>
+        <Typography textAlign="center" level="body-sm" textColor="neutral.800">
+          Top up
+        </Typography>
+        <Flex y>
+          <Typography level="h3">Top up your account</Typography>
+          <Typography level="body-md" textColor="neutral.600">
+            builder.fi is built on base and uses ETH as currency. We suggest a deposit of {`>`}0.001 ETH (~$2) to fully
+            test the app. You can withdraw your funds at any time.
+          </Typography>
+        </Flex>
+      </Flex>
+      <Flex y gap1>
+        <Flex y gap2>
+          {address && (
+            <Button
+              color="neutral"
+              variant="outlined"
+              onClick={() => openTransak()}
+              sx={{
+                p: 2,
+                ".MuiBox-root": {
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%"
+                }
+              }}
+            >
               <Flex x yc gap3>
-                <CreditCard fontSize="large" />
-                <Flex y gap1>
-                  <Typography level="title-md">Deposit with fiat</Typography>
+                <Flex x yc xsb>
+                  <Typography level="title-md">Deposit with USD or EUR</Typography>
+                  <Chip color="primary">Beginner</Chip>
                 </Flex>
               </Flex>
-            </Flex>
-          </Button>
-        )}
-      </Flex>
+            </Button>
+          )}
+        </Flex>
 
-      {address && (
-        <Button variant="plain" onClick={() => openTransferModal()} fullWidth style={{ padding: 0 }}>
-          <Flex x yc xsb component={Card} fullwidth>
+        {address && (
+          <Button
+            color="neutral"
+            variant="outlined"
+            onClick={() => openTransferModal()}
+            sx={{
+              p: 2,
+              ".MuiBox-root": {
+                display: "flex",
+                textAlign: "start",
+                justifyContent: "space-between",
+                width: "100%"
+              }
+            }}
+          >
             <Flex x yc gap3>
-              <Wallet fontSize="large" />
               <Flex y gap1>
                 <Typography level="title-md">Transfer ETH on base</Typography>
               </Flex>
             </Flex>
-          </Flex>
-        </Button>
-      )}
+          </Button>
+        )}
 
-      <Button variant="plain" onClick={() => openBridgeModal()} fullWidth style={{ padding: 0 }}>
-        <Flex x yc xsb component={Card} fullwidth>
+        <Button
+          color="neutral"
+          variant="outlined"
+          onClick={() => openBridgeModal()}
+          sx={{
+            p: 2,
+            ".MuiBox-root": {
+              display: "flex",
+              textAlign: "start",
+              justifyContent: "space-between",
+              width: "100%"
+            }
+          }}
+        >
           <Flex x yc gap3 fullwidth>
-            <SwapHoriz fontSize="large" />
             <Flex y gap1>
               <Typography level="title-md">Bridge from other chains</Typography>
             </Flex>
           </Flex>
-        </Flex>
-      </Button>
-
-      <Flex y gap2>
-        <Button disabled={(balance || 0) < 1000000000000000n} onClick={() => router.push("/onboarding/buykey")}>
-          {(balance || 0) < 1000000000000000n ? "Deposit at least 0.001 ETH" : "Continue"}
         </Button>
-
+      </Flex>
+      <Flex y gap2>
         <Flex x yc xc gap1 fullwidth>
-          <Typography level="body-sm" textAlign="center">
-            <Skeleton loading={balanceIsLoading}>builder.fi balance: {formatToDisplayString(balance, 18)} ETH</Skeleton>
+          <Typography level="body-md" textColor={"neutral.600"} textAlign="center">
+            <Skeleton loading={balanceIsLoading}>
+              builder.fi wallet balance: {formatToDisplayString(balance, 18)} ETH
+            </Skeleton>
           </Typography>
           <IconButton onClick={refetchBalance}>
             <Refresh fontSize="small" htmlColor={theme.palette.neutral[500]} />
           </IconButton>
         </Flex>
+
+        <Button
+          size="lg"
+          onClick={() =>
+            hasEnoughBalance ? router.push("/onboarding/buykey") : router.push({ searchParams: { skipFund: "1" } })
+          }
+          variant={hasEnoughBalance ? "solid" : "plain"}
+        >
+          {hasEnoughBalance ? "Continue" : "Continue without top up"}
+        </Button>
       </Flex>
       <Modal open={modalOpen} onClose={closeAndRefresh}>
         <ModalDialog minWidth="400px">

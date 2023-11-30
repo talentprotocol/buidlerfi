@@ -8,6 +8,7 @@ import { useGenerateChallenge, useLinkWallet } from "./useUserApi";
 
 export const useLinkExternalWallet = () => {
   const [walletToSign, setWalletToSign] = useState<ConnectedWallet>();
+  const [challenge, setChallenge] = useState<ReturnType<typeof useGenerateChallenge>["data"]>();
   const [isLoading, setIsLoading] = useState(false);
   const [successCB, setSuccessCB] = useState<() => Promise<void>>();
   const { refetch } = useUserContext();
@@ -16,29 +17,36 @@ export const useLinkExternalWallet = () => {
   const generateChallenge = useGenerateChallenge();
   const { connectWallet } = useConnectWallet({
     onSuccess: async wallet => {
+      //STEP2 new connected wallet is assigned to state, and challenge is generated -> will trigger STEP3
+      if (!wallet) {
+        setIsLoading(false);
+        return;
+      }
+
       setWalletToSign(wallet as ConnectedWallet);
-      setIsLoading(false);
+      const challenge = await generateChallenge.mutateAsync(wallet.address);
+      if (!challenge) {
+        setIsLoading(false);
+        return;
+      }
+      setChallenge(challenge);
     },
-    onError: () => {
-      setIsLoading(false);
-    }
+    onError: () => setIsLoading(false)
   });
 
   const linkWallet = (onSuccess?: () => Promise<void>) => {
-    if (onSuccess) setSuccessCB(onSuccess);
+    setIsLoading(true);
+    //STEP1: request wallet connect with privy
+    if (onSuccess) setSuccessCB(() => onSuccess);
     connectWallet();
   };
 
+  //STEP 3: when wallet is assigned to state 'walletToSign' and challenge is generated, this will execute and prompt to sign a message
   useQuery(
-    ["requestLinkWallet"],
+    ["requestLinkWallet", walletToSign?.address, challenge?.message],
     async () => {
       try {
-        const challenge = await generateChallenge.mutateAsync(walletToSign!.address);
-        if (!challenge) {
-          setIsLoading(false);
-          return;
-        }
-        const signature = await walletToSign!.sign(challenge.message);
+        const signature = await walletToSign!.sign(challenge!.message);
         const user = await linkNewWallet.mutateAsync(signature);
         if (user?.socialWallet) toast.success("Wallet successfully linked");
         await refetch();
@@ -52,7 +60,7 @@ export const useLinkExternalWallet = () => {
       }
     },
     {
-      enabled: !!walletToSign
+      enabled: !!walletToSign && !!challenge
     }
   );
 

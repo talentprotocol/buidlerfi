@@ -5,40 +5,89 @@ import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUpdateUser } from "@/hooks/useUserApi";
 import { formatError } from "@/lib/utils";
-import { Button, FormControl, FormHelperText, Input, Typography } from "@mui/joy";
+import { ArrowBackIosNewOutlined } from "@mui/icons-material";
+import { Button, FormControl, FormHelperText, IconButton, Input, Typography } from "@mui/joy";
 import { useState } from "react";
 
 export default function UsernamePage() {
   const router = useBetterRouter();
   const { refetch } = useUserContext();
+  const { user } = useUserContext();
   const [username, setUsername] = useState("");
   const updateUser = useUpdateUser();
 
   return (
-    <Flex y gap3>
-      <Flex y>
-        <Typography textColor="neutral.800" level="h2" whiteSpace="pre-line">
-          Select your username.
-        </Typography>
-        <Typography level="body-sm" mt={1}>
-          We couldn&apos;t find any onchain data about you. Please select a username to continue.
-        </Typography>
+    <Flex y ysb grow fullwidth>
+      <Flex y gap={3}>
+        <Flex x xsb yc>
+          <Flex basis="100%">
+            {!user?.socialWallet && router.searchParams.skiplink === "1" && (
+              <IconButton sx={{ textAlign: "start" }}>
+                <ArrowBackIosNewOutlined
+                  onClick={() => router.push({ searchParams: { skiplink: undefined } }, { preserveSearchParams: true })}
+                />
+              </IconButton>
+            )}
+          </Flex>
+          <Typography textAlign="center" level="body-sm" textColor="neutral.800" flexBasis={"100%"}>
+            Username
+          </Typography>
+          <Flex basis="100%" />
+        </Flex>
+        <Flex y>
+          <Typography my={1} level="h3">
+            Select guest username
+          </Typography>
+          <Typography level="body-md" textColor="neutral.600">
+            We couldn&apos;t find any onchain data about you. Please select a temporary username to continue.
+          </Typography>
+        </Flex>
+        <FormControl error={!!updateUser.error} sx={{ width: "100%" }}>
+          <Input
+            type="text"
+            placeholder="Enter username"
+            onChange={e => setUsername(e.target.value)}
+            value={username}
+          />
+          {!!updateUser.error && <FormHelperText>{formatError(updateUser.error)}</FormHelperText>}
+        </FormControl>
       </Flex>
-
-      <FormControl error={!!updateUser.error} sx={{ width: "100%" }}>
-        <Input type="text" placeholder="username" onChange={e => setUsername(e.target.value)} value={username} />
-        {!!updateUser.error && <FormHelperText>{formatError(updateUser.error)}</FormHelperText>}
-      </FormControl>
-      <Button
-        onClick={() =>
-          updateUser
-            .mutateAsync({ displayName: username, hasFinishedOnboarding: true })
-            .then(() => refetch())
-            .then(() => router.replace("/home"))
-        }
-      >
-        Continue
-      </Button>
+      <Flex y gap1>
+        <Button
+          size="lg"
+          loading={updateUser.isLoading}
+          fullWidth
+          onClick={() => updateUser.mutateAsync({ displayName: username }).then(() => refetch())}
+        >
+          Continue
+        </Button>
+      </Flex>
     </Flex>
+
+    // <Flex y gap3>
+    //   <Flex y>
+    //     <Typography textColor="neutral.800" level="h2" whiteSpace="pre-line">
+    //       Select your username.
+    //     </Typography>
+    //     <Typography level="body-sm" mt={1}>
+    //       We couldn&apos;t find any onchain data about you. Please select a username to continue.
+    //     </Typography>
+    //   </Flex>
+
+    //   <FormControl error={!!updateUser.error} sx={{ width: "100%" }}>
+    //     <Input type="text" placeholder="username" onChange={e => setUsername(e.target.value)} value={username} />
+    //     {!!updateUser.error && <FormHelperText>{formatError(updateUser.error)}</FormHelperText>}
+    //   </FormControl>
+    //   <Button
+    //     onClick={() =>
+    //       updateUser
+    //         .mutateAsync({ displayName: username })
+    //         .then(() => refetch())
+    //         .then(() => router.replace("/home"))
+    //     }
+    //   >
+    //     Continue
+    //   </Button>
+    // </Flex>
   );
 }

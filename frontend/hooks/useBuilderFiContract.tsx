@@ -70,7 +70,7 @@ const TRADE_DATA = {
   }
 } as const;
 
-export const useTradeKey = (side: "buy" | "sell", successFn?: () => void) => {
+export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorFn?: () => void) => {
   const toastId = useRef<string | number | undefined>(undefined);
 
   const {
@@ -87,6 +87,7 @@ export const useTradeKey = (side: "buy" | "sell", successFn?: () => void) => {
       if (err?.shortMessage !== "User rejected the request.") {
         toast.error("There was an error processing your transaction: " + formatError(err));
       }
+      errorFn && errorFn();
     }
   });
 

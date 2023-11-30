@@ -1,3 +1,4 @@
+import { parseEther } from "viem";
 import { builderFIV1Abi } from "./abi/BuidlerFiV1";
 
 export const MUMBAI_ADDRESS = "0x7083d3c0B2c031dc62ecD14184eB61B6815b31ED";
@@ -26,3 +27,7 @@ export const MAX_QUESTION_LENGTH = 280;
 // NON-APP CONSTANTS
 export const FAQ_LINK = "https://www.notion.so/talentprotocol/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39";
 export const TWITTER_LINK = "https://twitter.com/builderfi";
+export const WAITLIST_LINK = "https://builder.fi";
+export const ONBOARDING_WALLET_CREATED_KEY = "onboarding-wallet-created";
+//TODO RESET TO 0.0005 AFTER TESTING
+export const MIN_BALANCE_ONBOARDING = parseEther("0.001");
