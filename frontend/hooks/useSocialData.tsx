@@ -1,5 +1,3 @@
-import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { shortAddress } from "@/lib/utils";
 import { useGetUser } from "./useUserApi";
 
 export interface SocialData {
@@ -23,8 +21,8 @@ export const useSocialData = (address: `0x${string}`, options?: { enabled?: bool
     userId: user?.id || 0,
     wallet: address,
     socialAddress: user?.socialWallet,
-    avatarUrl: isLoading ? "" : user?.avatarUrl || DEFAULT_PROFILE_PICTURE,
-    displayName: user?.displayName || shortAddress(address),
+    avatarUrl: isLoading ? "" : user?.avatarUrl || "",
+    displayName: user?.displayName || "",
     hasDisplayName: !!user?.displayName,
     socialsList:
       user?.socialProfiles?.map(social => ({ dappName: social.type, profileName: social.profileName })) || [],

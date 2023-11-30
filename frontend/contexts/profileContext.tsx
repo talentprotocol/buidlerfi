@@ -1,11 +1,24 @@
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData, useSocialData } from "@/hooks/useSocialData";
-import { useGetCurrentUser } from "@/hooks/useUserApi";
+import { useGetCurrentUser, useGetRecommendedUser } from "@/hooks/useUserApi";
 import { useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useParams } from "next/navigation";
 import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+
+interface RecommendedUser {
+  userId: number | null;
+  wallet: string;
+  avatarUrl: string | null;
+  ens: string | null;
+  farcaster: string | null;
+  lens: string | null;
+  talentProtocol: string | null;
+  createdAt: Date;
+  questions?: number;
+  replies?: number;
+}
 
 interface ProfileContextType {
   holders: ReturnType<typeof useGetHolders>["data"];
@@ -15,6 +28,7 @@ interface ProfileContextType {
   isLoading: boolean;
   refetch: () => Promise<unknown>;
   socialData: SocialData;
+  recommendedUser?: RecommendedUser;
   isOwnProfile: boolean;
   questions: ReturnType<typeof useGetQuestions>["data"];
 }
@@ -37,6 +51,18 @@ const ProfileContext = createContext<ProfileContextType>({
     refetch: () => Promise.resolve(),
     socialAddress: "",
     socialsList: []
+  },
+  recommendedUser: {
+    avatarUrl: "",
+    createdAt: new Date(),
+    ens: "",
+    farcaster: "",
+    lens: "",
+    questions: 0,
+    replies: 0,
+    talentProtocol: "",
+    userId: 0,
+    wallet: ""
   },
   isOwnProfile: false
 });
@@ -67,6 +93,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   }, [setActiveWallet, wallets]);
 
   const { wallet } = useParams();
+
+  const { isLoading: isLoadingRecommendedUser, data: recommendedUser } = useGetRecommendedUser(wallet as `0x${string}`);
+
   const socialData = useSocialData(wallet as `0x${string}`);
   const {
     data: questions,
@@ -100,10 +129,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
       supporterNumber: supporterNumber,
       ownedKeysCount: ownedKeysCount || 0,
       hasKeys,
-      isLoading: isLoading || isQuestionsLoading,
+      isLoading: isLoading || isQuestionsLoading || isLoadingRecommendedUser,
       questions,
       refetch: refetchAll,
       socialData,
+      recommendedUser,
       isOwnProfile: mainWallet?.toLowerCase() === (wallet as string).toLowerCase()
     };
   }, [
@@ -117,7 +147,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     refetchAll,
     socialData,
     mainWallet,
-    wallet
+    wallet,
+    isLoadingRecommendedUser,
+    recommendedUser
   ]);
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

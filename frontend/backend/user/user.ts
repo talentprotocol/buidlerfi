@@ -3,9 +3,11 @@
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
+import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
+import { updateRecommendations } from "../socialProfile/recommendation";
 import { updateUserSocialProfiles } from "../socialProfile/socialProfile";
 
 export const refreshAllUsersProfile = async () => {
@@ -32,6 +34,7 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
   if (!user.socialWallet) return { error: ERRORS.NO_SOCIAL_PROFILE_FOUND };
 
   const res = await updateUserSocialProfiles(user.id, user.socialWallet);
+  updateRecommendations(user.socialWallet.toLowerCase());
   return { data: res };
 };
 
@@ -178,6 +181,7 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
 
   try {
     await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase());
+    updateRecommendations(challenge.publicKey.toLowerCase());
   } catch (err) {
     console.error("Error while updating social profiles: ", err);
   }
@@ -258,9 +262,80 @@ Wallet: ${publicKey}
 };
 
 export const getBulkUsers = async (addresses: string[]) => {
+  // get all users
+  const usersWithReplies = await prisma.user.findMany({
+    where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true },
+    include: { replies: true }
+  });
+
+  // split the count of replies and questions
+  const users = usersWithReplies.map(user => ({
+    ...user,
+    questions: user.replies.length,
+    replies: user.replies.filter(reply => !!reply.repliedOn).length
+  }));
+
   return {
-    data: await prisma.user.findMany({
-      where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true }
-    })
+    data: users
   };
+};
+
+const sanitizeAvatarUrl = (avatarUrl: string) => {
+  if (!avatarUrl) return avatarUrl;
+
+  if (avatarUrl.includes("talentprotocol")) {
+    const imageUrl = new URL(avatarUrl);
+    return imageUrl.origin + imageUrl.pathname;
+  }
+
+  if (avatarUrl.includes("ipfs://")) {
+    return ipfsToURL(avatarUrl);
+  }
+
+  return avatarUrl;
+};
+
+export const getRecommendedUsers = async (address: string) => {
+  const user = await prisma.user.findUnique({ where: { wallet: address.toLowerCase() } });
+  if (!user) return { error: ERRORS.USER_NOT_FOUND };
+
+  const recommendations = await prisma.recommendedUser.findMany({
+    where: { forId: user.id },
+    orderBy: { recommendationScore: "desc" }
+  });
+
+  const usersFromRecommendations = await prisma.user.findMany({
+    where: { id: { in: recommendations.map(rec => rec.userId).filter(i => i !== null) as number[] } },
+    include: { replies: true }
+  });
+
+  const users = recommendations.map(rec => {
+    const foundUser = usersFromRecommendations.find(u => u.id === rec.userId);
+    return {
+      ...rec,
+      avatarUrl: sanitizeAvatarUrl(rec.avatarUrl || ""),
+      wallet: foundUser?.wallet || rec.wallet,
+      socialWallet: rec.wallet,
+      userId: rec.userId,
+      questions: !!foundUser ? foundUser.replies.length : 0,
+      replies: !!foundUser ? foundUser.replies.filter(reply => !!reply.repliedOn).length : 0
+    };
+  });
+
+  return {
+    data: users
+  };
+};
+
+export const getRecommendedUser = async (wallet: string) => {
+  const address = wallet.toLowerCase();
+  const res = await prisma.recommendedUser.findFirst({
+    where: {
+      wallet: address
+    }
+  });
+
+  if (!res) return { error: ERRORS.USER_NOT_FOUND };
+
+  return { data: res };
 };

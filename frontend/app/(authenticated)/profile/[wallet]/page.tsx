@@ -120,6 +120,9 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
               text={"Buy other people's keys to ask them a question and access all answers."}
             />
           )}
+          {holdings.data?.length === 0 && !isOwnProfile && (
+            <PageMessage icon={<Lock />} text={"This user has not bought any keys yet."} />
+          )}
           {holdings.data?.map(holdingItem => (
             <UserItemFromAddress
               address={holdingItem.owner.owner as `0x${string}`}
@@ -132,6 +135,9 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
         <TabPanel value="holders">
           {holders?.length === 0 && isOwnProfile && (
             <PageMessage icon={<Lock />} text="Create your keys to allow others to ask you direct questions." />
+          )}
+          {holders?.length === 0 && !isOwnProfile && (
+            <PageMessage icon={<Lock />} text="This user hasn't created their keys yet." />
           )}
           {holders?.map(holdingItem => (
             <HolderItem

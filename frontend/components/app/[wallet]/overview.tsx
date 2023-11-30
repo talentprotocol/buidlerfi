@@ -7,12 +7,12 @@ import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
-import { formatEth } from "@/lib/utils";
+import { formatEth, shortAddress } from "@/lib/utils";
 import { KeyOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
 import { SocialProfileType } from "@prisma/client";
 import Image from "next/image";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -45,7 +45,8 @@ const socialsOrder = Object.keys(socialInfo);
 
 export const Overview: FC<Props> = ({ setBuyModalState }) => {
   const { refetch, user } = useUserContext();
-  const { hasKeys, holders, ownedKeysCount, supporterNumber, isOwnProfile, socialData } = useProfileContext();
+  const { hasKeys, holders, ownedKeysCount, supporterNumber, isOwnProfile, socialData, recommendedUser } =
+    useProfileContext();
 
   const refetchAll = async () => {
     await refetch();
@@ -75,11 +76,58 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
     }
   };
 
+  const avatarUrl = useMemo(() => {
+    return socialData.avatarUrl || recommendedUser?.avatarUrl || "";
+  }, [socialData, recommendedUser]);
+
+  const recommendedName = () =>
+    recommendedUser?.talentProtocol ||
+    recommendedUser?.farcaster ||
+    recommendedUser?.lens ||
+    recommendedUser?.ens ||
+    shortAddress(recommendedUser?.wallet || "");
+
+  const name = useMemo(() => socialData.displayName || recommendedName(), [socialData, recommendedUser]);
+
+  const allSocials = useMemo(() => {
+    if (socialData.socialsList.length > 0) {
+      return socialData.socialsList;
+    } else {
+      const otherSocials = [];
+
+      if (recommendedUser?.talentProtocol) {
+        otherSocials.push({
+          dappName: "TALENT_PROTOCOL",
+          profileName: recommendedUser.talentProtocol
+        });
+      }
+      if (recommendedUser?.farcaster) {
+        otherSocials.push({
+          dappName: "FARCASTER",
+          profileName: recommendedUser.farcaster
+        });
+      }
+      if (recommendedUser?.lens) {
+        otherSocials.push({
+          dappName: "LENS",
+          profileName: recommendedUser.lens
+        });
+      }
+      if (recommendedUser?.ens) {
+        otherSocials.push({
+          dappName: "ENS",
+          profileName: recommendedUser.ens
+        });
+      }
+      return otherSocials;
+    }
+  }, [socialData, recommendedUser]);
+
   return (
     <>
       <Flex y gap2 p={2}>
         <Flex x xsb mb={-1}>
-          <Avatar size="lg" src={socialData.avatarUrl}>
+          <Avatar size="lg" src={avatarUrl} alt={""}>
             <Skeleton loading={socialData.isLoading} />
           </Avatar>
           <Flex x yc gap1>
@@ -106,22 +154,30 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
         </Flex>
         <Flex x yc gap1>
           <Flex y fullwidth>
-            {socialData.hasDisplayName ? (
+            {!!name ? (
               <Typography level="h3">
-                <Skeleton loading={socialData.isLoading}>{socialData.displayName}</Skeleton>
+                <Skeleton loading={socialData.isLoading}>{name}</Skeleton>
               </Typography>
             ) : (
-              <WalletAddress address={socialData.wallet} level="h3" removeCopyButton={!isOwnProfile} />
+              <WalletAddress
+                address={socialData.wallet || recommendedUser?.wallet || ""}
+                level="h3"
+                removeCopyButton={!isOwnProfile}
+              />
             )}
             {/* Only display if user has a display name */}
             <Flex x yc gap={0.5} height="20px">
               <Typography level="body-sm" startDecorator={<KeyOutlined fontSize="small" />}>
                 <Skeleton loading={isLoading}>{formatEth(buyPrice)} ETH</Skeleton>
               </Typography>
-              {socialData.hasDisplayName && (
+              {!!name && (
                 <>
                   •
-                  <WalletAddress address={socialData.wallet} level="body-sm" removeCopyButton={!isOwnProfile} />
+                  <WalletAddress
+                    address={socialData.wallet || recommendedUser?.wallet || ""}
+                    level="body-sm"
+                    removeCopyButton={!isOwnProfile}
+                  />
                 </>
               )}
             </Flex>
@@ -142,7 +198,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
         )}
 
         <Flex x gap2 flexWrap={"wrap"}>
-          {socialData.socialsList
+          {allSocials
             .sort((a, b) => {
               return socialsOrder.indexOf(a.dappName) - socialsOrder.indexOf(b.dappName);
             })
@@ -162,7 +218,9 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
         </Flex>
 
         {ownedKeysCount === 0 ? (
-          <Typography level="body-sm">You don&apos;t own any keys</Typography>
+          <Typography level="body-sm">
+            {socialData.userId ? "You don't own any keys" : `${name} is not on builder.fi yet`}
+          </Typography>
         ) : (
           <Flex x gap2>
             <Typography level="body-sm">

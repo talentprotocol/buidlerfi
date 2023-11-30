@@ -1,5 +1,6 @@
 "use client";
 import { useSocialData } from "@/hooks/useSocialData";
+import { shortAddress } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Skeleton, Typography } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
@@ -36,12 +37,16 @@ export function HolderItem({ address, numberOfKeys, holderNumber }: Props) {
       onClick={() => router.push(`/profile/${address}`)}
     >
       <Flex x yc gap2>
-        <Avatar size="sm" src={socialData.avatarUrl}>
-          <Skeleton loading={socialData.isLoading} />
-        </Avatar>
+        <Avatar
+          size="sm"
+          src={socialData.avatarUrl}
+          alt={socialData.displayName || shortAddress(socialData.wallet || "")}
+        ></Avatar>
         <Flex y gap={0.5}>
           <Typography textColor={"neutral.800"} fontWeight={600} level="body-sm">
-            <Skeleton loading={socialData.isLoading}>{socialData.displayName}</Skeleton>
+            <Skeleton loading={socialData.isLoading}>
+              {socialData.displayName || shortAddress(socialData.wallet || "")}
+            </Skeleton>
           </Typography>
           <Typography textColor={"neutral.600"} level="body-sm">
             {numberOfKeys} {keysPlural()} • Holder {`#${holderNumber}`}
