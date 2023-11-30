@@ -9,6 +9,7 @@ import {
 import { THE_GRAPH_PAGE_SIZE } from "@/lib/constants";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { Share } from "@/models/share.model";
+import { ShareRelationship } from "@/models/shareRelationship.model";
 import { User } from "@prisma/client";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
@@ -87,14 +88,14 @@ export const useOnchainUsers = () => {
   };
 };
 
-export const useGetHoldings = (address?: `0x${string}`, options?: SimpleUseQueryOptions) => {
+export const useGetHoldings = (address?: `0x${string}`, options?: SimpleUseQueryOptions<ShareRelationship[]>) => {
   return useQuery(["useGetHoldings", address], () => fetchHoldings(address!), {
     enabled: !!address,
     ...options
   });
 };
 
-export const useGetHolders = (address?: `0x${string}`, options?: SimpleUseQueryOptions) => {
+export const useGetHolders = (address?: `0x${string}`, options?: SimpleUseQueryOptions<ShareRelationship[]>) => {
   return useQuery(["useGetHolders", address], () => fetchHolders(address!), {
     enabled: !!address,
     ...options
