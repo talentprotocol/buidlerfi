@@ -27,7 +27,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
   });
   // if in production, push the question to farcaster
   if (process.env.NODE_ENV === "production") {
-    const questionerFarcaster = await prisma.social.findUniqueOrThrow({
+    const questionerFarcaster = await prisma.socialProfile.findUniqueOrThrow({
       where: {
         userId_type: {
           userId: questioner.id,
@@ -35,7 +35,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
         }
       }
     });
-    const replierFarcaster = await prisma.social.findUniqueOrThrow({
+    const replierFarcaster = await prisma.socialProfile.findUniqueOrThrow({
       where: {
         userId_type: {
           userId: replier.id,
