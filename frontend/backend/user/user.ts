@@ -191,39 +191,13 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
 
 export interface UpdateUserArgs {
   hasFinishedOnboarding?: boolean;
-  displayName?: string;
 }
 
 export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArgs) => {
-  const existingUser = await prisma.user.findUniqueOrThrow({
-    where: { privyUserId: privyUserId },
-    include: { socialProfiles: true }
-  });
-
-  if (updatedUser.displayName !== undefined) {
-    //Only allow updating display name if no socialProfile found for user.
-    if (existingUser.socialProfiles.length > 0) {
-      return { error: ERRORS.INVALID_REQUEST };
-    }
-
-    if (!/^[A-Za-z][A-Za-z0-9_.]{2,19}$/.test(updatedUser.displayName)) {
-      return { error: ERRORS.USERNAME_INVALID_FORMAT };
-    }
-  }
-
-  if (updatedUser.hasFinishedOnboarding) {
-    //Check if user has a display name. Should fail otherwise.
-    //We just need to check if displayName is empty or not. If it's defined, it will be checked by the above code.
-    if (!existingUser.displayName && !updatedUser.displayName) {
-      return { error: ERRORS.INVALID_REQUEST };
-    }
-  }
-
   const res = await prisma.user.update({
     where: { privyUserId: privyUserId },
     data: {
-      hasFinishedOnboarding: updatedUser.hasFinishedOnboarding,
-      displayName: updatedUser.displayName
+      hasFinishedOnboarding: updatedUser.hasFinishedOnboarding
     }
   });
 
@@ -264,7 +238,7 @@ Wallet: ${publicKey}
 export const getBulkUsers = async (addresses: string[]) => {
   // get all users
   const usersWithReplies = await prisma.user.findMany({
-    where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true },
+    where: { wallet: { in: addresses }, isActive: true, hasFinishedOnboarding: true, displayName: { not: null } },
     include: { replies: true }
   });
 
