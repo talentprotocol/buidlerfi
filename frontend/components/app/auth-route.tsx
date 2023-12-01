@@ -32,8 +32,11 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     [pathname, router]
   );
 
+  console.log(user.user?.tags);
   const handleOnboardingRedirect = useCallback(() => {
-    if (window.localStorage.getItem(ONBOARDING_WALLET_CREATED_KEY) !== "true") {
+    if (user.user?.tags.length === 0 && router.searchParams.skipTags !== "1") {
+      return redirect("/onboarding/tags");
+    } else if (window.localStorage.getItem(ONBOARDING_WALLET_CREATED_KEY) !== "true") {
       return redirect("/onboarding/createwallet");
     } else if (
       user.balance !== undefined &&
