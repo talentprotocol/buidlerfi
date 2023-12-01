@@ -3,6 +3,7 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateUser } from "@/hooks/useUserApi";
+import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { INTRO_BLOG_POST_LINK, WAITLIST_LINK } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
 import { Button, FormControl, FormHelperText, Input, Typography } from "@mui/joy";
@@ -38,9 +39,11 @@ export default function InvitationCode() {
   return (
     <Flex y ysb grow fullwidth p={2}>
       <Flex y gap={3}>
-        <Typography textAlign="center" level="body-sm" textColor="neutral.800">
-          Welcome to builder.fi
-        </Typography>
+        <Flex x yc xc>
+          <Typography mb={3} level="body-sm" fontWeight="600" startDecorator={<img src={LOGO_BLUE_BACK} />}>
+            welcome to builder.fi
+          </Typography>
+        </Flex>
         <Flex y>
           <Typography level="h3">gm builder</Typography>
           <Typography level="body-md" textColor="neutral.600">

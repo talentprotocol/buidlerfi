@@ -43,7 +43,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       return redirect("/onboarding/fund");
     } else if (Number(supporterKeys) === 0 && router.searchParams.skipLaunchingKeys !== "1") {
       return redirect("/onboarding/buykey");
-    } else if (!user.user?.socialWallet && !user.user?.displayName && router.searchParams.skiplink !== "1") {
+    } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
     } else {
       updateUser

@@ -30,5 +30,4 @@ export const TWITTER_LINK = "https://twitter.com/builderfi";
 export const WAITLIST_LINK = "https://builder.fi";
 export const INTRO_BLOG_POST_LINK = "https://paragraph.xyz/@builderfi/intro-builderfi";
 export const ONBOARDING_WALLET_CREATED_KEY = "onboarding-wallet-created";
-//TODO RESET TO 0.0005 AFTER TESTING
 export const MIN_BALANCE_ONBOARDING = parseEther("0.001");

@@ -5,8 +5,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
 import { MIN_BALANCE_ONBOARDING } from "@/lib/constants";
-import { ArrowBackIosNewOutlined } from "@mui/icons-material";
-import { Button, IconButton, Typography } from "@mui/joy";
+import { Button, Typography } from "@mui/joy";
 import { useState } from "react";
 
 export default function BuyKeyPage() {
@@ -41,22 +40,9 @@ export default function BuyKeyPage() {
   return (
     <Flex y ysb grow fullwidth>
       <Flex y gap={3}>
-        <Flex x xsb yc>
-          <Flex basis="100%">
-            {!hasEnoughBalance && (
-              <IconButton sx={{ textAlign: "start" }}>
-                <ArrowBackIosNewOutlined onClick={() => router.back()} />
-              </IconButton>
-            )}
-          </Flex>
-          <Typography textAlign="center" level="body-sm" textColor="neutral.800" flexBasis={"100%"}>
-            Welcome to builder.fi
-          </Typography>
-          <Flex basis="100%" />
-        </Flex>
         <Flex y>
           <Typography my={1} level="h3">
-            Create your key, it&apos;s free
+            Create your keys
           </Typography>
           <Flex y gap3>
             <Typography level="body-md" textColor="neutral.600">
