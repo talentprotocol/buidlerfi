@@ -14,6 +14,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@standard-crypto/farcaster-js-neynar": "2.0.0",
     "@airstack/airstack-react": "^0.5.2",
     "@airstack/node": "^0.0.5",
     "@emotion/react": "^11.11.1",
