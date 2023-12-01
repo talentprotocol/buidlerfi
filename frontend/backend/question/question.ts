@@ -1,11 +1,12 @@
 "use server";
 
+import { publishNewQuestionCast } from "@/lib/api/backend/farcaster";
 import { fetchHolders } from "@/lib/api/common/builderfi";
 import { MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
-import { ReactionType } from "@prisma/client";
+import { ReactionType, SocialProfileType } from "@prisma/client";
 
 export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
@@ -24,7 +25,33 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
   const question = await prisma.question.create({
     data: { questionerId: questioner.id, replierId: replier.id, questionContent: questionContent }
   });
-
+  // if in production, push the question to farcaster
+  if (process.env.NODE_ENV === "production") {
+    const questionerFarcaster = await prisma.social.findUniqueOrThrow({
+      where: {
+        userId_type: {
+          userId: questioner.id,
+          type: SocialProfileType.FARCASTER
+        }
+      }
+    });
+    const replierFarcaster = await prisma.social.findUniqueOrThrow({
+      where: {
+        userId_type: {
+          userId: replier.id,
+          type: SocialProfileType.FARCASTER
+        }
+      }
+    });
+    if (questionerFarcaster || replierFarcaster) {
+      // if one of the two has farcaster, publish the cast
+      await publishNewQuestionCast(
+        questionerFarcaster?.profileName || questioner.name,
+        replierFarcaster?.profileName || replier.name,
+        `https://builder.fi/profile/${replier.wallet}?question=${question.id}`
+      );
+    }
+  }
   return { data: question };
 };
 

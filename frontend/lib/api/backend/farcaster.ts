@@ -52,7 +52,7 @@ export const publishNewAnswerCast = async (replyAuthor: string, questionAuthor: 
   return replyToCast(NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH, text);
 };
 
-export const publishNewUserCast = async (user: string, link: string) => {
+export const publishNewUserKeysCast = async (user: string, link: string) => {
   const text = NEW_BUILDERFI_USER_CAST.replace("{user}", user).replace("{link}", link);
   return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
 };
