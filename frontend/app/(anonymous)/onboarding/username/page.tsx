@@ -3,6 +3,7 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { usePublishOnFarcaster } from "@/hooks/usePublishOnFarcaster";
 import { useUpdateUser } from "@/hooks/useUserApi";
 import { formatError } from "@/lib/utils";
 import { ArrowBackIosNewOutlined } from "@mui/icons-material";
@@ -15,6 +16,7 @@ export default function UsernamePage() {
   const { user } = useUserContext();
   const [username, setUsername] = useState("");
   const updateUser = useUpdateUser();
+  const publishOnFarcaaster = usePublishOnFarcaster();
 
   return (
     <Flex y ysb grow fullwidth>
@@ -60,6 +62,16 @@ export default function UsernamePage() {
           onClick={() => updateUser.mutateAsync({ displayName: username }).then(() => refetch())}
         >
           Continue
+        </Button>
+      </Flex>
+      <Flex y gap1>
+        <Button
+          size="lg"
+          loading={publishOnFarcaaster.isLoading}
+          fullWidth
+          onClick={() => publishOnFarcaaster.mutateAsync({ userId: user!.id }).then(() => refetch())}
+        >
+          Share on Farcaster 
         </Button>
       </Flex>
     </Flex>
