@@ -104,6 +104,20 @@ const theme = extendTheme({
           zIndex: props.ownerState.open ? 1300 : undefined
         })
       }
+    },
+    JoyTypography: {
+      styleOverrides: {
+        root: props => ({
+          a: {
+            color: props.theme.palette.link,
+            textDecoration: "none",
+            fontWeight: "500",
+            "&:hover": {
+              textDecoration: "underline"
+            }
+          }
+        })
+      }
     }
   }
 });

@@ -13,9 +13,6 @@ export default function CreateWalletPage() {
   return (
     <Flex y ysb grow fullwidth>
       <Flex y gap={3}>
-        <Typography textAlign="center" level="body-sm" textColor="neutral.800">
-          Welcome to builder.fi
-        </Typography>
         <Flex y>
           <Typography level="h3">Your builder.fi wallet</Typography>
           <Typography level="body-md" textColor="neutral.600">
@@ -37,7 +34,7 @@ export default function CreateWalletPage() {
             router.replace("/onboarding/fund");
           }}
         >
-          Create wallet
+          Create my wallet
         </Button>
       </Flex>
     </Flex>

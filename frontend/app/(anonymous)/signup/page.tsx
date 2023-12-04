@@ -34,7 +34,7 @@ export default function Signup() {
     return (
       <Flex y yc grow>
         <Flex y grow yc>
-          <Flex y yc xc pt={3} height="587px">
+          <Flex y yc xc pt={3}>
             <Flex y xc gap2>
               <img alt="App logo" src={LOGO_WITH_SHADOW} />
             </Flex>
@@ -58,9 +58,11 @@ export default function Signup() {
 
   return (
     <Flex y ysb grow fullwidth p={2}>
-      <Typography mb={3} level="body-sm" startDecorator={<img src={LOGO_BLUE_BACK} />}>
-        Welcome to builder.fi
-      </Typography>
+      <Flex x yc xc>
+        <Typography mb={3} level="body-sm" fontWeight="600" startDecorator={<img src={LOGO_BLUE_BACK} />}>
+          welcome to builder.fi
+        </Typography>
+      </Flex>
       <Typography level="h2">
         Monetize your
         <br />
