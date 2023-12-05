@@ -35,6 +35,17 @@ export const useGetBuilderInfo = (address: string) => {
   });
 
   const {
+    data: sellPriceAfterFee,
+    refetch: refetchSellpriceAfterFee,
+    isLoading: isLoadingSellPriceAfterFee
+  } = useContractRead({
+    ...BUILDERFI_CONTRACT,
+    functionName: "getSellPriceAfterFee",
+    args: [address as `0x${string}`, BigInt(1)],
+    enabled: !!address
+  });
+
+  const {
     data: supply,
     refetch: refetchTotalSupply,
     isLoading: isLoadingSupply
@@ -45,8 +56,24 @@ export const useGetBuilderInfo = (address: string) => {
     enabled: !!address
   });
 
+  const { data: protocolFee } = useContractRead({
+    ...BUILDERFI_CONTRACT,
+    functionName: "protocolFeePercent"
+  });
+
+  const { data: builderFee } = useContractRead({
+    ...BUILDERFI_CONTRACT,
+    functionName: "builderFeePercent"
+  });
+
   const refetch = async () => {
-    return Promise.all([refetchTotalSupply(), refetchBuyPrice(), refetchSellprice(), refetchBuyPriceAfterFee()]);
+    return Promise.all([
+      refetchTotalSupply(),
+      refetchBuyPrice(),
+      refetchSellprice(),
+      refetchBuyPriceAfterFee(),
+      refetchSellpriceAfterFee()
+    ]);
   };
 
   return {
@@ -55,7 +82,10 @@ export const useGetBuilderInfo = (address: string) => {
     buyPriceAfterFee,
     buyPrice,
     sellPrice,
-    isLoading: isLoadingBuyPrice || isLoadingSellPrice || isLoadingSupply
+    isLoading: isLoadingBuyPrice || isLoadingSellPrice || isLoadingSupply || isLoadingSellPriceAfterFee,
+    protocolFee,
+    builderFee,
+    sellPriceAfterFee
   };
 };
 

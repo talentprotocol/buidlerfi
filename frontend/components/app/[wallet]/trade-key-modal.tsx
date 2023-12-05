@@ -7,13 +7,12 @@ import { Close } from "@mui/icons-material";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Tooltip, Typography } from "@mui/joy";
 import { FC, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { parseEther } from "viem";
 import { useBalance } from "wagmi";
 
 interface Props {
   hasKeys: boolean;
   close: () => void;
-  sellPrice?: bigint;
-  buyPriceWithFees?: bigint;
   supporterKeysCount?: number;
   side: "buy" | "sell";
   isFirstKey: boolean;
@@ -23,9 +22,7 @@ interface Props {
 export const TradeKeyModal: FC<Props> = ({
   hasKeys,
   close,
-  sellPrice,
   supporterKeysCount,
-  buyPriceWithFees,
   isFirstKey,
   side,
   targetBuilderAddress
@@ -37,7 +34,8 @@ export const TradeKeyModal: FC<Props> = ({
   const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { socialData } = useProfileContext();
-  const { refetch, buyPriceAfterFee } = useGetBuilderInfo(socialData?.wallet);
+  const { refetch, buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } =
+    useGetBuilderInfo(socialData?.wallet);
 
   const closeOrShowSuccessPurchase = () => {
     if (hasKeys) {
@@ -58,16 +56,16 @@ export const TradeKeyModal: FC<Props> = ({
 
   const handleBuy = async (recalculatePrice = false) => {
     if (isFirstKey) {
-      tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceWithFees });
+      tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceAfterFee });
       return;
     }
 
-    if (!buyPriceWithFees || !balance) return;
+    if (!buyPriceAfterFee || !balance) return;
 
-    let buyPrice = buyPriceWithFees;
+    let buyPrice = buyPriceAfterFee;
     if (recalculatePrice) {
-      await refetch();
-      buyPrice = buyPriceAfterFee || buyPriceWithFees;
+      const [, , , newBuyPrice] = await refetch();
+      buyPrice = newBuyPrice.data || buyPriceAfterFee;
     }
 
     if (buyPrice > balance.value) {
@@ -90,15 +88,15 @@ export const TradeKeyModal: FC<Props> = ({
   const hasEnoughBalance = useMemo(() => {
     if (side === "sell") return true;
     if (!balance) return false;
-    if (!buyPriceWithFees) return true;
+    if (!buyPriceAfterFee) return true;
 
-    return (balance.value || BigInt(0)) >= buyPriceWithFees;
-  }, [side, balance, buyPriceWithFees]);
+    return (balance.value || BigInt(0)) >= buyPriceAfterFee;
+  }, [side, balance, buyPriceAfterFee]);
 
   const enableTradeButton = () => {
     if (side === "sell") return true;
     if (isFirstKey) return true;
-    if (!buyPriceWithFees) return false;
+    if (!buyPriceAfterFee) return false;
 
     return hasEnoughBalance;
   };
@@ -108,6 +106,18 @@ export const TradeKeyModal: FC<Props> = ({
     if (side === "buy") return "Buy key";
     return "Sell key";
   };
+
+  const creatorFee = useMemo(() => {
+    const valueToUse = side === "buy" ? buyPrice : sellPrice;
+    if (!valueToUse || !builderFee) return BigInt(0);
+    return (valueToUse * builderFee) / parseEther("1");
+  }, [builderFee, buyPrice, sellPrice, side]);
+
+  const platformFee = useMemo(() => {
+    const valueToUse = side === "buy" ? buyPrice : sellPrice;
+    if (!valueToUse || !protocolFee) return BigInt(0);
+    return (valueToUse * protocolFee) / parseEther("1");
+  }, [buyPrice, protocolFee, sellPrice, side]);
 
   return (
     <Modal open={true} onClose={close}>
@@ -147,16 +157,34 @@ export const TradeKeyModal: FC<Props> = ({
                 : "You don't own any keys"}
             </Typography>
             <Tooltip title="The price of the next key is equal to the S^2 / 16000 * 1 ETH, where S is the current number of keys.">
-              <Flex x yc gap1>
-                <Typography level="body-lg" textColor="neutral.600">
-                  {side === "buy" ? "Buy" : "Sell"} price:
-                </Typography>
-
-                <Typography level="title-lg">
-                  {formatToDisplayString(side === "buy" ? buyPriceWithFees : sellPrice)} ETH
-                </Typography>
+              <Flex x yc xsb>
+                <Typography textColor="neutral.600">{side === "buy" ? "Buy" : "Sell"} price:</Typography>
+                <Typography>{formatToDisplayString(side === "buy" ? buyPrice : sellPrice)} ETH</Typography>
               </Flex>
             </Tooltip>
+            <Flex x yc gap1 xsb>
+              {builderFee !== undefined && (
+                <Typography textColor="neutral.600">
+                  Key Creator Fee ({formatToDisplayString(builderFee * BigInt(100))}%):
+                </Typography>
+              )}
+              <Typography>{formatToDisplayString(creatorFee)} ETH</Typography>
+            </Flex>
+            <Flex x yc gap1 xsb>
+              {protocolFee !== undefined && (
+                <Typography textColor="neutral.600">
+                  Platform Fee ({formatToDisplayString(protocolFee * BigInt(100))}%):
+                </Typography>
+              )}
+              <Typography>{formatToDisplayString(platformFee)} ETH</Typography>
+            </Flex>
+            <Flex x yc gap1 xsb>
+              <Typography textColor="neutral.600">You will {side === "buy" ? "spend" : "receive"}: </Typography>
+              <Typography level="title-lg">
+                {formatToDisplayString(side === "buy" ? buyPriceAfterFee : sellPriceAfterFee)} ETH
+              </Typography>
+            </Flex>
+
             {!hasEnoughBalance && (
               <Flex x yc>
                 <Typography level="body-md" textColor="danger.400">
