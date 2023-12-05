@@ -50,8 +50,8 @@ export default function Invite() {
                 <IconButton
                   size="sm"
                   onClick={() => {
-                    window.navigator.clipboard.writeText(code.code);
-                    toast.success("Copied invite code to clipboard");
+                    window.navigator.clipboard.writeText(window.location.origin + "?inviteCode=" + code.code);
+                    toast.success("Copied invite link to clipboard");
                   }}
                 >
                   <ContentCopy sx={{ fontSize: "0.9rem" }} />

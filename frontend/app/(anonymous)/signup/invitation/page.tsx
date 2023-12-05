@@ -15,7 +15,7 @@ export default function InvitationCode() {
   const { replace } = useRouter();
   const { user: privyUser, logout } = usePrivy();
   const { refetch } = useUserContext();
-  const [inviteCode, setInviteCode] = useState<string>("");
+  const [inviteCode, setInviteCode] = useState<string>(window.localStorage.getItem("inviteCode") || "");
   const createUser = useCreateUser();
   const [overrideLoading, setOverrideLoading] = useState<boolean>(false);
 

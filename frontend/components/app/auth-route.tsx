@@ -60,6 +60,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   }, [user, router, supporterKeys, redirect, updateUser]);
 
   useEffect(() => {
+    if (router.searchParams.inviteCode) window.localStorage.setItem("inviteCode", router.searchParams.inviteCode);
     if (user.isLoading || updateUser.isLoading) return;
 
     // user has not logged in with privy yet so send him to the signup page
