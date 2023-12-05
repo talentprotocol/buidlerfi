@@ -61,7 +61,7 @@ export default function InvitationCode() {
         </FormControl>
       </Flex>
       <Flex y gap3>
-        <Typography textColor={"neutral.600"} textAlign="center">
+        <Typography textTransform={"lowercase"} textColor={"neutral.600"} textAlign="center">
           Don&apos;t have an invite code?{" "}
           <a href={WAITLIST_LINK} target="_blank">
             Join waitlist

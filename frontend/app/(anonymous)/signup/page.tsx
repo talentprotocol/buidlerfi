@@ -39,9 +39,9 @@ export default function Signup() {
               <img alt="App logo" src={LOGO_WITH_SHADOW} />
             </Flex>
             <Flex y mt={1} xc grow>
-              <Typography level="h3">Add to home screen</Typography>
+              <Typography level="h3">install the app</Typography>
               <Typography textColor="neutral.600" level="body-md" mb={3}>
-                Install the app to get the best experience
+                add to home screen to get the best experience
               </Typography>
               <img src={INSTALL_PWA_IMAGE} width="100%" />
             </Flex>
@@ -68,13 +68,13 @@ export default function Signup() {
         <br />
         knowledge, support
         <br />
-        the next builders.
+        the next builders
       </Typography>
       <Flex grow>
         <img src={SIGN_IN_IMAGE} width="100%" />
       </Flex>
       <Flex y gap1>
-        <Typography textAlign="center" textColor="neutral.600" level="body-md" my={2}>
+        <Typography textTransform="lowercase" textAlign="center" textColor="neutral.600" level="body-md" my={2}>
           Check our{" "}
           <a target="_blank" href={FAQ_LINK}>
             FAQ

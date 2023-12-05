@@ -80,11 +80,9 @@ export default function FundPage() {
             >
               <Flex x yc gap3>
                 <Flex x yc xsb>
-                  <Typography sx={{ textTransform: "none" }} level="title-md">
-                    Deposit with USD or EUR
-                  </Typography>
+                  <Typography level="title-md">Deposit with USD or EUR</Typography>
                   <Chip variant="solid" color="primary">
-                    Beginner
+                    Popular
                   </Chip>
                 </Flex>
               </Flex>
@@ -109,8 +107,8 @@ export default function FundPage() {
           >
             <Flex x yc gap3>
               <Flex y gap1>
-                <Typography sx={{ textTransform: "none" }} level="title-md">
-                  Transfer ETH on base
+                <Typography level="title-md">
+                  Transfer ETH on <span style={{ textTransform: "none" }}>Base</span>
                 </Typography>
               </Flex>
             </Flex>
@@ -133,9 +131,7 @@ export default function FundPage() {
         >
           <Flex x yc gap3 fullwidth>
             <Flex y gap1>
-              <Typography sx={{ textTransform: "none" }} level="title-md">
-                Bridge from other chains
-              </Typography>
+              <Typography level="title-md">Bridge from other chains</Typography>
             </Flex>
           </Flex>
         </Button>
@@ -155,7 +151,9 @@ export default function FundPage() {
         <Button
           size="lg"
           onClick={() =>
-            hasEnoughBalance ? router.push("/onboarding/buykey") : router.push({ searchParams: { skipFund: "1" } })
+            hasEnoughBalance
+              ? router.replace("/", { preserveSearchParams: true })
+              : router.push({ searchParams: { skipFund: "1" } }, { preserveSearchParams: true })
           }
           variant={hasEnoughBalance ? "solid" : "plain"}
         >

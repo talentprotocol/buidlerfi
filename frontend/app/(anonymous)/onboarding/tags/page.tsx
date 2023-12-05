@@ -38,7 +38,7 @@ export default function TagsPage() {
             Choose 3 areas of expertise
           </Typography>
           <Typography level="body-md" textColor="neutral.600">
-            Sharing your knowledge on builder.fi can unlock an additional source of income. <br />
+            Sharing knowledge on builder.fi can unlock an additional source of income for you. <br />
             What are the 3 main topics other builders can ask you questions about?
           </Typography>
           <Flex x wrap mt={2} gap1>

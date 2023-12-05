@@ -1,15 +1,15 @@
 "use client";
 
 import { Flex } from "@/components/shared/flex";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { CREATE_WALLET_IMAGE } from "@/lib/assets";
 import { ONBOARDING_WALLET_CREATED_KEY } from "@/lib/constants";
 import { Button, Typography } from "@mui/joy";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function CreateWalletPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const router = useBetterRouter();
   return (
     <Flex y ysb grow fullwidth>
       <Flex y gap={3}>
@@ -31,7 +31,7 @@ export default function CreateWalletPage() {
           onClick={() => {
             setIsLoading(true);
             window.localStorage.setItem(ONBOARDING_WALLET_CREATED_KEY, "true");
-            router.replace("/onboarding/fund");
+            router.replace("/", { preserveSearchParams: true });
           }}
         >
           Create my wallet

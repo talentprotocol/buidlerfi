@@ -64,7 +64,8 @@ export const getQuestion = async (privyUserId: string, questionId: number) => {
 
   const replierHolders = await fetchHolders(question.replier.wallet.toLowerCase());
   const found = replierHolders.find(holder => holder.holder.owner.toLowerCase() === currentUser.wallet.toLowerCase());
-  if (found) return { data: question };
+
+  if (found && Number(found.heldKeyNumber) > 0) return { data: question };
   else return { data: exclude(question, ["reply"]) };
 };
 

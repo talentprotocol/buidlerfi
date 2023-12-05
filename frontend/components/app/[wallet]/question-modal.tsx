@@ -131,7 +131,10 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                       <ReplyContextMenu
                         question={question}
                         refetchQuestion={() => refetch()}
-                        onEdit={() => setIsEditingReply(true)}
+                        onEdit={() => {
+                          setReply(question.reply || "");
+                          setIsEditingReply(true);
+                        }}
                       />
                     </Flex>
                   </Flex>

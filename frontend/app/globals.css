@@ -1,17 +1,10 @@
 /* force lowercase for builder.fi */
-.MuiButton-root {
-	text-transform: lowercase;
-}
-
-.MuiTypography-h1 {
-	text-transform: lowercase;
-}
-
-.MuiTypography-h2 {
-	text-transform: lowercase;
-}
-
-.MuiTypography-h3 {
+.MuiButton-root,
+.MuiTypography-h1,
+.MuiTypography-h2,
+.MuiTypography-h3,
+.MuiInput-input,
+.MuiFormHelperText-root {
 	text-transform: lowercase;
 }
 
