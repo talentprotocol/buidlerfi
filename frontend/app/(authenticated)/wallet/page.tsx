@@ -43,7 +43,7 @@ export default function ChatsPage() {
 
   const [portfolio, tradingFees] = useMemo(() => {
     if (!allHolding || !builderFiData) return [BigInt(0), BigInt(0)];
-    const holding = allHolding.reduce((prev, curr) => prev + tryParseBigInt(curr.owner.buyPrice), BigInt(0));
+    const holding = allHolding.reduce((prev, curr) => prev + tryParseBigInt(curr.owner.sellPrice), BigInt(0));
     const tradingFees = builderFiData.shareParticipants.find(
       user => user.owner == mainWallet?.toLowerCase()
     )?.tradingFeesAmount;
