@@ -1,12 +1,6 @@
-import axios from "axios";
-import { useMutation } from "wagmi";
-
-interface FarcasterApiParams {
-    userId: number;
-  }
+import { publishNewUserKeysCastSA } from "@/backend/farcaster/farcasterServerActions";
+import { useMutationSA } from "./useMutationSA";
 
 export const usePublishOnFarcaster = () => {
-  return useMutation((params: FarcasterApiParams) => {
-    return axios.post(`/api/farcaster/${params.userId}`);
-  });
+  return useMutationSA(async options => publishNewUserKeysCastSA(options));
 };

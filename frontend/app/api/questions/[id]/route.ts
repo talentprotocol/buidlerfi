@@ -1,6 +1,7 @@
 import { publishNewAnswerCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { SocialProfileType } from "@prisma/client";
 
 export async function PUT(req: Request, { params }: { params: { id: number } }) {
   try {
