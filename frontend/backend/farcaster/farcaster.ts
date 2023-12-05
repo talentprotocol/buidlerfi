@@ -3,7 +3,7 @@ import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { SocialProfileType } from "@prisma/client";
 
-export async function publishNewCast(privyUserId: string) {
+export async function publishNewUserCast(privyUserId: string) {
   if (process.env.NODE_ENV !== "production" || true) {
     const user = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
     const userFarcaster = await prisma.socialProfile.findUniqueOrThrow({
@@ -23,5 +23,5 @@ export async function publishNewCast(privyUserId: string) {
     );
     return { data: { hash: castHash } };
   }
-  return { data: { hash: '' } };
+  return { data: { hash: "" } };
 }

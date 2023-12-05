@@ -1,6 +1,6 @@
 import { ServerActionOptions, serverActionWrapper } from "@/lib/serverActionWrapper";
-import { publishNewCast } from "./farcaster";
+import { publishNewUserCast } from "./farcaster";
 
 export const publishNewUserKeysCastSA = async (options: ServerActionOptions) => {
-  return serverActionWrapper(data => publishNewCast(data.privyUserId), options);
+  return serverActionWrapper(data => publishNewUserCast(data.privyUserId), options);
 };
