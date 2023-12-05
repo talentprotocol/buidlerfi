@@ -3,11 +3,13 @@ import prisma from "@/lib/prisma";
 export const getCurrentPosition = async (privyUserId: string) => {
   const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
 
+  let result: Array<{ userId: string; score: number; position: number }> = [];
+
   if (!currentUser) {
     return { data: [] };
   }
 
-  const result: [{ userId: string; score: number; position: number }] = await prisma.$queryRaw`
+  result = await prisma.$queryRaw`
     SELECT leaderboard."userId", leaderboard.score, leaderboard.position FROM (
       SELECT "userId", sum("points") as score, row_number() OVER (order by sum("points") desc) as position
       FROM "Point"
@@ -16,5 +18,9 @@ export const getCurrentPosition = async (privyUserId: string) => {
     ) AS leaderboard WHERE "userId" = ${currentUser.id}
   `;
 
-  return { data: result };
+  if (result.length > 0) {
+    return { data: result };
+  } else {
+    return { data: [] };
+  }
 };
