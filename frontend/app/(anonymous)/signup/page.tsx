@@ -39,9 +39,9 @@ export default function Signup() {
               <img alt="App logo" src={LOGO_WITH_SHADOW} />
             </Flex>
             <Flex y mt={1} xc grow>
-              <Typography level="h3">install the app</Typography>
+              <Typography level="h3">Install the App</Typography>
               <Typography textColor="neutral.600" level="body-md" mb={3}>
-                add to home screen to get the best experience
+                Add to homescreen to get the best experience
               </Typography>
               <img src={INSTALL_PWA_IMAGE} width="100%" />
             </Flex>
@@ -60,7 +60,7 @@ export default function Signup() {
     <Flex y ysb grow fullwidth p={2}>
       <Flex x yc xc>
         <Typography mb={3} level="body-sm" fontWeight="600" startDecorator={<img src={LOGO_BLUE_BACK} />}>
-          welcome to builder.fi
+          Welcome to builder.fi
         </Typography>
       </Flex>
       <Typography level="h2">
