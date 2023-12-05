@@ -15,9 +15,7 @@ import { toast } from "react-toastify";
 export default function Invite() {
   const { user } = useUserContext();
   const { data: invitedUsers } = useGetInvitedUsers();
-  const { data: currentPosition } = useGetCurrentPosition() as {
-    data: [{ userId: string; score: number; position: number }];
-  };
+  const { data: currentPosition } = useGetCurrentPosition();
   const [showInvitedUsersModal, setShowInvitedUsersModal] = useState(false);
   const router = useBetterRouter();
 
