@@ -1,7 +1,7 @@
 import { publishNewAnswerCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
-import { SocialProfileType } from "@prisma/client";
+import { SocialProfileType, User } from "@prisma/client";
 
 export async function PUT(req: Request, { params }: { params: { id: number } }) {
   try {
@@ -23,7 +23,7 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
 
     // if in production, push the question to farcaster
     if (process.env.NODE_ENV === "production") {
-      let questioner = await prisma.socialProfile.findUniqueOrThrow({
+      const questionerFarcaster = await prisma.socialProfile.findUniqueOrThrow({
         where: {
           userId_type: {
             userId: question.questionerId,
@@ -31,7 +31,8 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
           }
         }
       });
-      if (!questioner) {
+      let questioner: User;
+      if (!questionerFarcaster) {
         questioner = await prisma.user.findUniqueOrThrow({ where: { id: question.questionerId } });
       }
       const replierFarcaster = await prisma.socialProfile.findUniqueOrThrow({
@@ -42,12 +43,12 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
           }
         }
       });
-      if (questioner || replierFarcaster) {
+      if (questionerFarcaster || replierFarcaster) {
         // if one of the two has farcaster, publish the cast
         await publishNewAnswerCast(
-          replierFarcaster?.profileName || replier.name,
-          questioner?.profileName || questioner.name,
-          `https://builder.fi/profile/${replier.wallet}?question=${question.id}`
+          replierFarcaster?.profileName || replier.displayName!,
+          questionerFarcaster?.profileName || questioner!.displayName!,
+          `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
         );
       }
     }

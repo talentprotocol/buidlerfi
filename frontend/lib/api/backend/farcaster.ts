@@ -30,13 +30,13 @@ export const replyToCast = async (existingCastHash: string, reply: string) => {
 
 const NEW_BUILDERFI_QUESTION_CAST =
   "@{questionAuthor} just asked @{questionRecipient} a question on builder.fi!\n\n{link}";
-const NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH = "0x";
+const NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH = "0x30e279688544d642a65c086d84bd84fa033d2d2c";
 
 const NEW_BUILDERFI_ANSWER_CAST = "@{replyAuthor} just answered @{questionAuthor} question on builder.fi!\n\n{link}";
-const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x";
+const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x30e279688544d642a65c086d84bd84fa033d2d2c";
 
 const NEW_BUILDERFI_USER_CAST = "@{user} just launched their keys on builder.fi!\n\n{link}";
-const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x";
+const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x30e279688544d642a65c086d84bd84fa033d2d2c";
 
 export const publishNewQuestionCast = async (questionAuthor: string, questionRecipient: string, link: string) => {
   const text = NEW_BUILDERFI_QUESTION_CAST.replace("{questionAuthor}", questionAuthor)

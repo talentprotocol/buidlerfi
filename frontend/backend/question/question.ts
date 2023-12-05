@@ -46,9 +46,9 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     if (questionerFarcaster || replierFarcaster) {
       // if one of the two has farcaster, publish the cast
       await publishNewQuestionCast(
-        questionerFarcaster?.profileName || questioner.name,
-        replierFarcaster?.profileName || replier.name,
-        `https://builder.fi/profile/${replier.wallet}?question=${question.id}`
+        questionerFarcaster?.profileName || questioner.displayName!,
+        replierFarcaster?.profileName || replier.displayName!,
+        `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
       );
     }
   }

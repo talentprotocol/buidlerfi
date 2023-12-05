@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { SocialProfileType } from "@prisma/client";
 
 export async function publishNewUserCast(privyUserId: string) {
-  if (process.env.NODE_ENV !== "production" || true) {
+  if (process.env.NODE_ENV !== "production") {
     const user = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
     const userFarcaster = await prisma.socialProfile.findUniqueOrThrow({
       where: {
