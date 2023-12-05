@@ -4,7 +4,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
 import { formatToDisplayString } from "@/lib/utils";
 import { Close } from "@mui/icons-material";
-import { Button, DialogTitle, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
+import { Button, DialogTitle, IconButton, Modal, ModalDialog, Tooltip, Typography } from "@mui/joy";
 import { FC, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
@@ -105,8 +105,8 @@ export const TradeKeyModal: FC<Props> = ({
 
   const modalTitle = () => {
     if (showSuccessMessage) return "What's next?";
-    if (side === "buy") return "Buy 1 key";
-    return "Sell 1 key";
+    if (side === "buy") return "Buy key";
+    return "Sell key";
   };
 
   return (
@@ -142,20 +142,25 @@ export const TradeKeyModal: FC<Props> = ({
         ) : (
           <Flex y gap1>
             <Typography level="body-lg" textColor="neutral.600">
-              {hasKeys ? `You own ${supporterKeysCount} keys` : "You don't own any keys"}
+              {hasKeys
+                ? `You own ${supporterKeysCount} ${supporterKeysCount && supporterKeysCount > 1 ? "keys" : "key"}`
+                : "You don't own any keys"}
             </Typography>
-            <Flex x yc gap1>
-              <Typography level="body-lg" textColor="neutral.600">
-                {side === "buy" ? "Buy" : "Sell"} price
-              </Typography>
-              <Typography level="title-lg">
-                {formatToDisplayString(side === "buy" ? buyPriceWithFees : sellPrice)} ETH
-              </Typography>
-            </Flex>
+            <Tooltip title="The price of the next key is equal to the S^2 / 16000 * 1 ETH, where S is the current number of keys.">
+              <Flex x yc gap1>
+                <Typography level="body-lg" textColor="neutral.600">
+                  {side === "buy" ? "Buy" : "Sell"} price:
+                </Typography>
+
+                <Typography level="title-lg">
+                  {formatToDisplayString(side === "buy" ? buyPriceWithFees : sellPrice)} ETH
+                </Typography>
+              </Flex>
+            </Tooltip>
             {!hasEnoughBalance && (
               <Flex x yc>
                 <Typography level="body-md" textColor="danger.400">
-                  Insufficient funds. Please top up your wallet.
+                  Insufficient funds. Go to <a href={"/wallet"}>Wallet</a> and deposit ETH.
                 </Typography>
               </Flex>
             )}

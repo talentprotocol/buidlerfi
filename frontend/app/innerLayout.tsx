@@ -4,7 +4,6 @@ import { Flex } from "@/components/shared/flex";
 import { DialogContainer } from "@/contexts/DialogContainer";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
-import { LOGO } from "@/lib/assets";
 import theme from "@/theme";
 import { CssVarsProvider } from "@mui/joy";
 import {
@@ -86,8 +85,7 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
           defaultChain: supportedChain,
           appearance: {
             theme: "light",
-            accentColor: "#0B6EF9",
-            logo: LOGO
+            accentColor: "#0B6EF9"
           }
         }}
       >
