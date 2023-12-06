@@ -3,7 +3,6 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { usePublishOnFarcaster } from "@/hooks/usePublishOnFarcaster";
 import { useUpdateUser } from "@/hooks/useUserApi";
 import { formatError } from "@/lib/utils";
 import { ArrowBackIosNewOutlined } from "@mui/icons-material";
