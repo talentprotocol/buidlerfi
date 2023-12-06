@@ -27,7 +27,10 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
 
   const pathname = usePathname();
 
-  const sanitizedContent = useMemo(() => sanitize(anchorme(question?.questionContent)), [question?.questionContent]);
+  const sanitizedContent = useMemo(
+    () => sanitize(anchorme({ input: question?.questionContent, options: { attributes: { target: "_blank" } } })),
+    [question?.questionContent]
+  );
 
   if (!question) return <></>;
 

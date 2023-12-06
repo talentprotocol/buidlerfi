@@ -57,12 +57,18 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
   };
 
   const sanitizedContent = useMemo(
-    () => (question?.questionContent ? sanitize(anchorme(question?.questionContent)) : ""),
+    () =>
+      question?.questionContent
+        ? sanitize(anchorme({ input: question?.questionContent, options: { attributes: { target: "_blank" } } }))
+        : "",
     [question?.questionContent]
   );
 
   const sanitizedReply = useMemo(
-    () => (question?.reply ? sanitize(anchorme(question?.reply || "")) : ""),
+    () =>
+      question?.reply
+        ? sanitize(anchorme({ input: question?.reply || "", options: { attributes: { target: "_blank" } } }))
+        : "",
     [question?.reply]
   );
 
