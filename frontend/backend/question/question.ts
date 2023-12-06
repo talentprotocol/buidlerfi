@@ -13,8 +13,8 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
   }
 
-  const questioner = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
-  const replier = await prisma.user.findUniqueOrThrow({ where: { id: replierId } });
+  const questioner = await prisma.user.findUniqueOrThrow({ where: { privyUserId }, include: { socialProfiles: true } });
+  const replier = await prisma.user.findUniqueOrThrow({ where: { id: replierId }, include: { socialProfiles: true } });
 
   const replierHolders = await fetchHolders(replier.wallet);
   const found = replierHolders.find(holder => holder.holder.owner.toLowerCase() === questioner.wallet.toLowerCase());
@@ -27,22 +27,8 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
   });
   // if in production, push the question to farcaster
   if (process.env.ENABLE_FARCASTER === "true") {
-    const questionerFarcaster = await prisma.socialProfile.findUniqueOrThrow({
-      where: {
-        userId_type: {
-          userId: questioner.id,
-          type: SocialProfileType.FARCASTER
-        }
-      }
-    });
-    const replierFarcaster = await prisma.socialProfile.findUniqueOrThrow({
-      where: {
-        userId_type: {
-          userId: replier.id,
-          type: SocialProfileType.FARCASTER
-        }
-      }
-    });
+    const questionerFarcaster = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
+    const replierFarcaster = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
     if (questionerFarcaster || replierFarcaster) {
       // if one of the two has farcaster, publish the cast
       publishNewQuestionCast(
