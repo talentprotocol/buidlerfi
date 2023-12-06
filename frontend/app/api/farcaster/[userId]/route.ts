@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { SocialProfileType } from "@prisma/client";
 
 export async function POST(req: Request) {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.ENABLE_FARCASTER === "true") {
     const user = await prisma.user.findUnique({
       where: { privyUserId: req.headers.get("privyUserId")! },
       include: { socialProfiles: true }

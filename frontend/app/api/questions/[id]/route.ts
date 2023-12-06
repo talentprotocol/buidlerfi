@@ -33,7 +33,7 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
       const replierFarcaster = replier?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
       if (questionerFarcaster || replierFarcaster) {
         // if one of the two has farcaster, publish the cast
-        await publishNewAnswerCast(
+        publishNewAnswerCast(
           replierFarcaster?.profileName || replier.displayName!,
           questionerFarcaster?.profileName || questioner!.displayName!,
           `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
