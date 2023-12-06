@@ -12,7 +12,7 @@ export async function publishNewUserCast(privyUserId: string) {
     }
     const castHash = await publishNewUserKeysCast(
       userFarcaster.profileName,
-      `https://app.builder.fi/profile/${user.wallet}`
+      `https://app.builder.fi/profile/${user?.wallet}`
     );
     return { data: { hash: castHash } };
   }
