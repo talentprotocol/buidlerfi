@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
     const castHash = await publishNewUserKeysCast(
       userFarcaster.profileName,
-      `https://app.builder.fi/profile/${user.wallet}`
+      `https://app.builder.fi/profile/${user?.wallet}`
     );
     return Response.json({ castUrl: getCastUrl(castHash) });
   }
