@@ -1,6 +1,7 @@
 import { publishNewAnswerCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { shortAddress } from "@/lib/utils";
 import { SocialProfileType } from "@prisma/client";
 
 export async function PUT(req: Request, { params }: { params: { id: number } }) {
@@ -32,10 +33,16 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
       const questionerFarcaster = questioner?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
       const replierFarcaster = replier?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
       if (questionerFarcaster || replierFarcaster) {
+        const replierName = replierFarcaster?.profileName
+          ? `@${replierFarcaster?.profileName}`
+          : replier.displayName || shortAddress(replier.wallet || "");
+        const questionerName = questionerFarcaster?.profileName
+          ? `@${questionerFarcaster?.profileName}`
+          : questioner?.displayName || shortAddress(questioner?.wallet || "");
         // if one of the two has farcaster, publish the cast
         await publishNewAnswerCast(
-          replierFarcaster?.profileName ? `@${replierFarcaster?.profileName}` : replier.displayName!,
-          questionerFarcaster?.profileName ? `@${questionerFarcaster?.profileName}` : questioner!.displayName!,
+          replierName,
+          questionerName,
           `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
         );
       }

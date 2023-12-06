@@ -6,6 +6,7 @@ import { MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
+import { shortAddress } from "@/lib/utils";
 import { ReactionType, SocialProfileType } from "@prisma/client";
 
 export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
@@ -31,10 +32,16 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     const replierFarcaster = replier.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
 
     if (questionerFarcaster || replierFarcaster) {
+      const replierName = replierFarcaster?.profileName
+        ? `@${replierFarcaster?.profileName}`
+        : replier.displayName || shortAddress(replier.wallet || "");
+      const questionerName = questionerFarcaster?.profileName
+        ? `@${questionerFarcaster?.profileName}`
+        : questioner?.displayName || shortAddress(questioner?.wallet || "");
       // if one of the two has farcaster, publish the cast
       publishNewQuestionCast(
-        questionerFarcaster?.profileName ? `@${questionerFarcaster?.profileName}` : questioner.displayName!,
-        replierFarcaster?.profileName ? `@${replierFarcaster?.profileName}` : replier.displayName!,
+        questionerName,
+        replierName,
         `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
       );
     }
