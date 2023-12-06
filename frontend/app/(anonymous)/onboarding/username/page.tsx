@@ -16,7 +16,6 @@ export default function UsernamePage() {
   const { user } = useUserContext();
   const [username, setUsername] = useState("");
   const updateUser = useUpdateUser();
-  const publishOnFarcaster = usePublishOnFarcaster();
 
   return (
     <Flex y ysb grow fullwidth>
@@ -62,16 +61,6 @@ export default function UsernamePage() {
           onClick={() => updateUser.mutateAsync({ displayName: username }).then(() => refetch())}
         >
           Continue
-        </Button>
-      </Flex>
-      <Flex y gap1>
-        <Button
-          size="lg"
-          loading={publishOnFarcaster.isLoading}
-          fullWidth
-          onClick={() => publishOnFarcaster.mutateAsync().then(() => refetch())}
-        >
-          Share on Farcaster
         </Button>
       </Flex>
     </Flex>
