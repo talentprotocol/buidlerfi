@@ -36,21 +36,15 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
 
   const sendQuestion = async () => {
     if (isEditMode) {
-      OpenDialog({
-        type: "confirm",
-        body: "Are you sure you want to edit this question ?",
-        title: "Edit question",
-        submit: () =>
-          editQuestion
-            .mutateAsync({
-              questionId: questionToEdit,
-              questionContent: questionContent
-            })
-            .then(() => {
-              refetch();
-              close();
-            })
-      });
+      await editQuestion
+        .mutateAsync({
+          questionId: questionToEdit,
+          questionContent: questionContent
+        })
+        .then(() => {
+          refetch();
+          close();
+        });
     } else {
       await postQuestion.mutateAsync({
         questionContent: questionContent,

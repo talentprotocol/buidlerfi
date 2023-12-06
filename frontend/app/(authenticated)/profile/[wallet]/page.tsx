@@ -9,7 +9,6 @@ import { PageMessage } from "@/components/shared/page-message";
 import { UserItemFromAddress } from "@/components/shared/user-item";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
-import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { isEVMAddress, tryParseBigInt } from "@/lib/utils";
 import { Chat, Lock } from "@mui/icons-material";
 import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
@@ -26,8 +25,6 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   } = useProfileContext();
 
   const holdings = useGetHoldings(params.wallet);
-
-  const { sellPrice, refetch, buyPriceAfterFee } = useGetBuilderInfo(socialData?.wallet);
 
   const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
   const [isAskingQuestion, setIsAskingQuestion] = useState(false);
@@ -90,12 +87,9 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
         <TradeKeyModal
           supporterKeysCount={ownedKeysCount || 0}
           hasKeys={hasKeys}
-          sellPrice={sellPrice}
-          buyPriceWithFees={buyPriceAfterFee}
           isFirstKey={isOwnProfile && holders?.length === 0}
           side={buyModalState}
           close={async () => {
-            await refetch();
             await refetchProfileInfo();
             setBuyModalState("closed");
           }}

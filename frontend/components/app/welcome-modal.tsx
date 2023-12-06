@@ -15,17 +15,16 @@ export const WelcomeModal = () => {
           <img src={WELCOME_MODAL} width="100%" />
         </Flex>
         <Flex y p={2} gap={1}>
-          <Typography level="h3">You&apos;re in, congrats !</Typography>
+          <Typography level="h3">{"you're in! now what?"}</Typography>
           <Typography level="body-lg" textColor={"neutral.600"}>
-            Here&apos;s what to do next: <br />
-            1. Find a friend on an interesting builder.
+            1. Find a friend or an interesting builder.
             <br />
             2. Buy their key to reveal past answers. <br />
-            3. Ask then a question. <br />
+            3. Ask them a question. <br />
             4. Sell the key at anytime.
           </Typography>
           <Button fullWidth size="lg" sx={{ mt: 2 }} onClick={handleCloseModal}>
-            Let&apos;s do it!
+            Let&apos;s do this
           </Button>
         </Flex>
       </ModalDialog>

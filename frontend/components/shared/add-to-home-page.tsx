@@ -15,8 +15,10 @@ export function AddToHomePage() {
     const { standalone } = navigator as Navigator;
     if (document.referrer.startsWith("android-app://")) {
       setIsInstalled(true);
+      return;
     } else if (standalone || isStandalone) {
       setIsInstalled(true);
+      return;
     }
     setIsInstalled(false);
   }, []);
@@ -27,12 +29,12 @@ export function AddToHomePage() {
     <>
       <Button onClick={() => setInstructionsOpen(true)}>
         <AddToHomeScreen />
-        Add to Home Screen
+        Install App
       </Button>
       <Modal open={instructionsOpen} onClose={() => setInstructionsOpen(false)}>
         <ModalDialog minWidth="400px">
           <Flex x xsb yc>
-            <DialogTitle>Add to Home Screen</DialogTitle>
+            <DialogTitle>Install App</DialogTitle>
             <IconButton onClick={() => setInstructionsOpen(false)}>
               <Close />
             </IconButton>

@@ -22,6 +22,7 @@ type ShareParticipant @entity {
 	numberOfHolders: BigInt! # uint256
 	numberOfHoldings: BigInt! # uint256
 	tradingFeesAmount: BigInt! # uint256
+	dateOfLaunch: Int
 }
 
 type ShareRelationship @entity {

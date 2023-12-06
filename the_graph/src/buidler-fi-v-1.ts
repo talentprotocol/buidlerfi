@@ -66,12 +66,14 @@ export function handleTrade(event: TradeEvent): void {
   let subject = ShareParticipant.load(event.params.builder.toHexString());
   // load subject
   if (subject === null) {
+    let timestamp = event.block.timestamp.toI32();
     subject = new ShareParticipant(event.params.builder.toHexString());
     subject.supply = ONE_BI;
     subject.numberOfHolders = ZERO_BI;
     subject.numberOfHoldings = ZERO_BI;
     subject.owner = event.params.builder.toHexString();
     subject.tradingFeesAmount = event.params.builderEthAmount;
+    subject.dateOfLaunch = timestamp;
     contract_analytics.totalNumberOfBuilders = contract_analytics.totalNumberOfBuilders.plus(ONE_BI);
   } else {
     subject.tradingFeesAmount = subject.tradingFeesAmount.plus(event.params.builderEthAmount);
@@ -89,6 +91,7 @@ export function handleTrade(event: TradeEvent): void {
     buyer.buyPrice = subject.buyPrice;
     buyer.sellPrice = subject.sellPrice;
     buyer.tradingFeesAmount = subject.tradingFeesAmount;
+    buyer.dateOfLaunch = subject.dateOfLaunch;
   }
 
   // CREATE RELATIONSHIP INFO

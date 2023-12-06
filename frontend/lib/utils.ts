@@ -36,10 +36,15 @@ export const formatToDisplayString = (value?: string | bigint | number, decimals
 };
 
 export const formatError = (error: unknown) => {
-  if (typeof error === "string") return error;
-  if (error instanceof AxiosError) return error.response?.data.error;
-  if (error instanceof Error) return error.message;
-  return JSON.stringify(error);
+  if (!error) return "";
+  let res = "";
+  if (typeof error === "object" && "shortMessage" in error) res = error.shortMessage as string;
+  else if (typeof error === "string") res = error;
+  else if (error instanceof AxiosError) res = error.response?.data.error;
+  else if (error instanceof Error) res = error.message;
+  else res = JSON.stringify(error);
+
+  return res;
 };
 
 export const generateRandomString = (length: number) => {

@@ -27,7 +27,13 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
 
   const pathname = usePathname();
 
-  const sanitizedContent = useMemo(() => sanitize(anchorme(question?.questionContent)), [question?.questionContent]);
+  const sanitizedContent = useMemo(
+    () =>
+      sanitize(
+        anchorme({ input: question?.questionContent, options: { attributes: { target: "_blank", truncate: 20 } } })
+      ),
+    [question?.questionContent]
+  );
 
   if (!question) return <></>;
 
@@ -44,7 +50,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
               <Typography level="helper">•</Typography>
               <Typography level="body-sm">{askedOn}</Typography>
             </Flex>
-            <Flex x yc gap2>
+            <Flex x yc>
               {!question.repliedOn ? (
                 <Chip size="sm" color="neutral" variant="outlined">
                   Awaiting answer
@@ -69,7 +75,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
             level="body-sm"
             whiteSpace="pre-line"
           >
-            <span style={{ textTransform: "none" }} dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+            <span className="remove-text-transform" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
           </Typography>
         </Flex>
       </Flex>

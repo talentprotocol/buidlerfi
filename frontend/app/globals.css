@@ -1,6 +1,13 @@
-/* force lowercase for builder.fi */
 * {
-	text-transform: lowercase;
+	text-transform: lowercase !important;
+}
+
+.remove-text-transform {
+	text-transform: none !important;
+}
+
+.remove-text-transform > * {
+	text-transform: none !important;
 }
 
 @keyframes revealKey {

@@ -54,13 +54,10 @@ export default function FundPage() {
   return (
     <Flex y ysb grow fullwidth>
       <Flex y gap={3}>
-        <Typography textAlign="center" level="body-sm" textColor="neutral.800">
-          Welcome to builder.fi
-        </Typography>
         <Flex y>
           <Typography level="h3">Top up your account</Typography>
-          <Typography level="body-md" textColor="neutral.600">
-            builder.fi is built on base and uses ETH as currency. We suggest a deposit of {`>`}0.001 ETH (~$2) to fully
+          <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
+            builder.fi is built on Base and uses ETH as currency. We suggest a deposit of {">"} 0.001 ETH (~$2) to fully
             test the app. You can withdraw your funds at any time.
           </Typography>
         </Flex>
@@ -84,7 +81,9 @@ export default function FundPage() {
               <Flex x yc gap3>
                 <Flex x yc xsb>
                   <Typography level="title-md">Deposit with USD or EUR</Typography>
-                  <Chip color="primary">Beginner</Chip>
+                  <Chip variant="solid" color="primary">
+                    Popular
+                  </Chip>
                 </Flex>
               </Flex>
             </Button>
@@ -108,7 +107,9 @@ export default function FundPage() {
           >
             <Flex x yc gap3>
               <Flex y gap1>
-                <Typography level="title-md">Transfer ETH on base</Typography>
+                <Typography level="title-md">
+                  Transfer ETH on <span style={{ textTransform: "none" }}>Base</span>
+                </Typography>
               </Flex>
             </Flex>
           </Button>
@@ -150,7 +151,9 @@ export default function FundPage() {
         <Button
           size="lg"
           onClick={() =>
-            hasEnoughBalance ? router.push("/onboarding/buykey") : router.push({ searchParams: { skipFund: "1" } })
+            hasEnoughBalance
+              ? router.replace("/", { preserveSearchParams: true })
+              : router.push({ searchParams: { skipFund: "1" } }, { preserveSearchParams: true })
           }
           variant={hasEnoughBalance ? "solid" : "plain"}
         >

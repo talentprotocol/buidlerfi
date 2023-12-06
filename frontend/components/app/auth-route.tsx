@@ -33,7 +33,9 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   );
 
   const handleOnboardingRedirect = useCallback(() => {
-    if (window.localStorage.getItem(ONBOARDING_WALLET_CREATED_KEY) !== "true") {
+    if (user.user?.tags.length === 0 && router.searchParams.skipTags !== "1") {
+      return redirect("/onboarding/tags");
+    } else if (window.localStorage.getItem(ONBOARDING_WALLET_CREATED_KEY) !== "true") {
       return redirect("/onboarding/createwallet");
     } else if (
       user.balance !== undefined &&
@@ -43,10 +45,8 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       return redirect("/onboarding/fund");
     } else if (Number(supporterKeys) === 0 && router.searchParams.skipLaunchingKeys !== "1") {
       return redirect("/onboarding/buykey");
-    } else if (!user.user?.socialWallet && !user.user?.displayName && router.searchParams.skiplink !== "1") {
+    } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
-    } else if (!user.user?.displayName) {
-      return redirect("/onboarding/username");
     } else {
       updateUser
         .mutateAsync({ hasFinishedOnboarding: true })
@@ -59,6 +59,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   }, [user, router, supporterKeys, redirect, updateUser]);
 
   useEffect(() => {
+    if (router.searchParams.inviteCode) window.localStorage.setItem("inviteCode", router.searchParams.inviteCode);
     if (user.isLoading || updateUser.isLoading) return;
 
     // user has not logged in with privy yet so send him to the signup page

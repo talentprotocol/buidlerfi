@@ -34,14 +34,14 @@ export default function Signup() {
     return (
       <Flex y yc grow>
         <Flex y grow yc>
-          <Flex y yc xc pt={3} height="587px">
+          <Flex y yc xc pt={3}>
             <Flex y xc gap2>
               <img alt="App logo" src={LOGO_WITH_SHADOW} />
             </Flex>
             <Flex y mt={1} xc grow>
-              <Typography level="h3">Add to home screen</Typography>
+              <Typography level="h3">Install the App</Typography>
               <Typography textColor="neutral.600" level="body-md" mb={3}>
-                Install the app to get the best experience
+                Add to homescreen to get the best experience
               </Typography>
               <img src={INSTALL_PWA_IMAGE} width="100%" />
             </Flex>
@@ -58,21 +58,23 @@ export default function Signup() {
 
   return (
     <Flex y ysb grow fullwidth p={2}>
-      <Typography mb={3} level="body-sm" startDecorator={<img src={LOGO_BLUE_BACK} />}>
-        Welcome to builder.fi
-      </Typography>
+      <Flex x yc xc>
+        <Typography mb={3} level="body-sm" fontWeight="600" startDecorator={<img src={LOGO_BLUE_BACK} />}>
+          Welcome to builder.fi
+        </Typography>
+      </Flex>
       <Typography level="h2">
         Monetize your
         <br />
         knowledge, support
         <br />
-        the next builders.
+        the next builders
       </Typography>
       <Flex grow>
         <img src={SIGN_IN_IMAGE} width="100%" />
       </Flex>
       <Flex y gap1>
-        <Typography textAlign="center" textColor="neutral.600" level="body-md" my={2}>
+        <Typography textTransform="lowercase" textAlign="center" textColor="neutral.600" level="body-md" my={2}>
           Check our{" "}
           <a target="_blank" href={FAQ_LINK}>
             FAQ

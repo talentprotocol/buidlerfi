@@ -168,7 +168,8 @@ export const fetchHolders = async (address: string) => {
     }),
     headers: {
       "Content-Type": "application/json"
-    }
+    },
+    cache: "no-cache"
   }).then(res => res.json());
 
   return res.data.shareRelationships;

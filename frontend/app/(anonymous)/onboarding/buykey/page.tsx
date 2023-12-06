@@ -5,8 +5,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
 import { MIN_BALANCE_ONBOARDING } from "@/lib/constants";
-import { ArrowBackIosNewOutlined } from "@mui/icons-material";
-import { Button, IconButton, Typography } from "@mui/joy";
+import { Button, Typography } from "@mui/joy";
 import { useState } from "react";
 
 export default function BuyKeyPage() {
@@ -41,32 +40,19 @@ export default function BuyKeyPage() {
   return (
     <Flex y ysb grow fullwidth>
       <Flex y gap={3}>
-        <Flex x xsb yc>
-          <Flex basis="100%">
-            {!hasEnoughBalance && (
-              <IconButton sx={{ textAlign: "start" }}>
-                <ArrowBackIosNewOutlined onClick={() => router.back()} />
-              </IconButton>
-            )}
-          </Flex>
-          <Typography textAlign="center" level="body-sm" textColor="neutral.800" flexBasis={"100%"}>
-            Welcome to builder.fi
-          </Typography>
-          <Flex basis="100%" />
-        </Flex>
         <Flex y>
           <Typography my={1} level="h3">
-            Create your key, it&apos;s free
+            Create your keys
           </Typography>
           <Flex y gap3>
-            <Typography level="body-md" textColor="neutral.600">
-              To allow others to ask you questions*, you need to create your keys. You get the first key for free (you
-              just need to pay gas fees).
+            <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
+              To allow others to ask you questions*, you need to create your keys. The first key is free (you just need
+              to pay gas fees).
             </Typography>
-            <Typography level="body-md" textColor="neutral.600">
-              This creates a market for your keys, and every time someone buys or sells them, you earn a 5% fee.
+            <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
+              Launching a key creates a market, and every time someone buys or sells your keys, you earn a 5% fee.
             </Typography>
-            <Typography level="body-xs" textColor="neutral.600">
+            <Typography level="body-xs" textColor="neutral.600" className="remove-text-transform">
               *You&apos;re under no obligation to answer questions from your key holders. Buying a key just gives them
               the right to ask a question, not to a guaranteed response.
             </Typography>
