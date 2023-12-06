@@ -107,13 +107,7 @@ export default function ChatsPage() {
         {!!mainWallet && <WalletAddress address={mainWallet} level="body-md" />}
       </Flex>
       <Flex x xc p={2} gap1>
-        <Button
-          onClick={() =>
-            window.open("https://www.sushi.com/swap/cross-chain?chainId1=8453&token1=NATIVE&swapAmount=0.01")
-          }
-        >
-          Bridge
-        </Button>
+        <Button onClick={() => window.open("https://bungee.exchange")}>Bridge</Button>
         <Button variant="soft" onClick={() => setOpenWithdraw(true)}>
           Withdraw
         </Button>
