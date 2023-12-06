@@ -26,7 +26,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     data: { questionerId: questioner.id, replierId: replier.id, questionContent: questionContent }
   });
   // if in production, push the question to farcaster
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.ENABLE_FARCASTER === "true") {
     const questionerFarcaster = await prisma.socialProfile.findUniqueOrThrow({
       where: {
         userId_type: {

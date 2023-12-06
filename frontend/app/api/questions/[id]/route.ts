@@ -1,7 +1,7 @@
 import { publishNewAnswerCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
-import { SocialProfileType, User } from "@prisma/client";
+import { SocialProfileType } from "@prisma/client";
 
 export async function PUT(req: Request, { params }: { params: { id: number } }) {
   try {
@@ -9,7 +9,10 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
     const question = await prisma.question.findUnique({ where: { id: Number(params.id) } });
     if (!question) return Response.json({ error: ERRORS.QUESTION_NOT_FOUND }, { status: 404 });
 
-    const replier = await prisma.user.findUnique({ where: { privyUserId: req.headers.get("privyUserId")! } });
+    const replier = await prisma.user.findUnique({
+      where: { privyUserId: req.headers.get("privyUserId")! },
+      include: { socialProfiles: true }
+    });
 
     if (question.replierId !== replier?.id) return Response.json({ error: ERRORS.UNAUTHORIZED }, { status: 401 });
 
@@ -21,28 +24,13 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
       }
     });
 
-    // if in production, push the question to farcaster
-    if (process.env.NODE_ENV === "production") {
-      const questionerFarcaster = await prisma.socialProfile.findUniqueOrThrow({
-        where: {
-          userId_type: {
-            userId: question.questionerId,
-            type: SocialProfileType.FARCASTER
-          }
-        }
+    if (process.env.ENABLE_FARCASTER === "true") {
+      const questioner = await prisma.user.findUnique({
+        where: { id: question.questionerId },
+        include: { socialProfiles: true }
       });
-      let questioner: User;
-      if (!questionerFarcaster) {
-        questioner = await prisma.user.findUniqueOrThrow({ where: { id: question.questionerId } });
-      }
-      const replierFarcaster = await prisma.socialProfile.findUniqueOrThrow({
-        where: {
-          userId_type: {
-            userId: question.replierId,
-            type: SocialProfileType.FARCASTER
-          }
-        }
-      });
+      const questionerFarcaster = questioner?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
+      const replierFarcaster = replier?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
       if (questionerFarcaster || replierFarcaster) {
         // if one of the two has farcaster, publish the cast
         await publishNewAnswerCast(

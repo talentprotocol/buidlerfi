@@ -1,3 +1,11 @@
+import {
+  NEW_BUILDERFI_ANSWER_CAST,
+  NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH,
+  NEW_BUILDERFI_QUESTION_CAST,
+  NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH,
+  NEW_BUILDERFI_USER_CAST,
+  NEW_BUILDERFI_USER_PARENT_CAST_HASH
+} from "@/lib/constants";
 import { NeynarAPIClient } from "@standard-crypto/farcaster-js-neynar";
 
 export const publishCast = async (text: string) => {
@@ -28,16 +36,6 @@ export const replyToCast = async (existingCastHash: string, reply: string) => {
   return publishedCast.hash;
 };
 
-const NEW_BUILDERFI_QUESTION_CAST =
-  "@{questionAuthor} just asked @{questionRecipient} a question on builder.fi!\n\n{link}";
-const NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
-
-const NEW_BUILDERFI_ANSWER_CAST = "@{replyAuthor} just answered @{questionAuthor} question on builder.fi!\n\n{link}";
-const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
-
-const NEW_BUILDERFI_USER_CAST = "@{user} just launched their keys on builder.fi!\n\n{link}";
-const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
-
 export const publishNewQuestionCast = async (questionAuthor: string, questionRecipient: string, link: string) => {
   const text = NEW_BUILDERFI_QUESTION_CAST.replace("{questionAuthor}", questionAuthor)
     .replace("{questionRecipient}", questionRecipient)
@@ -56,3 +54,5 @@ export const publishNewUserKeysCast = async (user: string, link: string) => {
   const text = NEW_BUILDERFI_USER_CAST.replace("{user}", user).replace("{link}", link);
   return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
 };
+
+export const getCastUrl = (castHash: string) => `https://warpcast.com/~/conversations/${castHash}`;

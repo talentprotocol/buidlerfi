@@ -4,16 +4,9 @@ import prisma from "@/lib/prisma";
 import { SocialProfileType } from "@prisma/client";
 
 export async function publishNewUserCast(privyUserId: string) {
-  if (process.env.NODE_ENV !== "production") {
-    const user = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
-    const userFarcaster = await prisma.socialProfile.findUniqueOrThrow({
-      where: {
-        userId_type: {
-          userId: user.id,
-          type: SocialProfileType.FARCASTER
-        }
-      }
-    });
+  if (process.env.ENABLE_FARCASTER === "true") {
+    const user = await prisma.user.findUnique({ where: { privyUserId }, include: { socialProfiles: true } });
+    const userFarcaster = user?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
     if (!userFarcaster) {
       return { error: ERRORS.USER_NOT_ON_FARCASTER };
     }
