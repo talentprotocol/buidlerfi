@@ -59,7 +59,9 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
   const sanitizedContent = useMemo(
     () =>
       question?.questionContent
-        ? sanitize(anchorme({ input: question?.questionContent, options: { attributes: { target: "_blank" } } }))
+        ? sanitize(
+            anchorme({ input: question?.questionContent, options: { attributes: { target: "_blank", truncate: 20 } } })
+          )
         : "",
     [question?.questionContent]
   );
@@ -67,7 +69,9 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
   const sanitizedReply = useMemo(
     () =>
       question?.reply
-        ? sanitize(anchorme({ input: question?.reply || "", options: { attributes: { target: "_blank" } } }))
+        ? sanitize(
+            anchorme({ input: question?.reply || "", options: { attributes: { target: "_blank", truncate: 20 } } })
+          )
         : "",
     [question?.reply]
   );

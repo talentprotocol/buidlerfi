@@ -47,7 +47,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch, onClick }) => {
               <Typography level="helper">•</Typography>
               <Typography level="body-sm">{askedOn}</Typography>
             </Flex>
-            <Flex x yc gap2>
+            <Flex x yc>
               {!question.repliedOn ? (
                 <Chip size="sm" color="neutral" variant="outlined">
                   Awaiting answer
