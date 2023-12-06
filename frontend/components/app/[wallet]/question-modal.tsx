@@ -118,7 +118,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
             {isOwnProfile && (!question.repliedOn || isEditingReply) && (
               <FullTextArea
                 placeholder={`Answer ${question.questioner.displayName} ...`}
-                avatarUrl={question.questioner.avatarUrl || undefined}
+                avatarUrl={question.replier.avatarUrl || undefined}
                 onChange={e => setReply(e.target.value)}
                 value={reply}
               />
