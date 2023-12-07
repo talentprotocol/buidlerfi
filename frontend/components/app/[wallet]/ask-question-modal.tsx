@@ -18,6 +18,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
   const { user } = useUserContext();
   const { socialData } = useProfileContext();
   const [questionContent, setQuestionContent] = useState("");
+  const [showBadQuestionLabel, setShowBadQuestionLabel] = useState(false);
   const postQuestion = usePostQuestion();
   const editQuestion = useEditQuestion();
 
@@ -35,6 +36,13 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
   const isEditMode = questionToEdit !== undefined;
 
   const sendQuestion = async () => {
+    if (!questionContent.includes("?")) {
+      setShowBadQuestionLabel(true);
+      return;
+    } else {
+      setShowBadQuestionLabel(false);
+    }
+
     if (isEditMode) {
       await editQuestion
         .mutateAsync({
@@ -87,6 +95,12 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
             value={questionContent}
           />
         </Flex>
+        {showBadQuestionLabel && (
+          <Typography color={"danger"} level="helper" paddingLeft={2} paddingRight={2}>
+            builder.fi is designed to ask thoughtful questions to other builders. Make sure you&apos;re posting a
+            question.
+          </Typography>
+        )}
         <Flex x alignSelf={"flex-end"} pb={2} pr={2}>
           <Typography color={questionContent.length > MAX_QUESTION_LENGTH ? "danger" : undefined} level="helper">
             {questionContent.length}/{MAX_QUESTION_LENGTH}
