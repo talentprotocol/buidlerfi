@@ -33,13 +33,19 @@ export const ONBOARDING_WALLET_CREATED_KEY = "onboarding-wallet-created";
 export const MIN_BALANCE_ONBOARDING = parseEther("0.001");
 
 // FARCASTER
-export const NEW_BUILDERFI_QUESTION_CAST =
+export const NEW_BUILDERFI_QUESTION_POST =
   "{questionAuthor} just asked {questionRecipient} a question on builder.fi!\n\n{link}";
 export const NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
+export const NEW_BUILDERFI_QUESTION_POST_TITLE =  "builder.fi questions & answers";
 
-export const NEW_BUILDERFI_ANSWER_CAST =
+export const NEW_BUILDERFI_ANSWER_POST =
   "{replyAuthor} just answered {questionAuthor} question on builder.fi!\n\n{link}";
 export const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
+export const NEW_BUILDERFI_ANSWER_POST_TITLE =  "builder.fi questions & answers";
 
-export const NEW_BUILDERFI_USER_CAST = "{user} just launched their keys on builder.fi!\n\n{link}";
+export const NEW_BUILDERFI_USER_POST = "{user} just launched their keys on builder.fi!\n\n{link}";
 export const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
+export const NEW_BUILDERFI_USER_POST_TITLE =  "new builder.fi keys";
+
+// TODO: replace when we have a real app id
+export const BUILDERFI_LENS_APP_ID = "builderFiLensAppId";
