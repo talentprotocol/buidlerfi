@@ -24,8 +24,6 @@ export const getNotifications = async (privyUserId: string, offset: number) => {
     skip: offset
   });
 
-  console.log(notifications);
-
   return { data: notifications };
 };
 

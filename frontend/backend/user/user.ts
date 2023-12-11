@@ -374,8 +374,6 @@ export const search = async (searchValue: string, offset: number) => {
     }
   });
 
-  console.log("search for: ", searchValue, res);
-
   return {
     data: res
   };

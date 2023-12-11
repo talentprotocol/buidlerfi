@@ -56,8 +56,6 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
     }
   };
 
-  console.log(router.searchParams);
-
   return (
     <Flex component={"main"} y grow gap2>
       <InjectTopBar withBack />
