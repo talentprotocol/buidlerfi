@@ -1,13 +1,14 @@
 "use client";
 
 import { BuilderfiNotification, NotificationEntry } from "@/components/app/notification/notificationEntry";
+import { NotificationSettingsModal } from "@/components/app/notification/notificationSettingsModal";
 import { Flex } from "@/components/shared/flex";
 import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { SettingsOutlined } from "@mui/icons-material";
 import { IconButton, Typography } from "@mui/joy";
 import { startOfDay, subDays, subMonths } from "date-fns";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const periods = ["today", "last 7 days", "last 30 days", "last year", "all time"] as const;
 export type period = (typeof periods)[number];
@@ -40,16 +41,18 @@ const sortIntoPeriods = (notifications: BuilderfiNotification[]) => {
 
 export default function NotificationPage() {
   const { notifications } = useUserContext();
+  const [isNotifSettingsOpen, setIsNotifSettingsOpen] = useState(false);
 
   const sorted = useMemo(() => sortIntoPeriods(notifications || []), [notifications]);
 
   return (
     <Flex component={"main"} y grow>
+      {isNotifSettingsOpen && <NotificationSettingsModal close={() => setIsNotifSettingsOpen(false)} />}
       <InjectTopBar
         title="notifications"
         startItem={<BackButton />}
         endItem={
-          <IconButton>
+          <IconButton onClick={() => setIsNotifSettingsOpen(true)}>
             <SettingsOutlined />
           </IconButton>
         }
