@@ -34,6 +34,7 @@ export const FullTextArea: FC<Props> = ({ avatarUrl, placeholder, value, onChang
             placeholder={placeholder}
             value={value}
             onChange={onChange}
+            className="remove-text-transform"
           />
         </Flex>
       </Flex>

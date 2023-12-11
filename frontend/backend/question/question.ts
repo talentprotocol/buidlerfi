@@ -1,19 +1,21 @@
 "use server";
 
+import { publishNewQuestionCast } from "@/lib/api/backend/farcaster";
 import { fetchHolders } from "@/lib/api/common/builderfi";
 import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
-import { Prisma, ReactionType } from "@prisma/client";
+import { shortAddress } from "@/lib/utils";
+import { Prisma, ReactionType, SocialProfileType } from "@prisma/client";
 
 export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
   }
 
-  const questioner = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
-  const replier = await prisma.user.findUniqueOrThrow({ where: { id: replierId } });
+  const questioner = await prisma.user.findUniqueOrThrow({ where: { privyUserId }, include: { socialProfiles: true } });
+  const replier = await prisma.user.findUniqueOrThrow({ where: { id: replierId }, include: { socialProfiles: true } });
 
   const replierHolders = await fetchHolders(replier.wallet);
   const found = replierHolders.find(holder => holder.holder.owner.toLowerCase() === questioner.wallet.toLowerCase());
@@ -36,7 +38,31 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
 
     return question;
   });
+  // if in production, push the question to farcaster
+  console.log("Farcaster enabled -> ", process.env.ENABLE_FARCASTER);
+  if (process.env.ENABLE_FARCASTER === "true") {
+    const questionerFarcaster = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
+    const replierFarcaster = replier.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
 
+    console.log("FOUND questioner -> ", !!questionerFarcaster);
+    console.log("FOUND replier -> ", !!replierFarcaster);
+
+    if (questionerFarcaster || replierFarcaster) {
+      const replierName = replierFarcaster?.profileName
+        ? `@${replierFarcaster?.profileName}`
+        : replier.displayName || shortAddress(replier.wallet || "");
+      const questionerName = questionerFarcaster?.profileName
+        ? `@${questionerFarcaster?.profileName}`
+        : questioner?.displayName || shortAddress(questioner?.wallet || "");
+      // if one of the two has farcaster, publish the cast
+      console.log("CASTING NEW QUESTION");
+      await publishNewQuestionCast(
+        questionerName,
+        replierName,
+        `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
+      );
+    }
+  }
   return { data: question };
 };
 

@@ -21,7 +21,13 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
   const askedOn = useMemo(() => getDifference(question?.createdAt), [question?.createdAt]);
   const router = useBetterRouter();
 
-  const sanitizedContent = useMemo(() => sanitize(anchorme(question?.questionContent)), [question?.questionContent]);
+  const sanitizedContent = useMemo(
+    () =>
+      sanitize(
+        anchorme({ input: question?.questionContent, options: { attributes: { target: "_blank" }, truncate: 20 } })
+      ),
+    [question?.questionContent]
+  );
 
   if (!question) return <></>;
 
@@ -96,7 +102,7 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
             level="body-sm"
             whiteSpace="pre-line"
           >
-            <span style={{ textTransform: "none" }} dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+            <span className="remove-text-transform" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
           </Typography>
         </Flex>
       </Flex>

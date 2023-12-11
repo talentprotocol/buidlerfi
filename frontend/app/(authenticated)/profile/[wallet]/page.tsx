@@ -60,7 +60,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   return (
     <Flex component={"main"} y grow gap2>
-      <InjectTopBar />
+      <InjectTopBar withBack />
       {hasKeys && !isOwnProfile && (
         <Flex
           x

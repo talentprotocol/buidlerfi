@@ -32,7 +32,6 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     [pathname, router]
   );
 
-  console.log(user.user?.tags);
   const handleOnboardingRedirect = useCallback(() => {
     if (user.user?.tags.length === 0 && router.searchParams.skipTags !== "1") {
       return redirect("/onboarding/tags");
@@ -60,6 +59,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   }, [user, router, supporterKeys, redirect, updateUser]);
 
   useEffect(() => {
+    if (router.searchParams.inviteCode) window.localStorage.setItem("inviteCode", router.searchParams.inviteCode);
     if (user.isLoading || updateUser.isLoading) return;
 
     // user has not logged in with privy yet so send him to the signup page

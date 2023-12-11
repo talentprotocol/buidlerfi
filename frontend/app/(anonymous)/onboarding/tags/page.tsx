@@ -37,7 +37,7 @@ export default function TagsPage() {
           <Typography my={1} level="h3">
             Choose 3 areas of expertise
           </Typography>
-          <Typography level="body-md" textColor="neutral.600">
+          <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
             Sharing knowledge on builder.fi can unlock an additional source of income for you. <br />
             What are the 3 main topics other builders can ask you questions about?
           </Typography>

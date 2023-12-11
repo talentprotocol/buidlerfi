@@ -45,14 +45,14 @@ export default function BuyKeyPage() {
             Create your keys
           </Typography>
           <Flex y gap3>
-            <Typography level="body-md" textColor="neutral.600">
+            <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
               To allow others to ask you questions*, you need to create your keys. The first key is free (you just need
               to pay gas fees).
             </Typography>
-            <Typography level="body-md" textColor="neutral.600">
+            <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
               Launching a key creates a market, and every time someone buys or sells your keys, you earn a 5% fee.
             </Typography>
-            <Typography level="body-xs" textColor="neutral.600">
+            <Typography level="body-xs" textColor="neutral.600" className="remove-text-transform">
               *You&apos;re under no obligation to answer questions from your key holders. Buying a key just gives them
               the right to ask a question, not to a guaranteed response.
             </Typography>

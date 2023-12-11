@@ -230,7 +230,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           </Typography>
           <Typography textColor={"neutral.600"} level="body-sm">
             <>
-              {contractData.data?.totalNumberOfBuilders}/{batchCount()} builders joined
+              {contractData.data?.totalNumberOfBuilders}/{batchCount()} keys launched
             </>
           </Typography>
         </div>

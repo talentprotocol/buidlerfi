@@ -7,13 +7,26 @@ import { WalletAddress } from "@/components/shared/wallet-address";
 import { WithdrawDialog } from "@/components/shared/withdraw-modal";
 import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetCurrentUser } from "@/hooks/useUserApi";
-import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
-import { KeyOutlined, TransitEnterexitOutlined } from "@mui/icons-material";
-import { Button, Card, CircularProgress, Divider, Typography, useTheme } from "@mui/joy";
+import { formatToDisplayString, shortAddress, tryParseBigInt } from "@/lib/utils";
+import { Close, CopyAll, KeyOutlined, TransitEnterexitOutlined } from "@mui/icons-material";
+import {
+  Button,
+  Card,
+  CircularProgress,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Modal,
+  ModalDialog,
+  Tooltip,
+  Typography,
+  useTheme
+} from "@mui/joy";
 import { useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { Transak, TransakConfig } from "@transak/transak-sdk";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 
 export default function ChatsPage() {
@@ -21,6 +34,7 @@ export default function ChatsPage() {
   const { setActiveWallet } = usePrivyWagmi();
   const { wallets } = useWallets();
   const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
+  const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
@@ -44,7 +58,7 @@ export default function ChatsPage() {
 
   const [portfolio, tradingFees] = useMemo(() => {
     if (!allHolding || !builderFiData) return [BigInt(0), BigInt(0)];
-    const holding = allHolding.reduce((prev, curr) => prev + tryParseBigInt(curr.owner.buyPrice), BigInt(0));
+    const holding = allHolding.reduce((prev, curr) => prev + tryParseBigInt(curr.owner.sellPrice), BigInt(0));
     const tradingFees = builderFiData.shareParticipants.find(
       user => user.owner == mainWallet?.toLowerCase()
     )?.tradingFeesAmount;
@@ -91,11 +105,13 @@ export default function ChatsPage() {
           <Typography level="h4">{formatToDisplayString(portfolio, 18)} ETH</Typography>
           <Typography level="body-sm">Portfolio value</Typography>
         </Flex>
-        <Flex grow component={Card} sx={{ gap: 0 }}>
-          <TransitEnterexitOutlined htmlColor={theme.palette.primary[300]} />
-          <Typography level="h4">{formatToDisplayString(tradingFees, 18)} ETH</Typography>
-          <Typography level="body-sm">Fees earned</Typography>
-        </Flex>
+        <Tooltip title="every time one of your keys is bought or sold, we charge a 7.5% fee (5% goes to you, 2.5% goes to the protocol)">
+          <Flex grow component={Card} sx={{ gap: 0 }}>
+            <TransitEnterexitOutlined htmlColor={theme.palette.primary[300]} />
+            <Typography level="h4">{formatToDisplayString(tradingFees, 18)} ETH</Typography>
+            <Typography level="body-sm">Fees earned</Typography>
+          </Flex>
+        </Tooltip>
       </Flex>
       <Flex y xc p={2}>
         <Typography textAlign={"center"} level="body-sm">
@@ -107,13 +123,7 @@ export default function ChatsPage() {
         {!!mainWallet && <WalletAddress address={mainWallet} level="body-md" />}
       </Flex>
       <Flex x xc p={2} gap1>
-        <Button
-          onClick={() =>
-            window.open("https://www.sushi.com/swap/cross-chain?chainId1=8453&token1=NATIVE&swapAmount=0.01")
-          }
-        >
-          Bridge
-        </Button>
+        <Button onClick={() => setShowBridgeModal(true)}>Bridge</Button>
         <Button variant="soft" onClick={() => setOpenWithdraw(true)}>
           Withdraw
         </Button>
@@ -143,6 +153,51 @@ export default function ChatsPage() {
           ))
         )}
       </Flex>
+      <Modal open={showBridgeModal} onClose={() => setShowBridgeModal(false)}>
+        <ModalDialog minWidth="400px">
+          <Flex x xsb yc>
+            <DialogTitle>Bridge crypto from another chain to builder.fi wallet</DialogTitle>
+            <IconButton onClick={() => setShowBridgeModal(false)}>
+              <Close />
+            </IconButton>
+          </Flex>
+          <Flex y gap2>
+            <Typography level="body-md" textColor="neutral.600">
+              <strong>1.</strong> Copy your builder.fi wallet address <strong>{shortAddress(mainWallet || "")}</strong>{" "}
+              <IconButton
+                onClick={() => {
+                  navigator.clipboard.writeText(mainWallet || "");
+                  toast.success("Copied to clipboard");
+                }}
+              >
+                <CopyAll />
+              </IconButton>
+            </Typography>
+            <Typography level="body-md" textColor="neutral.600">
+              <strong>2.</strong> Go to{" "}
+              <a href="https://bungee.exchange" target="_blank">
+                bungee.exchange
+              </a>
+              , on desktop or mobile
+            </Typography>
+            <Typography level="body-md" textColor="neutral.600">
+              <strong>3.</strong> Connect a wallet with funds
+            </Typography>
+            <Typography level="body-md" textColor="neutral.600">
+              <strong>4.</strong> Click on “+ Add Address” and paste your builder.fi address
+            </Typography>
+            <Typography level="body-md" textColor="neutral.600">
+              <strong>5.</strong> Pick your preferred source chain and token to bridge
+            </Typography>
+            <Typography level="body-md" textColor="neutral.600">
+              <strong>6.</strong> Confirm the transaction in your wallet
+            </Typography>
+            <Button sx={{ marginTop: 2 }} onClick={() => setShowBridgeModal(false)}>
+              Done
+            </Button>
+          </Flex>
+        </ModalDialog>
+      </Modal>
     </Flex>
   );
 }

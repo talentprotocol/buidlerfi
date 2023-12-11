@@ -15,7 +15,7 @@ export default function CreateWalletPage() {
       <Flex y gap={3}>
         <Flex y>
           <Typography level="h3">Your builder.fi wallet</Typography>
-          <Typography level="body-md" textColor="neutral.600">
+          <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
             builder.fi will now create a new self-custodial wallet for you, to make the app experience much smoother
             after the onboarding.
           </Typography>

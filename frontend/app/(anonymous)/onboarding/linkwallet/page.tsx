@@ -25,7 +25,7 @@ export default function CreateWallet() {
           <Typography my={1} level="h3">
             Import your web3 socials
           </Typography>
-          <Typography level="body-md" textColor="neutral.600">
+          <Typography level="body-md" textColor="neutral.600" className="remove-text-transform">
             Connect your main web3 wallet to verify your onchain identity and import your profile info. This also makes
             it easier for your Farcaster, Lens and Talent Protocol friends to discover and trade your keys.
           </Typography>

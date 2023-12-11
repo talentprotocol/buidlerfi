@@ -1,4 +1,5 @@
 import { useUserContext } from "@/contexts/userContext";
+import { IN_USE_CHAIN_ID } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
 import { ConnectedWallet, useConnectWallet } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
@@ -18,18 +19,26 @@ export const useLinkExternalWallet = () => {
   const { connectWallet } = useConnectWallet({
     onSuccess: async wallet => {
       //STEP2 new connected wallet is assigned to state, and challenge is generated -> will trigger STEP3
-      if (!wallet) {
-        setIsLoading(false);
-        return;
-      }
+      try {
+        if (!wallet) {
+          setIsLoading(false);
+          return;
+        }
 
-      setWalletToSign(wallet as ConnectedWallet);
-      const challenge = await generateChallenge.mutateAsync(wallet.address);
-      if (!challenge) {
+        if (wallet.chainId !== `eip155:${IN_USE_CHAIN_ID}`) {
+          await wallet.switchChain(IN_USE_CHAIN_ID);
+        }
+
+        setWalletToSign(wallet as ConnectedWallet);
+        const challenge = await generateChallenge.mutateAsync(wallet.address);
+        if (!challenge) {
+          setIsLoading(false);
+          return;
+        }
+        setChallenge(challenge);
+      } catch {
         setIsLoading(false);
-        return;
       }
-      setChallenge(challenge);
     },
     onError: () => setIsLoading(false)
   });

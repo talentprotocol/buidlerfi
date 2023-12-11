@@ -1,11 +1,13 @@
-/* force lowercase for builder.fi */
-.MuiButton-root,
-.MuiTypography-h1,
-.MuiTypography-h2,
-.MuiTypography-h3,
-.MuiInput-input,
-.MuiFormHelperText-root {
-	text-transform: lowercase;
+* {
+	text-transform: lowercase !important;
+}
+
+.remove-text-transform {
+	text-transform: none !important;
+}
+
+.remove-text-transform > * {
+	text-transform: none !important;
 }
 
 @keyframes revealKey {

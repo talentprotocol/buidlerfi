@@ -62,7 +62,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
     if (user?.socialWallet) {
       await refreshData.mutateAsync();
       await refetchAll();
-      toast.success("Profile info imported from Talent Protocol/Farcaster/Lens/ENS");
+      toast.success("Profile info imported from your web3 social profiles");
     } else {
       linkWallet(refetchAll);
     }

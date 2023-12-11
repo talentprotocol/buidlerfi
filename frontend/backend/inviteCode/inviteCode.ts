@@ -31,3 +31,24 @@ export const createAdminInviteCodes = async (count: number, activateOnCreation?:
 
   return { data: res };
 };
+
+export const getInvitedUsers = async (privyUserId: string) => {
+  const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
+
+  const inviteCodes = await prisma.inviteCode.findMany({
+    where: {
+      userId: currentUser.id
+    }
+  });
+
+  const invitedUsers = await prisma.user.findMany({
+    where: {
+      invitedById: { in: inviteCodes.map(i => i.id) }
+    },
+    include: {
+      socialProfiles: true
+    }
+  });
+
+  return { data: invitedUsers };
+};
