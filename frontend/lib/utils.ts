@@ -89,7 +89,7 @@ export const ipfsToURL = (ipfsAddress?: string): string => {
   return "https://cloudflare-ipfs.com/" + ipfsAddress.replace("://", "/");
 };
 
-export function convertParamsToString(searchParams: Record<string, string | undefined>) {
+export function convertParamsToString(searchParams: Record<string, string | number | boolean | undefined>) {
   return Object.entries(searchParams)
     .filter(([key, value]) => key && value !== undefined)
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`)
@@ -99,6 +99,7 @@ export function convertParamsToString(searchParams: Record<string, string | unde
 export const getDifference = (date?: Date) => {
   if (!date) return "";
   const minutes = differenceInMinutes(new Date(), date);
+  if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h`;

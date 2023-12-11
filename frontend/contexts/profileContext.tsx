@@ -101,7 +101,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     data: questions,
     refetch: refetchQuestions,
     isLoading: isQuestionsLoading
-  } = useGetQuestions(socialData.userId);
+  } = useGetQuestions({ where: { replierId: socialData.userId } });
   const { data: holders, isLoading, refetch } = useGetHolders(wallet as `0x${string}`);
 
   const [supporterNumber, ownedKeysCount] = useMemo(() => {

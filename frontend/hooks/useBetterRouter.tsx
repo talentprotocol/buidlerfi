@@ -1,10 +1,10 @@
 import { convertParamsToString } from "@/lib/utils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 interface CustomUrl {
   pathname?: string;
-  searchParams?: Record<string, string | undefined>;
+  searchParams?: Record<string, string | number | boolean | undefined>;
 }
 
 interface BetterRouterOptions {
@@ -17,7 +17,19 @@ export const useBetterRouter = () => {
   const pathname = usePathname();
   const nextRouter = useRouter();
 
-  const searchParamsDict = Object.fromEntries(searchParams.entries());
+  const searchParamsDict = useMemo(() => {
+    const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
+    Object.keys(entries).forEach(key => {
+      if (entries[key] === undefined) {
+        delete entries[key];
+        return;
+      }
+
+      //Try to parse int and booleans
+      entries[key] = JSON.parse(entries[key]);
+    });
+    return entries as Record<string, string | number | boolean>;
+  }, [searchParams]);
 
   const formatUrl = useCallback(
     (url: CustomUrl | string, options?: BetterRouterOptions) => {

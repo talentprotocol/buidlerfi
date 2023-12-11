@@ -14,6 +14,7 @@ import {
   linkNewWallet,
   refreshAllUsersProfile,
   refreshCurrentUserProfile,
+  search,
   updateUser
 } from "./user";
 
@@ -64,4 +65,8 @@ export const getRecommendedUserSA = (wallet: string, options: ServerActionOption
 
 export const getRecommendedUsersSA = (address: string, options: ServerActionOptions) => {
   return serverActionWrapper(() => getRecommendedUsers(address), options);
+};
+
+export const searchSA = (searchValue: string, options: ServerActionOptions) => {
+  return serverActionWrapper(() => search(searchValue, options.pagination?.offset || 0), options);
 };

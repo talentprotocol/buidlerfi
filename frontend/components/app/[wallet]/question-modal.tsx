@@ -94,7 +94,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
             </Typography>
             <Typography level="helper">{format(question.createdAt, "MMM dd, yyyy")}</Typography>
             <Flex x yc xsb>
-              <Reactions question={question} refetch={refetch} />
+              <Reactions questionId={question.id} />
               <IconButton
                 onClick={e => {
                   e.preventDefault();
@@ -163,9 +163,7 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                 }
               />
             )}
-            {question.repliedOn && hasKeys && !isEditingReply && (
-              <Reactions question={question} type="like" refetch={refetch} />
-            )}
+            {question.repliedOn && hasKeys && !isEditingReply && <Reactions questionId={question.id} type="like" />}
           </Flex>
         </Flex>
       </ModalDialog>

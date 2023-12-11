@@ -1,58 +1,80 @@
-import { isEVMAddress } from "@/lib/utils";
-import { Link as JoyLink } from "@mui/joy";
-import { usePrivy } from "@privy-io/react-auth";
+import { HomeIcon } from "@/components/icons/home";
+import { SearchIcon } from "@/components/icons/search";
+import { useUserContext } from "@/contexts/userContext";
+import { Add } from "@mui/icons-material";
+import { Badge, Button, Link as JoyLink } from "@mui/joy";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
+import { KeyIcon } from "../icons/key";
+import { NotificationIcon } from "../icons/notification";
 import { Flex } from "./flex";
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { user } = usePrivy();
-  const address = (user?.wallet?.address as `0x${string}`) || "0x0";
+  const { notifications } = useUserContext();
 
   const paths = useMemo(
     () => [
       {
         path: "/home",
-        check: (pathname: string) => pathname === "/home",
-        label: "Explore"
+        label: <HomeIcon fontSize="xl2" />
       },
       {
-        path: "/chats",
-        check: (pathname: string) => pathname === "/chats",
-        label: "Keys"
+        path: "/explore",
+        label: <SearchIcon fontSize="xl2" />
       },
       {
-        path: "/" + address,
-        check: (pathname: string) => isEVMAddress(pathname.slice(1)),
-        label: "Profile"
+        path: "/question",
+        label: (
+          <Button
+            sx={{
+              borderRadius: "24px",
+              height: "40px",
+              width: "40px",
+              boxShadow: "0px 0px 16px 0px rgba(11, 110, 249, 0.40)"
+            }}
+          >
+            <Add />
+          </Button>
+        )
       },
       {
-        path: "/invite",
-        check: (pathname: string) => pathname === "/invite",
-        label: "Points"
+        path: "/wallet",
+        label: <KeyIcon fontSize="xl2" />
+      },
+      {
+        path: "/notifications",
+        label: (
+          <Badge badgeContent={notifications?.filter(notification => !notification.isRead).length}>
+            <NotificationIcon fontSize="xl2" />
+          </Badge>
+        )
       }
     ],
-    [address]
+    [notifications]
   );
 
   return (
     <Flex
       x
       yc
-      xsa
+      xsb
       component="nav"
       grow
+      px={2}
+      py={1}
       sx={{
-        margin: "auto",
+        width: "calc(min(100vw, 500px) - 32px)",
         position: "fixed",
         bottom: 0,
         left: "50%",
-        width: "100%",
-        maxWidth: "500px",
+        transform: "translate(-50%)",
         backgroundColor: "white",
-        transform: "translateX(-50%)"
+        borderTop: "1px solid var(--neutral-outlined-border, #CDD7E1)",
+        borderLeft: "1px solid var(--neutral-outlined-border, #CDD7E1)",
+        borderRight: "1px solid var(--neutral-outlined-border, #CDD7E1)",
+        backdropFilter: "blur(10px)"
       }}
     >
       {paths.map(item => (
@@ -66,9 +88,7 @@ export function BottomNav() {
             alignItems: "center",
             justifyContent: "center",
             textDecoration: "none",
-            height: "64px",
-            width: "100%",
-            backgroundColor: item.check(pathname) ? "neutral.100" : "background",
+            color: pathname === item.path ? "primary.main" : "text.icon",
             ":hover": {
               textDecoration: "none"
             }

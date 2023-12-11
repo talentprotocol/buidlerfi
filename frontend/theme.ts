@@ -7,6 +7,9 @@ declare module "@mui/joy/styles" {
   interface TypographySystemOverrides {
     helper: true;
   }
+  interface AvatarPropsSizeOverrides {
+    xs: true;
+  }
 }
 
 const theme = extendTheme({
@@ -35,7 +38,8 @@ const theme = extendTheme({
   typography: {
     helper: {
       color: "var(--joy-palette-neutral-600)",
-      fontSize: "var(--joy-fontSize-sm)"
+      fontSize: "var(--joy-fontSize-sm)",
+      fontFamily: `var(--joy-fontFamily-body, "Inter", var(--joy-fontFamily-fallback, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"))`
     }
   },
   components: {

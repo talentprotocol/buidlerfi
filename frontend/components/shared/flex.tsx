@@ -40,6 +40,7 @@ interface Props extends BoxProps {
   fullwidth?: boolean;
   basis?: string;
   pointer?: boolean;
+  hover?: boolean;
 }
 
 const Flex = forwardRef<HTMLDivElement, Props>(
@@ -69,6 +70,7 @@ const Flex = forwardRef<HTMLDivElement, Props>(
       loading,
       basis,
       pointer,
+      hover,
       ...rest
     },
     ref
@@ -126,6 +128,13 @@ const Flex = forwardRef<HTMLDivElement, Props>(
 
     if (pointer) {
       style.cursor = "pointer";
+    }
+
+    if (hover) {
+      // @ts-expect-error this exists on MUI sx Props
+      style["&:hover"] = {
+        backgroundColor: "neutral.100"
+      };
     }
 
     return (

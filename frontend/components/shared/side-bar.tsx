@@ -9,16 +9,16 @@ import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
   Cable,
-  Help,
+  ChatOutlined,
+  LiveHelpOutlined,
   Logout,
   PersonOutlineOutlined,
   Refresh,
   SearchOutlined,
-  WalletOutlined
+  SettingsOutlined
 } from "@mui/icons-material";
 import {
   Avatar,
-  Button,
   CircularProgress,
   Divider,
   Drawer,
@@ -27,17 +27,16 @@ import {
   ListItem,
   ListItemButton,
   Skeleton,
-  Typography,
-  useTheme
+  Typography
 } from "@mui/joy";
 import { ListItemIcon, ListItemText } from "@mui/material";
 import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
-import { ParachuteIcon } from "../icons/parachute";
+import { PointsIcon } from "../icons/points";
 import { AddToHomePage } from "./add-to-home-page";
 import { Flex } from "./flex";
 import { WalletAddress } from "./wallet-address";
@@ -49,19 +48,18 @@ interface Props {
 
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user, isLoading, refetch } = useUserContext();
-  const theme = useTheme();
+  const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
   const contractData = useGetContractData();
   const refreshData = useRefreshCurrentUser();
   const { data: balance } = useBalance({
     address
   });
   const router = useRouter();
-  const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
 
   const { logout } = usePrivy();
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await logout().then(() => router.push("/signup"));
-  };
+  }, [logout, router]);
 
   const navItems = useMemo(
     () => [
@@ -78,8 +76,15 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       },
       {
         text: "Points",
-        icon: <ParachuteIcon />,
+        icon: <PointsIcon />,
         path: "/invite"
+      },
+      {
+        text: "Settings",
+        icon: <SettingsOutlined />,
+        path: "/settings",
+        //Hidden for now as we don't have a settings page
+        hidden: true
       },
       {
         text: "Admin",
@@ -88,12 +93,31 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         hidden: !user?.isAdmin
       },
       {
+        type: "divider"
+      },
+      {
+        text: "Faq",
+        icon: <LiveHelpOutlined />,
+        onClick: () => window.open(FAQ_LINK)
+      },
+      {
+        text: "Feedback",
+        icon: <ChatOutlined />,
+        onClick: () => window.open("https://t.me/+7FGAfQx66Z8xOThk")
+      },
+      {
         text: "Import Web3 Socials",
         icon: isLoadingLinkWallet ? <CircularProgress size="sm" /> : <Cable />,
-        onClick: () => linkWallet()
+        onClick: () => linkWallet(),
+        hidden: !!user?.socialWallet
+      },
+      {
+        text: "Log out",
+        icon: <Logout />,
+        onClick: () => handleLogout()
       }
     ],
-    [address, isLoadingLinkWallet, linkWallet, user?.isAdmin]
+    [address, handleLogout, isLoadingLinkWallet, linkWallet, user?.isAdmin, user?.socialWallet]
   );
 
   const batchNumber = () => {
@@ -159,13 +183,13 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           </Flex>
           {/* Only display if user has a display name */}
           <Flex x yc gap={0.5} height="20px">
-            <Typography level="body-sm" startDecorator={<WalletOutlined fontSize="small" />}>
-              <Skeleton loading={isLoading}>{formatToDisplayString(balance?.value)} ETH</Skeleton>
+            <Typography level="body-sm">
+              <Skeleton loading={isLoading}>{formatToDisplayString(balance?.value, 18, 4)} ETH</Skeleton>
             </Typography>
             {user.displayName && (
               <>
                 •
-                <WalletAddress address={address!} level="body-sm" removeCopyButton={true} />
+                <WalletAddress address={address!} level="body-sm" />
               </>
             )}
           </Flex>
@@ -174,45 +198,27 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       <List>
         {navItems
           .filter(item => !item.hidden)
-          .map(item => (
-            <ListItem key={item.text}>
-              <ListItemButton
-                onClick={() => {
-                  if (item.path) {
-                    router.push(item.path);
-                    setOpen(false);
-                  } else if (item.onClick) {
-                    item.onClick();
-                  }
-                }}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        <Divider sx={{ my: 1 }} />
-        <ListItem>
-          <ListItemButton onClick={() => window.open(FAQ_LINK)}>
-            <ListItemIcon>
-              <Help />
-            </ListItemIcon>
-            <ListItemText primary="FAQ" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton
-            onClick={() => {
-              handleLogout();
-              setOpen(false);
-            }}
-          >
-            <ListItemIcon>
-              <Logout sx={{ color: theme.palette.danger[500] + " !important" }} />
-            </ListItemIcon>
-            <ListItemText sx={{ ".MuiTypography-root": { color: theme.palette.danger[500] } }} primary="Log out" />
-          </ListItemButton>
-        </ListItem>
+          .map(item =>
+            item.type === "divider" ? (
+              <Divider key={"divider"} sx={{ my: 1 }} />
+            ) : (
+              <ListItem key={item.text}>
+                <ListItemButton
+                  onClick={() => {
+                    if (item.path) {
+                      router.push(item.path);
+                      setOpen(false);
+                    } else if (item.onClick) {
+                      item.onClick();
+                    }
+                  }}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </ListItem>
+            )
+          )}
       </List>
       <Flex y xs p={2} gap3>
         <div>
@@ -229,11 +235,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           </Typography>
         </div>
         <AddToHomePage />
-        <Flex x gap2>
-          <Button variant="soft" onClick={() => window.open("https://t.me/+7FGAfQx66Z8xOThk")}>
-            Give Feedback
-          </Button>
-        </Flex>
         <Image src={LOGO} alt="App logo" height={40} width={120} />
       </Flex>
     </Drawer>

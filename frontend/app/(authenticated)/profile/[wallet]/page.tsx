@@ -6,8 +6,10 @@ import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
 import { Flex } from "@/components/shared/flex";
 import { HolderItem } from "@/components/shared/holder-item";
 import { PageMessage } from "@/components/shared/page-message";
+import { InjectTopBar } from "@/components/shared/top-bar";
 import { UserItemFromAddress } from "@/components/shared/user-item";
 import { useProfileContext } from "@/contexts/profileContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { isEVMAddress, tryParseBigInt } from "@/lib/utils";
 import { Chat, Lock } from "@mui/icons-material";
@@ -23,11 +25,10 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
     socialData,
     isOwnProfile
   } = useProfileContext();
-
+  const router = useBetterRouter();
   const holdings = useGetHoldings(params.wallet);
 
   const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
-  const [isAskingQuestion, setIsAskingQuestion] = useState(false);
 
   const isValidWallet = useMemo(() => {
     return isEVMAddress(params.wallet);
@@ -55,8 +56,11 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
     }
   };
 
+  console.log(router.searchParams);
+
   return (
     <Flex component={"main"} y grow gap2>
+      <InjectTopBar />
       {hasKeys && !isOwnProfile && (
         <Flex
           x
@@ -70,18 +74,25 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
             left: "50%",
             transform: "translateX(-50%)",
             top: 0,
-            bottom: 0,
+            bottom: "56px",
             mb: 2,
             pr: 4
           }}
         >
-          <Button sx={{ pointerEvents: "auto" }} size="lg" onClick={() => setIsAskingQuestion(true)}>
+          <Button
+            sx={{ pointerEvents: "auto" }}
+            size="lg"
+            onClick={() => router.replace({ searchParams: { ask: true } })}
+          >
             Ask
           </Button>
         </Flex>
       )}
-      {isAskingQuestion && (
-        <AskQuestionModal refetch={() => refetchProfileInfo()} close={() => setIsAskingQuestion(false)} />
+      {router.searchParams.ask && (
+        <AskQuestionModal
+          refetch={() => refetchProfileInfo()}
+          close={() => router.replace({ searchParams: { ask: undefined } })}
+        />
       )}
       {buyModalState !== "closed" && (
         <TradeKeyModal

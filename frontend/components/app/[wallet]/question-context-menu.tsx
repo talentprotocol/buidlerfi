@@ -1,7 +1,7 @@
 import { OpenDialog } from "@/contexts/DialogContainer";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
-import { useDeleteQuestion, useGetQuestion, useGetQuestions } from "@/hooks/useQuestionsApi";
+import { useDeleteQuestion, useGetHotQuestions, useGetQuestion, useGetQuestions } from "@/hooks/useQuestionsApi";
 import { DeleteOutline, EditOutlined, FileUploadOutlined, MoreHoriz } from "@mui/icons-material";
 import { CircularProgress, Dropdown, ListItemDecorator, Menu, MenuButton, MenuItem } from "@mui/joy";
 import { usePathname } from "next/navigation";
@@ -12,14 +12,15 @@ import { AskQuestionModal } from "./ask-question-modal";
 interface Props {
   question:
     | NonNullable<ReturnType<typeof useGetQuestions>["data"]>[number]
-    | NonNullable<ReturnType<typeof useGetQuestion>["data"]>;
+    | NonNullable<ReturnType<typeof useGetQuestion>["data"]>
+    | NonNullable<ReturnType<typeof useGetHotQuestions>["data"]>[number];
 }
 
 export const QuestionContextMenu: FC<Props> = ({ question }) => {
   const { refetch } = useProfileContext();
   const { user } = useUserContext();
   const deleteQuestion = useDeleteQuestion();
-  const isEditable = question.questionerId === user?.id && !question.repliedOn;
+  const isEditable = question.questioner.id === user?.id && !question.repliedOn;
   const pathname = usePathname();
   const [isEditQuestion, setIsEditQuestion] = useState(false);
 

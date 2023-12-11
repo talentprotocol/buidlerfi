@@ -1,3 +1,4 @@
+import { useGetNotifications } from "@/hooks/useNotificationApi";
 import { usePrevious } from "@/hooks/usePrevious";
 import { useGetCurrentUser } from "@/hooks/useUserApi";
 import { User as PrivyUser, usePrivy, useWallets } from "@privy-io/react-auth";
@@ -16,6 +17,9 @@ interface UserContextType {
   refetchBalance: () => Promise<unknown>;
   balance?: bigint;
   balanceIsLoading: boolean;
+  notifications?: ReturnType<typeof useGetNotifications>["data"];
+  refetchNotifications: () => Promise<unknown>;
+  fetchNotificationNextPage: () => Promise<unknown>;
 }
 const userContext = createContext<UserContextType>({
   user: undefined,
@@ -25,7 +29,10 @@ const userContext = createContext<UserContextType>({
   address: undefined,
   refetch: () => Promise.resolve(undefined),
   refetchBalance: () => Promise.resolve(),
-  balanceIsLoading: false
+  balanceIsLoading: false,
+  notifications: [],
+  refetchNotifications: () => Promise.resolve(),
+  fetchNotificationNextPage: () => Promise.resolve()
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -40,6 +47,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { setActiveWallet } = usePrivyWagmi();
   const [socialWallet, setSocialWallet] = useState<string | undefined>(undefined);
   const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
+  const {
+    data: notifications,
+    refetch: refetchNotifications,
+    fetchNextPage: fetchNotificationNextPage
+  } = useGetNotifications();
+  console.log(notifications);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
@@ -50,7 +63,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setMainWallet(user.data?.wallet);
     }
-  }, [setActiveWallet, wallets]);
+  }, [setActiveWallet, user.data?.wallet, wallets]);
 
   //Get the non embed wallet
   useEffect(() => {
@@ -77,7 +90,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       refetch: user.refetch,
       balance: balance?.value,
       refetchBalance,
-      balanceIsLoading
+      balanceIsLoading,
+      notifications,
+      refetchNotifications,
+      fetchNotificationNextPage
     }),
     [
       balance?.value,
@@ -90,7 +106,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       user.data,
       user.isLoading,
       user.refetch,
-      mainWallet
+      mainWallet,
+      notifications,
+      refetchNotifications,
+      fetchNotificationNextPage
     ]
   );
 

@@ -5,13 +5,16 @@ import {
   deleteReactionSA,
   deleteReplySA,
   editQuestionSA,
+  getHotQuestionsSA,
   getQuestionSA,
-  getQuestionsSA
+  getQuestionsSA,
+  getReactionsSA
 } from "@/backend/question/questionServerActions";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
-import { ReactionType } from "@prisma/client";
+import { Prisma, ReactionType } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
+import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
 import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
 
@@ -21,8 +24,11 @@ export function useGetQuestion(id: number, queryOptions?: SimpleUseQueryOptions)
   });
 }
 
-export const useGetQuestions = (userId?: number) => {
-  return useQuerySA(["useGetQuestions", userId], options => getQuestionsSA(userId!, options), { enabled: !!userId });
+export const useGetQuestions = (args: Prisma.QuestionFindManyArgs, queryOptions?: SimpleUseQueryOptions) => {
+  return useInfiniteQuerySA(["useGetQuestions", args], options => getQuestionsSA(args, options), {
+    enabled: !!args,
+    ...queryOptions
+  });
 };
 
 export const usePostQuestion = () => {
@@ -67,4 +73,12 @@ export const useEditQuestion = () => {
 
 export const useDeleteReply = () => {
   return useMutationSA((options, questionId: number) => deleteReplySA(questionId, options));
+};
+
+export const useGetHotQuestions = (queryOptions: SimpleUseQueryOptions) => {
+  return useInfiniteQuerySA(["useGetHotQuestions"], options => getHotQuestionsSA(options), queryOptions);
+};
+
+export const useGetReactions = (questionId: number, type: "like" | "upvote") => {
+  return useQuerySA(["useGetReactions", questionId, type], options => getReactionsSA(questionId, type, options));
 };

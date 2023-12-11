@@ -1,28 +1,27 @@
 "use client";
+import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
-import { DEFAULT_PROFILE_PICTURE, LOGO_SMALL } from "@/lib/assets";
-import { Menu } from "@mui/icons-material";
-import { Avatar, IconButton, Skeleton } from "@mui/joy";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { FC, useRef } from "react";
+import { ArrowBackOutlined } from "@mui/icons-material";
+import { Avatar, IconButton, Typography } from "@mui/joy";
+import { usePathname, useRouter } from "next/navigation";
+import { FC, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Flex } from "./flex";
+import { Sidebar } from "./side-bar";
 
 interface Props {
-  setOpen: (isOpen: boolean) => void;
+  children?: React.ReactNode;
 }
 
-export const Topbar: FC<Props> = ({ setOpen }) => {
-  const router = useRouter();
-  const anchor = useRef<HTMLDivElement>(null);
-  const { user, address, isLoading } = useUserContext();
-
+export const Topbar: FC<Props> = ({ children }) => {
+  const { topBarRef } = useLayoutContext();
   return (
     <Flex
       x
       xsb
       yc
-      p={1}
+      py={1}
+      px={2}
       sx={{
         backgroundColor: theme => theme.palette.background.body,
         position: "sticky",
@@ -30,32 +29,95 @@ export const Topbar: FC<Props> = ({ setOpen }) => {
         zIndex: 2
       }}
       borderBottom={"1px solid var(--neutral-outlined-border, #CDD7E1)"}
+      ref={topBarRef}
     >
-      <Flex basis="100%">
-        <IconButton onClick={() => setOpen(true)}>
-          <Menu />
-        </IconButton>
-      </Flex>
-      <Image
-        style={{ cursor: "pointer", flexBasis: "100%" }}
-        onClick={() => router.push("/home")}
-        alt="App logo"
-        src={LOGO_SMALL}
-        height={40}
-        width={40}
-      />
-
-      <Flex basis="100%" y xe px={1}>
-        <Avatar
-          size="md"
-          ref={anchor}
-          src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
-          sx={{ position: "relative", cursor: "pointer" }}
-          onClick={() => router.push("/profile/" + address)}
-        >
-          <Skeleton loading={isLoading} />
-        </Avatar>
-      </Flex>
+      {children}
     </Flex>
   );
+};
+
+interface InjectProps {
+  startItem?: React.ReactNode;
+  endItem?: React.ReactNode;
+  centerItem?: React.ReactNode;
+  fullItem?: React.ReactNode;
+  title?: string;
+  withBack?: boolean;
+}
+
+export const BackButton = () => {
+  const router = useRouter();
+  return (
+    <IconButton onClick={() => router.back()}>
+      <ArrowBackOutlined />
+    </IconButton>
+  );
+};
+
+export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, fullItem, title, withBack }) => {
+  const anchor = useRef<HTMLDivElement>(null);
+  const { user, isLoading } = useUserContext();
+  const { topBarRef } = useLayoutContext();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
+
+  if (!topBarRef?.current) return <></>;
+
+  if (fullItem) return createPortal(fullItem, topBarRef.current);
+  else if (startItem || endItem || centerItem) {
+    return createPortal(
+      <>
+        <Flex x xs yc basis="100%">
+          {startItem}
+        </Flex>
+        <Flex x xc yc basis="100%">
+          {centerItem ? (
+            centerItem
+          ) : title ? (
+            <Typography level="title-md" textAlign="center">
+              {title}
+            </Typography>
+          ) : (
+            <></>
+          )}
+        </Flex>
+        <Flex x xe yc basis="100%">
+          {endItem}
+        </Flex>
+      </>,
+      topBarRef.current
+    );
+  }
+
+  const defaultItem = (
+    <>
+      <Sidebar isOpen={isSidebarOpen} setOpen={setIsSidebarOpen} />
+      <Flex basis="100%">
+        {withBack ? (
+          <BackButton />
+        ) : (
+          <Avatar
+            size="md"
+            ref={anchor}
+            alt={user?.displayName?.[0]}
+            src={user?.avatarUrl || undefined}
+            sx={{ position: "relative", cursor: "pointer" }}
+            onClick={() => setIsSidebarOpen(true)}
+          />
+        )}
+      </Flex>
+
+      <Flex basis="100%" x xc yc>
+        <Typography textTransform="lowercase" level="title-md" textAlign="center">
+          {title || pathname.split("/")[1]}
+        </Typography>
+      </Flex>
+
+      <Flex basis="100%" y xe px={1}>
+        {/* <ToggleOnOutlined /> */}
+      </Flex>
+    </>
+  );
+
+  return createPortal(defaultItem, topBarRef.current);
 };

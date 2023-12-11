@@ -1,6 +1,7 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
 import { PageMessage } from "@/components/shared/page-message";
+import { InjectTopBar } from "@/components/shared/top-bar";
 import { UserItemFromAddress } from "@/components/shared/user-item";
 import { WalletAddress } from "@/components/shared/wallet-address";
 import { WithdrawDialog } from "@/components/shared/withdraw-modal";
@@ -83,6 +84,7 @@ export default function ChatsPage() {
           close={() => setOpenWithdraw(false)}
         />
       )}
+      <InjectTopBar title="Wallet" withBack />
       <Flex x gap2 ys px={2} mt={2}>
         <Flex grow component={Card} sx={{ gap: 0 }}>
           <KeyOutlined htmlColor={theme.palette.primary[300]} />

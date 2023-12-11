@@ -11,6 +11,7 @@ async function main() {
         try {
           const res = await prisma.user.create({
             data: {
+              id: Number(user.id),
               wallet: user.wallet,
               isAdmin: false,
               isActive: true,

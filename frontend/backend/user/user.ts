@@ -1,5 +1,6 @@
 "use server";
 
+import { PAGINATION_LIMIT } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
@@ -136,6 +137,15 @@ export const createUser = async (privyUserId: string, inviteCode: string) => {
     });
 
     return newUser;
+  });
+
+  await prisma.notification.create({
+    data: {
+      targetUserId: existingCode.userId,
+      sourceUserId: newUser.id,
+      type: "USER_INVITED",
+      referenceId: newUser.id
+    }
   });
 
   return { data: newUser };
@@ -330,4 +340,33 @@ export const getRecommendedUser = async (wallet: string) => {
   if (!res) return { error: ERRORS.USER_NOT_FOUND };
 
   return { data: { ...res, avatarUrl: sanitizeAvatarUrl(res.avatarUrl || "") } };
+};
+
+export const search = async (searchValue: string, offset: number) => {
+  const res = await prisma.user.findMany({
+    skip: offset,
+    take: PAGINATION_LIMIT,
+    where: {
+      isActive: true,
+      hasFinishedOnboarding: true,
+      socialProfiles: {
+        some: {
+          profileName: {
+            contains: searchValue,
+            mode: "insensitive"
+          }
+        }
+      }
+    },
+    include: {
+      socialProfiles: true,
+      tags: true
+    }
+  });
+
+  console.log("search for: ", searchValue, res);
+
+  return {
+    data: res
+  };
 };

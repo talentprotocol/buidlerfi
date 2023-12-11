@@ -82,11 +82,8 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
               return (
                 <QuestionEntry
                   key={question.id}
-                  socialData={socialData}
                   question={question}
-                  isOwnChat={isOwnProfile}
-                  ownsKeys={hasKeys}
-                  refetch={refetch}
+                  type={"profile"}
                   onClick={() => router.replace({ searchParams: { question: question.id.toString() } })}
                 />
               );

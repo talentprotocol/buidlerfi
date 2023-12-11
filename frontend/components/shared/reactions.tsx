@@ -1,5 +1,5 @@
 import { useUserContext } from "@/contexts/userContext";
-import { useAddReaction, useDeleteReaction, useGetQuestion } from "@/hooks/useQuestionsApi";
+import { useAddReaction, useDeleteReaction, useGetReactions } from "@/hooks/useQuestionsApi";
 import { ArrowDownward, ArrowUpward, Favorite, FavoriteBorder } from "@mui/icons-material";
 import { IconButton, Typography, useTheme } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
@@ -8,46 +8,46 @@ import { FC, MouseEvent, useMemo } from "react";
 import { Flex } from "./flex";
 
 interface Props {
-  question: ReturnType<typeof useGetQuestion>["data"];
-  refetch: () => void;
+  questionId: number;
   type?: "like" | "upvote";
   sx?: SxProps;
 }
 
-export const Reactions: FC<Props> = ({ question, refetch, type, sx }) => {
+export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
   const { user } = useUserContext();
   const theme = useTheme();
 
+  const { data: reactions, refetch: refetchReactions } = useGetReactions(questionId, type);
   const deleteReaction = useDeleteReaction();
   const addReaction = useAddReaction();
 
   const myVote = useMemo(() => {
-    const found = question?.reactions.find(react => react.userId === user?.id && react.questionId);
+    const found = reactions?.find(react => react.userId === user?.id && react.questionId);
     if (found) return found.reactionType;
-  }, [question?.reactions, user?.id]);
+  }, [reactions, user?.id]);
 
   const upvotes = useMemo(
-    () => question?.reactions.reduce((prev, curr) => (curr.reactionType === "UPVOTE" ? prev + 1 : prev - 1), 0),
-    [question?.reactions]
+    () => reactions?.reduce((prev, curr) => (curr.reactionType === "UPVOTE" ? prev + 1 : prev - 1), 0),
+    [reactions]
   );
 
   const hasLikedReply = useMemo(() => {
-    return !!question?.replyReactions.find(
-      react => react.userId === user?.id && react.reactionType === "LIKE" && react.replyId === question?.id
+    return !!reactions?.find(
+      react => react.userId === user?.id && react.reactionType === "LIKE" && react.replyId === questionId
     );
-  }, [question?.id, question?.replyReactions, user?.id]);
+  }, [questionId, reactions, user?.id]);
 
   const handleAddReaction = async (e: MouseEvent<HTMLAnchorElement>, reaction: ReactionType) => {
     e.preventDefault();
     e.stopPropagation();
     if (myVote === reaction || (reaction === "LIKE" && hasLikedReply))
-      await deleteReaction.mutateAsync({ questionId: question!.id, reactionType: reaction });
-    else await addReaction.mutateAsync({ questionId: question!.id, reactionType: reaction });
+      await deleteReaction.mutateAsync({ questionId: questionId, reactionType: reaction });
+    else await addReaction.mutateAsync({ questionId: questionId, reactionType: reaction });
 
-    refetch();
+    refetchReactions();
   };
 
-  const likes = useMemo(() => question?.replyReactions.length, [question?.replyReactions.length]);
+  const likes = useMemo(() => reactions?.length, [reactions?.length]);
 
   if (type === "like") {
     return (

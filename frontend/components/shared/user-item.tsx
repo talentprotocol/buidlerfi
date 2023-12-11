@@ -5,6 +5,7 @@ import { formatToDisplayString, shortAddress } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Skeleton, Typography, TypographySystem } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
+import { Tag } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { Flex } from "./flex";
@@ -14,6 +15,8 @@ interface CommonProps {
   py?: number;
   isButton?: boolean;
   nameLevel?: keyof TypographySystem;
+  onClick?: () => void;
+  hideChevron?: boolean;
 }
 
 interface UserItemProps extends CommonProps {
@@ -26,6 +29,7 @@ interface UserItemProps extends CommonProps {
     numberOfHolders?: string | number;
     questions?: number;
     replies?: number;
+    tags?: Tag[];
   };
 }
 
@@ -34,8 +38,8 @@ export const UserItem: FC<UserItemProps> = ({ user, ...props }) => {
     <UserItemInner
       {...user}
       {...props}
-      buyPrice={BigInt(user.buyPrice || "0")}
-      numberOfHolders={Number(user.numberOfHolders)}
+      buyPrice={user.buyPrice ? BigInt(user.buyPrice) : undefined}
+      numberOfHolders={user.numberOfHolders !== undefined ? Number(user.numberOfHolders) : undefined}
     />
   );
 };
@@ -61,6 +65,7 @@ interface UserItemInnerProps extends CommonProps {
   numberOfHolders?: number;
   questions?: number;
   replies?: number;
+  tags?: Tag[];
 }
 
 const UserItemInner: FC<UserItemInnerProps> = ({
@@ -68,6 +73,7 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   avatarUrl: avatar,
   displayName: name,
   isLoading = false,
+  tags,
   buyPrice,
   numberOfHolders,
   questions,
@@ -75,8 +81,11 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   px = 2,
   py = 1,
   isButton = true,
-  nameLevel = "body-sm"
+  nameLevel = "body-sm",
+  onClick,
+  hideChevron = false
 }) => {
+  console.log(tags);
   const router = useRouter();
 
   const pluralize = (word: string, amount: number) => {
@@ -105,6 +114,12 @@ const UserItemInner: FC<UserItemInnerProps> = ({
           {formatToDisplayString(buyPrice, 18)} ETH
         </Typography>
       );
+    } else if (tags !== undefined) {
+      return (
+        <Typography textColor={"neutral.600"} level="body-sm">
+          {tags.map(tag => tag.name).join(", ")}
+        </Typography>
+      );
     }
     return null;
   };
@@ -116,11 +131,9 @@ const UserItemInner: FC<UserItemInnerProps> = ({
       yc
       py={py}
       px={px}
-      sx={{
-        cursor: isButton ? "pointer" : undefined,
-        ":hover": { backgroundColor: isButton ? "neutral.100" : undefined }
-      }}
-      onClick={isButton ? () => router.push(`/profile/${address}`) : undefined}
+      pointer={isButton}
+      hover={isButton}
+      onClick={onClick ? () => onClick() : isButton ? () => router.push(`/profile/${address}`) : undefined}
     >
       <Flex x yc gap2>
         <Avatar
@@ -143,7 +156,7 @@ const UserItemInner: FC<UserItemInnerProps> = ({
           {renderDescription()}
         </Flex>
       </Flex>
-      {isButton && <ChevronRight />}
+      {isButton && !hideChevron && <ChevronRight />}
     </Flex>
   );
 };

@@ -25,16 +25,19 @@ model User {
   hasFinishedOnboarding       Boolean   @default(false)
   lastRecommendationsSyncedAt DateTime?
 
-  questions      Question[]      @relation("questioner")
-  replies        Question[]      @relation("replier")
-  inviteCodes    InviteCode[]
-  comments       Comment[]
-  invitedBy      InviteCode?     @relation("invitation", fields: [invitedById], references: [id])
-  invitedById    Int?
-  points         Point[]
-  reactions      Reaction[]
-  socialProfiles SocialProfile[]
-  tags           Tag[]
+  questions            Question[]                @relation("questioner")
+  replies              Question[]                @relation("replier")
+  inviteCodes          InviteCode[]
+  comments             Comment[]
+  invitedBy            InviteCode?               @relation("invitation", fields: [invitedById], references: [id])
+  invitedById          Int?
+  points               Point[]
+  reactions            Reaction[]
+  socialProfiles       SocialProfile[]
+  tags                 Tag[]
+  notifications        Notification[]            @relation("targetUser")
+  sourceNotifications  Notification[]
+  notificationSettings UserNotificationSetting[]
 
   id               Int                @id @default(autoincrement())
   createdAt        DateTime           @default(now())
@@ -182,6 +185,51 @@ model SigningChallenge {
 model Tag {
   name  String @unique @db.VarChar(255)
   users User[]
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum NotificationType {
+  ASKED_QUESTION
+  REPLIED_YOUR_QUESTION
+  REPLIED_OTHER_QUESTION
+  QUESTION_UPVOTED
+  QUESTION_DOWNVOTED
+  REPLY_REACTION
+  KEYBUY
+  KEYSELL
+  USER_INVITED
+  FRIEND_JOINED
+  POINTS_DROP
+  NEW_INVITE_CODE
+  SYSTEM
+}
+
+model Notification {
+  targetUser   User    @relation(fields: [targetUserId], references: [id], name: "targetUser")
+  targetUserId Int
+  sourceUser   User?   @relation(fields: [sourceUserId], references: [id])
+  sourceUserId Int?
+  description  String?
+
+  isRead Boolean          @default(false)
+  readAt DateTime?
+  type   NotificationType
+
+  referenceId Int?
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserNotificationSetting {
+  user             User             @relation(fields: [userId], references: [id])
+  userId           Int
+  notificationType NotificationType
+  isDisabled       Boolean          @default(false)
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
