@@ -343,14 +343,30 @@ export const search = async (searchValue: string, offset: number) => {
     where: {
       isActive: true,
       hasFinishedOnboarding: true,
-      socialProfiles: {
-        some: {
-          profileName: {
+      OR: [
+        {
+          socialProfiles: {
+            some: {
+              profileName: {
+                contains: searchValue,
+                mode: "insensitive"
+              }
+            }
+          }
+        },
+        {
+          wallet: {
+            contains: searchValue,
+            mode: "insensitive"
+          }
+        },
+        {
+          socialWallet: {
             contains: searchValue,
             mode: "insensitive"
           }
         }
-      }
+      ]
     },
     include: {
       socialProfiles: true,
