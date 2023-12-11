@@ -8,6 +8,7 @@ import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
+import { sendNotification } from "../notification/notification";
 import { updateRecommendations } from "../socialProfile/recommendation";
 import { updateUserSocialProfiles } from "../socialProfile/socialProfile";
 
@@ -139,14 +140,7 @@ export const createUser = async (privyUserId: string, inviteCode: string) => {
     return newUser;
   });
 
-  await prisma.notification.create({
-    data: {
-      targetUserId: existingCode.userId,
-      sourceUserId: newUser.id,
-      type: "USER_INVITED",
-      referenceId: newUser.id
-    }
-  });
+  await sendNotification(existingCode.userId, newUser.id, "USER_INVITED", newUser.id);
 
   return { data: newUser };
 };

@@ -15,7 +15,7 @@ const NotificationTypeToLabel = {
   [NotificationType.QUESTION_UPVOTED]: "Someone upvotes your question",
   [NotificationType.QUESTION_DOWNVOTED]: "Someone downvotes your question",
   [NotificationType.REPLY_REACTION]: "Someone likes your reply",
-  [NotificationType.FRIEND_JOINED]: "Someone joins builder.fi",
+  [NotificationType.FRIEND_JOINED]: "Your friend joins builder.fi",
   [NotificationType.KEYBUY]: "Someone buys your key",
   [NotificationType.KEYSELL]: "Someone sells your key",
   [NotificationType.REPLIED_OTHER_QUESTION]: "Someone answers a question you follow",

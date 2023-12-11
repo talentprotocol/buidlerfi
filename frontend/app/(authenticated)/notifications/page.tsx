@@ -8,7 +8,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { SettingsOutlined } from "@mui/icons-material";
 import { IconButton, Typography } from "@mui/joy";
 import { startOfDay, subDays, subMonths } from "date-fns";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const periods = ["today", "last 7 days", "last 30 days", "last year", "all time"] as const;
 export type period = (typeof periods)[number];
@@ -40,10 +40,14 @@ const sortIntoPeriods = (notifications: BuilderfiNotification[]) => {
 };
 
 export default function NotificationPage() {
-  const { notifications } = useUserContext();
+  const { notifications, refetchNotifications } = useUserContext();
   const [isNotifSettingsOpen, setIsNotifSettingsOpen] = useState(false);
 
   const sorted = useMemo(() => sortIntoPeriods(notifications || []), [notifications]);
+
+  useEffect(() => {
+    refetchNotifications();
+  }, [refetchNotifications]);
 
   return (
     <Flex component={"main"} y grow>

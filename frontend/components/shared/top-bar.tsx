@@ -9,12 +9,9 @@ import { createPortal } from "react-dom";
 import { Flex } from "./flex";
 import { Sidebar } from "./side-bar";
 
-interface Props {
-  children?: React.ReactNode;
-}
-
-export const Topbar: FC<Props> = ({ children }) => {
+export const Topbar = () => {
   const { topBarRef } = useLayoutContext();
+
   return (
     <Flex
       x
@@ -30,9 +27,7 @@ export const Topbar: FC<Props> = ({ children }) => {
       }}
       borderBottom={"1px solid var(--neutral-outlined-border, #CDD7E1)"}
       ref={topBarRef}
-    >
-      {children}
-    </Flex>
+    ></Flex>
   );
 };
 
@@ -56,7 +51,7 @@ export const BackButton = () => {
 
 export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, fullItem, title, withBack }) => {
   const anchor = useRef<HTMLDivElement>(null);
-  const { user, isLoading } = useUserContext();
+  const { user } = useUserContext();
   const { topBarRef } = useLayoutContext();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();

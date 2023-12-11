@@ -2,7 +2,8 @@
 
 import { PAGINATION_LIMIT } from "@/lib/constants";
 import prisma from "@/lib/prisma";
-import { NotificationType } from "@prisma/client";
+import { NotificationType, Prisma, PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const getNotifications = async (privyUserId: string, offset: number) => {
   const currentUser = await prisma.user.findUniqueOrThrow({
@@ -95,4 +96,40 @@ export const updateNotificationSettings = async (privyUserId: string, settings: 
   });
 
   return { data: updatedSettings };
+};
+
+export const sendNotification = async (
+  targetUserId: number,
+  sourceUserId: number,
+  type: NotificationType,
+  referenceId?: number,
+  tx?: Omit<
+    PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+    "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+  >
+) => {
+  const prismaClient = tx ?? prisma;
+  const targetUser = await prismaClient.user.findUniqueOrThrow({
+    where: {
+      id: targetUserId
+    },
+    include: {
+      notificationSettings: true
+    }
+  });
+
+  if (targetUser.notificationSettings.find(setting => setting.notificationType === type)?.isDisabled) {
+    return { data: null };
+  }
+
+  const notification = await prismaClient.notification.create({
+    data: {
+      targetUserId: targetUserId,
+      sourceUserId: sourceUserId,
+      type: type,
+      referenceId: referenceId
+    }
+  });
+
+  return { data: notification.id };
 };

@@ -1,3 +1,4 @@
+import { sendNotification } from "@/backend/notification/notification";
 import { publishNewAnswerCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
@@ -25,14 +26,7 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
           repliedOn: new Date()
         }
       });
-      tx.notification.create({
-        data: {
-          targetUserId: question.questionerId,
-          sourceUserId: replier.id,
-          type: "REPLIED_YOUR_QUESTION",
-          referenceId: question.id
-        }
-      });
+      await sendNotification(question.questionerId, replier.id, "REPLIED_YOUR_QUESTION", question.id, tx);
       return question;
     });
 

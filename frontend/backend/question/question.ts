@@ -8,6 +8,7 @@ import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
 import { shortAddress } from "@/lib/utils";
 import { Prisma, ReactionType, SocialProfileType } from "@prisma/client";
+import { sendNotification } from "../notification/notification";
 
 export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
@@ -27,14 +28,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     const question = await tx.question.create({
       data: { questionerId: questioner.id, replierId: replier.id, questionContent: questionContent }
     });
-    await tx.notification.create({
-      data: {
-        type: "ASKED_QUESTION",
-        referenceId: question.id,
-        targetUserId: replier.id,
-        sourceUserId: questioner.id
-      }
-    });
+    await sendNotification(replier.id, questioner.id, "ASKED_QUESTION", question.id, tx);
 
     return question;
   });
@@ -320,14 +314,13 @@ export const addReaction = async (privyUserId: string, questionId: number, react
     //Only send notification when not reacting to own question/
     const target = isLike ? question.replierId : question.questionerId;
     if (target !== user.id) {
-      await tx.notification.create({
-        data: {
-          type: isLike ? "REPLY_REACTION" : reactionType === "DOWNVOTE" ? "QUESTION_DOWNVOTED" : "QUESTION_UPVOTED",
-          referenceId: question.id,
-          targetUserId: target,
-          sourceUserId: user.id
-        }
-      });
+      await sendNotification(
+        target,
+        user.id,
+        isLike ? "REPLY_REACTION" : reactionType === "DOWNVOTE" ? "QUESTION_DOWNVOTED" : "QUESTION_UPVOTED",
+        question.id,
+        tx
+      );
     }
 
     return res;
