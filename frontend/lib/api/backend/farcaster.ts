@@ -3,6 +3,7 @@ import {
   NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH,
   NEW_BUILDERFI_QUESTION_CAST,
   NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH,
+  NEW_BUILDERFI_QUESTION_REPLY_CAST,
   NEW_BUILDERFI_USER_CAST,
   NEW_BUILDERFI_USER_PARENT_CAST_HASH
 } from "@/lib/constants";
@@ -53,6 +54,11 @@ export const publishNewAnswerCast = async (replyAuthor: string, questionAuthor: 
 export const publishNewUserKeysCast = async (user: string, link: string) => {
   const text = NEW_BUILDERFI_USER_CAST.replace("{user}", user).replace("{link}", link);
   return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
+};
+
+export const replyToNewQuestionCast = async (castHash: string, link: string) => {
+  const text = `@${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
+  return replyToCast(castHash, text);
 };
 
 export const getCastUrl = (castHash: string) => `https://warpcast.com/~/conversations/${castHash}`;
