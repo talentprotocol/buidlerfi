@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/farcaster",
+      "path": "/api/cron/farcaster",
       "schedule": "*/1 * * * *"
     }
   ]

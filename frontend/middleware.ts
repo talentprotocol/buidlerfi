@@ -7,9 +7,22 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0yFanm3yTbCe4Z4KM9yi/IGZf+ugrj+rn82e/guPcFly
 
 export default async function middleware(req: NextRequest) {
   if (!req.nextUrl.pathname.includes("/api/")) return NextResponse.next();
+
   try {
     const verificationKey = await jose.importSPKI(SPKI, "ES256");
     const authToken = req.headers.get("authorization")?.replace("Bearer ", "");
+
+    if (req.nextUrl.pathname.includes("/api/cron/")) {
+      // authenticate cron jobs
+      if (authToken !== process.env.CRON_SECRET) {
+        return new Response("Unauthorized", {
+          status: 401
+        });
+      } else {
+        return NextResponse.next();
+      }
+    }
+
     const payload = authToken
       ? await jose.jwtVerify(authToken, verificationKey, {
           issuer: "privy.io",
