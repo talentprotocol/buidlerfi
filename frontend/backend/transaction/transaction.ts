@@ -1,8 +1,8 @@
 "use server";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { IN_USE_CHAIN_ID } from "@/lib/constants";
+import { BUIILDER_FI_V1_EVENT_SIGNATURE, BUILDERFI_CONTRACT, IN_USE_CHAIN_ID } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-import { createPublicClient, decodeEventLog, http } from "viem";
+import { createPublicClient, decodeEventLog, http, parseAbiItem } from "viem";
 import { base, baseGoerli } from "viem/chains";
 
 export const storeTransaction = async (privyUserId: string, hash: `0x${string}`) => {
@@ -86,4 +86,35 @@ export const storeTransaction = async (privyUserId: string, hash: `0x${string}`)
   }
 
   return { data: hash };
+};
+
+export const processAnyPendingTransactions = async (privyUserId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      privyUserId: privyUserId
+    }
+  });
+
+  if (!user?.isAdmin) {
+    return { data: null };
+  }
+
+  const client = createPublicClient({
+    chain: process.env.NODE_ENV === "production" ? base : baseGoerli,
+    transport: http(process.env.INFURA_API_KEY)
+  });
+
+  const logs = await client.getLogs({
+    address: BUILDERFI_CONTRACT.address,
+    event: parseAbiItem(BUIILDER_FI_V1_EVENT_SIGNATURE),
+    fromBlock: BUILDERFI_CONTRACT.startBlock,
+    strict: true
+  });
+
+  for await (const log of logs) {
+    console.log("Processing log: ", log);
+  }
+
+  console.log("end");
+  return { data: null };
 };
