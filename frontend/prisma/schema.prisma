@@ -42,6 +42,8 @@ model User {
   SigningChallenge SigningChallenge[]
   recommendedTo    RecommendedUser[]  @relation("recommendationTarget")
   recommendedUsers RecommendedUser[]  @relation("recommendationSource")
+  keysBought       Key[]              @relation("owner")
+  keysOfSelf       Key[]              @relation("holder")
 }
 
 enum SocialProfileType {
@@ -184,6 +186,37 @@ model Tag {
   users User[]
 
   id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Transaction {
+  id Int @id @default(autoincrement())
+
+  hash    String @unique
+  chainId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  key       Key[]
+}
+
+model Key {
+  id Int @id @default(autoincrement())
+
+  holder        User?       @relation(fields: [holderId], references: [id], name: "holder")
+  holderId      Int?
+  owner         User?       @relation(fields: [ownerId], references: [id], name: "owner")
+  ownerId       Int?
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  transactionId Int         @unique
+  amount        BigInt
+  ethCost       BigInt?
+  protocolFee   BigInt?
+  ownerFee      BigInt?
+  block         BigInt
+  chainId       Int
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -3,6 +3,7 @@ frontend/.env
 .idea
 todo.md
 frontend/.env.dev
+frontend/.env.production
 dumps/*
 frontend/public/sw.js
 frontend/public/sw.js.map
