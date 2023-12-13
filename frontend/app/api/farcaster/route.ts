@@ -5,6 +5,7 @@ import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { CastWithInteractions as CastWithInteractionsV1 } from "@neynar/nodejs-sdk/build/neynar-api/v1";
 import { CastWithInteractions as CastWithInteractionsV2 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { SocialProfileType } from "@prisma/client";
+import { OpenAI } from "openai";
 
 export const GET = async () => {
   const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY as string);
@@ -36,7 +37,7 @@ export const GET = async () => {
 
 const getQuestionsFromNotifications = async (
   notifications: CastWithInteractionsV2[]
-): { questionerUsername: string; recipientUsername: string; questionContent: string; castHash: string }[] => {
+): Promise<{ questionerUsername: string; recipientUsername: string; questionContent: string; castHash: string }[]> => {
   const parsedNotifications = notifications
     .map(notification => ({
       authorUsername: notification.author.username,
@@ -59,6 +60,56 @@ const getQuestionsFromNotifications = async (
   // recipientUsername is mentionedProfile.username
   // questionContent is text, but we need to ask OpenAI to extract just the question from the text
   // castHash is notification.hash
+
+  const prompt = `Given a list of casts, for each cast extract the questions without modifying the text in any way. Persist the order of the questions. Returns a JSON array of objects with the following property: "question".
+    This is an example of a list of casts: 
+    
+    Casts: 
+      - "Hey @builderfi, what do you think about @elonmusk? @buidlerfibot". 
+      - "Hey @orbulo, what are the most important projects in web3 <> AI? @buidlerfibot".
+
+    Your result:
+      [{ "question": "what do you think about @elonmusk?" }, { "question": "what are the most important projects in web3 <> AI?" }]
+    
+    These are the casts you need to extract the question from:
+    ${parsedNotifications.map(n => `- "${n.text}"`).join("\n")}
+  `;
+
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY as string });
+
+  const { choices } = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo-1106",
+    messages: [
+      {
+        content: prompt,
+        role: "user"
+      }
+    ],
+    n: 1
+  });
+
+  if (choices.length === 0) {
+    throw new Error("error while extracting questions from casts: no choices from OpenAI");
+  }
+
+  const jsonArrayString = choices[0].message.content;
+
+  if (!jsonArrayString) {
+    throw new Error("error while extracting questions from casts: no jsonArrayString from OpenAI");
+  }
+
+  try {
+    const questions = JSON.parse(jsonArrayString);
+
+    return parsedNotifications.map((notification, i) => ({
+      questionContent: questions[i].question,
+      questionerUsername: notification.authorUsername,
+      recipientUsername: notification.mentionedProfiles[0].username,
+      castHash: notification.castHash
+    }));
+  } catch (error) {
+    throw new Error(`error while parsing questions from casts: ${error}`);
+  }
 };
 
 const prepareQuestion = async (
