@@ -1,5 +1,5 @@
 import {
-  replyToNewQuestionCast,
+  replyToNewQuestionCastSuccess,
   replyToNewQuestionErrorNoUser,
   replyToNewQuestionErrorNotKeyHolder
 } from "@/lib/api/backend/farcaster";
@@ -116,7 +116,7 @@ const prepareQuestion = async (
       replierId: questionRecipient.userId
     }
   });
-  await replyToNewQuestionCast(
+  await replyToNewQuestionCastSuccess(
     questionCastHash,
     `https://app.builder.fi/profile/${questionRecipient.user.wallet}?question=${newQuestion.id}`
   );
