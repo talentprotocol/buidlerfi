@@ -9,40 +9,29 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { UserItemFromAddress } from "@/components/shared/user-item";
 import { WalletAddress } from "@/components/shared/wallet-address";
 import { WithdrawDialog } from "@/components/shared/withdraw-modal";
+import { useUserContext } from "@/contexts/userContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
-import { useGetCurrentUser } from "@/hooks/useUserApi";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
 import { ArrowDownwardOutlined, ArrowUpwardOutlined, KeyOutlined } from "@mui/icons-material";
 import { Button, DialogTitle, Divider, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
-import { useWallets } from "@privy-io/react-auth";
-import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { Transak, TransakConfig } from "@transak/transak-sdk";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useBalance } from "wagmi";
 
 export default function ChatsPage() {
-  const user = useGetCurrentUser();
-  const { setActiveWallet } = usePrivyWagmi();
-  const { wallets } = useWallets();
-  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
+  const { user } = useUserContext();
   const [fundModalType, setFundModalType] = useState<"deposit" | "transfer" | "bridge" | "none">("none");
 
-  //Ensure the active wallet is the embedded wallet from Privy
-  useEffect(() => {
-    const found = wallets.find(wal => wal.connectorType === "embedded");
-    if (found) {
-      setActiveWallet(found);
-      setMainWallet(found.address);
-    } else {
-      setMainWallet(user.data?.wallet);
-    }
-  }, [setActiveWallet, wallets]);
+  const router = useBetterRouter();
+
+  const mainWallet = user?.wallet;
 
   const { data: builderFiData, isLoading } = useBuilderFIData();
   const { data: balance, refetch: refetchBalance } = useBalance({
     address: mainWallet as `0x${string}`,
-    enabled: mainWallet !== "0x0"
+    enabled: !!mainWallet
   });
   const { data: allHolding } = useGetHoldings(mainWallet as `0x${string}`);
   const [openWithdraw, setOpenWithdraw] = useState<boolean>(false);
@@ -115,6 +104,7 @@ export default function ChatsPage() {
           fullWidth
           size="lg"
           sx={{ borderRadius: "5px 5px 0 0", display: "flex", justifyContent: "space-between" }}
+          onClick={() => router.push("/wallet/portfolio")}
         >
           <Typography level="title-md">Portfolio value</Typography>
           <Typography fontWeight={300} level="body-sm">
@@ -128,6 +118,7 @@ export default function ChatsPage() {
           fullWidth
           size="lg"
           sx={{ borderRadius: "0 0 5px 5px", display: "flex", justifyContent: "space-between" }}
+          onClick={() => router.push("/wallet/fees")}
         >
           <Typography level="title-md">Fees earned</Typography>
           <Typography fontWeight={300} level="body-sm">

@@ -14,6 +14,11 @@ export function BottomNav() {
   const pathname = usePathname();
   const { notifications } = useUserContext();
 
+  const unreadNotifsCount = useMemo(
+    () => notifications?.filter(notification => !notification.isRead).length,
+    [notifications]
+  );
+
   const paths = useMemo(
     () => [
       {
@@ -46,13 +51,13 @@ export function BottomNav() {
       {
         path: "/notifications",
         label: (
-          <Badge badgeContent={notifications?.filter(notification => !notification.isRead).length}>
+          <Badge invisible={unreadNotifsCount === 0} badgeContent={unreadNotifsCount}>
             <NotificationIcon fontSize="xl2" />
           </Badge>
         )
       }
     ],
-    [notifications]
+    [unreadNotifsCount]
   );
 
   return (

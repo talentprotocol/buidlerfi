@@ -2,6 +2,7 @@
 import { AuthRoute } from "@/components/app/auth-route";
 import { Flex } from "@/components/shared/flex";
 import { DialogContainer } from "@/contexts/DialogContainer";
+import { GlobalContextProvider } from "@/contexts/globalContext";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
 import theme from "@/theme";
@@ -90,9 +91,11 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
-          <UserProvider>
-            <AuthRoute>{children}</AuthRoute>
-          </UserProvider>
+          <GlobalContextProvider>
+            <UserProvider>
+              <AuthRoute>{children}</AuthRoute>
+            </UserProvider>
+          </GlobalContextProvider>
         </PrivyWagmiConnector>
       </PrivyProvider>
     </Flex>

@@ -7,8 +7,8 @@ export const shortAddress = (address: string) => {
   return `${address.toLowerCase().slice(0, 6)}...${address.toLowerCase().slice(-4)}`;
 };
 
-export const formatEth = (eth?: bigint) => {
-  return `${formatUnits(eth || BigInt(0), 18)}`;
+export const formatEth = (eth?: bigint, decimals = 18) => {
+  return `${formatUnits(eth || BigInt(0), decimals)}`;
 };
 
 export const encodeQueryData = (data: Record<string, string>) => {
@@ -25,8 +25,8 @@ export const tryParseBigInt = (value?: string | bigint | number) => {
   else return BigInt(value);
 };
 
-export const toEthNumber = (value?: string | bigint | number) => {
-  return Number(formatEth(tryParseBigInt(value)));
+export const toEthNumber = (value?: string | bigint | number, decimals = 18) => {
+  return Number(formatEth(tryParseBigInt(value), decimals));
 };
 
 export const formatToDisplayString = (value?: string | bigint | number, decimals = 18, significantDigits = 6) => {

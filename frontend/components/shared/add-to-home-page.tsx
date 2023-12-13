@@ -1,22 +1,10 @@
 import { Flex } from "@/components/shared/flex";
 import { Close, IosShare } from "@mui/icons-material";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
-import { useMemo, useState } from "react";
-
-interface Navigator extends globalThis.Navigator {
-  standalone?: boolean;
-}
+import { useState } from "react";
 
 export function AddToHomePage() {
   const [instructionsOpen, setInstructionsOpen] = useState(false);
-
-  const isInstalled = useMemo(() => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    const { standalone } = navigator as Navigator;
-    return document.referrer.startsWith("android-app://") || standalone || isStandalone;
-  }, []);
-
-  if (isInstalled) return null;
 
   return (
     <>

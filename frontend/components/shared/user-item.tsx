@@ -88,7 +88,6 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   onClick,
   hideChevron = false
 }) => {
-  console.log(tags);
   const router = useRouter();
 
   const pluralize = (word: string, amount: number) => {

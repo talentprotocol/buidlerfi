@@ -52,7 +52,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     refetch: refetchNotifications,
     fetchNextPage: fetchNotificationNextPage
   } = useGetNotifications();
-  console.log(notifications);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {

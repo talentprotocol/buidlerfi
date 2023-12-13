@@ -3,14 +3,14 @@ import { SvgIcon, SvgIconProps } from "@mui/joy";
 export const HomeIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props}>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
         <path
-          d="M21.6623 9.28792L12.0031 2L2.33507 9.28792C2.1352 9.47236 2.01502 9.72738 2 9.99893V21.1281C2.0007 21.3584 2.09251 21.5791 2.25536 21.742C2.41822 21.9048 2.6389 21.9966 2.86922 21.9973H8.66578V17.334C8.66578 16.45 9.01692 15.6023 9.64196 14.9772C10.267 14.3522 11.1147 14.0011 11.9987 14.0011C12.8826 14.0011 13.7303 14.3522 14.3554 14.9772C14.9804 15.6023 15.3316 16.45 15.3316 17.334V22H21.1272C21.3576 21.9993 21.5784 21.9075 21.7414 21.7447C21.9044 21.5819 21.9964 21.3612 21.9973 21.1308V9.99893C21.9819 9.72748 21.8618 9.47258 21.6623 9.28792Z"
           stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.5"
+          d="M21.662 9.288L12.003 2 2.335 9.288c-.2.184-.32.44-.335.71v11.13a.872.872 0 00.87.87h5.796v-4.664a3.333 3.333 0 116.666 0V22h5.795a.873.873 0 00.87-.87V10a1.05 1.05 0 00-.335-.711z"
+        ></path>
       </svg>
     </SvgIcon>
   );
