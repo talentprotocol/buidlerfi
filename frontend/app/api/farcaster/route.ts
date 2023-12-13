@@ -19,15 +19,15 @@ export const GET = async () => {
   const { result } = await client.fetchMentionAndReplyNotifications(BUILDERFI_FARCASTER_FID, {
     limit: 150
   });
-  const publishedBeforeDate = await getLastProcessedMentionTimestamp();
-  const publishedBefore = publishedBeforeDate ? publishedBeforeDate.getTime() : Date.now() - 1000 * 60 * 3;
+  const lastProcessedMentionDate = await getLastProcessedMentionTimestamp();
+  const lastProcessedMentionTimestamp = lastProcessedMentionDate ? lastProcessedMentionDate.getTime() : Date.now() - 1000 * 60 * 3;
 
   const mentionNotifications = result.notifications?.filter(
     n =>
       // notifications that are mentions
       n.type === "cast-mention" &&
       // notifications that have been published after the last time we checked
-      parseInt(n.timestamp, 10) > publishedBefore &&
+      parseInt(n.timestamp, 10) > lastProcessedMentionTimestamp &&
       // notifications that have only one mention (the recipient of the question)
       n.mentionedProfiles?.filter(p => p.fid !== BUILDERFI_FARCASTER_FID)?.length === 1
   );
