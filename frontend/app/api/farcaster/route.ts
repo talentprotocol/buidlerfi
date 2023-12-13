@@ -64,21 +64,15 @@ const getQuestionsFromNotifications = async (
     // cause we want casts that mention only builder.fi and one other user
     .filter(n => n.mentionedProfiles.length === 1);
 
-  // TODO: integrate with OpenAI here
-  // authorUsername is questionerUsername
-  // recipientUsername is mentionedProfile.username
-  // questionContent is text, but we need to ask OpenAI to extract just the question from the text
-  // castHash is notification.hash
-
   const prompt = `Given a list of casts, for each cast extract the questions without modifying the text in any way. Persist the order of the questions. Returns a JSON array of objects with the following property: "question".
     This is an example of a list of casts: 
     
     Casts: 
-      - "Hey @builderfi, what do you think about @elonmusk? @buidlerfibot". 
-      - "Hey @orbulo, what are the most important projects in web3 <> AI? @buidlerfibot".
+      - "Hey @builderfi, what do you think about elon musk? @buidlerfi". 
+      - "Hey @orbulo, what are the most important projects in web3 <> AI? @buidlerfi".
 
     Your result:
-      [{ "question": "what do you think about @elonmusk?" }, { "question": "what are the most important projects in web3 <> AI?" }]
+      [{ "question": "what do you think about elon musk?" }, { "question": "what are the most important projects in web3 <> AI?" }]
     
     These are the casts you need to extract the question from:
     ${parsedNotifications.map(n => `- "${n.text}"`).join("\n")}
