@@ -48,10 +48,10 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR =
   "We couldn't post your question because {username} is not on builderfi yet.";
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST =
-  "You question has been successfully posted on builder.fi!\n\nRead it on {link}\n\nQuestions? Check our FAQ: builder.fi/faq";
+  "Your question has been successfully posted on builder.fi!\n\nRead it on {link}\n\nQuestions? Check our FAQ: builder.fi/faq";
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR =
-  "We couldn't post your question because @{username} is not on builderfi yet.";
+  "We couldn't post your question because @{username} is not on builder.fi yet.";
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
   "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";

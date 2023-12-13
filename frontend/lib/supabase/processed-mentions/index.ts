@@ -17,7 +17,7 @@ const envToTable = (tableName: string) => {
 
 export const insertProcessedMention = async (timestamp: Date) => {
   const { data, error } = await supabaseClientAdmin.from(envToTable("processed_mentions")).insert({
-    timestamp
+    last_timestamp: timestamp
   });
   if (error) {
     throw error;
@@ -28,12 +28,12 @@ export const insertProcessedMention = async (timestamp: Date) => {
 export const getLastProcessedMentionTimestamp = async () => {
   const { data, error } = await supabaseClientAdmin
     .from(envToTable("processed_mentions"))
-    .select("timestamp")
-    .order("timestamp", { ascending: false })
+    .select("last_timestamp")
+    .order("last_timestamp", { ascending: false })
     .limit(1)
     .single();
   if (error) {
-    throw error;
+    return null;
   }
-  return data?.timestamp;
+  return data?.last_timestamp;
 };

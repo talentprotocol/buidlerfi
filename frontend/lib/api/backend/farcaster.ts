@@ -60,22 +60,22 @@ export const publishNewUserKeysCast = async (user: string, link: string) => {
 };
 
 export const replyToNewQuestionCastSuccess = async (castHash: string, link: string) => {
-  const text = `@${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
+  const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
   return replyToCast(castHash, text);
 };
 
 export const replyToNewQuestionErrorNoAuthor = async (castHash: string, username: string) => {
-  const text = `@${NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR.replace("{username}", username)}`;
+  const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR.replace("{username}", username)}`;
   return replyToCast(castHash, text);
 };
 
 export const replyToNewQuestionErrorNoUser = async (castHash: string, username: string) => {
-  const text = `@${NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR.replace("{username}", username)}`;
+  const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR.replace("{username}", username)}`;
   return replyToCast(castHash, text);
 };
 
 export const replyToNewQuestionErrorNotKeyHolder = async (castHash: string, username: string, link: string) => {
-  const text = `@${NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER.replace("{username}", username).replace(
+  const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER.replace("{username}", username).replace(
     "{link}",
     link
   )}`;
