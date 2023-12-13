@@ -16,6 +16,7 @@ import { OpenAI } from "openai";
 
 export const GET = async () => {
   const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY as string);
+  // fetch last 150 reply and mentions notifications
   const { result } = await client.fetchMentionAndReplyNotifications(BUILDERFI_FARCASTER_FID, {
     limit: 150
   });
