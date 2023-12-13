@@ -1,5 +1,6 @@
 import {
   replyToNewQuestionCastSuccess,
+  replyToNewQuestionErrorNoAuthor,
   replyToNewQuestionErrorNoUser,
   replyToNewQuestionErrorNotKeyHolder
 } from "@/lib/api/backend/farcaster";
@@ -84,7 +85,7 @@ const prepareQuestion = async (
     include: { user: true }
   });
   if (!questionAuthor) {
-    return null;
+    return await replyToNewQuestionErrorNoAuthor(questionCastHash, questionAuthorUsername);
   }
 
   // check if the question recipient is on builder.fi
