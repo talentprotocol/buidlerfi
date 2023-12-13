@@ -86,6 +86,9 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
           appearance: {
             theme: "light",
             accentColor: "#0B6EF9"
+          },
+          fiatOnRamp: {
+            useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"
           }
         }}
       >

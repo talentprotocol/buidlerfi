@@ -21,23 +21,22 @@ import {
   Typography,
   useTheme
 } from "@mui/joy";
-import { useWallets } from "@privy-io/react-auth";
+import { MoonpayConfig, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
-import { Transak, TransakConfig } from "@transak/transak-sdk";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 
 export default function ChatsPage() {
   const user = useGetCurrentUser();
-  const { setActiveWallet } = usePrivyWagmi();
+  const { setActiveWallet, wallet } = usePrivyWagmi();
   const { wallets } = useWallets();
   const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
   const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
-    const found = wallets.find(wal => wal.connectorType === "embedded");
+    const found = wallets.find(wal => wal.walletClientType === "privy");
     if (found) {
       setActiveWallet(found);
       setMainWallet(found.address);
@@ -72,20 +71,16 @@ export default function ChatsPage() {
     );
   }
 
-  const openTransak = () => {
-    const transakConfig: TransakConfig = {
-      apiKey: process.env.NEXT_PUBLIC_TRANSAK_KEY || "", // (Required)
-      environment: Transak.ENVIRONMENTS.PRODUCTION,
-      defaultNetwork: "base",
-      network: "base",
-      walletAddress: mainWallet,
-      productsAvailed: "buy",
-      cryptoCurrencyList: ["ETH"]
-    };
+  const openMoonpay = async () => {
+    if (!wallet) return;
 
-    const transak = new Transak(transakConfig);
+    const fundWalletConfig = {
+      currencyCode: "ETH_BASE", // Purchase ETH on Ethereum mainnet
+      quoteCurrencyAmount: 0.05, // Purchase 0.05 ETH
+      paymentMethod: "credit_debit_card" // Purchase with credit or debit card
+    } as MoonpayConfig;
 
-    transak.init();
+    await wallet.fund({ config: fundWalletConfig });
   };
 
   return (
@@ -125,7 +120,7 @@ export default function ChatsPage() {
         <Button variant="soft" onClick={() => setOpenWithdraw(true)}>
           Withdraw
         </Button>
-        <Button variant="outlined" onClick={() => openTransak()}>
+        <Button variant="outlined" onClick={() => openMoonpay()}>
           Deposit
         </Button>
       </Flex>

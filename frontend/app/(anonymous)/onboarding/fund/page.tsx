@@ -7,8 +7,9 @@ import { MIN_BALANCE_ONBOARDING } from "@/lib/constants";
 import { formatToDisplayString, shortAddress } from "@/lib/utils";
 import { Close, CopyAll, Refresh } from "@mui/icons-material";
 import { Button, Chip, DialogTitle, IconButton, Modal, ModalDialog, Skeleton, Typography, useTheme } from "@mui/joy";
-import { Transak, TransakConfig } from "@transak/transak-sdk";
-import { useState } from "react";
+import { MoonpayConfig, useWallets } from "@privy-io/react-auth";
+import { usePrivyWagmi } from "@privy-io/wagmi-connector";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function FundPage() {
@@ -18,20 +19,29 @@ export default function FundPage() {
   const [option, setOption] = useState("transfer");
   const [modalOpen, setModalOpen] = useState(false);
 
-  const openTransak = () => {
-    const transakConfig: TransakConfig = {
-      apiKey: process.env.NEXT_PUBLIC_TRANSAK_KEY || "", // (Required)
-      environment: Transak.ENVIRONMENTS.PRODUCTION,
-      defaultNetwork: "base",
-      network: "base",
-      walletAddress: address,
-      productsAvailed: "buy",
-      cryptoCurrencyList: ["ETH"]
-    };
+  const { setActiveWallet, wallet } = usePrivyWagmi();
+  const { wallets } = useWallets();
+  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
+  const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false);
 
-    const transak = new Transak(transakConfig);
+  //Ensure the active wallet is the embedded wallet from Privy
+  useEffect(() => {
+    const found = wallets.find(wal => wal.walletClientType === "privy");
+    if (found) {
+      setActiveWallet(found);
+    }
+  }, [setActiveWallet, wallets]);
 
-    transak.init();
+  const openMoonpay = async () => {
+    if (!wallet) return;
+
+    const fundWalletConfig = {
+      currencyCode: "ETH_BASE", // Purchase ETH on Ethereum mainnet
+      quoteCurrencyAmount: 0.05, // Purchase 0.05 ETH
+      paymentMethod: "credit_debit_card" // Purchase with credit or debit card
+    } as MoonpayConfig;
+
+    await wallet.fund({ config: fundWalletConfig });
   };
 
   const closeAndRefresh = () => {
@@ -68,7 +78,7 @@ export default function FundPage() {
             <Button
               color="neutral"
               variant="outlined"
-              onClick={() => openTransak()}
+              onClick={() => openMoonpay()}
               sx={{
                 p: 2,
                 ".MuiBox-root": {
