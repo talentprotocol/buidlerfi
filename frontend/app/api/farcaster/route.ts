@@ -1,6 +1,12 @@
-import { replyToNewQuestionCast } from "@/lib/api/backend/farcaster";
+import {
+  replyToNewQuestionCast,
+  replyToNewQuestionErrorNoUser,
+  replyToNewQuestionErrorNotKeyHolder
+} from "@/lib/api/backend/farcaster";
+import { fetchHolders } from "@/lib/api/common/builderfi";
 import { BUILDERFI_FARCASTER_FID } from "@/lib/constants";
 import prisma from "@/lib/prisma";
+import { getLastProcessedMentionTimestamp, insertProcessedMention } from "@/lib/supabase/processed-mentions";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { CastWithInteractions as CastWithInteractionsV1 } from "@neynar/nodejs-sdk/build/neynar-api/v1";
 import { CastWithInteractions as CastWithInteractionsV2 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
@@ -11,8 +17,8 @@ export const GET = async () => {
   const { result } = await client.fetchMentionAndReplyNotifications(BUILDERFI_FARCASTER_FID, {
     limit: 150
   });
-  // TODO: fetch publishedBefore from the last time we checked (stored in a db)
-  const publishedBefore = Date.now() - 1000 * 120; // 2 minutes
+  const publishedBeforeDate = await getLastProcessedMentionTimestamp();
+  const publishedBefore = publishedBeforeDate ? publishedBeforeDate.getTime() : Date.now() - 1000 * 60 * 3;
 
   const mentionNotifications = result.notifications?.filter(
     n =>
@@ -30,8 +36,10 @@ export const GET = async () => {
     questions.map(q => prepareQuestion(q.recipientUsername, q.questionContent, q.recipientUsername, q.castHash))
   );
 
-  const mostRecentTimestamp = mentionNotifications[0].timestamp;
-  // TODO: store mostRecentTimestamp on DB
+  if (mentionNotifications?.length >= 0) {
+    const mostRecentTimestamp = mentionNotifications[0].timestamp;
+    await insertProcessedMention(new Date(parseInt(mostRecentTimestamp, 10)));
+  }
 };
 
 const getQuestionsFromNotifications = async (
@@ -75,9 +83,32 @@ const prepareQuestion = async (
     where: { profileName: questionRecipientUsername, type: SocialProfileType.FARCASTER },
     include: { user: true }
   });
-  if (!questionAuthor || !questionRecipient) {
+  if (!questionAuthor) {
     return null;
   }
+
+  // check if the question recipient is on builder.fi
+  // if not, reply with an error
+  if (!questionRecipient) {
+    return await replyToNewQuestionErrorNoUser(questionCastHash, questionRecipientUsername);
+  }
+
+  // check if the question author is a key holder of question recipient
+  // i.e. check if author can actually ask questions to recipient
+  const replierHolders = await fetchHolders(questionRecipient.user.wallet);
+  const found = replierHolders.find(
+    holder => holder.holder.owner.toLowerCase() === questionAuthor.user.wallet.toLowerCase()
+  );
+  // if not, reply with an error
+  if (!found || Number(found.heldKeyNumber) === 0) {
+    return await replyToNewQuestionErrorNotKeyHolder(
+      questionCastHash,
+      questionRecipientUsername,
+      `https://app.builder.fi/profile/${questionRecipient.user.wallet}`
+    );
+  }
+
+  // create question and reply successfully with the bot
   const newQuestion = await prisma.question.create({
     data: {
       questionContent,
