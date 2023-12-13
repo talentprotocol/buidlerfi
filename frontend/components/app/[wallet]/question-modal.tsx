@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import sanitize from "sanitize-html";
+import { QuestionContextMenu } from "./question-context-menu";
 import { ReplyContextMenu } from "./reply-context-menu";
 
 export default function QuestionModal({ questionId, close }: { questionId: number; close: () => void }) {
@@ -93,10 +94,12 @@ export default function QuestionModal({ questionId, close }: { questionId: numbe
                 numberOfHolders={holders?.length}
                 nameLevel="title-sm"
               />
-              {isOwnProfile && (!question.repliedOn || isEditingReply) && (
+              {isOwnProfile && (!question.repliedOn || isEditingReply) ? (
                 <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>
                   Reply
                 </Button>
+              ) : (
+                <QuestionContextMenu question={question} refetch={() => refetch()} />
               )}
             </Flex>
             <Typography fontWeight={300} level="body-sm" whiteSpace="pre-line" textColor={"neutral.800"}>

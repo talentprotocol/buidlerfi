@@ -2,13 +2,12 @@ import { useUserContext } from "@/contexts/userContext";
 import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
-import { DEFAULT_PROFILE_PICTURE, LOGO } from "@/lib/assets";
+import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { FAQ_LINK } from "@/lib/constants";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
-  Cable,
   ChatOutlined,
   LiveHelpOutlined,
   Logout,
@@ -19,7 +18,7 @@ import {
 } from "@mui/icons-material";
 import {
   Avatar,
-  CircularProgress,
+  Button,
   Divider,
   Drawer,
   IconButton,
@@ -31,13 +30,13 @@ import {
 } from "@mui/joy";
 import { ListItemIcon, ListItemText } from "@mui/material";
 import { usePrivy } from "@privy-io/react-auth";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 import { PointsIcon } from "../icons/points";
 import { AddToHomePage } from "./add-to-home-page";
+import { BannerCard } from "./bannerCard";
 import { Flex } from "./flex";
 import { WalletAddress } from "./wallet-address";
 
@@ -46,11 +45,17 @@ interface Props {
   setOpen: (isOpen: boolean) => void;
 }
 
+interface Navigator extends globalThis.Navigator {
+  standalone?: boolean;
+}
+
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user, isLoading, refetch } = useUserContext();
   const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
   const contractData = useGetContractData();
   const refreshData = useRefreshCurrentUser();
+  const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
+  const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
   const { data: balance } = useBalance({
     address
   });
@@ -106,18 +111,12 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         onClick: () => window.open("https://t.me/+7FGAfQx66Z8xOThk")
       },
       {
-        text: "Import Web3 Socials",
-        icon: isLoadingLinkWallet ? <CircularProgress size="sm" /> : <Cable />,
-        onClick: () => linkWallet(),
-        hidden: !!user?.socialWallet
-      },
-      {
         text: "Log out",
         icon: <Logout />,
         onClick: () => handleLogout()
       }
     ],
-    [address, handleLogout, isLoadingLinkWallet, linkWallet, user?.isAdmin, user?.socialWallet]
+    [address, handleLogout, user?.isAdmin]
   );
 
   const batchNumber = () => {
@@ -149,6 +148,18 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       return "10,000";
     }
   };
+
+  const isInstalled = useMemo(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const { standalone } = navigator as Navigator;
+    return document.referrer.startsWith("android-app://") || standalone || isStandalone;
+  }, []);
+
+  const cardToDisplay = useMemo(() => {
+    if (!isInstalled && !hasIgnoredInstallApp) return "install";
+    else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
+    else return "none";
+  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isInstalled, user?.socialWallet]);
 
   if (!user) return <></>;
 
@@ -220,22 +231,36 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             )
           )}
       </List>
-      <Flex y xs p={2} gap3>
-        <div>
+      <Flex y p={2}>
+        <Flex>
+          {cardToDisplay === "install" && (
+            <BannerCard
+              onClose={() => setHasIgnoredInstallApp(true)}
+              title="Enhance Your Experience"
+              body="Install the app for a seamless, personalized experience."
+            >
+              <AddToHomePage />
+            </BannerCard>
+          )}
+          {cardToDisplay === "connect" && (
+            <BannerCard
+              onClose={() => setHasIgnoredConnectWallet(true)}
+              title="Import web3 socials"
+              body="Connect your wallet associated with your web3 social profiles to import your data."
+            >
+              <Button onClick={() => linkWallet()} loading={isLoadingLinkWallet}>
+                Connect Wallet
+              </Button>
+            </BannerCard>
+          )}
+        </Flex>
+
+        <Flex y xc yc>
           <Typography textColor={"neutral.600"} level="body-sm">
-            <>
-              Batch {"#"}
-              {batchNumber()}
-            </>
+            <strong>Batch 0{batchNumber()}</strong> {contractData.data?.totalNumberOfBuilders}/{batchCount()} keys
+            launched
           </Typography>
-          <Typography textColor={"neutral.600"} level="body-sm">
-            <>
-              {contractData.data?.totalNumberOfBuilders}/{batchCount()} keys launched
-            </>
-          </Typography>
-        </div>
-        <AddToHomePage />
-        <Image src={LOGO} alt="App logo" height={40} width={120} />
+        </Flex>
       </Flex>
     </Drawer>
   );

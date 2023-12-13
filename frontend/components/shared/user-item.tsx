@@ -21,6 +21,7 @@ interface CommonProps {
 
 interface UserItemProps extends CommonProps {
   user: {
+    id: number;
     wallet: string;
     avatarUrl?: string;
     displayName?: string;
@@ -38,6 +39,7 @@ export const UserItem: FC<UserItemProps> = ({ user, ...props }) => {
     <UserItemInner
       {...user}
       {...props}
+      userId={user.id}
       buyPrice={user.buyPrice ? BigInt(user.buyPrice) : undefined}
       numberOfHolders={user.numberOfHolders !== undefined ? Number(user.numberOfHolders) : undefined}
     />
@@ -57,6 +59,7 @@ export const UserItemFromAddress: FC<Props> = ({ address, numberOfHolders, buyPr
 };
 
 interface UserItemInnerProps extends CommonProps {
+  userId: number;
   wallet: string;
   avatarUrl?: string;
   displayName?: string;

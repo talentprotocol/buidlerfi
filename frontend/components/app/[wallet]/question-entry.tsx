@@ -1,5 +1,6 @@
 import { Flex } from "@/components/shared/flex";
 import { Reactions } from "@/components/shared/reactions";
+import { useProfileContext } from "@/contexts/profileContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetHotQuestions, useGetQuestions } from "@/hooks/useQuestionsApi";
 import { getDifference, shortAddress } from "@/lib/utils";
@@ -19,6 +20,7 @@ interface Props {
 }
 export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
   const askedOn = useMemo(() => getDifference(question?.createdAt), [question?.createdAt]);
+  const { refetch } = useProfileContext();
   const router = useBetterRouter();
 
   const sanitizedContent = useMemo(
@@ -85,7 +87,7 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
               <Typography level="helper">•</Typography>
               <Typography level="body-sm">{askedOn}</Typography>
             </Flex>
-            <QuestionContextMenu question={question} />
+            <QuestionContextMenu question={question} refetch={() => refetch()} />
             {/* <Flex x yc gap2>
               
 

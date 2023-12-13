@@ -1,22 +1,21 @@
 "use client";
 
 import { Flex } from "@/components/shared/flex";
+import { FundWalletModal } from "@/components/shared/fundTransferModal";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { MIN_BALANCE_ONBOARDING } from "@/lib/constants";
-import { formatToDisplayString, shortAddress } from "@/lib/utils";
-import { Close, CopyAll, Refresh } from "@mui/icons-material";
-import { Button, Chip, DialogTitle, IconButton, Modal, ModalDialog, Skeleton, Typography, useTheme } from "@mui/joy";
+import { formatToDisplayString } from "@/lib/utils";
+import { Refresh } from "@mui/icons-material";
+import { Button, Chip, IconButton, Skeleton, Typography, useTheme } from "@mui/joy";
 import { Transak, TransakConfig } from "@transak/transak-sdk";
 import { useState } from "react";
-import { toast } from "react-toastify";
 
 export default function FundPage() {
   const theme = useTheme();
   const router = useBetterRouter();
   const { address, balance, refetchBalance, balanceIsLoading } = useUserContext();
-  const [option, setOption] = useState("transfer");
-  const [modalOpen, setModalOpen] = useState(false);
+  const [option, setOption] = useState<"transfer" | "bridge" | "none">("none");
 
   const openTransak = () => {
     const transakConfig: TransakConfig = {
@@ -35,18 +34,16 @@ export default function FundPage() {
   };
 
   const closeAndRefresh = () => {
-    setModalOpen(false);
+    setOption("none");
     refetchBalance();
   };
 
   const openTransferModal = () => {
     setOption("transfer");
-    setModalOpen(true);
   };
 
   const openBridgeModal = () => {
     setOption("bridge");
-    setModalOpen(true);
   };
 
   const hasEnoughBalance = balance && balance >= MIN_BALANCE_ONBOARDING;
@@ -160,80 +157,7 @@ export default function FundPage() {
           {hasEnoughBalance ? "Continue" : "Continue without top up"}
         </Button>
       </Flex>
-      <Modal open={modalOpen} onClose={closeAndRefresh}>
-        <ModalDialog minWidth="400px">
-          <Flex x xsb yc>
-            <DialogTitle>
-              {option === "transfer"
-                ? "Transfer ETH on Base to builder.fi wallet"
-                : "Bridge crypto from another chain to builder.fi wallet"}
-            </DialogTitle>
-            <IconButton onClick={closeAndRefresh}>
-              <Close />
-            </IconButton>
-          </Flex>
-          <Flex y gap2>
-            {option === "transfer" && (
-              <>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>1.</strong> Copy your builder.fi wallet address <strong>{shortAddress(address || "")}</strong>{" "}
-                  <IconButton
-                    onClick={() => {
-                      navigator.clipboard.writeText(address || "");
-                      toast.success("Copied to clipboard");
-                    }}
-                  >
-                    <CopyAll />
-                  </IconButton>
-                </Typography>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>2.</strong> Go to your wallet (ex: Metamask) or exchange (ex: Coinbase or Binance)
-                </Typography>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>3.</strong> Send ETH on the Base network to your builder.fi address
-                </Typography>
-              </>
-            )}
-            {option !== "transfer" && (
-              <>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>1.</strong> Copy your builder.fi wallet address <strong>{shortAddress(address || "")}</strong>{" "}
-                  <IconButton
-                    onClick={() => {
-                      navigator.clipboard.writeText(address || "");
-                      toast.success("Copied to clipboard");
-                    }}
-                  >
-                    <CopyAll />
-                  </IconButton>
-                </Typography>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>2.</strong> Go to{" "}
-                  <a href="https://bungee.exchange" target="_blank">
-                    bungee.exchange
-                  </a>
-                  , on desktop or mobile
-                </Typography>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>3.</strong> Connect a wallet with funds
-                </Typography>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>4.</strong> Click on “+ Add Address” and paste your builder.fi address
-                </Typography>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>5.</strong> Pick your preferred source chain and token to bridge
-                </Typography>
-                <Typography level="body-md" textColor="neutral.600">
-                  <strong>6.</strong> Confirm the transaction in your wallet
-                </Typography>
-              </>
-            )}
-            <Button sx={{ marginTop: 2 }} onClick={() => closeAndRefresh()}>
-              Done
-            </Button>
-          </Flex>
-        </ModalDialog>
-      </Modal>
+      {option !== "none" && <FundWalletModal address={address} close={closeAndRefresh} type={option} />}
     </Flex>
   );
 }

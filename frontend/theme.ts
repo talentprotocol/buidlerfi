@@ -22,7 +22,7 @@ const theme = extendTheme({
           "100": "#dbeafe",
           "200": "#bfdbfe",
           "300": "#93c5fd",
-          "400": "#60a5fa",
+          "400": "#4393E4",
           "500": "#0B6EF9",
           "600": "#2563eb",
           "700": "#1d4ed8",
@@ -61,7 +61,7 @@ const theme = extendTheme({
         root: props => ({
           backgroundColor: props.theme.palette.primary[50],
           ".MuiTypography-root": {
-            color: props.theme.palette.primary[900]
+            color: props.theme.palette.primary[400]
           }
         })
       }

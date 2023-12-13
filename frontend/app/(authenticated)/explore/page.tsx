@@ -3,6 +3,7 @@ import { ExploreTopBar, TabsEnum } from "@/components/app/explore/exploreTopBar"
 import { WelcomeModal } from "@/components/app/welcome-modal";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
+import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { RecommendedUserItem } from "@/components/shared/recommended-user-item";
 import { InjectTopBar } from "@/components/shared/top-bar";
@@ -12,7 +13,7 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useOnchainUsers } from "@/hooks/useBuilderFiApi";
 import { useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
 import { PersonSearchOutlined, SupervisorAccountOutlined } from "@mui/icons-material";
-import { CircularProgress, TabPanel, Tabs } from "@mui/joy";
+import { TabPanel, Tabs } from "@mui/joy";
 import { useState } from "react";
 
 export default function ExplorePage() {
@@ -50,9 +51,7 @@ export default function ExplorePage() {
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
         <TabPanel value="Top">
           {isInitialLoading ? (
-            <Flex y grow yc xc>
-              <CircularProgress />
-            </Flex>
+            <LoadingPage />
           ) : (
             users.map(user => (
               <div key={user.id}>
@@ -74,9 +73,7 @@ export default function ExplorePage() {
         </TabPanel>
         <TabPanel value="Friends">
           {isLoadingRecommendedUsers ? (
-            <Flex y grow yc xc>
-              <CircularProgress />
-            </Flex>
+            <LoadingPage />
           ) : (
             <>
               {!recommendedUsers || recommendedUsers.length == 0 ? (
@@ -107,9 +104,7 @@ export default function ExplorePage() {
         </TabPanel>
         <TabPanel value="Search">
           {isSearching ? (
-            <Flex y yc xc grow>
-              <CircularProgress />
-            </Flex>
+            <LoadingPage />
           ) : data?.length === 0 ? (
             <PageMessage
               icon={<PersonSearchOutlined />}

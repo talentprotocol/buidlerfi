@@ -1,12 +1,7 @@
 "use client";
 
-import { Flex } from "@/components/shared/flex";
-import { CircularProgress } from "@mui/joy";
+import { LoadingPage } from "@/components/shared/loadingPage";
 
 export default function RootPage() {
-  return (
-    <Flex y yc xc grow>
-      <CircularProgress />
-    </Flex>
-  );
+  return <LoadingPage />;
 }

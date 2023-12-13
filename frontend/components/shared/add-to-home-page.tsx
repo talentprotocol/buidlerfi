@@ -1,7 +1,7 @@
 import { Flex } from "@/components/shared/flex";
-import { AddToHomeScreen, Close, IosShare } from "@mui/icons-material";
+import { Close, IosShare } from "@mui/icons-material";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface Navigator extends globalThis.Navigator {
   standalone?: boolean;
@@ -9,28 +9,18 @@ interface Navigator extends globalThis.Navigator {
 
 export function AddToHomePage() {
   const [instructionsOpen, setInstructionsOpen] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-  useEffect(() => {
+
+  const isInstalled = useMemo(() => {
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
     const { standalone } = navigator as Navigator;
-    if (document.referrer.startsWith("android-app://")) {
-      setIsInstalled(true);
-      return;
-    } else if (standalone || isStandalone) {
-      setIsInstalled(true);
-      return;
-    }
-    setIsInstalled(false);
+    return document.referrer.startsWith("android-app://") || standalone || isStandalone;
   }, []);
 
   if (isInstalled) return null;
 
   return (
     <>
-      <Button onClick={() => setInstructionsOpen(true)}>
-        <AddToHomeScreen />
-        Install App
-      </Button>
+      <Button onClick={() => setInstructionsOpen(true)}>Install App</Button>
       <Modal open={instructionsOpen} onClose={() => setInstructionsOpen(false)}>
         <ModalDialog minWidth="400px">
           <Flex x xsb yc>

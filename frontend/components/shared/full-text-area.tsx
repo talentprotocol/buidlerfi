@@ -29,7 +29,8 @@ export const FullTextArea: FC<Props> = ({ avatarUrl, placeholder, value, onChang
               },
               "&>*": {
                 textTransform: "none"
-              }
+              },
+              backgroundColor: "inherit"
             }}
             placeholder={placeholder}
             value={value}

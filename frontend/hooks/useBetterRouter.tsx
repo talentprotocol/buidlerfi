@@ -1,4 +1,5 @@
 import { convertParamsToString } from "@/lib/utils";
+import { isBoolean, isNumber } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -19,16 +20,19 @@ export const useBetterRouter = () => {
 
   const searchParamsDict = useMemo(() => {
     const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
+    const resEntries: Record<string, string | number | boolean> = {};
     Object.keys(entries).forEach(key => {
       if (entries[key] === undefined) {
-        delete entries[key];
         return;
       }
 
       //Try to parse int and booleans
-      entries[key] = JSON.parse(entries[key]);
+      const val = entries[key];
+      if (isNumber(val)) resEntries[key] = Number(val);
+      else if (isBoolean(val)) resEntries[key] = val === "true";
+      else resEntries[key] = val;
     });
-    return entries as Record<string, string | number | boolean>;
+    return resEntries;
   }, [searchParams]);
 
   const formatUrl = useCallback(

@@ -63,7 +63,7 @@ export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, 
     return createPortal(
       <>
         <Flex x xs yc basis="100%">
-          {startItem}
+          {withBack ? <BackButton /> : startItem}
         </Flex>
         <Flex x xc yc basis="100%">
           {centerItem ? (

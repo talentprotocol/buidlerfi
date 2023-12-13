@@ -21,7 +21,10 @@ export const getNotifications = async (privyUserId: string, offset: number) => {
       targetUser: true
     },
     take: PAGINATION_LIMIT,
-    skip: offset
+    skip: offset,
+    orderBy: {
+      createdAt: "desc"
+    }
   });
 
   return { data: notifications };

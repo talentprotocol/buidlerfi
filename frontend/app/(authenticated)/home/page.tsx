@@ -47,12 +47,7 @@ export default function Home() {
               type="home"
               key={question.id}
               question={question}
-              onClick={() =>
-                router.push({
-                  pathname: `profile/${question.replier?.wallet}`,
-                  searchParams: { question: question.id }
-                })
-              }
+              onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
         </TabPanel>
@@ -62,7 +57,7 @@ export default function Home() {
               type="home"
               key={question.id}
               question={question}
-              onClick={() => router.push(`profile/${question.replier?.wallet}/questions/${question.id}`)}
+              onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
         </TabPanel>
@@ -72,7 +67,7 @@ export default function Home() {
               type="home"
               key={question.id}
               question={question}
-              onClick={() => router.push(`profile/${question.replier?.wallet}/questions/${question.id}`)}
+              onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
         </TabPanel>

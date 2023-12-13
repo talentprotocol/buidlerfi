@@ -1,10 +1,11 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
+import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { Chat, KeyOutlined, LockOpen, LockOutlined } from "@mui/icons-material";
-import { Button, CircularProgress } from "@mui/joy";
+import { Button } from "@mui/joy";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
 import QuestionModal from "./question-modal";
@@ -52,11 +53,7 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
   }
 
   if (isLoading) {
-    return (
-      <Flex y xc yc grow>
-        <CircularProgress />
-      </Flex>
-    );
+    return <LoadingPage />;
   }
 
   return (

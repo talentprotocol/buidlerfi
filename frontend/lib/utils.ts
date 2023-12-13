@@ -106,3 +106,7 @@ export const getDifference = (date?: Date) => {
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days}d`;
 };
+
+export function isNumeric(n: string) {
+  return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
+}
