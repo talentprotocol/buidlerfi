@@ -1,4 +1,6 @@
 import {
+  BUILDERFI_LENS_APP_ID,
+  BUILDERFI_LENS_PROFILE_ID,
   NEW_BUILDERFI_ANSWER_POST,
   NEW_BUILDERFI_ANSWER_POST_TITLE,
   NEW_BUILDERFI_QUESTION_POST,
@@ -44,7 +46,7 @@ export interface Post {
 export const preparePostMetadata = (title: string, description: string, content: string, external_url: string) =>
   textOnly({
     content,
-    appId: "builderFiAppId",
+    appId: BUILDERFI_LENS_APP_ID,
     marketplace: {
       description,
       external_url,
@@ -59,7 +61,7 @@ export const publishLensPost = async (title: string, description: string, conten
   });
   const { id, text } = await lensClient.authentication.generateChallenge({
     signedBy: wallet.address,
-    for: "0xa8bd"
+    for: BUILDERFI_LENS_PROFILE_ID
   });
   const signature = await wallet.signMessage({ message: text });
   await lensClient.authentication.authenticate({
@@ -70,7 +72,7 @@ export const publishLensPost = async (title: string, description: string, conten
 
   console.log(metadata);
 
-  const { data } = await uploadJson("test post", metadata);
+  const { data } = await uploadJson(title, metadata);
 
   const { hash } = data;
 

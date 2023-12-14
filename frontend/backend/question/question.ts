@@ -1,6 +1,7 @@
 "use server";
 
 import { publishNewQuestionCast } from "@/lib/api/backend/farcaster";
+import { publishNewQuestionLensPost } from "@/lib/api/backend/lens";
 import { fetchHolders } from "@/lib/api/common/builderfi";
 import { MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
@@ -32,6 +33,9 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     const questionerFarcaster = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
     const replierFarcaster = replier.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
 
+    const questionerLens = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
+    const replierLens = replier.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
+
     console.log("FOUND questioner -> ", !!questionerFarcaster);
     console.log("FOUND replier -> ", !!replierFarcaster);
 
@@ -45,6 +49,22 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW QUESTION");
       await publishNewQuestionCast(
+        questionerName,
+        replierName,
+        `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
+      );
+    }
+
+    if (questionerLens || replierLens) {
+      // if one of the two has lens, publish the post
+      const replierName = replierLens?.profileName
+        ? `@lens/${replierLens?.profileName}`
+        : replier.displayName || shortAddress(replier.wallet || "");
+      const questionerName = questionerLens?.profileName
+        ? `@lens/${questionerLens?.profileName}`
+        : questioner?.displayName || shortAddress(questioner?.wallet || "");
+
+      await publishNewQuestionLensPost(
         questionerName,
         replierName,
         `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
