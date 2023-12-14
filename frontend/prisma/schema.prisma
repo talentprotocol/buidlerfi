@@ -218,6 +218,8 @@ model KeyRelationship {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([holderId, ownerId])
 }
 
 model SystemSetting {
