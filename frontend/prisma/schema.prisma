@@ -220,3 +220,13 @@ model Key {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model SystemSetting {
+  id Int @id @default(autoincrement())
+
+  key   String @unique
+  value String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

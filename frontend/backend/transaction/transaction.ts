@@ -104,17 +104,97 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
     transport: http(process.env.INFURA_API_KEY)
   });
 
-  const logs = await client.getLogs({
-    address: BUILDERFI_CONTRACT.address,
-    event: parseAbiItem(BUIILDER_FI_V1_EVENT_SIGNATURE),
-    fromBlock: BUILDERFI_CONTRACT.startBlock,
-    strict: true
+  const systemSetting = await prisma.systemSetting.upsert({
+    where: {
+      key: "lastProcessedBlock"
+    },
+    update: {},
+    create: {
+      key: "lastProcessedBlock",
+      value: BUILDERFI_CONTRACT.startBlock.toString()
+    }
   });
 
-  for await (const log of logs) {
-    console.log("Processing log: ", log);
+  const lastProcessedBlock = BigInt(systemSetting.value);
+
+  const latestBlock = await client.getBlockNumber();
+
+  console.log("--------------------");
+  console.log("START SYNC FROM BLOCK: ", lastProcessedBlock);
+
+  for (let i = lastProcessedBlock; i < latestBlock; i += 100n) {
+    const searchUntil = i + 100n;
+    const logs = await client.getLogs({
+      address: BUILDERFI_CONTRACT.address,
+      event: parseAbiItem(BUIILDER_FI_V1_EVENT_SIGNATURE),
+      fromBlock: i,
+      toBlock: searchUntil > latestBlock ? latestBlock : searchUntil,
+      strict: true
+    });
+
+    console.log("SEARCHED FROM: ", i);
+    console.log("SEARCHED TO: ", searchUntil);
+
+    for await (const log of logs) {
+      let transaction = await prisma.transaction.findFirst({
+        where: {
+          hash: log.transactionHash
+        }
+      });
+
+      if (!transaction) {
+        transaction = await prisma.transaction.create({
+          data: {
+            hash: log.transactionHash,
+            chainId: IN_USE_CHAIN_ID
+          }
+        });
+      }
+
+      const owner = await prisma.user.findUnique({
+        where: {
+          wallet: log.args.builder.toLowerCase()
+        }
+      });
+
+      const holder = await prisma.user.findUnique({
+        where: {
+          wallet: log.args.trader.toLowerCase()
+        }
+      });
+
+      const key = await prisma.key.findFirst({
+        where: {
+          transactionId: transaction.id
+        }
+      });
+
+      if (!key) {
+        await prisma.key.create({
+          data: {
+            holderId: !!holder ? holder.id : null,
+            ownerId: !!owner ? owner.id : null,
+            transactionId: transaction.id,
+            amount: log.args.isBuy ? log.args.shareAmount : -log.args.shareAmount,
+            ethCost: log.args.ethAmount,
+            protocolFee: log.args.protocolEthAmount,
+            ownerFee: log.args.builderEthAmount,
+            block: log.blockNumber,
+            chainId: IN_USE_CHAIN_ID
+          }
+        });
+      }
+    }
+
+    await prisma.systemSetting.update({
+      where: {
+        key: "lastProcessedBlock"
+      },
+      data: {
+        value: i.toString()
+      }
+    });
   }
 
-  console.log("end");
   return { data: null };
 };
