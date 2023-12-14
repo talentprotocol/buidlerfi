@@ -36,17 +36,24 @@ export const storeTransaction = async (privyUserId: string, hash: `0x${string}`)
     return { data: null };
   }
 
-  let transaction = await prisma.transaction.findFirst({
+  let transaction = await prisma.trade.findFirst({
     where: {
       hash: hash
     }
   });
 
   if (!transaction) {
-    transaction = await prisma.transaction.create({
+    transaction = await prisma.trade.create({
       data: {
         hash: hash,
-        chainId: IN_USE_CHAIN_ID
+        chainId: IN_USE_CHAIN_ID,
+        amount: eventLog.args.isBuy ? eventLog.args.shareAmount : -eventLog.args.shareAmount,
+        ethCost: eventLog.args.ethAmount,
+        protocolFee: eventLog.args.protocolEthAmount,
+        ownerFee: eventLog.args.builderEthAmount,
+        block: onchainTransaction.blockNumber,
+        holderAddress: eventLog.args.builder.toLowerCase(),
+        ownerAddress: eventLog.args.trader.toLowerCase()
       }
     });
   }
@@ -63,27 +70,38 @@ export const storeTransaction = async (privyUserId: string, hash: `0x${string}`)
     }
   });
 
-  const key = await prisma.key.findFirst({
-    where: {
-      transactionId: transaction.id
-    }
-  });
+  if (!owner || !holder) {
+    console.log("Users don't exist for has, can't sync: ", hash);
+    return;
+  }
 
-  if (!key) {
-    await prisma.key.create({
-      data: {
-        holderId: !!holder ? holder.id : null,
-        ownerId: !!owner ? owner.id : null,
-        transactionId: transaction.id,
-        amount: eventLog.args.isBuy ? eventLog.args.shareAmount : -eventLog.args.shareAmount,
-        ethCost: eventLog.args.ethAmount,
-        protocolFee: eventLog.args.protocolEthAmount,
-        ownerFee: eventLog.args.builderEthAmount,
-        block: onchainTransaction.blockNumber,
-        chainId: IN_USE_CHAIN_ID
+  await prisma.$transaction(async tx => {
+    const key = await tx.keyRelationship.findFirst({
+      where: {
+        holderId: holder.id,
+        ownerId: owner.id
       }
     });
-  }
+
+    if (!key) {
+      await tx.keyRelationship.create({
+        data: {
+          holderId: holder.id,
+          ownerId: owner.id,
+          amount: eventLog.args.isBuy ? eventLog.args.shareAmount : -eventLog.args.shareAmount
+        }
+      });
+    } else {
+      await tx.keyRelationship.update({
+        where: {
+          id: key.id
+        },
+        data: {
+          amount: key.amount + (eventLog.args.isBuy ? eventLog.args.shareAmount : -eventLog.args.shareAmount)
+        }
+      });
+    }
+  });
 
   return { data: hash };
 };
@@ -136,17 +154,24 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
     console.log("SEARCHED TO: ", searchUntil);
 
     for await (const log of logs) {
-      let transaction = await prisma.transaction.findFirst({
+      let transaction = await prisma.trade.findFirst({
         where: {
           hash: log.transactionHash
         }
       });
 
       if (!transaction) {
-        transaction = await prisma.transaction.create({
+        transaction = await prisma.trade.create({
           data: {
             hash: log.transactionHash,
-            chainId: IN_USE_CHAIN_ID
+            chainId: IN_USE_CHAIN_ID,
+            amount: log.args.isBuy ? log.args.shareAmount : -log.args.shareAmount,
+            ethCost: log.args.ethAmount,
+            protocolFee: log.args.protocolEthAmount,
+            ownerFee: log.args.builderEthAmount,
+            block: log.blockNumber,
+            holderAddress: log.args.builder.toLowerCase(),
+            ownerAddress: log.args.trader.toLowerCase()
           }
         });
       }
@@ -163,24 +188,33 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
         }
       });
 
-      const key = await prisma.key.findFirst({
+      if (!owner || !holder) {
+        console.log("Users don't exist for has, can't sync: ", log.transactionHash);
+        return;
+      }
+
+      const key = await prisma.keyRelationship.findFirst({
         where: {
-          transactionId: transaction.id
+          ownerId: owner.id,
+          holderId: holder.id
         }
       });
 
       if (!key) {
-        await prisma.key.create({
+        await prisma.keyRelationship.create({
           data: {
-            holderId: !!holder ? holder.id : null,
-            ownerId: !!owner ? owner.id : null,
-            transactionId: transaction.id,
-            amount: log.args.isBuy ? log.args.shareAmount : -log.args.shareAmount,
-            ethCost: log.args.ethAmount,
-            protocolFee: log.args.protocolEthAmount,
-            ownerFee: log.args.builderEthAmount,
-            block: log.blockNumber,
-            chainId: IN_USE_CHAIN_ID
+            holderId: holder.id,
+            ownerId: owner.id,
+            amount: log.args.isBuy ? log.args.shareAmount : -log.args.shareAmount
+          }
+        });
+      } else {
+        await prisma.keyRelationship.update({
+          where: {
+            id: key.id
+          },
+          data: {
+            amount: key.amount + (log.args.isBuy ? log.args.shareAmount : -log.args.shareAmount)
           }
         });
       }
