@@ -43,7 +43,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
         ? `@${questionerFarcaster?.profileName}`
         : questioner?.displayName || shortAddress(questioner?.wallet || "");
       // if one of the two has farcaster, publish the cast
-      console.log("CASTING NEW QUESTION");
+      console.log("CASTING NEW QUESTION ");
       await publishNewQuestionCast(
         questionerName,
         replierName,
