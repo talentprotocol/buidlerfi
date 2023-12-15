@@ -72,7 +72,7 @@ export const storeTransaction = async (privyUserId: string, hash: `0x${string}`)
 
   if (!owner || !holder) {
     console.log("Users don't exist for has, can't sync: ", hash);
-    return;
+    return { data: hash };
   }
 
   await prisma.$transaction(async tx => {
@@ -190,7 +190,7 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
 
       if (!owner || !holder) {
         console.log("Users don't exist for has, can't sync: ", log.transactionHash);
-        return;
+        continue;
       }
 
       const key = await prisma.keyRelationship.findFirst({
