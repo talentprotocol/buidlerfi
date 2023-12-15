@@ -287,6 +287,8 @@ const sanitizeAvatarUrl = (avatarUrl: string) => {
 };
 
 export const getRecommendedUsers = async (address: string) => {
+  if (!address) return { data: [] };
+
   const user = await prisma.user.findUnique({ where: { wallet: address.toLowerCase() } });
   if (!user) return { error: ERRORS.USER_NOT_FOUND };
 
@@ -320,6 +322,8 @@ export const getRecommendedUsers = async (address: string) => {
 };
 
 export const getRecommendedUser = async (wallet: string) => {
+  if (!wallet) return { data: null };
+
   const address = wallet.toLowerCase();
   const res = await prisma.recommendedUser.findFirst({
     where: {
