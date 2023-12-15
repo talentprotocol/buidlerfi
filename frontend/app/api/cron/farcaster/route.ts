@@ -161,7 +161,7 @@ const prepareQuestion = async (
   }
 
   // check if the question author is a key holder of question recipient
-  // i.e. check if author can actually ask questions to recipient
+  // i.e. check if author can actually ask questions to recipient 
   const replierHolders = await fetchHolders(questionRecipient.user.wallet);
   const found = replierHolders.find(
     holder => holder.holder.owner.toLowerCase() === questionAuthor.user.wallet.toLowerCase()
