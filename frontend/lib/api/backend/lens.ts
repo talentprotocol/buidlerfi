@@ -8,7 +8,7 @@ import {
   NEW_BUILDERFI_USER_POST,
   NEW_BUILDERFI_USER_POST_TITLE
 } from "@/lib/constants";
-import BUILDERFI_ACCOUNT from "@/lib/viemServer";
+import { getAccount } from "@/lib/viemServer";
 import { LensClient, production } from "@lens-protocol/client";
 import { textOnly } from "@lens-protocol/metadata";
 import { uploadJson } from "../common/lighthouse";
@@ -55,7 +55,7 @@ export const preparePostMetadata = (title: string, description: string, content:
   });
 
 export const publishLensPost = async (title: string, description: string, content: string, externalUrl: string) => {
-  const wallet = BUILDERFI_ACCOUNT;
+  const wallet = await getAccount(process.env.PRIVATE_KEY as string);
   const lensClient = new LensClient({
     environment: production
   });

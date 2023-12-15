@@ -1,10 +1,10 @@
-import BUILDERFI_ACCOUNT from "@/lib/viemServer";
+import { getAccount } from "@/lib/viemServer";
 import { TextOnlyMetadata } from "@lens-protocol/metadata";
 import lighthouse from "@lighthouse-web3/sdk";
 import axios from "axios";
 
 export const getApiKey = async () => {
-  const wallet = BUILDERFI_ACCOUNT;
+  const wallet = await getAccount(process.env.PRIVATE_KEY as string);;
   const verificationMessage = (
     await axios.get(`https://api.lighthouse.storage/api/auth/get_message?publicKey=${wallet.publicKey}`)
   ).data;
