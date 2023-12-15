@@ -43,6 +43,10 @@ export const storeTransaction = async (privyUserId: string, hash: `0x${string}`)
   });
 
   if (!transaction) {
+    const block = await client.getBlock({
+      blockHash: onchainTransaction.blockHash
+    });
+
     transaction = await prisma.trade.create({
       data: {
         hash: hash,
@@ -53,7 +57,8 @@ export const storeTransaction = async (privyUserId: string, hash: `0x${string}`)
         ownerFee: eventLog.args.builderEthAmount,
         block: onchainTransaction.blockNumber,
         holderAddress: eventLog.args.builder.toLowerCase(),
-        ownerAddress: eventLog.args.trader.toLowerCase()
+        ownerAddress: eventLog.args.trader.toLowerCase(),
+        blockTimestamp: block.timestamp
       }
     });
   }
@@ -160,6 +165,10 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
         }
       });
 
+      const block = await client.getBlock({
+        blockHash: log.blockHash
+      });
+
       if (!transaction) {
         transaction = await prisma.trade.create({
           data: {
@@ -170,6 +179,7 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
             protocolFee: log.args.protocolEthAmount,
             ownerFee: log.args.builderEthAmount,
             block: log.blockNumber,
+            blockTimestamp: block.timestamp,
             holderAddress: log.args.builder.toLowerCase(),
             ownerAddress: log.args.trader.toLowerCase()
           }

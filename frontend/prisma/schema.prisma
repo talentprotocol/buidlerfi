@@ -195,15 +195,16 @@ model Tag {
 model Trade {
   id Int @id @default(autoincrement())
 
-  holderAddress String
-  ownerAddress  String
-  amount        BigInt
-  ethCost       BigInt?
-  protocolFee   BigInt?
-  ownerFee      BigInt?
-  block         BigInt
-  chainId       Int
-  hash          String  @unique
+  holderAddress  String
+  ownerAddress   String
+  amount         BigInt
+  ethCost        BigInt?
+  protocolFee    BigInt?
+  ownerFee       BigInt?
+  block          BigInt
+  chainId        Int
+  hash           String  @unique
+  blockTimestamp BigInt?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
