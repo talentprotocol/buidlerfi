@@ -21,7 +21,7 @@ interface EventLog {
   };
 }
 
-const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber: bigint) => {
+const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber: bigint, timestamp: bigint) => {
   let transaction = await prisma.trade.findFirst({
     where: {
       hash: hash
@@ -38,6 +38,7 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
         protocolFee: log.args.protocolEthAmount,
         ownerFee: log.args.builderEthAmount,
         block: blockNumber,
+        timestamp: timestamp,
         holderAddress: log.args.builder.toLowerCase(),
         ownerAddress: log.args.trader.toLowerCase()
       }
@@ -115,7 +116,11 @@ export const storeTransaction = async (hash: `0x${string}`) => {
     return { error: ERRORS.NOT_FOUND };
   }
 
-  await storeTransactionInternal(eventLog, hash, onchainTransaction.blockNumber);
+  const block = await viemClient.getBlock({
+    blockHash: onchainTransaction.blockHash
+  });
+
+  await storeTransactionInternal(eventLog, hash, onchainTransaction.blockNumber, block.timestamp);
 
   return { data: hash };
 };
@@ -149,8 +154,8 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
   console.log("--------------------");
   console.log("START SYNC FROM BLOCK: ", lastProcessedBlock);
 
-  for (let i = lastProcessedBlock; i < latestBlock; i += 10000n) {
-    const searchUntil = i + 10000n;
+  for (let i = lastProcessedBlock; i < latestBlock; i += 100n) {
+    const searchUntil = i + 100n;
     const logs = await viemClient.getLogs({
       address: BUILDERFI_CONTRACT.address,
       event: parseAbiItem(BUIILDER_FI_V1_EVENT_SIGNATURE),
@@ -163,7 +168,13 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
     console.log("SEARCHED TO: ", searchUntil);
 
     for (const log of logs) {
-      await storeTransactionInternal(log, log.blockHash, log.blockNumber).catch(err => console.error(err));
+      const block = await viemClient.getBlock({
+        blockHash: log.blockHash
+      });
+
+      await storeTransactionInternal(log, log.blockHash, log.blockNumber, block.timestamp).catch(err =>
+        console.error(err)
+      );
     }
 
     await prisma.systemSetting.update({
