@@ -122,7 +122,7 @@ export const deleteQuestion = async (privyUserId: string, questionId: number) =>
       }
     });
 
-    //Make sure to delete reactions when deleting question
+    // Make sure to delete reactions when deleting question
     await tx.reaction.deleteMany({
       where: {
         questionId: questionId
