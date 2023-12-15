@@ -37,9 +37,9 @@ export default function FundPage() {
       currencyCode: "ETH_BASE", // Purchase ETH on Ethereum mainnet
       quoteCurrencyAmount: 0.05, // Purchase 0.05 ETH
       paymentMethod: "credit_debit_card" // Purchase with credit or debit card
-    } as MoonpayConfig;
+    } as unknown;
 
-    await wallet.fund({ config: fundWalletConfig });
+    await wallet.fund({ config: fundWalletConfig as MoonpayConfig });
   };
 
   const closeAndRefresh = () => {
