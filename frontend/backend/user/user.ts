@@ -322,7 +322,7 @@ export const getRecommendedUsers = async (address: string) => {
 };
 
 export const getRecommendedUser = async (wallet: string) => {
-  if (!wallet) return { data: null };
+  if (!wallet) return { data: undefined };
 
   const address = wallet.toLowerCase();
   const res = await prisma.recommendedUser.findFirst({
