@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
 import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
+import { Prisma } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
 import { sendNotification } from "../notification/notification";
@@ -256,6 +257,71 @@ Wallet: ${publicKey}
   return { data: res };
 };
 
+export type getUsersArgs = Omit<Prisma.UserFindManyArgs, "include" | "take" | "skip">;
+
+export const getUsers = async (privyUserId: string, args: getUsersArgs, offset: number) => {
+  const currentUser = await prisma.user.findUnique({ where: { privyUserId } });
+
+  const users = await prisma.user.findMany({
+    where: {
+      ...args.where
+    },
+    include: {
+      keysOfSelf: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      },
+      keysOwned: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      },
+      recommendedTo: {
+        where: {
+          forId: currentUser?.id
+        }
+      }
+    },
+    take: PAGINATION_LIMIT,
+    orderBy: args.orderBy,
+    skip: offset
+  });
+
+  return { data: users };
+};
+
+type TopUser = Prisma.$UserPayload["scalars"] & {
+  soldKeys: number;
+  numberOfHolders: number;
+  questions: number;
+  replies: number;
+};
+
+export const getTopUsers = async (offset: number) => {
+  const users = (await prisma.$queryRaw`
+    SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "soldKeys",
+    CAST(COUNT(DISTINCT "KeyRelationship"."holderId") AS INTEGER) as "numberOfHolders",
+    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "questions",
+    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "replies"
+    FROM "User"
+    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
+    LEFT JOIN "Question" ON "User".id = "Question"."replierId"
+    WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
+    GROUP BY "User".id
+    ORDER BY "soldKeys" DESC
+    LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
+  `) as TopUser[];
+
+  console.log(users);
+
+  return { data: users };
+};
+
 export const getBulkUsers = async (addresses: string[]) => {
   // get all users
   const usersWithReplies = await prisma.user.findMany({
@@ -340,45 +406,42 @@ export const getRecommendedUser = async (wallet: string) => {
   return { data: { ...res, avatarUrl: sanitizeAvatarUrl(res.avatarUrl || "") } };
 };
 
+type SearchUser = Prisma.$UserPayload["scalars"] & {
+  soldKeys: number;
+  numberOfHolders: number;
+  questions: number;
+  replies: number;
+};
+
 export const search = async (searchValue: string, offset: number) => {
-  const res = await prisma.user.findMany({
-    skip: offset,
-    take: PAGINATION_LIMIT,
-    where: {
-      isActive: true,
-      hasFinishedOnboarding: true,
-      OR: [
-        {
-          socialProfiles: {
-            some: {
-              profileName: {
-                contains: searchValue,
-                mode: "insensitive"
-              }
-            }
-          }
-        },
-        {
-          wallet: {
-            contains: searchValue,
-            mode: "insensitive"
-          }
-        },
-        {
-          socialWallet: {
-            contains: searchValue,
-            mode: "insensitive"
-          }
-        }
-      ]
-    },
-    include: {
-      socialProfiles: true,
-      tags: true
-    }
-  });
+  //We use raw query to order by soldKeys
+  const users = (await prisma.$queryRaw`
+    SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "soldKeys",
+    CAST(COUNT(DISTINCT "KeyRelationship"."holderId") AS INTEGER) as "numberOfHolders",
+    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "questions",
+    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "replies"
+    FROM "User"
+    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
+    LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId"
+    LEFT JOIN "Question" ON "User".id = "Question"."replierId"
+    WHERE "User"."isActive" = true 
+      AND "User"."hasFinishedOnboarding" = true 
+      AND (
+        "User"."wallet" ILIKE '%' || ${searchValue} || '%'
+        OR "User"."socialWallet" ILIKE '%' || ${searchValue} || '%'
+        OR EXISTS (
+          SELECT 1
+          FROM "SocialProfile"
+          WHERE "SocialProfile"."userId" = "User".id
+            AND "SocialProfile"."profileName" ILIKE '%' || ${searchValue} || '%'
+        )
+      )
+    GROUP BY "User".id
+    ORDER BY "soldKeys" DESC
+    LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
+  `) as SearchUser[];
 
   return {
-    data: res
+    data: users
   };
 };

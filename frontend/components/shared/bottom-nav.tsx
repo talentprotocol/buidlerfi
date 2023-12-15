@@ -15,7 +15,7 @@ export function BottomNav() {
   const { notifications } = useUserContext();
 
   const unreadNotifsCount = useMemo(
-    () => notifications?.filter(notification => !notification.isRead).length,
+    () => notifications?.filter(notification => !notification.isRead).length || 0,
     [notifications]
   );
 

@@ -10,7 +10,10 @@ import {
   getCurrentUser,
   getRecommendedUser,
   getRecommendedUsers,
+  getTopUsers,
   getUser,
+  getUsers,
+  getUsersArgs,
   linkNewWallet,
   refreshAllUsersProfile,
   refreshCurrentUserProfile,
@@ -24,6 +27,14 @@ export const getCurrentUserSA = (options: ServerActionOptions) => {
 
 export const getUserSA = (wallet: string, options: ServerActionOptions) => {
   return serverActionWrapper(() => getUser(wallet), options);
+};
+
+export const getUsersSA = (args: getUsersArgs, options: ServerActionOptions) => {
+  return serverActionWrapper(data => getUsers(data.privyUserId, args, options.pagination?.offset || 0), options);
+};
+
+export const getTopUsersSA = (options: ServerActionOptions) => {
+  return serverActionWrapper(() => getTopUsers(options.pagination?.offset || 0), options);
 };
 
 export const createUserSA = (inviteCode: string, options: ServerActionOptions) => {

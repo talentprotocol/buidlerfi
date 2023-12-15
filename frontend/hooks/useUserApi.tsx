@@ -1,4 +1,4 @@
-import { UpdateUserArgs } from "@/backend/user/user";
+import { UpdateUserArgs, getUsersArgs } from "@/backend/user/user";
 import {
   checkUsersExistSA,
   createUserSA,
@@ -6,7 +6,9 @@ import {
   getCurrentUserSA,
   getRecommendedUserSA,
   getRecommendedUsersSA,
+  getTopUsersSA,
   getUserSA,
+  getUsersSA,
   linkNewWalletSA,
   refreshCurrentUserProfileSA,
   searchSA,
@@ -37,6 +39,14 @@ export const useGetUser = (address?: string, reactQueryOptions?: { enabled?: boo
     enabled: !!address,
     ...reactQueryOptions
   });
+};
+
+export const useGetUsers = (args: getUsersArgs) => {
+  return useInfiniteQuerySA(["useGetUsers"], async options => getUsersSA(args, options));
+};
+
+export const useGetTopUsers = () => {
+  return useInfiniteQuerySA(["useGetTopUsers"], async options => getTopUsersSA(options));
 };
 
 export const useGetCurrentUser = () => {

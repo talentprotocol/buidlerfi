@@ -1,6 +1,6 @@
 "use server";
 import { ServerActionOptions, serverActionWrapper } from "@/lib/serverActionWrapper";
-import { Prisma, ReactionType } from "@prisma/client";
+import { ReactionType } from "@prisma/client";
 import {
   addReaction,
   createQuestion,
@@ -11,6 +11,7 @@ import {
   getHotQuestions,
   getQuestion,
   getQuestions,
+  getQuestionsArgs,
   getReactions
 } from "./question";
 
@@ -30,7 +31,7 @@ export const deleteReactionSA = async (
   return serverActionWrapper(data => deleteReaction(data.privyUserId, questionId, reactionType), options);
 };
 
-export const getQuestionsSA = (args: Prisma.QuestionFindManyArgs, options: ServerActionOptions) => {
+export const getQuestionsSA = (args: getQuestionsArgs, options: ServerActionOptions) => {
   return serverActionWrapper(() => getQuestions(args, options.pagination?.offset || 0), options);
 };
 

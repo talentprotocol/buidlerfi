@@ -161,7 +161,9 @@ export async function getReactions(questionId: number, type: "like" | "upvote") 
   return { data: reactions };
 }
 
-export async function getQuestions(args: Prisma.QuestionFindManyArgs, offset: number) {
+export type getQuestionsArgs = Omit<Prisma.QuestionFindManyArgs, "include" | "take" | "skip">;
+
+export async function getQuestions(args: getQuestionsArgs, offset: number) {
   const questions = await prisma.question.findMany({
     where: {
       ...args.where

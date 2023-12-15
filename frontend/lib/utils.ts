@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import { differenceInMinutes } from "date-fns";
 import { URLSearchParams } from "url";
-import { formatUnits } from "viem";
+import { formatUnits, parseEther } from "viem";
 
 export const shortAddress = (address: string) => {
   return `${address.toLowerCase().slice(0, 6)}...${address.toLowerCase().slice(-4)}`;
@@ -110,3 +110,14 @@ export const getDifference = (date?: Date) => {
 export function isNumeric(n: string) {
   return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
 }
+
+export const calculateSharePrice = (supply: number) => {
+  if (supply === 0) {
+    return 0;
+  }
+
+  const sum1 = ((supply - 1) * supply * (2 * supply - 1)) / 6;
+  const sum2 = (supply * (supply + 1) * (2 * supply + 1)) / 6;
+
+  return (BigInt(sum2 - sum1) * parseEther("1")) / BigInt(16000);
+};

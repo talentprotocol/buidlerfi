@@ -28,7 +28,10 @@ export const useInfiniteQuerySA = <TResponse extends Array<unknown>, TQueryKey e
     }
   );
 
-  const res = useMemo(() => ({ ...query, data: query.data?.pages.flatMap(page => page) as TResponse }), [query]);
+  const res = useMemo(
+    () => ({ ...query, data: query.data?.pages.flatMap(page => page) as TResponse | undefined }),
+    [query]
+  );
 
   return res;
 };

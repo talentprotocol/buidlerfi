@@ -1,3 +1,4 @@
+import { getQuestionsArgs } from "@/backend/question/question";
 import {
   addReactionSA,
   createQuestionSA,
@@ -11,7 +12,7 @@ import {
   getReactionsSA
 } from "@/backend/question/questionServerActions";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
-import { Prisma, ReactionType } from "@prisma/client";
+import { ReactionType } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
 import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
@@ -24,7 +25,7 @@ export function useGetQuestion(id: number, queryOptions?: SimpleUseQueryOptions)
   });
 }
 
-export const useGetQuestions = (args: Prisma.QuestionFindManyArgs, queryOptions?: SimpleUseQueryOptions) => {
+export const useGetQuestions = (args: getQuestionsArgs, queryOptions?: SimpleUseQueryOptions) => {
   return useInfiniteQuerySA(["useGetQuestions", args], options => getQuestionsSA(args, options), {
     enabled: !!args,
     ...queryOptions

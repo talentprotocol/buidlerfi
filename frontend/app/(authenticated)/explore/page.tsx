@@ -10,8 +10,7 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { UserItem } from "@/components/shared/user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useOnchainUsers } from "@/hooks/useBuilderFiApi";
-import { useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
+import { useGetTopUsers, useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
 import { PersonSearchOutlined, SupervisorAccountOutlined } from "@mui/icons-material";
 import { TabPanel, Tabs } from "@mui/joy";
 import { useState } from "react";
@@ -21,7 +20,7 @@ export default function ExplorePage() {
   const [searchValue, setSearchValue] = useState("");
 
   const { user } = useUserContext();
-  const { users, nextPage, isInitialLoading, hasMoreUsers, isLoading: isLoadingMoreUsers } = useOnchainUsers();
+  const { data: users, fetchNextPage, hasNextPage, isLoading: isLoadingMoreUsers, isInitialLoading } = useGetTopUsers();
   const router = useBetterRouter();
 
   const { isLoading: isLoadingRecommendedUsers, data: recommendedUsers } = useRecommendedUsers(
@@ -53,7 +52,7 @@ export default function ExplorePage() {
           {isInitialLoading ? (
             <LoadingPage />
           ) : (
-            users.map(user => (
+            users?.map(user => (
               <div key={user.id}>
                 <UserItem
                   user={{
@@ -65,11 +64,7 @@ export default function ExplorePage() {
               </div>
             ))
           )}
-          <LoadMoreButton
-            nextPage={nextPage}
-            isLoading={isLoadingMoreUsers}
-            hidden={isInitialLoading || !hasMoreUsers}
-          />
+          <LoadMoreButton nextPage={fetchNextPage} isLoading={isLoadingMoreUsers} hidden={hasNextPage} />
         </TabPanel>
         <TabPanel value="Friends">
           {isLoadingRecommendedUsers ? (

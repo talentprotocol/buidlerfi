@@ -1,6 +1,7 @@
 import { useGetHolders } from "@/hooks/useBuilderFiApi";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
+import { useGetRecommendedUser } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useParams } from "next/navigation";
 import { ReactNode, createContext, useContext } from "react";
