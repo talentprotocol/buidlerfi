@@ -1,3 +1,4 @@
+import { storeTransactionAction } from "@/hooks/useTransaction";
 import { BUILDERFI_CONTRACT } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
 import { useRef } from "react";
@@ -102,6 +103,7 @@ const TRADE_DATA = {
 
 export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorFn?: () => void) => {
   const toastId = useRef<string | number | undefined>(undefined);
+  const storeTransaction = storeTransactionAction();
 
   const {
     data: tx,
@@ -110,7 +112,8 @@ export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorF
   } = useContractWrite({
     ...BUILDERFI_CONTRACT,
     functionName: TRADE_DATA[side].functionName,
-    onSuccess: () => {
+    onSuccess: async data => {
+      await storeTransaction.mutateAsync(data.hash);
       toastId.current = toast("Transaction submitted!", { isLoading: true });
     },
     onError: (err: any) => {

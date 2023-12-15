@@ -14,15 +14,21 @@ export const GRAPH_URL =
   process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_GRAPH_URL : BASE_GOERLI_GRAPH_URL;
 export const BASE_MAINNET_CHAIN_ID = 8453;
 export const BASE_TESTNET_CHAIN_ID = 84531;
+export const BASE_TESTNET_START_BLOCK = 12338536n;
+export const BASE_MAINNET_START_BLOCK = 6495600n;
 export const IN_USE_CHAIN_ID =
   process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_CHAIN_ID : BASE_TESTNET_CHAIN_ID;
 export const BUILDERFI_CONTRACT = {
   address: process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET : BASE_GOERLI_TESTNET,
-  abi: builderFIV1Abi
+  abi: builderFIV1Abi,
+  startBlock:
+    process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_START_BLOCK : BASE_TESTNET_START_BLOCK
 } as const;
 export const THE_GRAPH_PAGE_SIZE = 50;
 export const MIN_QUESTION_LENGTH = 10;
 export const MAX_QUESTION_LENGTH = 280;
+export const BUIILDER_FI_V1_EVENT_SIGNATURE =
+  "event Trade(address trader,address builder,bool isBuy,uint256 shareAmount,uint256 ethAmount,uint256 protocolEthAmount,uint256 builderEthAmount,uint256 supply,uint256 nextPrice)";
 
 // NON-APP CONSTANTS
 export const FAQ_LINK = "https://www.notion.so/talentprotocol/builder-fi-FAQ-dcebfe7103b34d11aba90de032173b39";
