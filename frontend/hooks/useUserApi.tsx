@@ -1,4 +1,4 @@
-import { UpdateUserArgs, getUsersArgs } from "@/backend/user/user";
+import { GetUsersArgs, UpdateUserArgs } from "@/backend/user/user";
 import {
   checkUsersExistSA,
   createUserSA,
@@ -41,7 +41,7 @@ export const useGetUser = (address?: string, reactQueryOptions?: { enabled?: boo
   });
 };
 
-export const useGetUsers = (args: getUsersArgs) => {
+export const useGetUsers = (args: GetUsersArgs) => {
   return useInfiniteQuerySA(["useGetUsers"], async options => getUsersSA(args, options));
 };
 

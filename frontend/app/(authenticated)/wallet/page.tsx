@@ -2,19 +2,21 @@
 import { ExportIcon } from "@/components/icons/export";
 import { Flex } from "@/components/shared/flex";
 import { FundWalletModal } from "@/components/shared/fundTransferModal";
+import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { RoundButton } from "@/components/shared/roundButton";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { UserItemFromAddress } from "@/components/shared/user-item";
+import { TransactionEntry } from "@/components/shared/transaction-entry";
 import { WalletAddress } from "@/components/shared/wallet-address";
 import { WithdrawDialog } from "@/components/shared/withdraw-modal";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
+import { useGetMyGetTransactions } from "@/hooks/useTransaction";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
-import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
-import { ArrowDownwardOutlined, ArrowUpwardOutlined, KeyOutlined } from "@mui/icons-material";
+import { formatToDisplayString, sortIntoPeriods, tryParseBigInt } from "@/lib/utils";
+import { ArrowDownwardOutlined, ArrowUpwardOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Button, DialogTitle, Divider, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
 import { Transak, TransakConfig } from "@transak/transak-sdk";
 import { useMemo, useState } from "react";
@@ -45,6 +47,14 @@ export default function ChatsPage() {
     return [holding, tradingFees];
   }, [mainWallet, allHolding, builderFiData]);
 
+  const {
+    data: myTransactions,
+    isLoading: isTransactionHistoryLoading,
+    fetchNextPage,
+    hasNextPage
+  } = useGetMyGetTransactions("both");
+  const sortedTransactions = sortIntoPeriods(myTransactions || []);
+
   if (isLoading) {
     return <LoadingPage />;
   }
@@ -66,7 +76,7 @@ export default function ChatsPage() {
   };
 
   return (
-    <Flex y grow gap2 component={"main"}>
+    <Flex y grow component={"main"}>
       {openWithdraw && (
         <WithdrawDialog
           formattedBalance={formatToDisplayString(balance?.value, balance?.decimals)}
@@ -126,26 +136,36 @@ export default function ChatsPage() {
           </Typography>
         </Button>
       </Flex>
-      <Divider />
-      <Flex y grow px={2}>
-        <Typography level="h4" mb={1}>
-          {allHolding ? `Holding(${allHolding.length})` : "Holding"}
+      <Flex y grow>
+        <Typography level="h4" mb={1} px={2}>
+          Transaction history
         </Typography>
-        {!allHolding || allHolding?.length === 0 ? (
+        {isTransactionHistoryLoading ? (
+          <LoadingPage />
+        ) : !myTransactions || myTransactions?.length === 0 ? (
           <PageMessage
-            icon={<KeyOutlined />}
-            title="You don't have any keys"
-            text="This space is where you'll find all your expert key holdings."
+            icon={<HistoryOutlined />}
+            title="No transaction history"
+            text="This space is where you'll find all your transactions history."
           />
         ) : (
-          allHolding.map(item => (
-            <UserItemFromAddress
-              address={item.owner.owner as `0x${string}`}
-              buyPrice={tryParseBigInt(item.owner.buyPrice)}
-              numberOfHolders={Number(item.owner.numberOfHolders)}
-              key={`home-${item.owner.owner}`}
-            />
-          ))
+          <>
+            {Object.keys(sortedTransactions)
+              .filter(key => sortedTransactions[key as keyof typeof sortedTransactions].length > 0)
+              .map(key => {
+                return (
+                  <Flex y key={key}>
+                    <Typography sx={{ px: 2, py: 1 }}>{key}</Typography>
+                    {sortedTransactions[key as keyof typeof sortedTransactions]?.map(transaction => {
+                      return (
+                        <TransactionEntry key={transaction.id} transaction={transaction} type="your" feeType="price" />
+                      );
+                    })}
+                  </Flex>
+                );
+              })}
+            <LoadMoreButton isLoading={isTransactionHistoryLoading} nextPage={fetchNextPage} hidden={!hasNextPage} />
+          </>
         )}
       </Flex>
       {fundModalType === "deposit" && (

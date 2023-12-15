@@ -257,9 +257,9 @@ Wallet: ${publicKey}
   return { data: res };
 };
 
-export type getUsersArgs = Omit<Prisma.UserFindManyArgs, "include" | "take" | "skip">;
+export type GetUsersArgs = Omit<Prisma.UserFindManyArgs, "include" | "take" | "skip">;
 
-export const getUsers = async (privyUserId: string, args: getUsersArgs, offset: number) => {
+export const getUsers = async (privyUserId: string, args: GetUsersArgs, offset: number) => {
   const currentUser = await prisma.user.findUnique({ where: { privyUserId } });
 
   const users = await prisma.user.findMany({

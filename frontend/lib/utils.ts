@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { differenceInMinutes } from "date-fns";
+import { differenceInMinutes, startOfDay, subDays, subMonths } from "date-fns";
 import { URLSearchParams } from "url";
 import { formatUnits, parseEther } from "viem";
 
@@ -121,3 +121,30 @@ export const calculateSharePrice = (supply: number) => {
 
   return (BigInt(sum2 - sum1) * parseEther("1")) / BigInt(16000);
 };
+
+//Sort any item into periods. Param must be any array of items with a createdAt field
+export function sortIntoPeriods<T extends { createdAt: Date }>(toSort: T[]) {
+  const now = new Date();
+  const today = startOfDay(now);
+  const lastWeek = subDays(now, 7);
+  const lastMonth = subMonths(now, 1);
+  const lastYear = subMonths(now, 12);
+
+  const sorted = {
+    today: [] as T[],
+    "last 7 days": [] as T[],
+    "last 30 days": [] as T[],
+    "last year": [] as T[],
+    "all time": [] as T[]
+  };
+
+  toSort.forEach(item => {
+    if (item.createdAt > today) sorted["today"].push(item);
+    else if (item.createdAt > lastWeek) sorted["last 7 days"].push(item);
+    else if (item.createdAt > lastMonth) sorted["last 30 days"].push(item);
+    else if (item.createdAt > lastYear) sorted["last year"].push(item);
+    else sorted["all time"].push(item);
+  });
+
+  return sorted;
+}

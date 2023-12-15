@@ -2,6 +2,8 @@
 import { QuestionEntry } from "@/components/app/[wallet]/question-entry";
 import { WelcomeModal } from "@/components/app/welcome-modal";
 import { Flex } from "@/components/shared/flex";
+import { LoadMoreButton } from "@/components/shared/loadMoreButton";
+import { LoadingPage } from "@/components/shared/loadingPage";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
@@ -15,14 +17,25 @@ export default function Home() {
   const router = useBetterRouter();
   const [selectedTab, setSelectedTab] = useState("new");
 
-  const { data: newQuestions } = useGetQuestions(
-    { orderBy: { createdAt: "desc" } },
-    { enabled: selectedTab === "new" }
-  );
-  const { data: hotQuestions } = useGetHotQuestions({ enabled: selectedTab === "hot" });
-
+  const {
+    data: newQuestions,
+    isLoading: newIsLoading,
+    hasNextPage: newHasNextPage,
+    fetchNextPage: fetchNewNextPage
+  } = useGetQuestions({ orderBy: { createdAt: "desc" } }, { enabled: selectedTab === "new" });
+  const {
+    data: hotQuestions,
+    isLoading: hotIsLoading,
+    hasNextPage: hotHasNextPage,
+    fetchNextPage: fetchHotNextPage
+  } = useGetHotQuestions({ enabled: selectedTab === "hot" });
   const { data: allHolding } = useGetHoldings(user?.wallet as `0x${string}`);
-  const { data: keysQuestions } = useGetQuestions({
+  const {
+    data: keysQuestions,
+    fetchNextPage: fetchKeysNextPage,
+    isLoading: keysIsLoading,
+    hasNextPage: keysHasNextPage
+  } = useGetQuestions({
     orderBy: { createdAt: "desc" },
     where: {
       replier: {
@@ -42,6 +55,7 @@ export default function Home() {
           <Tab value="keys">Keys</Tab>
         </TabList>
         <TabPanel value="new">
+          {newIsLoading && <LoadingPage />}
           {newQuestions?.map(question => (
             <QuestionEntry
               type="home"
@@ -50,8 +64,10 @@ export default function Home() {
               onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
+          {<LoadMoreButton isLoading={newIsLoading} nextPage={fetchNewNextPage} hidden={!newHasNextPage} />}
         </TabPanel>
         <TabPanel value="hot">
+          {hotIsLoading && <LoadingPage />}
           {hotQuestions?.map(question => (
             <QuestionEntry
               type="home"
@@ -60,8 +76,10 @@ export default function Home() {
               onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
+          {<LoadMoreButton isLoading={hotIsLoading} nextPage={fetchHotNextPage} hidden={!hotHasNextPage} />}
         </TabPanel>
         <TabPanel value="keys">
+          {keysIsLoading && <LoadingPage />}
           {keysQuestions?.map(question => (
             <QuestionEntry
               type="home"
@@ -70,6 +88,7 @@ export default function Home() {
               onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
+          {<LoadMoreButton isLoading={keysIsLoading} nextPage={fetchKeysNextPage} hidden={!keysHasNextPage} />}
         </TabPanel>
       </Tabs>
     </Flex>

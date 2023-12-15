@@ -2,6 +2,7 @@
 
 import { ServerActionOptions, serverActionWrapper } from "../../lib/serverActionWrapper";
 import {
+  GetUsersArgs,
   UpdateUserArgs,
   checkUsersExist,
   createUser,
@@ -13,7 +14,6 @@ import {
   getTopUsers,
   getUser,
   getUsers,
-  getUsersArgs,
   linkNewWallet,
   refreshAllUsersProfile,
   refreshCurrentUserProfile,
@@ -29,7 +29,7 @@ export const getUserSA = (wallet: string, options: ServerActionOptions) => {
   return serverActionWrapper(() => getUser(wallet), options);
 };
 
-export const getUsersSA = (args: getUsersArgs, options: ServerActionOptions) => {
+export const getUsersSA = (args: GetUsersArgs, options: ServerActionOptions) => {
   return serverActionWrapper(data => getUsers(data.privyUserId, args, options.pagination?.offset || 0), options);
 };
 

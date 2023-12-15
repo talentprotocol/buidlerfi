@@ -23,14 +23,15 @@ interface UserItemProps extends CommonProps {
   user: {
     id: number;
     wallet: string;
-    avatarUrl?: string;
-    displayName?: string;
+    avatarUrl?: string | null;
+    displayName?: string | null;
     isLoading?: boolean;
     buyPrice?: string | bigint;
     numberOfHolders?: string | number;
     questions?: number;
     replies?: number;
     tags?: Tag[];
+    keysHeld?: number;
   };
 }
 
@@ -61,14 +62,15 @@ export const UserItemFromAddress: FC<Props> = ({ address, numberOfHolders, buyPr
 interface UserItemInnerProps extends CommonProps {
   userId: number;
   wallet: string;
-  avatarUrl?: string;
-  displayName?: string;
+  avatarUrl?: string | null;
+  displayName?: string | null;
   isLoading?: boolean;
   buyPrice?: bigint;
   numberOfHolders?: number;
   questions?: number;
   replies?: number;
   tags?: Tag[];
+  keysHeld?: number;
 }
 
 const UserItemInner: FC<UserItemInnerProps> = ({
@@ -86,7 +88,8 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   isButton = true,
   nameLevel = "body-sm",
   onClick,
-  hideChevron = false
+  hideChevron = false,
+  keysHeld
 }) => {
   const router = useRouter();
 
@@ -95,6 +98,7 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   };
 
   const renderDescription = () => {
+    console.log({ questions, replies, numberOfHolders, buyPrice, tags, keysHeld });
     if (questions !== undefined && replies !== undefined) {
       if (numberOfHolders !== undefined) {
         return (
@@ -120,6 +124,12 @@ const UserItemInner: FC<UserItemInnerProps> = ({
       return (
         <Typography textColor={"neutral.600"} level="body-sm">
           {tags.map(tag => tag.name).join(", ")}
+        </Typography>
+      );
+    } else if (keysHeld !== undefined) {
+      return (
+        <Typography textColor={"neutral.600"} level="body-sm">
+          {keysHeld} {pluralize("key", keysHeld)}
         </Typography>
       );
     }

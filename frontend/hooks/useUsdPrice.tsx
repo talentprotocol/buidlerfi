@@ -25,7 +25,7 @@ export const useUsdPrice = ({
   }, [ethAmount, ethAmountInWei]);
 
   return {
-    bigint: ethWei * BigInt(ethPrice),
-    formattedString: formatToDisplayString(ethWei * BigInt(ethPrice), 18, 2)
+    bigint: BigInt(ethWei) * BigInt(ethPrice),
+    formattedString: formatToDisplayString(BigInt(ethWei) * BigInt(ethPrice), 18, 2)
   };
 };

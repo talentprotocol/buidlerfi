@@ -1,9 +1,10 @@
 "use server";
 import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { BUIILDER_FI_V1_EVENT_SIGNATURE, BUILDERFI_CONTRACT, IN_USE_CHAIN_ID } from "@/lib/constants";
+import { BUIILDER_FI_V1_EVENT_SIGNATURE, BUILDERFI_CONTRACT, IN_USE_CHAIN_ID, PAGINATION_LIMIT } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { prisma } from "@/lib/prisma";
 import viemClient from "@/lib/viemClient";
+import _ from "lodash";
 import { decodeEventLog, parseAbiItem } from "viem";
 
 interface EventLog {
@@ -177,4 +178,68 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
   }
 
   return { data: "success" };
+};
+
+export const getMyTransactions = async (privyUserId: string, side: "holder" | "owner" | "both", offset: number) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      privyUserId: privyUserId
+    }
+  });
+
+  const transactions = await prisma.trade.findMany({
+    where:
+      side === "both"
+        ? {
+            OR: [
+              {
+                holderAddress: user.wallet.toLowerCase()
+              },
+              {
+                ownerAddress: user.wallet.toLowerCase()
+              }
+            ]
+          }
+        : side === "owner"
+        ? {
+            ownerAddress: user.wallet.toLowerCase()
+          }
+        : {
+            holderAddress: user.wallet.toLowerCase()
+          },
+    orderBy: {
+      block: "desc"
+    },
+    skip: offset,
+    take: PAGINATION_LIMIT
+  });
+
+  console.log(transactions);
+
+  const uniqueWallets = _.uniq([...transactions.map(t => t.holderAddress), ...transactions.map(t => t.ownerAddress)]);
+
+  const users = await prisma.user.findMany({
+    where: {
+      wallet: {
+        in: uniqueWallets
+      }
+    }
+  });
+
+  const userMap = new Map<string, (typeof users)[number]>();
+  for (const user of users) {
+    userMap.set(user.wallet.toLowerCase(), user);
+  }
+
+  const res = transactions
+    .filter(tx => userMap.has(tx.holderAddress.toLowerCase()) && userMap.has(tx.ownerAddress.toLowerCase()))
+    .map(transaction => ({
+      ...transaction,
+      holder: userMap.get(transaction.holderAddress.toLowerCase()),
+      owner: userMap.get(transaction.ownerAddress.toLowerCase())
+    }));
+
+  console.log(res);
+
+  return { data: res };
 };

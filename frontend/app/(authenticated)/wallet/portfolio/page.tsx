@@ -2,9 +2,13 @@
 
 import { KeyIcon } from "@/components/icons/key";
 import { Flex } from "@/components/shared/flex";
+import { LoadingPage } from "@/components/shared/loadingPage";
+import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
+import { UserItem } from "@/components/shared/user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
+import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useUsdPrice } from "@/hooks/useUsdPrice";
 import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
 import { Typography } from "@mui/joy";
@@ -22,10 +26,15 @@ export default function PortfolioPage() {
 
   const { formattedString } = useUsdPrice({ ethAmountInWei: portfolio });
 
+  const { data: holding, isLoading } = useGetKeyRelationships({
+    orderBy: { amount: "desc" },
+    where: { holderId: user?.id, amount: { gt: 0 } }
+  });
+
   return (
-    <Flex y grow component="main" gap1 p={2}>
+    <Flex y grow component="main" gap1>
       <InjectTopBar withBack title="Portfolio" />
-      <Flex x yc gap1>
+      <Flex x yc gap1 p={2}>
         <Flex
           y
           xc
@@ -43,6 +52,22 @@ export default function PortfolioPage() {
           </Typography>
           <Typography level="body-sm">${formattedString}</Typography>
         </Flex>
+      </Flex>
+      <Flex y grow>
+        <Typography px={2} fontWeight={600} level="body-sm">
+          My keys
+        </Typography>
+        {isLoading ? (
+          <LoadingPage />
+        ) : !holding || holding?.length === 0 ? (
+          <PageMessage
+            icon={<KeyIcon />}
+            title="You don't have any keys"
+            text="This space is where you'll find all your expert key holdings."
+          />
+        ) : (
+          holding?.map(key => <UserItem key={key.id} user={{ ...key.owner, keysHeld: Number(key.amount) }} />)
+        )}
       </Flex>
     </Flex>
   );
