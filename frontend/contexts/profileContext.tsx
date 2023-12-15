@@ -5,19 +5,6 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useParams } from "next/navigation";
 import { ReactNode, createContext, useContext } from "react";
 
-interface RecommendedUser {
-  userId: number | null;
-  wallet: string;
-  avatarUrl: string | null;
-  ens: string | null;
-  farcaster: string | null;
-  lens: string | null;
-  talentProtocol: string | null;
-  createdAt: Date;
-  questions?: number;
-  replies?: number;
-}
-
 interface ProfileContextType {
   holders: ReturnType<typeof useGetHolders>["data"];
   supporterNumber?: number;
@@ -26,7 +13,7 @@ interface ProfileContextType {
   isLoading: boolean;
   refetch: () => Promise<unknown>;
   socialData: SocialData;
-  recommendedUser?: RecommendedUser;
+  recommendedUser?: ReturnType<typeof useGetRecommendedUser>["data"];
   isOwnProfile: boolean;
   questions: ReturnType<typeof useGetQuestions>["data"];
 }
@@ -51,13 +38,15 @@ const ProfileContext = createContext<ProfileContextType>({
     socialsList: []
   },
   recommendedUser: {
+    forId: 0,
+    id: 0,
+    recommendationScore: 0,
     avatarUrl: "",
+    updatedAt: new Date(),
     createdAt: new Date(),
     ens: "",
     farcaster: "",
     lens: "",
-    questions: 0,
-    replies: 0,
     talentProtocol: "",
     userId: 0,
     wallet: ""
