@@ -21,5 +21,6 @@ export const ERRORS = {
   QUESTION_LENGTH_INVALID: `Question too long or too short. Maximum ${MAX_QUESTION_LENGTH} and minimum ${MIN_QUESTION_LENGTH} characters`,
   ALREADY_REPLIED: "Cannot edit or delete a question that has already been replied",
   USER_NOT_ON_FARCASTER: "User not on farcaster",
-  TAGS_COUNT_INVALID: "You can only select up to 3 tags"
+  TAGS_COUNT_INVALID: "You can only select up to 3 tags",
+  NOT_FOUND: "Not found"
 } as const;

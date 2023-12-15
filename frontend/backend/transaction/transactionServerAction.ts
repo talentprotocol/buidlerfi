@@ -4,7 +4,7 @@ import { ServerActionOptions, serverActionWrapper } from "../../lib/serverAction
 import { processAnyPendingTransactions, storeTransaction } from "./transaction";
 
 export const storeTransactionSA = (hash: `0x${string}`, options: ServerActionOptions) => {
-  return serverActionWrapper(data => storeTransaction(data.privyUserId, hash), options);
+  return serverActionWrapper(() => storeTransaction(hash), options);
 };
 
 export const processPendingTransactionsSA = (options: ServerActionOptions) => {
