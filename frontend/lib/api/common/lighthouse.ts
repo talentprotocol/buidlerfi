@@ -1,4 +1,5 @@
 import BUILDERFI_ACCOUNT from "@/lib/viemServer";
+import { TextOnlyMetadata } from "@lens-protocol/metadata";
 import lighthouse from "@lighthouse-web3/sdk";
 import axios from "axios";
 
@@ -12,10 +13,10 @@ export const getApiKey = async () => {
   return response;
 };
 
-export const uploadJson = async (name: string, object: Record<string, never>) => {
+export const uploadJson = async (name: string, payload: TextOnlyMetadata) => {
   const apiKey = process.env.LIGHTHOUSE_API_KEY as string;
 
-  const response = await lighthouse.uploadText(JSON.stringify(object), apiKey, name);
+  const response = await lighthouse.uploadText(JSON.stringify(payload), apiKey, name);
 
   return response;
 };

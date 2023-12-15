@@ -70,8 +70,6 @@ export const publishLensPost = async (title: string, description: string, conten
   });
   const metadata = preparePostMetadata(title, description, content, externalUrl);
 
-  console.log(metadata);
-
   const { data } = await uploadJson(title, metadata);
 
   const { hash } = data;
