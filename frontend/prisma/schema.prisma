@@ -24,6 +24,8 @@ model User {
   isAdmin                     Boolean   @default(false)
   hasFinishedOnboarding       Boolean   @default(false)
   lastRecommendationsSyncedAt DateTime?
+  keyBuyPrice                 BigInt?
+  keySellPrice                BigInt?
 
   questions      Question[]      @relation("questioner")
   replies        Question[]      @relation("replier")
