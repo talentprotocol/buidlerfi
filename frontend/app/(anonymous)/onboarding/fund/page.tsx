@@ -21,8 +21,6 @@ export default function FundPage() {
 
   const { setActiveWallet, wallet } = usePrivyWagmi();
   const { wallets } = useWallets();
-  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
-  const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
