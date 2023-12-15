@@ -56,4 +56,4 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR =
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
   "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";
 
-export const BUILDERFI_FARCASTER_FID = 196040;
+export const BUILDERFI_FARCASTER_FID = 210833;
