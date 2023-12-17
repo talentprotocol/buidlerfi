@@ -51,8 +51,3 @@ export const NEW_BUILDERFI_ANSWER_POST_TITLE =  "builder.fi questions & answers"
 
 export const NEW_BUILDERFI_USER_POST = "{user} just launched their keys on builder.fi!\n\n{link}";
 export const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
-export const NEW_BUILDERFI_USER_POST_TITLE =  "new builder.fi keys";
-
-// TODO: replace when we have a real app id and real profile id
-export const BUILDERFI_LENS_APP_ID = "builderFiLensAppId";
-export const BUILDERFI_LENS_PROFILE_ID = "builderFiLensProfileId";
