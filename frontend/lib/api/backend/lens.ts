@@ -11,7 +11,7 @@ import {
 import { getAccount } from "@/lib/viemServer";
 import { LensClient, production } from "@lens-protocol/client";
 import { textOnly } from "@lens-protocol/metadata";
-import { uploadJson } from "../common/lighthouse";
+import { uploadJSONToIPFS } from "../common/pinata";
 
 /* eslint-disable camelcase */
 interface Lens {
@@ -70,12 +70,10 @@ export const publishLensPost = async (title: string, description: string, conten
   });
   const metadata = preparePostMetadata(title, description, content, externalUrl);
 
-  const { data } = await uploadJson(title, metadata);
-
-  const { hash } = data;
+  const { IpfsHash } = await uploadJSONToIPFS(title, metadata);
 
   return await lensClient.publication.postOnchain({
-    contentURI: `ipfs://${hash}` // or arweave
+    contentURI: `ipfs://${IpfsHash}` // or arweave
   });
 };
 
