@@ -3,11 +3,11 @@ import {
   checkUsersExistSA,
   createUserSA,
   generateChallengeSA,
-  getCurrentUserSA,
   getRecommendedUserSA,
   getRecommendedUsersSA,
   getTopUsersSA,
   getUserSA,
+  getUserStatsSA,
   getUsersSA,
   linkNewWalletSA,
   refreshCurrentUserProfileSA,
@@ -16,7 +16,6 @@ import {
 } from "@/backend/user/userServerActions";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { Prisma } from "@prisma/client";
-import { usePrivy } from "@privy-io/react-auth";
 import { useDebounce } from "./useDebounce";
 import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
 import { useMutationSA } from "./useMutationSA";
@@ -47,11 +46,6 @@ export const useGetUsers = (args: GetUsersArgs) => {
 
 export const useGetTopUsers = () => {
   return useInfiniteQuerySA(["useGetTopUsers"], async options => getTopUsersSA(options));
-};
-
-export const useGetCurrentUser = () => {
-  const { user } = usePrivy();
-  return useQuerySA(["useGetCurrentUser", user?.id], getCurrentUserSA);
 };
 
 export const useRefreshCurrentUser = () => {
@@ -91,5 +85,11 @@ export const useSearch = (searchValue: string, queryOptions?: SimpleUseQueryOpti
   return useInfiniteQuerySA(["useSearch", debouncedValue], async options => searchSA(debouncedValue, options), {
     enabled: !!debouncedValue,
     ...queryOptions
+  });
+};
+
+export const useGetUserStats = (userId?: number) => {
+  return useQuerySA(["useGetUserStats", userId], async options => getUserStatsSA(userId!, options), {
+    enabled: !!userId
   });
 };

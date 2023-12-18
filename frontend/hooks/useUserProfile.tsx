@@ -1,33 +1,23 @@
-import { useGetHolders } from "@/hooks/useBuilderFiApi";
+import { useUserContext } from "@/contexts/userContext";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { useSocialData } from "@/hooks/useSocialData";
-import { useGetCurrentUser, useGetRecommendedUser } from "@/hooks/useUserApi";
-import { useWallets } from "@privy-io/react-auth";
-import { usePrivyWagmi } from "@privy-io/wagmi-connector";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useGetRecommendedUser } from "@/hooks/useUserApi";
+import { useCallback, useMemo } from "react";
+import { useGetKeyRelationships } from "./useKeyRelationshipApi";
 
 export const useUserProfile = (wallet?: string) => {
-  const user = useGetCurrentUser();
-  const { setActiveWallet } = usePrivyWagmi();
-  const { wallets } = useWallets();
-  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
+  const { user } = useUserContext();
+  const {
+    data: holders,
+    refetch,
+    isLoading: isLoadingHolders
+  } = useGetKeyRelationships({ where: { owner: { wallet: wallet } } });
 
-  //Ensure the active wallet is the embedded wallet from Privy
-  useEffect(() => {
-    const found = wallets.find(wal => wal.connectorType === "embedded");
-    if (found) {
-      setActiveWallet(found);
-      setMainWallet(found.address);
-    } else {
-      setMainWallet(user.data?.wallet);
-    }
-  }, [setActiveWallet, wallets]);
-
-  //Ensure the active wallet is the embedded wallet from Privy
-  useEffect(() => {
-    const found = wallets.find(wal => wal.connectorType === "embedded");
-    if (found) setActiveWallet(found);
-  }, [setActiveWallet, wallets]);
+  const {
+    data: holdings,
+    refetch: refetchHoldings,
+    isLoading: isLoadingHoldings
+  } = useGetKeyRelationships({ where: { holder: { wallet: wallet } } });
 
   const { isLoading: isLoadingRecommendedUser, data: recommendedUser } = useGetRecommendedUser(wallet as `0x${string}`);
 
@@ -37,54 +27,51 @@ export const useUserProfile = (wallet?: string) => {
     refetch: refetchQuestions,
     isLoading: isQuestionsLoading
   } = useGetQuestions({ where: { replierId: socialData.userId } });
-  const { data: holders, isLoading, refetch } = useGetHolders(wallet as `0x${string}`);
-
-  const [supporterNumber, ownedKeysCount] = useMemo(() => {
-    if (!holders) return [undefined, undefined];
-
-    const holder = holders.find(holder => holder.holder.owner.toLowerCase() === mainWallet?.toLowerCase());
-    if (!holder) return [undefined, 0];
-    else return [Number(holder.supporterNumber), Number(holder.heldKeyNumber)];
-  }, [mainWallet, holders]);
-
-  const hasKeys = useMemo(() => !!ownedKeysCount && ownedKeysCount > 0, [ownedKeysCount]);
 
   const sortedHolders = useMemo(
-    () => holders?.sort((a, b) => Number(a.supporterNumber) - Number(b.supporterNumber)),
+    () => holders?.sort((a, b) => a.createdAt.valueOf() - b.createdAt.valueOf()),
     [holders]
   );
 
+  const [myShares, supporterNumber] = useMemo(() => {
+    if (!holders) return [undefined, undefined];
+    const index = holders.findIndex(h => h.holder.id === user?.id);
+    return [holders[index], index + 1];
+  }, [holders, user?.id]);
+
   const refetchAll = useCallback(async () => {
-    await Promise.all([refetch(), refetchQuestions()]);
-  }, [refetch, refetchQuestions]);
+    await Promise.all([refetch(), refetchQuestions(), refetchHoldings()]);
+  }, [refetch, refetchHoldings, refetchQuestions]);
 
   const value = useMemo(() => {
     return {
       holders: sortedHolders,
-      supporterNumber: supporterNumber,
-      ownedKeysCount: ownedKeysCount || 0,
-      hasKeys,
-      isLoading: isLoading || isQuestionsLoading || isLoadingRecommendedUser,
+      holdings,
+      supporterNumber,
+      ownedKeysCount: Number(myShares?.amount) || 0,
+      hasKeys: (myShares && myShares.amount > BigInt(0)) || false,
+      isLoading: isLoadingHolders || isQuestionsLoading || isLoadingRecommendedUser || isLoadingHoldings,
       questions,
       refetch: refetchAll,
       socialData,
       recommendedUser,
-      isOwnProfile: mainWallet?.toLowerCase() === wallet?.toLowerCase()
+      isOwnProfile: user?.wallet?.toLowerCase() === wallet?.toLowerCase()
     };
   }, [
     sortedHolders,
+    holdings,
     supporterNumber,
-    ownedKeysCount,
-    hasKeys,
-    isLoading,
+    myShares,
+    isLoadingHolders,
     isQuestionsLoading,
+    isLoadingRecommendedUser,
+    isLoadingHoldings,
     questions,
     refetchAll,
     socialData,
-    mainWallet,
-    wallet,
-    isLoadingRecommendedUser,
-    recommendedUser
+    recommendedUser,
+    user?.wallet,
+    wallet
   ]);
 
   return value;

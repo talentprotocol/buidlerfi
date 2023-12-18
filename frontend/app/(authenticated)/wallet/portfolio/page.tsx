@@ -5,7 +5,7 @@ import { Flex } from "@/components/shared/flex";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { UserItem } from "@/components/shared/user-item";
+import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
@@ -66,7 +66,9 @@ export default function PortfolioPage() {
             text="This space is where you'll find all your expert key holdings."
           />
         ) : (
-          holding?.map(key => <UserItem key={key.id} user={{ ...key.owner, keysHeld: Number(key.amount) }} />)
+          holding?.map(key => (
+            <UnifiedUserItem key={key.id} user={key.owner} holderInfo={{ numberOfKeys: Number(key.amount) }} />
+          ))
         )}
       </Flex>
     </Flex>

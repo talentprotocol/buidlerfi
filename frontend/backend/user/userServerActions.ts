@@ -13,6 +13,7 @@ import {
   getRecommendedUsers,
   getTopUsers,
   getUser,
+  getUserStats,
   getUsers,
   linkNewWallet,
   refreshAllUsersProfile,
@@ -80,4 +81,8 @@ export const getRecommendedUsersSA = (address: string, options: ServerActionOpti
 
 export const searchSA = (searchValue: string, options: ServerActionOptions) => {
   return serverActionWrapper(() => search(searchValue, options.pagination?.offset || 0), options);
+};
+
+export const getUserStatsSA = (userId: number, options: ServerActionOptions) => {
+  return serverActionWrapper(() => getUserStats(userId), options);
 };

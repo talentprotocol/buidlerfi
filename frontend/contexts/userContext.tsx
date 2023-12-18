@@ -1,10 +1,16 @@
+import { getCurrentUserSA } from "@/backend/user/userServerActions";
+import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useGetNotifications } from "@/hooks/useNotificationApi";
 import { usePrevious } from "@/hooks/usePrevious";
-import { useGetCurrentUser } from "@/hooks/useUserApi";
+import { useQuerySA } from "@/hooks/useQuerySA";
 import { User as PrivyUser, usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useBalance } from "wagmi";
+
+const useGetCurrentUser = (privyUserId?: string) => {
+  return useQuerySA(["useGetCurrentUser", privyUserId], getCurrentUserSA, { enabled: !!privyUserId });
+};
 
 interface UserContextType {
   user?: ReturnType<typeof useGetCurrentUser>["data"];
@@ -20,6 +26,7 @@ interface UserContextType {
   notifications?: ReturnType<typeof useGetNotifications>["data"];
   refetchNotifications: () => Promise<unknown>;
   fetchNotificationNextPage: () => Promise<unknown>;
+  holding: ReturnType<typeof useGetKeyRelationships>["data"];
 }
 const userContext = createContext<UserContextType>({
   user: undefined,
@@ -32,12 +39,13 @@ const userContext = createContext<UserContextType>({
   balanceIsLoading: false,
   notifications: [],
   refetchNotifications: () => Promise.resolve(),
-  fetchNotificationNextPage: () => Promise.resolve()
+  fetchNotificationNextPage: () => Promise.resolve(),
+  holding: []
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { user: privyUser, ready, authenticated: privyAuthenticated } = usePrivy();
-  const user = useGetCurrentUser();
+  const user = useGetCurrentUser(privyUser?.id);
   const {
     data: balance,
     refetch: refetchBalance,
@@ -52,6 +60,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     refetch: refetchNotifications,
     fetchNextPage: fetchNotificationNextPage
   } = useGetNotifications();
+
+  const { data: holding } = useGetKeyRelationships({ where: { holderId: user.data?.id, amount: { gt: 0 } } });
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
@@ -92,7 +102,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       balanceIsLoading,
       notifications,
       refetchNotifications,
-      fetchNotificationNextPage
+      fetchNotificationNextPage,
+      holding
     }),
     [
       balance?.value,
@@ -108,7 +119,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       mainWallet,
       notifications,
       refetchNotifications,
-      fetchNotificationNextPage
+      fetchNotificationNextPage,
+      holding
     ]
   );
 

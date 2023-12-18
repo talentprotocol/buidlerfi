@@ -50,12 +50,12 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
 
   const refetchAll = async () => {
     await refetch();
-    await socialData.refetch();
+    await socialData?.refetch();
   };
 
   const { linkWallet } = useLinkExternalWallet();
 
-  const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData.wallet);
+  const { buyPrice, isLoading, supply } = useGetBuilderInfo(socialData?.wallet);
   const refreshData = useRefreshCurrentUser();
 
   const handleLinkOrRefreshWallet = async () => {
@@ -77,7 +77,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
   };
 
   const avatarUrl = useMemo(() => {
-    return socialData.avatarUrl || recommendedUser?.avatarUrl || "";
+    return socialData?.avatarUrl || recommendedUser?.avatarUrl || "";
   }, [socialData, recommendedUser]);
 
   const recommendedName = () =>
@@ -87,11 +87,11 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
     recommendedUser?.ens ||
     shortAddress(recommendedUser?.wallet || "");
 
-  const name = useMemo(() => socialData.displayName || recommendedName(), [socialData, recommendedUser]);
+  const name = useMemo(() => socialData?.displayName || recommendedName(), [socialData, recommendedUser]);
 
   const allSocials = useMemo(() => {
-    if (socialData.socialsList.length > 0) {
-      return socialData.socialsList;
+    if (socialData?.socialsList.length) {
+      return socialData?.socialsList;
     } else {
       const otherSocials = [];
 
@@ -155,11 +155,11 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
           <Flex y fullwidth>
             {!!name ? (
               <Typography level="h3">
-                <Skeleton loading={socialData.isLoading}>{name}</Skeleton>
+                <Skeleton loading={!socialData || socialData.isLoading}>{name}</Skeleton>
               </Typography>
             ) : (
               <WalletAddress
-                address={socialData.wallet || recommendedUser?.wallet || ""}
+                address={socialData?.wallet || recommendedUser?.wallet || ""}
                 level="h3"
                 removeCopyButton={!isOwnProfile}
               />
@@ -173,7 +173,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
                 <>
                   •
                   <WalletAddress
-                    address={socialData.wallet || recommendedUser?.wallet || ""}
+                    address={socialData?.wallet || recommendedUser?.wallet || ""}
                     level="body-sm"
                     removeCopyButton={!isOwnProfile}
                   />
@@ -208,7 +208,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
                   key={social.dappName}
                   href={additionalData.url(
                     social.profileName,
-                    socialData.socialAddress || recommendedUser?.wallet || ""
+                    socialData?.socialAddress || recommendedUser?.wallet || ""
                   )}
                   target="_blank"
                   textColor={"link"}
@@ -221,7 +221,7 @@ export const Overview: FC<Props> = ({ setBuyModalState }) => {
 
         {ownedKeysCount === 0 ? (
           <Typography level="body-sm">
-            {socialData.userId ? "You don't own any keys" : `${name} is not on builder.fi yet`}
+            {socialData?.userId ? "You don't own any keys" : `${name} is not on builder.fi yet`}
           </Typography>
         ) : (
           <Flex x gap2>

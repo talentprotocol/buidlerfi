@@ -7,7 +7,7 @@ import { LoadingPage } from "@/components/shared/loadingPage";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetHoldings } from "@/hooks/useBuilderFiApi";
+import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useGetHotQuestions, useGetQuestions } from "@/hooks/useQuestionsApi";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useState } from "react";
@@ -16,6 +16,10 @@ export default function Home() {
   const { user } = useUserContext();
   const router = useBetterRouter();
   const [selectedTab, setSelectedTab] = useState("new");
+
+  const { data: allHolding } = useGetKeyRelationships({
+    where: { holderId: user?.id, amount: { gt: 0 } }
+  });
 
   const {
     data: newQuestions,
@@ -29,7 +33,7 @@ export default function Home() {
     hasNextPage: hotHasNextPage,
     fetchNextPage: fetchHotNextPage
   } = useGetHotQuestions({ enabled: selectedTab === "hot" });
-  const { data: allHolding } = useGetHoldings(user?.wallet as `0x${string}`);
+
   const {
     data: keysQuestions,
     fetchNextPage: fetchKeysNextPage,
@@ -39,7 +43,7 @@ export default function Home() {
     orderBy: { createdAt: "desc" },
     where: {
       replier: {
-        wallet: { in: allHolding?.map(holding => holding.owner.owner).filter(wallet => wallet !== user?.wallet) }
+        id: { in: allHolding?.map(holding => holding.owner.id) }
       }
     }
   });

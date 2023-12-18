@@ -3,9 +3,9 @@ import { BUILDERFI_CONTRACT } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
 import { useRef } from "react";
 import { toast } from "react-toastify";
-import { useContractRead, useContractWrite, useWaitForTransaction } from "wagmi";
+import { useContractRead, useContractWrite } from "wagmi";
 
-export const useGetBuilderInfo = (address: string) => {
+export const useGetBuilderInfo = (address?: string) => {
   const { data: buyPriceAfterFee, refetch: refetchBuyPriceAfterFee } = useContractRead({
     ...BUILDERFI_CONTRACT,
     functionName: "getBuyPriceAfterFee",
@@ -103,29 +103,8 @@ const TRADE_DATA = {
 
 export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorFn?: () => void) => {
   const toastId = useRef<string | number | undefined>(undefined);
-  const storeTransaction = useStoreTransactionAction();
 
-  const {
-    data: tx,
-    writeAsync,
-    isLoading
-  } = useContractWrite({
-    ...BUILDERFI_CONTRACT,
-    functionName: TRADE_DATA[side].functionName,
-    onSuccess: async data => {
-      await storeTransaction.mutateAsync(data.hash);
-      toastId.current = toast("Transaction submitted!", { isLoading: true });
-    },
-    onError: (err: any) => {
-      if (err?.shortMessage !== "User rejected the request.") {
-        toast.error("There was an error processing your transaction: " + formatError(err));
-      }
-      errorFn && errorFn();
-    }
-  });
-
-  const { isLoading: txProcessing } = useWaitForTransaction({
-    hash: tx?.hash,
+  const processTransaction = useStoreTransactionAction({
     onSuccess: () => {
       toast.update(toastId.current!, {
         render: TRADE_DATA[side].successMsg,
@@ -137,5 +116,20 @@ export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorF
     }
   });
 
-  return { isLoading: isLoading || txProcessing, executeTx: writeAsync };
+  const { writeAsync, isLoading } = useContractWrite({
+    ...BUILDERFI_CONTRACT,
+    functionName: TRADE_DATA[side].functionName,
+    onSuccess: async data => {
+      await processTransaction.mutateAsync(data.hash);
+      toastId.current = toast("Transaction submitted!", { isLoading: true });
+    },
+    onError: (err: any) => {
+      if (err?.shortMessage !== "User rejected the request.") {
+        toast.error("There was an error processing your transaction: " + formatError(err));
+      }
+      errorFn && errorFn();
+    }
+  });
+
+  return { isLoading: isLoading || processTransaction.isLoading, executeTx: writeAsync };
 };

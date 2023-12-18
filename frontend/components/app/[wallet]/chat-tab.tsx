@@ -23,7 +23,7 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
       <PageMessage
         title="Unlock Q&A"
         icon={<LockOutlined />}
-        text={`Hold at least one key to ask ${socialData.displayName} a question and access the answers`}
+        text={`Hold at least one key to ask ${socialData?.displayName} a question and access the answers`}
       />
     );
   }
@@ -71,7 +71,7 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
         <Flex y grow sx={{ "& > div:last-child": { border: "none" } }}>
           {hasKeys && !questions?.length ? (
             <PageMessage
-              text={`Congratulations. You can now ask ${socialData.displayName} a question.`}
+              text={`Congratulations. You can now ask ${socialData?.displayName} a question.`}
               icon={<LockOpen />}
             />
           ) : (

@@ -22,7 +22,7 @@ export const TransactionEntry: FC<Props> = ({ transaction, type, feeType }) => {
     () => (user?.id === transaction.holder?.id ? transaction.owner : transaction.holder),
     [transaction.holder, transaction.owner, user?.id]
   );
-  const timeDiff = getDifference(transaction.createdAt);
+  const timeDiff = getDifference(new Date(Number(transaction.timestamp) * 1000));
   const { formattedString } = useUsdPrice({ ethAmountInWei: transaction.ethCost || BigInt(0) });
   return (
     <Flex x px={2} pb={2} gap1>

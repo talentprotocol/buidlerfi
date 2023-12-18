@@ -42,7 +42,7 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
 };
 
 export const getCurrentUser = async (privyUserId: string) => {
-  const res = await prisma.user.findUnique({
+  const res = await prisma.user.findUniqueOrThrow({
     where: {
       privyUserId: privyUserId
     },
@@ -298,16 +298,16 @@ export const getUsers = async (privyUserId: string, args: GetUsersArgs, offset: 
 type TopUser = Prisma.$UserPayload["scalars"] & {
   soldKeys: number;
   numberOfHolders: number;
-  questions: number;
-  replies: number;
+  numberOfQuestions: number;
+  numberOfReplies: number;
 };
 
 export const getTopUsers = async (offset: number) => {
   const users = (await prisma.$queryRaw`
     SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "soldKeys",
     CAST(COUNT(DISTINCT "KeyRelationship"."holderId") AS INTEGER) as "numberOfHolders",
-    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "questions",
-    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "replies"
+    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "numberOfQuestions",
+    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "numberOfReplies"
     FROM "User"
     LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
     LEFT JOIN "Question" ON "User".id = "Question"."replierId"
@@ -316,8 +316,6 @@ export const getTopUsers = async (offset: number) => {
     ORDER BY "soldKeys" DESC
     LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
   `) as TopUser[];
-
-  console.log(users);
 
   return { data: users };
 };
@@ -409,8 +407,8 @@ export const getRecommendedUser = async (wallet: string) => {
 type SearchUser = Prisma.$UserPayload["scalars"] & {
   soldKeys: number;
   numberOfHolders: number;
-  questions: number;
-  replies: number;
+  numberOfQuestions: number;
+  numberOfReplies: number;
 };
 
 export const search = async (searchValue: string, offset: number) => {
@@ -418,8 +416,8 @@ export const search = async (searchValue: string, offset: number) => {
   const users = (await prisma.$queryRaw`
     SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "soldKeys",
     CAST(COUNT(DISTINCT "KeyRelationship"."holderId") AS INTEGER) as "numberOfHolders",
-    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "questions",
-    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "replies"
+    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "numberOfQuestions",
+    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "numberOfReplies"
     FROM "User"
     LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
     LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId"
@@ -443,5 +441,31 @@ export const search = async (searchValue: string, offset: number) => {
 
   return {
     data: users
+  };
+};
+
+export const getUserStats = async (id: number) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: id
+    },
+    include: {
+      replies: true,
+      keysOfSelf: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    }
+  });
+
+  return {
+    data: {
+      numberOfHolders: user.keysOfSelf.length,
+      numberOfQuestions: user.replies.length,
+      numberOfReplies: user.replies.filter(reply => !!reply.repliedOn).length
+    }
   };
 };

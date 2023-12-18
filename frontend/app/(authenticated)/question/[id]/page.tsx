@@ -7,10 +7,9 @@ import { FullTextArea } from "@/components/shared/full-text-area";
 import { PageMessage } from "@/components/shared/page-message";
 import { Reactions } from "@/components/shared/reactions";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { UserItemFromAddress } from "@/components/shared/user-item";
-import { useGetHolders } from "@/hooks/useBuilderFiApi";
-import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
+import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
+import { useGetUserStats } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { getDifference, shortAddress } from "@/lib/utils";
@@ -30,8 +29,7 @@ export default function QuestionPage() {
   const { hasKeys, socialData, isOwnProfile } = useUserProfile(question?.replier.wallet as `0x${string}`);
   const [reply, setReply] = useState("");
   const putQuestion = usePutQuestion();
-  const { buyPrice } = useGetBuilderInfo(socialData.wallet);
-  const { data: holders } = useGetHolders(question?.questioner.wallet as `0x${string}`);
+  const { data: questionerStats } = useGetUserStats(question?.questioner?.id);
 
   const replyQuestion = async () => {
     if (!question) return;
@@ -84,14 +82,12 @@ export default function QuestionPage() {
       <InjectTopBar title={socialData.displayName} withBack />
       <Flex y p={2} gap1>
         <Flex x yc xsb>
-          <UserItemFromAddress
-            isButton={false}
-            px={0}
-            py={0}
-            address={question.questioner.wallet as `0x${string}`}
-            buyPrice={buyPrice}
-            numberOfHolders={holders?.length}
+          <UnifiedUserItem
+            nonClickable
+            sx={{ px: 0, py: 0 }}
+            user={question.questioner}
             nameLevel="title-sm"
+            holdersAndReplies={questionerStats}
           />
           {isOwnProfile && (!question.repliedOn || isEditingReply) ? (
             <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>

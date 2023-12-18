@@ -7,7 +7,7 @@ import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { RecommendedUserItem } from "@/components/shared/recommended-user-item";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { UserItem } from "@/components/shared/user-item";
+import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetTopUsers, useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
@@ -54,11 +54,12 @@ export default function ExplorePage() {
           ) : (
             users?.map(user => (
               <div key={user.id}>
-                <UserItem
-                  user={{
-                    ...user,
-                    avatarUrl: user.avatarUrl || undefined,
-                    displayName: user.displayName || undefined
+                <UnifiedUserItem
+                  user={user}
+                  holdersAndReplies={{
+                    numberOfReplies: user.numberOfReplies,
+                    numberOfHolders: user.numberOfHolders,
+                    numberOfQuestions: user.numberOfQuestions
                   }}
                 />
               </div>
@@ -108,9 +109,14 @@ export default function ExplorePage() {
             />
           ) : (
             data?.map(user => (
-              <UserItem
+              <UnifiedUserItem
                 key={user.id}
-                user={{ ...user, avatarUrl: user.avatarUrl || undefined, displayName: user.displayName || undefined }}
+                user={user}
+                holdersAndReplies={{
+                  numberOfReplies: user.numberOfReplies,
+                  numberOfHolders: user.numberOfHolders,
+                  numberOfQuestions: user.numberOfQuestions
+                }}
               />
             ))
           )}

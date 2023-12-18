@@ -70,12 +70,17 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
         <IconButton onClick={e => handleAddReaction(e, "UPVOTE")} color={myVote === "UPVOTE" ? "primary" : undefined}>
           <ArrowUpward fontSize="small" />
         </IconButton>
-        <Typography textColor={myVote && "primary.500"} level="body-sm" textAlign="center" sx={{ minWidth: "35px" }}>
+        <Typography
+          textColor={!myVote ? undefined : myVote === "UPVOTE" ? "primary.500" : "danger.500"}
+          level="body-sm"
+          textAlign="center"
+          sx={{ minWidth: "35px" }}
+        >
           {upvotes}
         </Typography>
         <IconButton
           onClick={e => handleAddReaction(e, "DOWNVOTE")}
-          color={myVote === "DOWNVOTE" ? "primary" : undefined}
+          color={myVote === "DOWNVOTE" ? "danger" : undefined}
         >
           <ArrowDownward fontSize="small" />
         </IconButton>

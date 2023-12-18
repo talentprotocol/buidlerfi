@@ -7,8 +7,6 @@ import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { TransactionEntry } from "@/components/shared/transaction-entry";
-import { useUserContext } from "@/contexts/userContext";
-import { useBuilderFIData } from "@/hooks/useBuilderFiApi";
 import { useGetMyGetTransactions } from "@/hooks/useTransaction";
 import { useUsdPrice } from "@/hooks/useUsdPrice";
 import { formatToDisplayString, sortIntoPeriods } from "@/lib/utils";
@@ -17,18 +15,6 @@ import { Typography } from "@mui/joy";
 import { useMemo } from "react";
 
 export default function FeesPage() {
-  const { user } = useUserContext();
-  const { data: builderFiData } = useBuilderFIData();
-  const tradingFees = useMemo(() => {
-    if (!builderFiData) return BigInt(0);
-    const tradingFees = builderFiData.shareParticipants.find(
-      u => u.owner == user?.wallet?.toLowerCase()
-    )?.tradingFeesAmount;
-    return BigInt(tradingFees || 0);
-  }, [user?.wallet, builderFiData]);
-
-  const { formattedString } = useUsdPrice({ ethAmountInWei: tradingFees });
-
   const {
     data: myTransactions,
     isLoading: isTransactionHistoryLoading,
@@ -36,6 +22,12 @@ export default function FeesPage() {
     hasNextPage
   } = useGetMyGetTransactions("owner");
   const sortedTransactions = sortIntoPeriods(myTransactions || []);
+
+  const tradingFees = useMemo(() => {
+    return myTransactions?.reduce((prev, curr) => prev + BigInt(curr.ownerFee || 0), BigInt(0));
+  }, [myTransactions]);
+
+  const { formattedString } = useUsdPrice({ ethAmountInWei: tradingFees });
 
   return (
     <Flex y grow component="main" gap1>

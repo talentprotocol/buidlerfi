@@ -7,9 +7,10 @@ import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { UserItem } from "@/components/shared/user-item";
+import { UnifiedUserItem } from "@/components/shared/unified-user-item";
+import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useOnchainUsers } from "@/hooks/useBuilderFiApi";
+import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useSearch } from "@/hooks/useUserApi";
 import { PersonSearchOutlined } from "@mui/icons-material";
 import { Input, useTheme } from "@mui/joy";
@@ -17,10 +18,13 @@ import { useState } from "react";
 
 export default function QuestionPage() {
   const theme = useTheme();
+  const { user } = useUserContext();
   const [searchValue, setSearchValue] = useState("");
   const router = useBetterRouter();
   const { data, isLoading: isSearching, hasNextPage, fetchNextPage } = useSearch(searchValue);
-  const { users, nextPage, isInitialLoading, hasMoreUsers, isLoading: isLoadingMoreUsers } = useOnchainUsers();
+  const { data: holdings, isLoading } = useGetKeyRelationships({
+    where: { holderId: user?.id, amount: { gt: 0 }, NOT: [{ ownerId: user?.id }] }
+  });
   if (router.searchParams.ask) {
     return <AskQuestion />;
   }
@@ -41,28 +45,18 @@ export default function QuestionPage() {
 
       {!searchValue && (
         <Flex y grow>
-          {isInitialLoading ? (
+          {isLoading ? (
             <LoadingPage />
           ) : (
-            users.map(user => (
-              <div key={user.id}>
-                <UserItem
-                  user={{
-                    ...user,
-                    avatarUrl: user.avatarUrl || undefined,
-                    displayName: user.displayName || undefined
-                  }}
-                  hideChevron
-                  onClick={() => router.push({ searchParams: { ask: true, wallet: user.wallet } })}
-                />
-              </div>
+            holdings?.map(holding => (
+              <UnifiedUserItem
+                key={holding.id}
+                user={holding.owner}
+                hideChevron
+                onClick={() => router.push({ searchParams: { ask: true, wallet: holding.owner.wallet } })}
+              />
             ))
           )}
-          <LoadMoreButton
-            nextPage={nextPage}
-            isLoading={isLoadingMoreUsers}
-            hidden={isInitialLoading || !hasMoreUsers}
-          />
         </Flex>
       )}
 
@@ -78,10 +72,16 @@ export default function QuestionPage() {
             />
           ) : (
             data?.map(user => (
-              <UserItem
+              <UnifiedUserItem
                 key={user.id}
-                user={{ ...user, avatarUrl: user.avatarUrl || undefined, displayName: user.displayName || undefined }}
+                user={user}
                 hideChevron
+                holdersAndReplies={{
+                  numberOfReplies: user.numberOfReplies,
+                  numberOfHolders: user.numberOfHolders,
+                  numberOfQuestions: user.numberOfQuestions
+                }}
+                onClick={() => router.push({ searchParams: { ask: true, wallet: user.wallet } })}
               />
             ))
           )}

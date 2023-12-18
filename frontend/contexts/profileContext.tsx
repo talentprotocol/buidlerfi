@@ -1,4 +1,4 @@
-import { useGetHolders } from "@/hooks/useBuilderFiApi";
+import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useGetQuestions } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { useGetRecommendedUser } from "@/hooks/useUserApi";
@@ -7,13 +7,14 @@ import { useParams } from "next/navigation";
 import { ReactNode, createContext, useContext } from "react";
 
 interface ProfileContextType {
-  holders: ReturnType<typeof useGetHolders>["data"];
+  holders: ReturnType<typeof useGetKeyRelationships>["data"];
+  holdings: ReturnType<typeof useGetKeyRelationships>["data"];
   supporterNumber?: number;
   ownedKeysCount: number;
   hasKeys: boolean;
   isLoading: boolean;
   refetch: () => Promise<unknown>;
-  socialData: SocialData;
+  socialData?: SocialData;
   recommendedUser?: ReturnType<typeof useGetRecommendedUser>["data"];
   isOwnProfile: boolean;
   questions: ReturnType<typeof useGetQuestions>["data"];
@@ -22,36 +23,12 @@ interface ProfileContextType {
 const ProfileContext = createContext<ProfileContextType>({
   hasKeys: false,
   holders: [],
+  holdings: [],
   ownedKeysCount: 0,
   supporterNumber: 0,
   isLoading: true,
   refetch: () => Promise.resolve(),
   questions: [],
-  socialData: {
-    userId: 0,
-    wallet: "0x",
-    avatarUrl: "",
-    hasDisplayName: false,
-    isLoading: true,
-    displayName: "",
-    refetch: () => Promise.resolve(),
-    socialAddress: "",
-    socialsList: []
-  },
-  recommendedUser: {
-    forId: 0,
-    id: 0,
-    recommendationScore: 0,
-    avatarUrl: "",
-    updatedAt: new Date(),
-    createdAt: new Date(),
-    ens: "",
-    farcaster: "",
-    lens: "",
-    talentProtocol: "",
-    userId: 0,
-    wallet: ""
-  },
   isOwnProfile: false
 });
 

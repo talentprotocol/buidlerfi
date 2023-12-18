@@ -7,6 +7,7 @@ import { useEditQuestion, useGetQuestion, usePostQuestion } from "@/hooks/useQue
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
 import { FC, useState } from "react";
+import { toast } from "react-toastify";
 
 interface Props {
   questionToEdit?: number;
@@ -36,6 +37,11 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
   const isEditMode = questionToEdit !== undefined;
 
   const sendQuestion = async () => {
+    if (!socialData) {
+      toast.error("Not ready yet");
+      return;
+    }
+
     if (!questionContent.includes("?")) {
       setShowBadQuestionLabel(true);
       return;
@@ -79,7 +85,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
       <ModalDialog layout="center" sx={{ width: "min(100vw, 500px)", padding: 0, overflowY: "auto" }}>
         <Flex y gap2 p={2} grow>
           <Flex x xsb yc>
-            <Typography level="title-sm">Ask to {socialData.displayName}</Typography>
+            <Typography level="title-sm">Ask to {socialData?.displayName}</Typography>
             <Button
               loading={postQuestion.isLoading}
               disabled={questionContent.length < MIN_QUESTION_LENGTH || questionContent.length > MAX_QUESTION_LENGTH}
@@ -89,7 +95,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
             </Button>
           </Flex>
           <FullTextArea
-            placeholder={`Ask ${socialData.displayName} a question...`}
+            placeholder={`Ask ${socialData?.displayName} a question...`}
             avatarUrl={user?.avatarUrl || undefined}
             onChange={e => setQuestionContent(e.target.value)}
             value={questionContent}

@@ -25,7 +25,6 @@ import { useBalance } from "wagmi";
 export default function ChatsPage() {
   const { user } = useUserContext();
   const [fundModalType, setFundModalType] = useState<"deposit" | "transfer" | "bridge" | "none">("none");
-
   const router = useBetterRouter();
 
   const mainWallet = user?.wallet;
@@ -38,14 +37,11 @@ export default function ChatsPage() {
   const { data: allHolding } = useGetHoldings(mainWallet as `0x${string}`);
   const [openWithdraw, setOpenWithdraw] = useState<boolean>(false);
 
-  const [portfolio, tradingFees] = useMemo(() => {
-    if (!allHolding || !builderFiData) return [BigInt(0), BigInt(0)];
+  const portfolio = useMemo(() => {
+    if (!allHolding || !builderFiData) return BigInt(0);
     const holding = allHolding.reduce((prev, curr) => prev + tryParseBigInt(curr.owner.sellPrice), BigInt(0));
-    const tradingFees = builderFiData.shareParticipants.find(
-      user => user.owner == mainWallet?.toLowerCase()
-    )?.tradingFeesAmount;
-    return [holding, tradingFees];
-  }, [mainWallet, allHolding, builderFiData]);
+    return holding;
+  }, [allHolding, builderFiData]);
 
   const {
     data: myTransactions,
@@ -53,6 +49,15 @@ export default function ChatsPage() {
     fetchNextPage,
     hasNextPage
   } = useGetMyGetTransactions("both");
+
+  console.log(myTransactions);
+
+  const tradingFees = useMemo(() => {
+    return myTransactions
+      ?.filter(tx => tx.owner?.id === user?.id)
+      ?.reduce((prev, curr) => prev + BigInt(curr.ownerFee || 0), BigInt(0));
+  }, [myTransactions, user?.id]);
+
   const sortedTransactions = sortIntoPeriods(myTransactions || []);
 
   if (isLoading) {

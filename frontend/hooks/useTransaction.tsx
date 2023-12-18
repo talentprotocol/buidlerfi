@@ -5,13 +5,14 @@ import {
   processPendingTransactionsSA,
   storeTransactionSA
 } from "@/backend/transaction/transactionServerAction";
+import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
 import { useMutationSA } from "./useMutationSA";
 
-export const useStoreTransactionAction = () => {
+export const useStoreTransactionAction = (queryOptions: SimpleUseQueryOptions) => {
   return useMutationSA(async (options, hash: `0x${string}`) => {
     return storeTransactionSA(hash, options);
-  });
+  }, queryOptions);
 };
 
 export const useProcessPendingTransactions = () => {
