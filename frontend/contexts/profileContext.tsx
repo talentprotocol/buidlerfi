@@ -36,7 +36,7 @@ export const useProfileContext = () => useContext(ProfileContext);
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const { wallet } = useParams();
-  const value = useUserProfile(wallet as string);
+  const value = useUserProfile((wallet as string).toLowerCase());
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 };
