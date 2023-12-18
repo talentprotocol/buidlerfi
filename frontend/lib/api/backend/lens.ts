@@ -55,7 +55,7 @@ export const preparePostMetadata = (title: string, description: string, content:
   });
 
 export const publishLensPost = async (title: string, description: string, content: string, externalUrl: string) => {
-  const wallet = await getAccount(process.env.PRIVATE_KEY as string);
+  const wallet = await getAccount(process.env.WALLET_PRIVATE_KEY as string);
   const lensClient = new LensClient({
     environment: production
   });
