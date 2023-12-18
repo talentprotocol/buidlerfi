@@ -51,3 +51,17 @@ export const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c
 export const NEW_BUILDERFI_USER_CAST = "{user} just launched their keys on builder.fi!\n\n{link}";
 export const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
 export const UNISWAP_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+
+export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR =
+  "We couldn't post your question because {username} is not on builderfi yet.";
+
+export const NEW_BUILDERFI_QUESTION_REPLY_CAST =
+  "Your question has been successfully posted on builder.fi!\n\nRead it on {link}\n\nQuestions? Check our FAQ: builder.fi/faq";
+
+export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR =
+  "We couldn't post your question because @{username} is not on builder.fi yet.";
+
+export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
+  "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";
+
+export const BUILDERFI_FARCASTER_FID = 210833;

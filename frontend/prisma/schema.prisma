@@ -250,6 +250,7 @@ model Trade {
   block         BigInt
   chainId       Int
   hash          String  @unique
+  timestamp     BigInt?
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
