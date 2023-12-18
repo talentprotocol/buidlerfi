@@ -30,7 +30,6 @@
     "@standard-crypto/farcaster-js-neynar": "2.0.0",
     "@standard-crypto/farcaster-js-neynar": "2.0.0",
     "@tanstack/react-query": "^4.35.3",
-    "@transak/transak-sdk": "^2.0.1",
     "anchorme": "^3.0.5",
     "@supabase/supabase-js": "^2.39.0",
     "autoprefixer": "10.4.15",

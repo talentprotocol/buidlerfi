@@ -18,8 +18,9 @@ import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { formatToDisplayString, sortIntoPeriods, tryParseBigInt } from "@/lib/utils";
 import { ArrowDownwardOutlined, ArrowUpwardOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Button, DialogTitle, Divider, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
-import { Transak, TransakConfig } from "@transak/transak-sdk";
-import { useMemo, useState } from "react";
+import { MoonpayConfig, useWallets } from "@privy-io/react-auth";
+import { usePrivyWagmi } from "@privy-io/wagmi-connector";
+import { useEffect, useMemo, useState } from "react";
 import { useBalance } from "wagmi";
 
 export default function ChatsPage() {
@@ -27,8 +28,20 @@ export default function ChatsPage() {
   const [fundModalType, setFundModalType] = useState<"deposit" | "transfer" | "bridge" | "none">("none");
   const router = useBetterRouter();
 
-  const mainWallet = user?.wallet;
+  const { setActiveWallet, wallet } = usePrivyWagmi();
+  const { wallets } = useWallets();
+  const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
 
+  //Ensure the active wallet is the embedded wallet from Privy
+  useEffect(() => {
+    const found = wallets.find(wal => wal.walletClientType === "privy");
+    if (found) {
+      setActiveWallet(found);
+      setMainWallet(found.address);
+    } else {
+      setMainWallet(user?.wallet);
+    }
+  }, [setActiveWallet, wallets]);
   const { data: builderFiData, isLoading } = useBuilderFIData();
   const { data: balance, refetch: refetchBalance } = useBalance({
     address: mainWallet as `0x${string}`,
@@ -62,20 +75,16 @@ export default function ChatsPage() {
     return <LoadingPage />;
   }
 
-  const openTransak = () => {
-    const transakConfig: TransakConfig = {
-      apiKey: process.env.NEXT_PUBLIC_TRANSAK_KEY || "", // (Required)
-      environment: Transak.ENVIRONMENTS.PRODUCTION,
-      defaultNetwork: "base",
-      network: "base",
-      walletAddress: mainWallet,
-      productsAvailed: "buy",
-      cryptoCurrencyList: ["ETH"]
-    };
+  const openMoonpay = async () => {
+    if (!wallet) return;
 
-    const transak = new Transak(transakConfig);
+    const fundWalletConfig = {
+      currencyCode: "ETH_BASE", // Purchase ETH on Ethereum mainnet
+      quoteCurrencyAmount: 0.05, // Purchase 0.05 ETH
+      paymentMethod: "credit_debit_card" // Purchase with credit or debit card
+    } as unknown;
 
-    transak.init();
+    await wallet.fund({ config: fundWalletConfig as MoonpayConfig });
   };
 
   return (
@@ -186,7 +195,7 @@ export default function ChatsPage() {
               size="lg"
               onClick={() => {
                 setFundModalType("none");
-                openTransak();
+                openMoonpay();
               }}
               variant="soft"
             >
