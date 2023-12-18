@@ -1,11 +1,13 @@
 "use client";
 
 import { Flex } from "@/components/shared/flex";
+import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetInvitedUsers } from "@/hooks/useInviteCodeApi";
 import { useGetCurrentPosition } from "@/hooks/usePointApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
+
 import { shortAddress } from "@/lib/utils";
 import { Close, ContentCopy } from "@mui/icons-material";
 import { Avatar, Card, DialogTitle, Divider, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
@@ -48,6 +50,7 @@ export default function Invite() {
 
   return (
     <Flex y p={2}>
+      <InjectTopBar title="Points" withBack />
       <Typography textColor="neutral.800" level="h2" whiteSpace="pre-line">
         Invite builders. <br /> Earn points.
       </Typography>
