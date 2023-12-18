@@ -71,7 +71,6 @@ export const publishLensPost = async (title: string, description: string, conten
   const metadata = preparePostMetadata(title, description, content, externalUrl);
 
   const { IpfsHash } = await uploadJSONToIPFS(title, metadata);
-
   return await lensClient.publication.postOnchain({
     contentURI: `ipfs://${IpfsHash}` // or arweave
   });

@@ -63,7 +63,6 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
       const questionerName = questionerLens?.profileName
         ? `@lens/${questionerLens?.profileName}`
         : questioner?.displayName || shortAddress(questioner?.wallet || "");
-
       await publishNewQuestionLensPost(
         questionerName,
         replierName,
