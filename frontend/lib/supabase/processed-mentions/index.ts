@@ -5,8 +5,8 @@ export type SupabaseProcessedMention = Database["public"]["Tables"]["processed_m
 export type SupabaseProcessedMentionInsert = Database["public"]["Tables"]["processed_mentions_dev"]["Insert"];
 
 const envToTable = (tableName: string) => {
-  switch (process.env.NODE_ENV) {
-    case "development":
+  switch (process.env.NEXT_PUBLIC_CONTRACTS_ENV) {
+    case "dev":
       return `${tableName}_dev`;
     case "production":
       return `${tableName}_prod`;
