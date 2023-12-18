@@ -42,7 +42,7 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
       console.log("FOUND replier -> ", !!replierFarcaster);
 
       if (questionerFarcaster || replierFarcaster) {
-        // if one of the two has farcaster, publish the cast
+        // if one of the two has farcaster, publish the cast 
         const replierName = replierFarcaster?.profileName
           ? `@${replierFarcaster?.profileName}`
           : replier.displayName || shortAddress(replier.wallet || "");
