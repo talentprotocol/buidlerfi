@@ -55,7 +55,7 @@ export const NEW_BUILDERFI_USER_POST_TITLE = "new builder.fi keys";
 
 // TODO: replace when we have a real app id and real profile id
 export const BUILDERFI_LENS_APP_ID = "builderFiLensAppId";
-export const BUILDERFI_LENS_PROFILE_ID = "builderFiLensProfileId";
+export const BUILDERFI_LENS_PROFILE_ID = "0x01edd8";
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR =
   "We couldn't post your question because {username} is not on builderfi yet.";
