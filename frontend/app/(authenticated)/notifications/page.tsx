@@ -19,8 +19,6 @@ export default function NotificationPage() {
 
   const sorted = useMemo(() => sortIntoPeriods(notifications || []), [notifications]);
 
-  console.log({ notifications, sorted });
-
   useEffect(() => {
     refetchNotifications();
   }, [refetchNotifications]);

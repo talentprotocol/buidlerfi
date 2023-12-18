@@ -25,7 +25,6 @@ export const AskQuestion = () => {
     enabled: !!questionToEdit,
     //Need to fix this to add typescript inference
     onSuccess: (data: unknown) => {
-      console.log(data);
       const questionData = data as { questionContent: string };
       setQuestionContent(questionData.questionContent);
     },

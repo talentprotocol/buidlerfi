@@ -50,8 +50,6 @@ export default function ChatsPage() {
     hasNextPage
   } = useGetMyGetTransactions("both");
 
-  console.log(myTransactions);
-
   const tradingFees = useMemo(() => {
     return myTransactions
       ?.filter(tx => tx.owner?.id === user?.id)
