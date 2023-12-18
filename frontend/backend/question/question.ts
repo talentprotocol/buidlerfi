@@ -63,11 +63,12 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
       const questionerName = questionerLens?.profileName
         ? `@lens/${questionerLens?.profileName}`
         : questioner?.displayName || shortAddress(questioner?.wallet || "");
-      await publishNewQuestionLensPost(
+      const newQuestion = await publishNewQuestionLensPost(
         questionerName,
         replierName,
         `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
       );
+      console.log(newQuestion)
     }
   }
   return { data: question };
