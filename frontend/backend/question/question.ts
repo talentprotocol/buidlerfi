@@ -33,9 +33,6 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     const questionerFarcaster = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
     const replierFarcaster = replier.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
 
-    const questionerLens = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
-    const replierLens = replier.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
-
     console.log("FOUND questioner -> ", !!questionerFarcaster);
     console.log("FOUND replier -> ", !!replierFarcaster);
 
@@ -54,7 +51,10 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
         `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
       );
     }
-
+  }
+  if (process.env.ENABLE_LENS === "true") {
+    const questionerLens = questioner.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
+    const replierLens = replier.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
     if (questionerLens || replierLens) {
       // if one of the two has lens, publish the post
       const replierName = replierLens?.profileName

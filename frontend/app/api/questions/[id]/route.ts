@@ -35,14 +35,11 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
       const questionerFarcaster = questioner?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
       const replierFarcaster = replier?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
 
-      const questionerLens = questioner?.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
-      const replierLens = replier?.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
-
       console.log("FOUND questioner -> ", !!questionerFarcaster);
       console.log("FOUND replier -> ", !!replierFarcaster);
 
       if (questionerFarcaster || replierFarcaster) {
-        // if one of the two has farcaster, publish the cast 
+        // if one of the two has farcaster, publish the cast
         const replierName = replierFarcaster?.profileName
           ? `@${replierFarcaster?.profileName}`
           : replier.displayName || shortAddress(replier.wallet || "");
@@ -56,7 +53,14 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
           `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
         );
       }
-
+    }
+    if (process.env.ENABLE_LENS === "true") {
+      const questioner = await prisma.user.findUnique({
+        where: { id: question.questionerId },
+        include: { socialProfiles: true }
+      });
+      const questionerLens = questioner?.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
+      const replierLens = replier?.socialProfiles.find(sp => sp.type === SocialProfileType.LENS);
       if (questionerLens || replierLens) {
         // if one of the two has lens, publish the cast
         const replierName = replierLens?.profileName
