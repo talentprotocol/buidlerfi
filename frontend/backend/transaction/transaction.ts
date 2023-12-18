@@ -238,13 +238,11 @@ export const getMyTransactions = async (privyUserId: string, side: "holder" | "o
             holderAddress: user.wallet.toLowerCase()
           },
     orderBy: {
-      timestamp: "desc"
+      timestamp: "asc"
     },
     skip: offset,
     take: PAGINATION_LIMIT
   });
-
-  console.log(transactions);
 
   const uniqueWallets = _.uniq([...transactions.map(t => t.holderAddress), ...transactions.map(t => t.ownerAddress)]);
 
@@ -268,8 +266,6 @@ export const getMyTransactions = async (privyUserId: string, side: "holder" | "o
       holder: userMap.get(transaction.holderAddress.toLowerCase()),
       owner: userMap.get(transaction.ownerAddress.toLowerCase())
     }));
-
-  console.log(res);
 
   return { data: res };
 };
