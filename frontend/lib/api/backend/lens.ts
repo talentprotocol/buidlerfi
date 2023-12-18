@@ -65,7 +65,7 @@ export const publishLensPost = async (title: string, description: string, conten
   });
   const signature = await wallet.signMessage({ message: text });
   await lensClient.authentication.authenticate({
-    id, // returned from authentication.generateChallenge
+    id, // returned from authentication.generateChallenge 
     signature
   });
   const metadata = preparePostMetadata(title, description, content, externalUrl);
