@@ -6,6 +6,7 @@ import {
 } from "@/lib/api/backend/farcaster";
 import { fetchHolders } from "@/lib/api/common/builderfi";
 import { BUILDERFI_FARCASTER_FID } from "@/lib/constants";
+import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { getLastProcessedMentionTimestamp, insertProcessedMention } from "@/lib/supabase/processed-mentions";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
@@ -15,54 +16,59 @@ import { SocialProfileType } from "@prisma/client";
 import { OpenAI } from "openai";
 
 export const GET = async () => {
-  const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY as string);
+  try {
+    const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY as string);
 
-  // fetch last 150 reply and mentions notifications
-  console.log("Fetching last 150 builder.fi mentions and replies on Farcaster");
-  const { result } = await client.fetchMentionAndReplyNotifications(BUILDERFI_FARCASTER_FID, {
-    limit: 150
-  });
+    // fetch last 150 reply and mentions notifications
+    console.log("Fetching last 150 builder.fi mentions and replies on Farcaster");
+    const { result } = await client.fetchMentionAndReplyNotifications(BUILDERFI_FARCASTER_FID, {
+      limit: 150
+    });
 
-  // get last processed mention timestamp
-  console.log("Fetching last processed mention timestamp");
-  const lastProcessedMentionDate = await getLastProcessedMentionTimestamp();
-  const lastProcessedMentionTimestamp = lastProcessedMentionDate
-    ? new Date(lastProcessedMentionDate).getTime()
-    : Date.now() - 1000 * 60 * 10;
-  console.log("Last processed mention timestamp: ", lastProcessedMentionTimestamp);
+    // get last processed mention timestamp
+    console.log("Fetching last processed mention timestamp");
+    const lastProcessedMentionDate = await getLastProcessedMentionTimestamp();
+    const lastProcessedMentionTimestamp = lastProcessedMentionDate
+      ? new Date(lastProcessedMentionDate).getTime()
+      : Date.now() - 1000 * 60 * 10;
+    console.log("Last processed mention timestamp: ", lastProcessedMentionTimestamp);
 
-  // filter mentions that have been published after the last time we checked
-  const mentionNotifications = result.notifications?.filter(
-    n =>
-      // notifications that are mentions
-      n.type === "cast-mention" &&
-      // notifications that have been published after the last time we checked
-      new Date(n.timestamp).getTime() > lastProcessedMentionTimestamp &&
-      // notifications that have only one mention (the recipient of the question)
-      n.mentionedProfiles?.filter(p => p.fid !== BUILDERFI_FARCASTER_FID)?.length === 1
-  );
-  console.log("Found ", mentionNotifications?.length, " new mentions to process.");
-  if (!mentionNotifications || mentionNotifications.length === 0) {
-    return Response.json({ message: "No new mentions found." }, { status: 404 });
+    // filter mentions that have been published after the last time we checked
+    const mentionNotifications = result.notifications?.filter(
+      n =>
+        // notifications that are mentions
+        n.type === "cast-mention" &&
+        // notifications that have been published after the last time we checked
+        new Date(n.timestamp).getTime() > lastProcessedMentionTimestamp &&
+        // notifications that have only one mention (the recipient of the question)
+        n.mentionedProfiles?.filter(p => p.fid !== BUILDERFI_FARCASTER_FID)?.length === 1
+    );
+    console.log("Found ", mentionNotifications?.length, " new mentions to process.");
+    if (!mentionNotifications || mentionNotifications.length === 0) {
+      return Response.json({ message: "No new mentions found." }, { status: 404 });
+    }
+
+    // extract questions from notifications with AI
+    console.log("Extracting questions from mentions through OpenAI");
+    const questions = await getQuestionsFromNotifications(mentionNotifications as unknown as CastWithInteractionsV2[]);
+
+    // prepare questions on DB
+    console.log("Preparing questions on DB");
+    await Promise.all(
+      questions.map(q => prepareQuestion(q.questionerUsername, q.questionContent, q.recipientUsername, q.castHash))
+    );
+
+    // insert last processed mention timestamp
+    if (mentionNotifications?.length >= 0) {
+      const mostRecentTimestamp = mentionNotifications[0].timestamp;
+      await insertProcessedMention(new Date(mostRecentTimestamp));
+    }
+    console.log("Done");
+    return Response.json({ message: "Done" });
+  } catch (error) {
+    console.error(error);
+    return Response.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });
   }
-
-  // extract questions from notifications with AI
-  console.log("Extracting questions from mentions through OpenAI");
-  const questions = await getQuestionsFromNotifications(mentionNotifications as unknown as CastWithInteractionsV2[]);
-
-  // prepare questions on DB
-  console.log("Preparing questions on DB");
-  await Promise.all(
-    questions.map(q => prepareQuestion(q.questionerUsername, q.questionContent, q.recipientUsername, q.castHash))
-  );
-
-  // insert last processed mention timestamp
-  if (mentionNotifications?.length >= 0) {
-    const mostRecentTimestamp = mentionNotifications[0].timestamp;
-    await insertProcessedMention(new Date(mostRecentTimestamp));
-  }
-  console.log("Done");
-  return Response.json({ message: "Done" });
 };
 
 const getQuestionsFromNotifications = async (
