@@ -31,6 +31,7 @@ export const GET = async () => {
     : Date.now() - 1000 * 60 * 10;
   console.log("Last processed mention timestamp: ", lastProcessedMentionTimestamp);
 
+  // filter mentions that have been published after the last time we checked
   const mentionNotifications = result.notifications?.filter(
     n =>
       // notifications that are mentions
@@ -42,7 +43,7 @@ export const GET = async () => {
   );
   console.log("Found ", mentionNotifications?.length, " new mentions to process.");
   if (!mentionNotifications || mentionNotifications.length === 0) {
-    return Response.json({ message: "Done. No new mentions found." });
+    return Response.json({ message: "No new mentions found." }, { status: 404 });
   }
 
   // extract questions from notifications with AI
@@ -161,7 +162,7 @@ const prepareQuestion = async (
   }
 
   // check if the question author is a key holder of question recipient
-  // i.e. check if author can actually ask questions to recipient 
+  // i.e. check if author can actually ask questions to recipient
   const replierHolders = await fetchHolders(questionRecipient.user.wallet);
   const found = replierHolders.find(
     holder => holder.holder.owner.toLowerCase() === questionAuthor.user.wallet.toLowerCase()
