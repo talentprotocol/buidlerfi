@@ -231,7 +231,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             )
           )}
       </List>
-      <Flex y p={2} gap1>
+      <Flex xc y p={2} gap1>
         <Flex>
           {cardToDisplay === "install" && (
             <BannerCard
