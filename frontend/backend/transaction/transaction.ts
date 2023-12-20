@@ -9,6 +9,8 @@ import _ from "lodash";
 import { decodeEventLog, parseAbiItem } from "viem";
 import { sendNotification } from "../notification/notification";
 
+const LOGS_RANGE_SIZE = process.env.LOGS_RANGE_SIZE ? BigInt(process.env.LOGS_RANGE_SIZE) : 100n;
+
 interface EventLog {
   eventName: "Trade";
   args: {
@@ -42,8 +44,8 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
         ownerFee: log.args.builderEthAmount,
         block: blockNumber,
         timestamp: timestamp,
-        holderAddress: log.args.builder.toLowerCase(),
-        ownerAddress: log.args.trader.toLowerCase()
+        holderAddress: log.args.trader.toLowerCase(),
+        ownerAddress: log.args.builder.toLowerCase()
       }
     });
   }
@@ -174,8 +176,8 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
   console.log("--------------------");
   console.log("START SYNC FROM BLOCK: ", lastProcessedBlock);
 
-  for (let i = lastProcessedBlock; i < latestBlock; i += 100n) {
-    const searchUntil = i + 100n;
+  for (let i = lastProcessedBlock; i < latestBlock; i += LOGS_RANGE_SIZE) {
+    const searchUntil = i + LOGS_RANGE_SIZE;
     const logs = await viemClient.getLogs({
       address: BUILDERFI_CONTRACT.address,
       event: parseAbiItem(BUIILDER_FI_V1_EVENT_SIGNATURE),
@@ -238,7 +240,7 @@ export const getMyTransactions = async (privyUserId: string, side: "holder" | "o
             holderAddress: user.wallet.toLowerCase()
           },
     orderBy: {
-      timestamp: "asc"
+      timestamp: "desc"
     },
     skip: offset,
     take: PAGINATION_LIMIT

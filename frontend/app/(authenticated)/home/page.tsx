@@ -4,16 +4,18 @@ import { WelcomeModal } from "@/components/app/welcome-modal";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
+import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useGetHotQuestions, useGetQuestions } from "@/hooks/useQuestionsApi";
+import { Key } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useState } from "react";
 
 export default function Home() {
-  const { user } = useUserContext();
+  const { user, holding } = useUserContext();
   const router = useBetterRouter();
   const [selectedTab, setSelectedTab] = useState("new");
 
@@ -68,14 +70,26 @@ export default function Home() {
         </TabPanel>
         <TabPanel value="keys">
           {keysQuestions.isLoading && <LoadingPage />}
-          {keysQuestions.data?.map(question => (
-            <QuestionEntry
-              type="home"
-              key={question.id}
-              question={question}
-              onClick={() => router.push(`/question/${question.id}`)}
+          {keysQuestions.data?.length === 0 ? (
+            <PageMessage
+              icon={<Key />}
+              title="Nothing to show"
+              text={
+                holding?.length === 0
+                  ? "You don't own any keys"
+                  : "Questions asked to builders you follow will appear here"
+              }
             />
-          ))}
+          ) : (
+            keysQuestions.data?.map(question => (
+              <QuestionEntry
+                type="home"
+                key={question.id}
+                question={question}
+                onClick={() => router.push(`/question/${question.id}`)}
+              />
+            ))
+          )}
           {<LoadMoreButton query={keysQuestions} />}
         </TabPanel>
       </Tabs>

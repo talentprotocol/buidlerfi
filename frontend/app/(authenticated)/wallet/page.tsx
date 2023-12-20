@@ -42,6 +42,7 @@ export default function ChatsPage() {
       setMainWallet(user?.wallet);
     }
   }, [setActiveWallet, wallets]);
+
   const { data: builderFiData, isLoading } = useBuilderFIData();
   const { data: balance, refetch: refetchBalance } = useBalance({
     address: mainWallet as `0x${string}`,
@@ -56,20 +57,19 @@ export default function ChatsPage() {
     return holding;
   }, [allHolding, builderFiData]);
 
-  const {
-    data: myTransactions,
-    isLoading: isTransactionHistoryLoading,
-    fetchNextPage,
-    hasNextPage
-  } = useGetMyGetTransactions("both");
+  const myTransactions = useGetMyGetTransactions("both");
 
   const tradingFees = useMemo(() => {
-    return myTransactions
+    return myTransactions.data
       ?.filter(tx => tx.owner?.id === user?.id)
       ?.reduce((prev, curr) => prev + BigInt(curr.ownerFee || 0), BigInt(0));
   }, [myTransactions, user?.id]);
 
-  const sortedTransactions = sortIntoPeriods(myTransactions || []);
+  //We override createdAt value with the timestamp. As the createdAt may not reflect the transaction execution moment
+  const sortedTransactions = sortIntoPeriods(
+    myTransactions.data?.map(tx => ({ ...tx, createdAt: new Date(tx.timestamp ? Number(tx.timestamp) * 1000 : 0) })) ||
+      []
+  );
 
   if (isLoading) {
     return <LoadingPage />;
@@ -152,9 +152,9 @@ export default function ChatsPage() {
         <Typography level="h4" mb={1} px={2}>
           Transaction history
         </Typography>
-        {isTransactionHistoryLoading ? (
+        {myTransactions.isLoading ? (
           <LoadingPage />
-        ) : !myTransactions || myTransactions?.length === 0 ? (
+        ) : !myTransactions || myTransactions.data?.length === 0 ? (
           <PageMessage
             icon={<HistoryOutlined />}
             title="No transaction history"
@@ -176,7 +176,7 @@ export default function ChatsPage() {
                   </Flex>
                 );
               })}
-            <LoadMoreButton isLoading={isTransactionHistoryLoading} nextPage={fetchNextPage} hidden={!hasNextPage} />
+            <LoadMoreButton query={myTransactions} />
           </>
         )}
       </Flex>

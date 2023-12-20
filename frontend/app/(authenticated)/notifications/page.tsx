@@ -3,10 +3,12 @@
 import { NotificationEntry } from "@/components/app/notification/notificationEntry";
 import { NotificationSettingsModal } from "@/components/app/notification/notificationSettingsModal";
 import { Flex } from "@/components/shared/flex";
+import { PageMessage } from "@/components/shared/page-message";
 import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
+import { useMarkNotificationsAsRead } from "@/hooks/useNotificationApi";
 import { sortIntoPeriods } from "@/lib/utils";
-import { SettingsOutlined } from "@mui/icons-material";
+import { Notifications, SettingsOutlined } from "@mui/icons-material";
 import { IconButton, Typography } from "@mui/joy";
 import { useEffect, useMemo, useState } from "react";
 
@@ -19,9 +21,18 @@ export default function NotificationPage() {
 
   const sorted = useMemo(() => sortIntoPeriods(notifications || []), [notifications]);
 
+  const markAsRead = useMarkNotificationsAsRead();
+
   useEffect(() => {
     refetchNotifications();
-  }, [refetchNotifications]);
+    //Mark as read when leaving page
+    return () => {
+      const unreadNotifs = notifications?.filter(notif => !notif.isRead) || [];
+      if (unreadNotifs.length > 0) {
+        markAsRead.mutateAsync(unreadNotifs.map(notif => notif.id)).then(() => refetchNotifications());
+      }
+    };
+  }, [markAsRead, notifications, refetchNotifications]);
 
   return (
     <Flex component={"main"} y grow>
@@ -35,18 +46,22 @@ export default function NotificationPage() {
           </IconButton>
         }
       />
-      {Object.keys(sorted)
-        .filter(key => sorted[key as keyof typeof sorted].length > 0)
-        .map(key => {
-          return (
-            <Flex y key={key}>
-              <Typography sx={{ px: 2, pt: 2 }}>{key}</Typography>
-              {sorted[key as keyof typeof sorted]?.map(notification => {
-                return <NotificationEntry key={notification.id} notification={notification} />;
-              })}
-            </Flex>
-          );
-        })}
+      {notifications?.length === 0 ? (
+        <PageMessage icon={<Notifications />} title="No notifications" text="Your notifications will appear here" />
+      ) : (
+        Object.keys(sorted)
+          .filter(key => sorted[key as keyof typeof sorted].length > 0)
+          .map(key => {
+            return (
+              <Flex y key={key}>
+                <Typography sx={{ px: 2, pt: 2 }}>{key}</Typography>
+                {sorted[key as keyof typeof sorted]?.map(notification => {
+                  return <NotificationEntry key={notification.id} notification={notification} />;
+                })}
+              </Flex>
+            );
+          })
+      )}
     </Flex>
   );
 }
