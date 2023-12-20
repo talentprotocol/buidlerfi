@@ -13,6 +13,7 @@ const verificationKey = jose.importSPKI(SPKI, "ES256");
 export interface ServerActionResponse<T> {
   data?: T;
   error?: (typeof ERRORS)[keyof typeof ERRORS];
+  status?: number;
 }
 
 export type SortingParams<T> = Record<keyof T, "asc" | "desc">;

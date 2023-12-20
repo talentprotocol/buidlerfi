@@ -104,24 +104,32 @@ const TRADE_DATA = {
 export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorFn?: () => void) => {
   const toastId = useRef<string | number | undefined>(undefined);
 
-  const processTransaction = useStoreTransactionAction({
-    onSuccess: () => {
-      toast.update(toastId.current!, {
-        render: TRADE_DATA[side].successMsg,
-        isLoading: false,
-        type: "success",
-        autoClose: 3000
-      });
-      successFn && successFn();
-    }
-  });
+  const processTransaction = useStoreTransactionAction();
 
   const { writeAsync, isLoading } = useContractWrite({
     ...BUILDERFI_CONTRACT,
     functionName: TRADE_DATA[side].functionName,
     onSuccess: async data => {
-      await processTransaction.mutateAsync(data.hash);
       toastId.current = toast("Transaction submitted!", { isLoading: true });
+      await processTransaction
+        .mutateAsync(data.hash)
+        .then(() => {
+          toast.update(toastId.current!, {
+            render: TRADE_DATA[side].successMsg,
+            isLoading: false,
+            type: "success",
+            autoClose: 3000
+          });
+          if (successFn) successFn();
+        })
+        .catch(err => {
+          toast.update(toastId.current!, {
+            render: "There was an error processing your transaction: " + formatError(err),
+            isLoading: false,
+            type: "error",
+            autoClose: 3000
+          });
+        });
     },
     onError: (err: any) => {
       if (err?.shortMessage !== "User rejected the request.") {

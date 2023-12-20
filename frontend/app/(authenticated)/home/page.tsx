@@ -21,25 +21,9 @@ export default function Home() {
     where: { holderId: user?.id, amount: { gt: 0 } }
   });
 
-  const {
-    data: newQuestions,
-    isLoading: newIsLoading,
-    hasNextPage: newHasNextPage,
-    fetchNextPage: fetchNewNextPage
-  } = useGetQuestions({ orderBy: { createdAt: "desc" } }, { enabled: selectedTab === "new" });
-  const {
-    data: hotQuestions,
-    isLoading: hotIsLoading,
-    hasNextPage: hotHasNextPage,
-    fetchNextPage: fetchHotNextPage
-  } = useGetHotQuestions({ enabled: selectedTab === "hot" });
-
-  const {
-    data: keysQuestions,
-    fetchNextPage: fetchKeysNextPage,
-    isLoading: keysIsLoading,
-    hasNextPage: keysHasNextPage
-  } = useGetQuestions({
+  const newQuestions = useGetQuestions({ orderBy: { createdAt: "desc" } }, { enabled: selectedTab === "new" });
+  const hotQuestions = useGetHotQuestions({ enabled: selectedTab === "hot" });
+  const keysQuestions = useGetQuestions({
     orderBy: { createdAt: "desc" },
     where: {
       replier: {
@@ -59,8 +43,8 @@ export default function Home() {
           <Tab value="keys">Keys</Tab>
         </TabList>
         <TabPanel value="new">
-          {newIsLoading && <LoadingPage />}
-          {newQuestions?.map(question => (
+          {newQuestions.isLoading && <LoadingPage />}
+          {newQuestions.data?.map(question => (
             <QuestionEntry
               type="home"
               key={question.id}
@@ -68,11 +52,11 @@ export default function Home() {
               onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
-          {<LoadMoreButton isLoading={newIsLoading} nextPage={fetchNewNextPage} hidden={!newHasNextPage} />}
+          {<LoadMoreButton query={newQuestions} />}
         </TabPanel>
         <TabPanel value="hot">
-          {hotIsLoading && <LoadingPage />}
-          {hotQuestions?.map(question => (
+          {hotQuestions.isLoading && <LoadingPage />}
+          {hotQuestions.data?.map(question => (
             <QuestionEntry
               type="home"
               key={question.id}
@@ -80,11 +64,11 @@ export default function Home() {
               onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
-          {<LoadMoreButton isLoading={hotIsLoading} nextPage={fetchHotNextPage} hidden={!hotHasNextPage} />}
+          {<LoadMoreButton query={hotQuestions} />}
         </TabPanel>
         <TabPanel value="keys">
-          {keysIsLoading && <LoadingPage />}
-          {keysQuestions?.map(question => (
+          {keysQuestions.isLoading && <LoadingPage />}
+          {keysQuestions.data?.map(question => (
             <QuestionEntry
               type="home"
               key={question.id}
@@ -92,7 +76,7 @@ export default function Home() {
               onClick={() => router.push(`/question/${question.id}`)}
             />
           ))}
-          {<LoadMoreButton isLoading={keysIsLoading} nextPage={fetchKeysNextPage} hidden={!keysHasNextPage} />}
+          {<LoadMoreButton query={keysQuestions} />}
         </TabPanel>
       </Tabs>
     </Flex>

@@ -20,19 +20,14 @@ export default function ExplorePage() {
   const [searchValue, setSearchValue] = useState("");
 
   const { user } = useUserContext();
-  const { data: users, fetchNextPage, hasNextPage, isLoading: isLoadingMoreUsers, isInitialLoading } = useGetTopUsers();
+  const topUsers = useGetTopUsers();
   const router = useBetterRouter();
 
   const { isLoading: isLoadingRecommendedUsers, data: recommendedUsers } = useRecommendedUsers(
     user?.wallet as `0x${string}`
   );
 
-  const {
-    data,
-    isLoading: isSearching,
-    fetchNextPage: searchNextPage,
-    hasNextPage: searchHasNextPage
-  } = useSearch(searchValue);
+  const searchUsers = useSearch(searchValue);
 
   return (
     <Flex component={"main"} y grow>
@@ -49,10 +44,10 @@ export default function ExplorePage() {
       {router.searchParams.welcome === "1" && <WelcomeModal />}
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
         <TabPanel value="Top">
-          {isInitialLoading ? (
+          {topUsers.isLoading ? (
             <LoadingPage />
           ) : (
-            users?.map(user => (
+            topUsers.data?.map(user => (
               <div key={user.id}>
                 <UnifiedUserItem
                   user={user}
@@ -65,7 +60,7 @@ export default function ExplorePage() {
               </div>
             ))
           )}
-          <LoadMoreButton nextPage={fetchNextPage} isLoading={isLoadingMoreUsers} hidden={hasNextPage} />
+          <LoadMoreButton query={topUsers} />
         </TabPanel>
         <TabPanel value="Friends">
           {isLoadingRecommendedUsers ? (
@@ -99,16 +94,16 @@ export default function ExplorePage() {
           )}
         </TabPanel>
         <TabPanel value="Search">
-          {isSearching ? (
+          {searchUsers.isLoading ? (
             <LoadingPage />
-          ) : data?.length === 0 ? (
+          ) : searchUsers.data?.length === 0 ? (
             <PageMessage
               icon={<PersonSearchOutlined />}
               title={`No results for "${searchValue}"`}
               text="Try searching for users by their username or explore the home screen."
             />
           ) : (
-            data?.map(user => (
+            searchUsers.data?.map(user => (
               <UnifiedUserItem
                 key={user.id}
                 user={user}
@@ -120,7 +115,7 @@ export default function ExplorePage() {
               />
             ))
           )}
-          <LoadMoreButton nextPage={searchNextPage} isLoading={isLoadingMoreUsers} hidden={!searchHasNextPage} />
+          <LoadMoreButton query={searchUsers} />
         </TabPanel>
       </Tabs>
     </Flex>

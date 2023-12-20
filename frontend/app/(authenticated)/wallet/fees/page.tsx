@@ -15,16 +15,11 @@ import { Typography } from "@mui/joy";
 import { useMemo } from "react";
 
 export default function FeesPage() {
-  const {
-    data: myTransactions,
-    isLoading: isTransactionHistoryLoading,
-    fetchNextPage,
-    hasNextPage
-  } = useGetMyGetTransactions("owner");
-  const sortedTransactions = sortIntoPeriods(myTransactions || []);
+  const myTransactions = useGetMyGetTransactions("owner");
+  const sortedTransactions = sortIntoPeriods(myTransactions.data || []);
 
   const tradingFees = useMemo(() => {
-    return myTransactions?.reduce((prev, curr) => prev + BigInt(curr.ownerFee || 0), BigInt(0));
+    return myTransactions.data?.reduce((prev, curr) => prev + BigInt(curr.ownerFee || 0), BigInt(0));
   }, [myTransactions]);
 
   const { formattedString } = useUsdPrice({ ethAmountInWei: tradingFees });
@@ -52,9 +47,9 @@ export default function FeesPage() {
         </Flex>
       </Flex>
 
-      {isTransactionHistoryLoading ? (
+      {myTransactions.isLoading ? (
         <LoadingPage />
-      ) : !myTransactions || myTransactions?.length === 0 ? (
+      ) : !myTransactions || myTransactions.data?.length === 0 ? (
         <PageMessage
           icon={<HistoryOutlined />}
           title="No transaction history"
@@ -76,7 +71,7 @@ export default function FeesPage() {
                 </Flex>
               );
             })}
-          <LoadMoreButton isLoading={isTransactionHistoryLoading} nextPage={fetchNextPage} hidden={!hasNextPage} />
+          <LoadMoreButton query={myTransactions} />
         </>
       )}
     </Flex>

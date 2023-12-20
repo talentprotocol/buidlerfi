@@ -4,25 +4,28 @@ import { useInView } from "react-intersection-observer";
 import { Flex } from "./flex";
 
 interface Props {
-  nextPage: () => void;
-  isLoading: boolean;
-  hidden?: boolean;
+  query: {
+    hasNextPage?: boolean;
+    fetchNextPage: () => void;
+    isLoading: boolean;
+    isFetching: boolean;
+  };
 }
 
-export const LoadMoreButton: FC<Props> = ({ nextPage, isLoading, hidden }) => {
+export const LoadMoreButton: FC<Props> = ({ query }) => {
   const { ref, inView } = useInView();
 
   useEffect(() => {
-    if (inView && !isLoading) {
-      nextPage();
+    if (inView && !query.isLoading && !query.isFetching) {
+      query.fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, query]);
 
-  if (hidden) return <></>;
+  if (!query.hasNextPage) return <></>;
 
   return (
     <Flex x xc ref={ref} py={2}>
-      <Button loading={isLoading} onClick={() => nextPage()}>
+      <Button loading={query.isLoading || query.isFetching} onClick={() => query.fetchNextPage()}>
         Load More
       </Button>
     </Flex>

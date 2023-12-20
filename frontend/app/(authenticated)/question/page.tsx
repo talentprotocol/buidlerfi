@@ -21,7 +21,7 @@ export default function QuestionPage() {
   const { user } = useUserContext();
   const [searchValue, setSearchValue] = useState("");
   const router = useBetterRouter();
-  const { data, isLoading: isSearching, hasNextPage, fetchNextPage } = useSearch(searchValue);
+  const searchUsers = useSearch(searchValue);
   const { data: holdings, isLoading } = useGetKeyRelationships({
     where: { holderId: user?.id, amount: { gt: 0 }, NOT: [{ ownerId: user?.id }] }
   });
@@ -62,16 +62,16 @@ export default function QuestionPage() {
 
       {searchValue && (
         <Flex y grow>
-          {isSearching ? (
+          {searchUsers.isLoading ? (
             <LoadingPage />
-          ) : data?.length === 0 ? (
+          ) : searchUsers.data?.length === 0 ? (
             <PageMessage
               icon={<PersonSearchOutlined />}
               title={`No results for "${searchValue}"`}
               text="Try searching for users by their username or explore the home screen."
             />
           ) : (
-            data?.map(user => (
+            searchUsers.data?.map(user => (
               <UnifiedUserItem
                 key={user.id}
                 user={user}
@@ -85,7 +85,7 @@ export default function QuestionPage() {
               />
             ))
           )}
-          <LoadMoreButton nextPage={fetchNextPage} isLoading={isSearching} hidden={!hasNextPage} />
+          <LoadMoreButton query={searchUsers} />
         </Flex>
       )}
     </Flex>

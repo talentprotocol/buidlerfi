@@ -37,7 +37,7 @@ export const WAITLIST_LINK = "https://builder.fi";
 export const INTRO_BLOG_POST_LINK = "https://paragraph.xyz/@builderfi/intro-builderfi";
 export const ONBOARDING_WALLET_CREATED_KEY = "onboarding-wallet-created";
 export const MIN_BALANCE_ONBOARDING = parseEther("0.001");
-export const PAGINATION_LIMIT = 17;
+export const PAGINATION_LIMIT = 20;
 
 // FARCASTER
 export const NEW_BUILDERFI_QUESTION_CAST =
