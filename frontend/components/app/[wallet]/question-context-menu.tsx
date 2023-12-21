@@ -1,6 +1,11 @@
 import { OpenDialog } from "@/contexts/DialogContainer";
 import { useUserContext } from "@/contexts/userContext";
-import { useDeleteQuestion, useGetHotQuestions, useGetQuestion, useGetQuestions } from "@/hooks/useQuestionsApi";
+import {
+  useDeleteQuestion,
+  useGetHotQuestions,
+  useGetQuestion,
+  useGetQuestionsFromReplier
+} from "@/hooks/useQuestionsApi";
 import { DeleteOutline, EditOutlined, FileUploadOutlined, MoreHoriz } from "@mui/icons-material";
 import { CircularProgress, Dropdown, ListItemDecorator, Menu, MenuButton, MenuItem } from "@mui/joy";
 import { FC, useState } from "react";
@@ -9,7 +14,7 @@ import { AskQuestionModal } from "./ask-question-modal";
 
 interface Props {
   question:
-    | NonNullable<ReturnType<typeof useGetQuestions>["data"]>[number]
+    | NonNullable<ReturnType<typeof useGetQuestionsFromReplier>["data"]>[number]
     | NonNullable<ReturnType<typeof useGetQuestion>["data"]>
     | NonNullable<ReturnType<typeof useGetHotQuestions>["data"]>[number];
   refetch: () => Promise<unknown>;
