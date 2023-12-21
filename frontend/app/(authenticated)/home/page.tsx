@@ -8,31 +8,19 @@ import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
-import { useGetHotQuestions, useGetQuestions } from "@/hooks/useQuestionsApi";
+import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
 import { Key } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useState } from "react";
 
 export default function Home() {
-  const { user, holding } = useUserContext();
+  const { holding } = useUserContext();
   const router = useBetterRouter();
   const [selectedTab, setSelectedTab] = useState("new");
 
-  const { data: allHolding } = useGetKeyRelationships({
-    where: { holderId: user?.id, amount: { gt: 0 } }
-  });
-
-  const newQuestions = useGetQuestions({ orderBy: { createdAt: "desc" } }, { enabled: selectedTab === "new" });
-  const hotQuestions = useGetHotQuestions({ enabled: selectedTab === "hot" });
-  const keysQuestions = useGetQuestions({
-    orderBy: { createdAt: "desc" },
-    where: {
-      replier: {
-        id: { in: allHolding?.map(holding => holding.owner.id) }
-      }
-    }
-  });
+  const newQuestions = useGetNewQuestions();
+  const hotQuestions = useGetHotQuestions();
+  const keysQuestions = useGetKeyQuestions();
 
   return (
     <Flex component={"main"} y grow>

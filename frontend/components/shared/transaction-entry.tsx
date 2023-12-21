@@ -1,5 +1,5 @@
 import { useUserContext } from "@/contexts/userContext";
-import { useGetMyGetTransactions } from "@/hooks/useTransaction";
+import { useGetTransactions } from "@/hooks/useTransaction";
 import { useUsdPrice } from "@/hooks/useUsdPrice";
 import { formatToDisplayString, getDifference, shortAddress } from "@/lib/utils";
 import { Box, Link as JoyLink, Typography } from "@mui/joy";
@@ -8,7 +8,7 @@ import { FC, useMemo } from "react";
 import { UserGroupAvatars } from "./avatar-group";
 import { Flex } from "./flex";
 
-type Transaction = NonNullable<ReturnType<typeof useGetMyGetTransactions>["data"]>[number];
+type Transaction = NonNullable<ReturnType<typeof useGetTransactions>["data"]>[number];
 
 interface Props {
   transaction: Transaction;

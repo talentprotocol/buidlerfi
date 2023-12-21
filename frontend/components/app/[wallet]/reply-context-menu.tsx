@@ -1,14 +1,14 @@
 import { OpenDialog } from "@/contexts/DialogContainer";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
-import { useDeleteReply, useGetQuestion, useGetQuestions } from "@/hooks/useQuestionsApi";
+import { useDeleteReply, useGetQuestion, useGetQuestionsFromReplier } from "@/hooks/useQuestionsApi";
 import { DeleteOutline, EditOutlined, MoreHoriz } from "@mui/icons-material";
 import { Box, CircularProgress, Dropdown, ListItemDecorator, Menu, MenuButton, MenuItem } from "@mui/joy";
 import { FC } from "react";
 
 interface Props {
   question:
-    | NonNullable<ReturnType<typeof useGetQuestions>["data"]>[number]
+    | NonNullable<ReturnType<typeof useGetQuestionsFromReplier>["data"]>[number]
     | NonNullable<ReturnType<typeof useGetQuestion>["data"]>;
   refetchQuestion: () => void;
   onEdit: () => void;

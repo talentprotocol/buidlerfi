@@ -1,12 +1,9 @@
 "use client";
 
-import {
-  getMyTransactionsSA,
-  processPendingTransactionsSA,
-  storeTransactionSA
-} from "@/backend/transaction/transactionServerAction";
+import { getFriendsTransactions, getTransactions } from "@/backend/transaction/transaction";
+import { processPendingTransactionsSA, storeTransactionSA } from "@/backend/transaction/transactionServerAction";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
-import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
+import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
 import { useMutationSA } from "./useMutationSA";
 
 export const useStoreTransactionAction = (queryOptions?: SimpleUseQueryOptions) => {
@@ -21,6 +18,21 @@ export const useProcessPendingTransactions = () => {
   });
 };
 
-export const useGetMyGetTransactions = (side: "holder" | "owner" | "both") => {
-  return useInfiniteQuerySA(["useGetMyGetTransactions"], async options => getMyTransactionsSA(side, options));
+export const useGetTransactions = (side: "holder" | "owner" | "both" | "all", queryOptions?: SimpleUseQueryOptions) => {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getTransactions>>>(
+    ["useGetTransactions", side],
+    "api/transaction",
+    queryOptions,
+    {
+      side: side
+    }
+  );
+};
+
+export const useGetFriendsTransactions = (queryOptions?: SimpleUseQueryOptions) => {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getFriendsTransactions>>>(
+    ["useGetFriendsTransactions"],
+    "/api/transaction/friends",
+    queryOptions
+  );
 };

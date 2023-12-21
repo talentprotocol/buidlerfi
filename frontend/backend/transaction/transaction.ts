@@ -212,7 +212,11 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
   return { data: "success" };
 };
 
-export const getMyTransactions = async (privyUserId: string, side: "holder" | "owner" | "both", offset: number) => {
+export const getTransactions = async (
+  privyUserId: string,
+  side: "holder" | "owner" | "both" | "all",
+  offset: number
+) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
       privyUserId: privyUserId
@@ -221,7 +225,9 @@ export const getMyTransactions = async (privyUserId: string, side: "holder" | "o
 
   const transactions = await prisma.trade.findMany({
     where:
-      side === "both"
+      side === "all"
+        ? {}
+        : side === "both"
         ? {
             OR: [
               {
@@ -239,6 +245,69 @@ export const getMyTransactions = async (privyUserId: string, side: "holder" | "o
         : {
             holderAddress: user.wallet.toLowerCase()
           },
+    orderBy: {
+      timestamp: "desc"
+    },
+    skip: offset,
+    take: PAGINATION_LIMIT
+  });
+
+  const uniqueWallets = _.uniq([...transactions.map(t => t.holderAddress), ...transactions.map(t => t.ownerAddress)]);
+
+  const users = await prisma.user.findMany({
+    where: {
+      wallet: {
+        in: uniqueWallets
+      }
+    }
+  });
+
+  const userMap = new Map<string, (typeof users)[number]>();
+  for (const user of users) {
+    userMap.set(user.wallet.toLowerCase(), user);
+  }
+
+  const res = transactions
+    .filter(tx => userMap.has(tx.holderAddress.toLowerCase()) && userMap.has(tx.ownerAddress.toLowerCase()))
+    .map(transaction => ({
+      ...transaction,
+      holder: userMap.get(transaction.holderAddress.toLowerCase()),
+      owner: userMap.get(transaction.ownerAddress.toLowerCase())
+    }));
+
+  return { data: res };
+};
+
+export const getFriendsTransactions = async (privyUserId: string, offset: number) => {
+  const currentUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      privyUserId: privyUserId
+    }
+  });
+
+  const friends = await prisma.recommendedUser.findMany({
+    where: {
+      wallet: currentUser.wallet.toLowerCase()
+    }
+  });
+
+  const friendsWallets = friends.map(friend => friend.wallet.toLowerCase());
+
+  const transactions = await prisma.trade.findMany({
+    where: {
+      OR: [
+        {
+          holderAddress: {
+            in: friendsWallets
+          }
+        },
+        {
+          ownerAddress: {
+            in: friendsWallets
+          }
+        }
+      ]
+    },
     orderBy: {
       timestamp: "desc"
     },

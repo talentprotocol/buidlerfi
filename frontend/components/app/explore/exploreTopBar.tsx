@@ -3,11 +3,7 @@ import { BackButton } from "@/components/shared/top-bar";
 import { Chip, Input } from "@mui/joy";
 import { FC } from "react";
 
-const Tabs = [
-  "Friends",
-  "Top"
-  // "Answers", "Questions"
-] as const;
+const Tabs = ["Friends", "New", "Answers", "Questions", "Holders", "Keys"] as const;
 export type TabsEnum = (typeof Tabs)[number];
 
 interface Props {

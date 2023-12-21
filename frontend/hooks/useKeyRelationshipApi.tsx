@@ -1,12 +1,20 @@
 "use client";
 
-import { GetKeyRelationshipArgs } from "@/backend/keyRelationship/keyRelationship";
-import { getKeyRelationshipsSA } from "@/backend/keyRelationship/keyRelationshipServerAction";
-import { SimpleUseQueryOptions } from "@/models/helpers.model";
-import { useQuerySA } from "./useQuerySA";
+import { getKeyRelationships } from "@/backend/keyRelationship/keyRelationship";
+import { useQuery } from "wagmi";
+import { useAxios } from "./useAxios";
 
-export function useGetKeyRelationships(args: GetKeyRelationshipArgs, queryOptions?: SimpleUseQueryOptions) {
-  return useQuerySA(["useGetKeyRelationships", args], options => getKeyRelationshipsSA(args, options), {
-    ...queryOptions
-  });
+export function useGetKeyRelationships(address?: string, side: "holder" | "owner" = "holder") {
+  const axios = useAxios();
+  return useQuery(
+    ["useGetKeyRelationships", address, side],
+    () =>
+      axios
+        .get<ReturnType<typeof getKeyRelationships>>("/api/keyrelationship", { params: { address, side } })
+        .then(res => res.data)
+        .then(res => res.data),
+    {
+      enabled: !!address
+    }
+  );
 }

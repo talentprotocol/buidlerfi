@@ -7,7 +7,7 @@ import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { TransactionEntry } from "@/components/shared/transaction-entry";
-import { useGetMyGetTransactions } from "@/hooks/useTransaction";
+import { useGetTransactions } from "@/hooks/useTransaction";
 import { useUsdPrice } from "@/hooks/useUsdPrice";
 import { formatToDisplayString, sortIntoPeriods } from "@/lib/utils";
 import { HistoryOutlined } from "@mui/icons-material";
@@ -15,7 +15,7 @@ import { Typography } from "@mui/joy";
 import { useMemo } from "react";
 
 export default function FeesPage() {
-  const myTransactions = useGetMyGetTransactions("owner");
+  const myTransactions = useGetTransactions("owner");
   const sortedTransactions = sortIntoPeriods(myTransactions.data || []);
 
   const tradingFees = useMemo(() => {

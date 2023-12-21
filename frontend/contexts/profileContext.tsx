@@ -1,5 +1,5 @@
 import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
-import { useGetQuestions } from "@/hooks/useQuestionsApi";
+import { useGetQuestionsFromReplier } from "@/hooks/useQuestionsApi";
 import { SocialData } from "@/hooks/useSocialData";
 import { useGetRecommendedUser } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -17,7 +17,7 @@ interface ProfileContextType {
   socialData?: SocialData;
   recommendedUser?: ReturnType<typeof useGetRecommendedUser>["data"];
   isOwnProfile: boolean;
-  questions: ReturnType<typeof useGetQuestions>["data"];
+  questions: ReturnType<typeof useGetQuestionsFromReplier>["data"];
 }
 
 const ProfileContext = createContext<ProfileContextType>({

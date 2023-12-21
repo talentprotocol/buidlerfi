@@ -8,14 +8,13 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
-import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useUsdPrice } from "@/hooks/useUsdPrice";
 import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
 import { Typography } from "@mui/joy";
 import { useMemo } from "react";
 
 export default function PortfolioPage() {
-  const { user } = useUserContext();
+  const { user, holding, isLoading } = useUserContext();
   const { data: allHolding } = useGetHoldings(user?.wallet as `0x${string}`);
 
   const portfolio = useMemo(() => {
@@ -25,11 +24,6 @@ export default function PortfolioPage() {
   }, [allHolding]);
 
   const { formattedString } = useUsdPrice({ ethAmountInWei: portfolio });
-
-  const { data: holding, isLoading } = useGetKeyRelationships({
-    orderBy: { amount: "desc" },
-    where: { holderId: user?.id, amount: { gt: 0 } }
-  });
 
   return (
     <Flex y grow component="main" gap1>

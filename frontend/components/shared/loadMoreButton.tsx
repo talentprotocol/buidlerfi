@@ -25,7 +25,7 @@ export const LoadMoreButton: FC<Props> = ({ query }) => {
 
   return (
     <Flex x xc ref={ref} py={2}>
-      <Button loading={query.isLoading || query.isFetching} onClick={() => query.fetchNextPage()}>
+      <Button variant="plain" loading={query.isLoading || query.isFetching} onClick={() => query.fetchNextPage()}>
         Load More
       </Button>
     </Flex>

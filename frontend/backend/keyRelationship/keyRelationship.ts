@@ -1,17 +1,31 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 
-export type GetKeyRelationshipArgs = Omit<Prisma.KeyRelationshipFindManyArgs, "include" | "take" | "skip">;
-
-export const getKeyRelationships = async (args: GetKeyRelationshipArgs) => {
+export const getKeyRelationships = async (address: string, side: "owner" | "holder") => {
   const relationships = await prisma.keyRelationship.findMany({
-    where: {
-      ...args.where
-    },
+    where:
+      side === "owner"
+        ? {
+            owner: {
+              wallet: address.toLowerCase()
+            },
+            amount: {
+              gt: 0
+            }
+          }
+        : {
+            holder: {
+              wallet: address.toLowerCase()
+            },
+            amount: {
+              gt: 0
+            }
+          },
     include: { holder: true, owner: true },
-    orderBy: args.orderBy
+    orderBy: {
+      amount: "desc"
+    }
   });
 
   return { data: relationships };

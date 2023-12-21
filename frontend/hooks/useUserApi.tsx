@@ -1,14 +1,19 @@
-import { GetUsersArgs, UpdateUserArgs } from "@/backend/user/user";
+import {
+  UpdateUserArgs,
+  getNewUsers,
+  getTopUsers,
+  getTopUsersByAnswersGiven,
+  getTopUsersByKeysOwned,
+  getTopUsersByQuestionsAsked
+} from "@/backend/user/user";
 import {
   checkUsersExistSA,
   createUserSA,
   generateChallengeSA,
   getRecommendedUserSA,
   getRecommendedUsersSA,
-  getTopUsersSA,
   getUserSA,
   getUserStatsSA,
-  getUsersSA,
   linkNewWalletSA,
   refreshCurrentUserProfileSA,
   searchSA,
@@ -17,6 +22,7 @@ import {
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { Prisma } from "@prisma/client";
 import { useDebounce } from "./useDebounce";
+import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
 import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
 import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
@@ -40,12 +46,33 @@ export const useGetUser = (address?: string, reactQueryOptions?: { enabled?: boo
   });
 };
 
-export const useGetUsers = (args: GetUsersArgs) => {
-  return useInfiniteQuerySA(["useGetUsers"], async options => getUsersSA(args, options));
+export const useGetNewUsers = () => {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getNewUsers>>>(["useGetNewUsers"], "/api/user/new");
+};
+
+export const useGetTopUsersByAnswersGiven = () => {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getTopUsersByAnswersGiven>>>(
+    ["useGetTopUsersByAnswersGiven"],
+    "/api/user/answers"
+  );
+};
+
+export const useGetTopUsersByQuestionsAsked = () => {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getTopUsersByQuestionsAsked>>>(
+    ["useGetTopUsersByQuestionsAsked"],
+    "/api/user/questions"
+  );
+};
+
+export const useGetTopUsersByKeysOwned = () => {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getTopUsersByKeysOwned>>>(
+    ["useGetTopUsersByKeysOwned"],
+    "/api/user/keys"
+  );
 };
 
 export const useGetTopUsers = () => {
-  return useInfiniteQuerySA(["useGetTopUsers"], async options => getTopUsersSA(options));
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getTopUsers>>>(["useGetTopUsers"], "/api/user/holders");
 };
 
 export const useRefreshCurrentUser = () => {

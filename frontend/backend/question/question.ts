@@ -8,6 +8,7 @@ import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
 import { shortAddress } from "@/lib/utils";
 import { Prisma, ReactionType, SocialProfileType } from "@prisma/client";
+import { getKeyRelationships } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
 export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
@@ -148,6 +149,28 @@ export async function getHotQuestions(offset: number) {
   });
 
   return { data: transformedResults };
+}
+
+export async function getKeysQuestions(privyUserId: string, offset: number) {
+  const currentUser = await prisma.user.findFirstOrThrow({
+    where: {
+      privyUserId: privyUserId
+    }
+  });
+  const keys = await getKeyRelationships(currentUser.wallet, "holder");
+  const res = await getQuestions(
+    {
+      orderBy: { createdAt: "desc" },
+      where: {
+        replier: {
+          id: { in: keys.data?.map(holding => holding.owner.id) }
+        }
+      }
+    },
+    offset
+  );
+
+  return { data: res.data };
 }
 
 export async function getReactions(questionId: number, type: "like" | "upvote") {

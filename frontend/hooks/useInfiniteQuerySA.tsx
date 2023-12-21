@@ -23,8 +23,7 @@ export const useInfiniteQuerySA = <TResponse extends Array<unknown>, TQueryKey e
     },
     {
       ...options,
-      getNextPageParam: (lastPage, allPages) =>
-        lastPage?.length && !(lastPage.length % PAGINATION_LIMIT) ? allPages.length * PAGINATION_LIMIT : undefined
+      getNextPageParam: (lastPage, allPages) => (lastPage?.length ? allPages.length * PAGINATION_LIMIT : undefined)
     }
   );
 

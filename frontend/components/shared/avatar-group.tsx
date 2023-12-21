@@ -10,7 +10,7 @@ interface SimpleUser {
 export const UserGroupAvatars = ({ user1, user2 }: { user1?: SimpleUser; user2?: SimpleUser }) => {
   const router = useRouter();
   return (
-    <AvatarGroup>
+    <AvatarGroup sx={{ "--AvatarGroup-gap": "-1rem" }}>
       <Avatar
         sx={{ width: "40px", height: "40px", cursor: "pointer" }}
         src={user1?.avatarUrl || ""}

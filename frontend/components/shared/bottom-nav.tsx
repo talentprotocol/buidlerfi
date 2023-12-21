@@ -45,7 +45,7 @@ export function BottomNav() {
         )
       },
       {
-        path: "/wallet",
+        path: "/keys",
         label: <KeyIcon fontSize="xl2" />
       },
       {

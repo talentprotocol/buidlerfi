@@ -18,6 +18,10 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
   const { isOwnProfile, socialData, hasKeys, questions, isLoading, refetch } = useProfileContext();
   const router = useBetterRouter();
 
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+
   if (!hasKeys && !isOwnProfile && !questions?.length) {
     return (
       <PageMessage
@@ -50,10 +54,6 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
         text="Your Q&A will appear here as soon as one of your holders asks you a question"
       />
     );
-  }
-
-  if (isLoading) {
-    return <LoadingPage />;
   }
 
   return (

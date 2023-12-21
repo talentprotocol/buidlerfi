@@ -1,5 +1,5 @@
 import { useUserContext } from "@/contexts/userContext";
-import { useGetQuestions } from "@/hooks/useQuestionsApi";
+import { useGetQuestionsFromReplier } from "@/hooks/useQuestionsApi";
 import { useSocialData } from "@/hooks/useSocialData";
 import { useGetRecommendedUser } from "@/hooks/useUserApi";
 import { useCallback, useMemo } from "react";
@@ -7,17 +7,13 @@ import { useGetKeyRelationships } from "./useKeyRelationshipApi";
 
 export const useUserProfile = (wallet?: string) => {
   const { user } = useUserContext();
-  const {
-    data: holders,
-    refetch,
-    isLoading: isLoadingHolders
-  } = useGetKeyRelationships({ where: { owner: { wallet: wallet } } });
+  const { data: holders, refetch, isLoading: isLoadingHolders } = useGetKeyRelationships(wallet, "owner");
 
   const {
     data: holdings,
     refetch: refetchHoldings,
     isLoading: isLoadingHoldings
-  } = useGetKeyRelationships({ where: { holder: { wallet: wallet } } });
+  } = useGetKeyRelationships(wallet, "holder");
 
   const { isLoading: isLoadingRecommendedUser, data: recommendedUser } = useGetRecommendedUser(wallet as `0x${string}`);
 
@@ -26,7 +22,7 @@ export const useUserProfile = (wallet?: string) => {
     data: questions,
     refetch: refetchQuestions,
     isLoading: isQuestionsLoading
-  } = useGetQuestions({ where: { replierId: socialData.userId } });
+  } = useGetQuestionsFromReplier(socialData?.userId);
 
   const sortedHolders = useMemo(
     () => holders?.sort((a, b) => a.createdAt.valueOf() - b.createdAt.valueOf()),

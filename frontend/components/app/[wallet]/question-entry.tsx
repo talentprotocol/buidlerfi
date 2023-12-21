@@ -2,7 +2,7 @@ import { Flex } from "@/components/shared/flex";
 import { Reactions } from "@/components/shared/reactions";
 import { useProfileContext } from "@/contexts/profileContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetHotQuestions, useGetQuestions } from "@/hooks/useQuestionsApi";
+import { useGetHotQuestions, useGetKeyQuestions, useGetQuestionsFromReplier } from "@/hooks/useQuestionsApi";
 import { getDifference, shortAddress } from "@/lib/utils";
 import theme from "@/theme";
 import { Avatar, AvatarGroup, Chip, Typography } from "@mui/joy";
@@ -13,8 +13,9 @@ import { QuestionContextMenu } from "./question-context-menu";
 
 interface Props {
   question?:
-    | NonNullable<ReturnType<typeof useGetQuestions>["data"]>[number]
-    | NonNullable<ReturnType<typeof useGetHotQuestions>["data"]>[number];
+    | NonNullable<ReturnType<typeof useGetQuestionsFromReplier>["data"]>[number]
+    | NonNullable<ReturnType<typeof useGetHotQuestions>["data"]>[number]
+    | NonNullable<ReturnType<typeof useGetKeyQuestions>["data"]>[number];
   onClick: () => void;
   type: "profile" | "home";
 }
@@ -46,7 +47,7 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
             <Avatar
               sx={{ width: "24px", height: "24px", cursor: "pointer" }}
               src={question.replier?.avatarUrl || ""}
-              onClick={() => router.push(`/profile/${question.replier.wallet}`)}
+              onClick={() => router.push(`/profile/${question.replier?.wallet}`)}
             />
           )}
         </AvatarGroup>
@@ -58,9 +59,9 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
                   level="title-sm"
                   whiteSpace="pre-line"
                   sx={{ cursor: "pointer" }}
-                  onClick={() => router.push(`/profile/${question.questioner.wallet}`)}
+                  onClick={() => router.push(`/profile/${question.questioner?.wallet}`)}
                 >
-                  {question.questioner.displayName}
+                  {question.questioner?.displayName}
                 </Typography>
               ) : (
                 <>
@@ -68,18 +69,18 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
                     level="title-sm"
                     whiteSpace="pre-line"
                     sx={{ cursor: "pointer" }}
-                    onClick={() => router.push(`/profile/${question.questioner.wallet}`)}
+                    onClick={() => router.push(`/profile/${question.questioner?.wallet}`)}
                   >
-                    {question.questioner.displayName || shortAddress(question.questioner.wallet)}
+                    {question.questioner?.displayName || shortAddress(question.questioner?.wallet)}
                   </Typography>
                   <Typography level="body-sm"> asked </Typography>
                   <Typography
                     level="title-sm"
                     whiteSpace="pre-line"
                     sx={{ cursor: "pointer" }}
-                    onClick={() => router.push(`/profile/${question.replier.wallet}`)}
+                    onClick={() => router.push(`/profile/${question.replier?.wallet}`)}
                   >
-                    {question.replier.displayName}
+                    {question.replier?.displayName}
                   </Typography>
                 </>
               )}

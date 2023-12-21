@@ -13,7 +13,7 @@ import { WithdrawDialog } from "@/components/shared/withdraw-modal";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
-import { useGetMyGetTransactions } from "@/hooks/useTransaction";
+import { useGetTransactions } from "@/hooks/useTransaction";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { formatToDisplayString, sortIntoPeriods, tryParseBigInt } from "@/lib/utils";
 import { ArrowDownwardOutlined, ArrowUpwardOutlined, HistoryOutlined } from "@mui/icons-material";
@@ -57,7 +57,7 @@ export default function ChatsPage() {
     return holding;
   }, [allHolding, builderFiData]);
 
-  const myTransactions = useGetMyGetTransactions("both");
+  const myTransactions = useGetTransactions("both");
 
   const tradingFees = useMemo(() => {
     return myTransactions.data

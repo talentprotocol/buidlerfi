@@ -2,6 +2,7 @@
 
 import { PAGINATION_LIMIT } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
+import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
 import { ipfsToURL } from "@/lib/utils";
@@ -259,38 +260,123 @@ Wallet: ${publicKey}
 
 export type GetUsersArgs = Omit<Prisma.UserFindManyArgs, "include" | "take" | "skip">;
 
-export const getUsers = async (privyUserId: string, args: GetUsersArgs, offset: number) => {
-  const currentUser = await prisma.user.findUnique({ where: { privyUserId } });
-
+export const getNewUsers = async (offset: number) => {
   const users = await prisma.user.findMany({
-    where: {
-      ...args.where
+    orderBy: {
+      createdAt: "desc"
     },
     include: {
+      replies: true
+    },
+    where: {
+      isActive: true,
+      hasFinishedOnboarding: true,
+      displayName: { not: null }
+    },
+    take: PAGINATION_LIMIT,
+    skip: offset
+  });
+
+  const res = users.map(user => {
+    const numberOfReplies = user.replies.length;
+    const numberOfQuestions = user.replies.filter(reply => !!reply.repliedOn).length;
+    const strippedUser = exclude(user, "replies");
+    return { ...strippedUser, numberOfReplies, numberOfQuestions };
+  });
+
+  return { data: res };
+};
+
+export const getTopUsersByQuestionsAsked = async (offset: number) => {
+  const users = await prisma.user.findMany({
+    orderBy: {
+      questions: {
+        _count: "desc"
+      }
+    },
+    include: {
+      questions: true,
       keysOfSelf: {
         where: {
           amount: {
             gt: 0
           }
         }
-      },
-      keysOwned: {
+      }
+    },
+    where: {
+      isActive: true,
+      hasFinishedOnboarding: true,
+      displayName: { not: null }
+    },
+    take: PAGINATION_LIMIT,
+    skip: offset
+  });
+
+  const res = users.map(user => {
+    const questionsAsked = user.questions.length;
+    const questionsAnswered = user.questions.filter(question => !!question.repliedOn).length;
+    const numberOfHolders = user.keysOfSelf.length;
+    const strippedUser = exclude(user, ["keysOfSelf", "questions"]);
+    return { ...strippedUser, questionsAsked, questionsAnswered, numberOfHolders };
+  });
+
+  return { data: res };
+};
+
+export const getTopUsersByAnswersGiven = async (offset: number) => {
+  const users = await prisma.user.findMany({
+    orderBy: {
+      replies: {
+        _count: "desc"
+      }
+    },
+    include: {
+      replies: true,
+      keysOfSelf: {
         where: {
           amount: {
             gt: 0
           }
         }
-      },
-      recommendedTo: {
-        where: {
-          forId: currentUser?.id
-        }
       }
     },
+    where: {
+      isActive: true,
+      hasFinishedOnboarding: true,
+      displayName: { not: null }
+    },
     take: PAGINATION_LIMIT,
-    orderBy: args.orderBy,
     skip: offset
   });
+
+  const res = users.map(user => {
+    const questionsReceived = user.replies.length;
+    const questionsAnswered = user.replies.filter(reply => !!reply.repliedOn).length;
+    const numberOfHolders = user.keysOfSelf.length;
+    const strippedUser = exclude(user, ["keysOfSelf", "replies"]);
+    return { ...strippedUser, questionsReceived, questionsAnswered, numberOfHolders };
+  });
+
+  return { data: res };
+};
+
+type TopUserByKeysOwned = Prisma.$UserPayload["scalars"] & {
+  ownedKeys: number;
+  numberOfHolders: number;
+};
+
+export const getTopUsersByKeysOwned = async (offset: number) => {
+  const users = (await prisma.$queryRaw`
+    SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys",
+    CAST(COUNT(DISTINCT "KeyRelationship"."holderId") AS INTEGER) as "numberOfHolders"
+    FROM "User"
+    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
+    WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
+    GROUP BY "User".id
+    ORDER BY "ownedKeys" DESC
+    LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
+  `) as TopUserByKeysOwned[];
 
   return { data: users };
 };

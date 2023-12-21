@@ -1,16 +1,19 @@
+import { getNotifications } from "@/backend/notification/notification";
 import {
   getNotificationSettingsSA,
-  getNotificationsSA,
   markNotificationsAsReadSA,
   updateNotificationSettingsSA
 } from "@/backend/notification/notificationServerActions";
 import { NotificationType } from "@prisma/client";
-import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
+import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
 import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
 
 export const useGetNotifications = () => {
-  return useInfiniteQuerySA(["useGetNotifications"], async options => getNotificationsSA(options));
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getNotifications>>>(
+    ["useGetNotifications"],
+    "/api/notification/me"
+  );
 };
 
 export const useMarkNotificationsAsRead = () => {

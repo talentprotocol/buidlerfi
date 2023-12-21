@@ -1,6 +1,7 @@
 import { usePrivy } from "@privy-io/react-auth";
 import axios from "axios";
 import { useMemo } from "react";
+import { toast } from "react-toastify";
 
 function dateTransformer(data: object): object {
   // Check if a string looks like a date
@@ -56,15 +57,15 @@ export const useAxios = () => {
       return config;
     });
 
-    // instance.interceptors.response.use(
-    //   response => {
-    //     return response;
-    //   },
-    //   error => {
-    //     toast.error(error.response?.data?.error || error.message);
-    //     return Promise.reject(error);
-    //   }
-    // );
+    instance.interceptors.response.use(
+      response => {
+        return response;
+      },
+      error => {
+        toast.error(error.response?.data?.error || error.message);
+        return Promise.reject(error);
+      }
+    );
 
     return instance;
   }, [getAccessToken]);

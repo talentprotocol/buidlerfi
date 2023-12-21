@@ -10,7 +10,15 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetTopUsers, useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
+import {
+  useGetNewUsers,
+  useGetTopUsers,
+  useGetTopUsersByAnswersGiven,
+  useGetTopUsersByKeysOwned,
+  useGetTopUsersByQuestionsAsked,
+  useRecommendedUsers,
+  useSearch
+} from "@/hooks/useUserApi";
 import { PersonSearchOutlined, SupervisorAccountOutlined } from "@mui/icons-material";
 import { TabPanel, Tabs } from "@mui/joy";
 import { useState } from "react";
@@ -21,6 +29,11 @@ export default function ExplorePage() {
 
   const { user } = useUserContext();
   const topUsers = useGetTopUsers();
+  const newUsers = useGetNewUsers();
+  const topUsersByQuestions = useGetTopUsersByQuestionsAsked();
+  const topUsersByAnswers = useGetTopUsersByAnswersGiven();
+  const topUsersByKeys = useGetTopUsersByKeysOwned();
+
   const router = useBetterRouter();
 
   const { isLoading: isLoadingRecommendedUsers, data: recommendedUsers } = useRecommendedUsers(
@@ -43,7 +56,7 @@ export default function ExplorePage() {
       />
       {router.searchParams.welcome === "1" && <WelcomeModal />}
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
-        <TabPanel value="Top">
+        <TabPanel value="Holders">
           {topUsers.isLoading ? (
             <LoadingPage />
           ) : (
@@ -116,6 +129,82 @@ export default function ExplorePage() {
             ))
           )}
           <LoadMoreButton query={searchUsers} />
+        </TabPanel>
+        <TabPanel value="New">
+          {newUsers.isLoading ? (
+            <LoadingPage />
+          ) : (
+            newUsers.data?.map(user => (
+              <div key={user.id}>
+                <UnifiedUserItem
+                  user={user}
+                  joinedAndReplies={{
+                    createdAt: user.createdAt,
+                    numberOfReplies: user.numberOfReplies,
+                    numberOfQuestions: user.numberOfQuestions
+                  }}
+                />
+              </div>
+            ))
+          )}
+          <LoadMoreButton query={newUsers} />
+        </TabPanel>
+        <TabPanel value="Questions">
+          {topUsersByQuestions.isLoading ? (
+            <LoadingPage />
+          ) : (
+            topUsersByQuestions.data?.map(user => (
+              <div key={user.id}>
+                <UnifiedUserItem
+                  user={user}
+                  holdersAndReplies={{
+                    numberOfHolders: user.numberOfHolders,
+                    numberOfReplies: user.questionsAsked,
+                    numberOfQuestions: user.questionsAnswered,
+                    label: "question"
+                  }}
+                />
+              </div>
+            ))
+          )}
+          <LoadMoreButton query={topUsersByQuestions} />
+        </TabPanel>
+        <TabPanel value="Answers">
+          {topUsersByAnswers.isLoading ? (
+            <LoadingPage />
+          ) : (
+            topUsersByAnswers.data?.map(user => (
+              <div key={user.id}>
+                <UnifiedUserItem
+                  user={user}
+                  holdersAndReplies={{
+                    numberOfHolders: user.numberOfHolders,
+                    numberOfReplies: user.questionsReceived,
+                    numberOfQuestions: user.questionsAnswered
+                  }}
+                />
+              </div>
+            ))
+          )}
+          <LoadMoreButton query={topUsersByAnswers} />
+        </TabPanel>
+        <TabPanel value="Keys">
+          {topUsersByKeys.isLoading ? (
+            <LoadingPage />
+          ) : (
+            topUsersByKeys.data?.map(user => (
+              <div key={user.id}>
+                <UnifiedUserItem
+                  user={user}
+                  holdersAndKeys={{
+                    numberOfHolders: user.numberOfHolders,
+                    ownedKeys: user.ownedKeys
+                  }}
+                />
+              </div>
+            ))
+          )}
+          <LoadMoreButton query={topUsersByKeys} />
         </TabPanel>
       </Tabs>
     </Flex>
