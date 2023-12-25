@@ -4,7 +4,8 @@ import {
   getTopUsers,
   getTopUsersByAnswersGiven,
   getTopUsersByKeysOwned,
-  getTopUsersByQuestionsAsked
+  getTopUsersByQuestionsAsked,
+  search
 } from "@/backend/user/user";
 import {
   checkUsersExistSA,
@@ -16,14 +17,12 @@ import {
   getUserStatsSA,
   linkNewWalletSA,
   refreshCurrentUserProfileSA,
-  searchSA,
   updateUserSA
 } from "@/backend/user/userServerActions";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { Prisma } from "@prisma/client";
 import { useDebounce } from "./useDebounce";
 import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
-import { useInfiniteQuerySA } from "./useInfiniteQuerySA";
 import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
 
@@ -107,12 +106,17 @@ export const useRecommendedUsers = (wallet: string) => {
   return useQuerySA(["useRecommendedUsers", wallet], async options => getRecommendedUsersSA(wallet, options));
 };
 
-export const useSearch = (searchValue: string, queryOptions?: SimpleUseQueryOptions) => {
+export const useSearch = (searchValue: string, includeOwnedKeysOnly = false, queryOptions?: SimpleUseQueryOptions) => {
   const debouncedValue = useDebounce(searchValue, 500);
-  return useInfiniteQuerySA(["useSearch", debouncedValue], async options => searchSA(debouncedValue, options), {
-    enabled: !!debouncedValue,
-    ...queryOptions
-  });
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof search>>>(
+    ["useSearch", debouncedValue],
+    "/api/user/search",
+    {
+      enabled: !!debouncedValue,
+      ...queryOptions
+    },
+    { includeOwnedKeysOnly: includeOwnedKeysOnly, search: debouncedValue }
+  );
 };
 
 export const useGetUserStats = (userId?: number) => {

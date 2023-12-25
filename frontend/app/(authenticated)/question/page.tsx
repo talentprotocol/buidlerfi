@@ -20,7 +20,7 @@ export default function QuestionPage() {
   const { user, holding, isLoading } = useUserContext();
   const [searchValue, setSearchValue] = useState("");
   const router = useBetterRouter();
-  const searchUsers = useSearch(searchValue);
+  const searchUsers = useSearch(searchValue, true);
   if (router.searchParams.ask) {
     return <AskQuestion />;
   }

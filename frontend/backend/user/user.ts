@@ -497,7 +497,17 @@ type SearchUser = Prisma.$UserPayload["scalars"] & {
   numberOfReplies: number;
 };
 
-export const search = async (searchValue: string, offset: number) => {
+export const search = async (
+  privyUserId: string,
+  searchValue: string,
+  includeOwnedKeysOnly: boolean,
+  offset: number
+) => {
+  const currentUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      privyUserId: privyUserId
+    }
+  });
   //We use raw query to order by soldKeys
   const users = (await prisma.$queryRaw`
     SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "soldKeys",
@@ -508,7 +518,7 @@ export const search = async (searchValue: string, offset: number) => {
     LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
     LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId"
     LEFT JOIN "Question" ON "User".id = "Question"."replierId"
-    WHERE "User"."isActive" = true 
+    WHERE "User"."isActive" = true
       AND "User"."hasFinishedOnboarding" = true 
       AND (
         "User"."wallet" ILIKE '%' || ${searchValue} || '%'
@@ -520,6 +530,15 @@ export const search = async (searchValue: string, offset: number) => {
             AND "SocialProfile"."profileName" ILIKE '%' || ${searchValue} || '%'
         )
       )
+      AND (
+        NOT ${includeOwnedKeysOnly} 
+        OR EXISTS (
+          SELECT 1
+          FROM "KeyRelationship"
+          WHERE "KeyRelationship"."ownerId" = ${currentUser.id}
+            AND "KeyRelationship"."holderId" = "User".id
+        )
+  )
     GROUP BY "User".id
     ORDER BY "soldKeys" DESC
     LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
