@@ -18,11 +18,7 @@ export const useUserProfile = (wallet?: string) => {
   const { isLoading: isLoadingRecommendedUser, data: recommendedUser } = useGetRecommendedUser(wallet as `0x${string}`);
 
   const socialData = useSocialData(wallet as `0x${string}`);
-  const {
-    data: questions,
-    refetch: refetchQuestions,
-    isLoading: isQuestionsLoading
-  } = useGetQuestionsFromReplier(socialData?.userId);
+  const getQuestionsFromReplierQuery = useGetQuestionsFromReplier(socialData?.userId);
 
   const sortedHolders = useMemo(
     () => holders?.sort((a, b) => a.createdAt.valueOf() - b.createdAt.valueOf()),
@@ -36,8 +32,8 @@ export const useUserProfile = (wallet?: string) => {
   }, [holders, user?.id]);
 
   const refetchAll = useCallback(async () => {
-    await Promise.all([refetch(), refetchQuestions(), refetchHoldings()]);
-  }, [refetch, refetchHoldings, refetchQuestions]);
+    await Promise.all([refetch(), getQuestionsFromReplierQuery.refetch(), refetchHoldings()]);
+  }, [refetch, refetchHoldings, getQuestionsFromReplierQuery]);
 
   const value = useMemo(() => {
     return {
@@ -46,12 +42,14 @@ export const useUserProfile = (wallet?: string) => {
       supporterNumber,
       ownedKeysCount: Number(myShares?.amount) || 0,
       hasKeys: (myShares && myShares.amount > BigInt(0)) || false,
-      isLoading: isLoadingHolders || isQuestionsLoading || isLoadingRecommendedUser || isLoadingHoldings,
-      questions,
+      isLoading:
+        isLoadingHolders || getQuestionsFromReplierQuery.isLoading || isLoadingRecommendedUser || isLoadingHoldings,
+      questions: getQuestionsFromReplierQuery.data,
       refetch: refetchAll,
       socialData,
       recommendedUser,
-      isOwnProfile: user?.wallet?.toLowerCase() === wallet?.toLowerCase()
+      isOwnProfile: user?.wallet?.toLowerCase() === wallet?.toLowerCase(),
+      getQuestionsFromReplierQuery
     };
   }, [
     sortedHolders,
@@ -59,10 +57,9 @@ export const useUserProfile = (wallet?: string) => {
     supporterNumber,
     myShares,
     isLoadingHolders,
-    isQuestionsLoading,
+    getQuestionsFromReplierQuery,
     isLoadingRecommendedUser,
     isLoadingHoldings,
-    questions,
     refetchAll,
     socialData,
     recommendedUser,

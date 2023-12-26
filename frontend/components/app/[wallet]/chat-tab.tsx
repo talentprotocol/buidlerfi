@@ -1,5 +1,6 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
+import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { useProfileContext } from "@/contexts/profileContext";
@@ -15,7 +16,8 @@ interface Props {
 }
 
 export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
-  const { isOwnProfile, socialData, hasKeys, questions, isLoading, refetch } = useProfileContext();
+  const { isOwnProfile, socialData, hasKeys, questions, isLoading, refetch, getQuestionsFromReplierQuery } =
+    useProfileContext();
   const router = useBetterRouter();
 
   if (isLoading) {
@@ -75,16 +77,19 @@ export const ChatTab: FC<Props> = ({ onBuyKeyClick }) => {
               icon={<LockOpen />}
             />
           ) : (
-            questions?.map(question => {
-              return (
-                <QuestionEntry
-                  key={question.id}
-                  question={question}
-                  type={"profile"}
-                  onClick={() => router.replace({ searchParams: { question: question.id.toString() } })}
-                />
-              );
-            })
+            <>
+              {questions?.map(question => {
+                return (
+                  <QuestionEntry
+                    key={question.id}
+                    question={question}
+                    type={"profile"}
+                    onClick={() => router.replace({ searchParams: { question: question.id.toString() } })}
+                  />
+                );
+              })}
+              <LoadMoreButton query={getQuestionsFromReplierQuery} />
+            </>
           )}
         </Flex>
       </Flex>

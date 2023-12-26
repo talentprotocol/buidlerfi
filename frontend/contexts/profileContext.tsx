@@ -18,6 +18,7 @@ interface ProfileContextType {
   recommendedUser?: ReturnType<typeof useGetRecommendedUser>["data"];
   isOwnProfile: boolean;
   questions: ReturnType<typeof useGetQuestionsFromReplier>["data"];
+  getQuestionsFromReplierQuery?: ReturnType<typeof useGetQuestionsFromReplier>;
 }
 
 const ProfileContext = createContext<ProfileContextType>({
