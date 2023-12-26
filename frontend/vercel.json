@@ -2,7 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/farcaster",
-      "schedule": "*/1 * * * *"
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/transaction",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
