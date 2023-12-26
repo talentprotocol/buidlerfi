@@ -45,7 +45,7 @@ export default function KeysPage() {
         <TabList tabFlex={1} className="grid w-full grid-cols-2">
           <Tab value="you">You</Tab>
           <Tab value="global">Global</Tab>
-          <Tab value="friends">Keys</Tab>
+          <Tab value="friends">Friends</Tab>
         </TabList>
         <TabPanel value="you">
           {myTransactions.isLoading ? (
@@ -88,7 +88,7 @@ export default function KeysPage() {
             <PageMessage
               icon={<HistoryOutlined />}
               title="No transaction history"
-              text="This space is where you'll find all your transactions history."
+              text="This space is where you'll find the global transactions history."
             />
           ) : (
             <>
@@ -121,8 +121,8 @@ export default function KeysPage() {
           ) : !friendsTransactions || friendsTransactions.data?.length === 0 ? (
             <PageMessage
               icon={<HistoryOutlined />}
-              title="No transaction history"
-              text="This space is where you'll find all your transactions history."
+              title="No friends transaction history"
+              text="This space is where you'll find your friends' transactions history."
             />
           ) : (
             <>

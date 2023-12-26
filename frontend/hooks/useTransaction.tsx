@@ -21,7 +21,7 @@ export const useProcessPendingTransactions = () => {
 export const useGetTransactions = (side: "holder" | "owner" | "both" | "all", queryOptions?: SimpleUseQueryOptions) => {
   return useInfiniteQueryAxios<Awaited<ReturnType<typeof getTransactions>>>(
     ["useGetTransactions", side],
-    "api/transaction",
+    "/api/transaction",
     queryOptions,
     {
       side: side
