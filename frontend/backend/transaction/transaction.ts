@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import viemClient from "@/lib/viemClient";
 import { decodeEventLog, parseAbiItem } from "viem";
 
+const logsRange = process.env.LOGS_RANGE_SIZE ? BigInt(process.env.LOGS_RANGE_SIZE) : 100n;
+
 interface EventLog {
   eventName: "Trade";
   args: {
@@ -22,12 +24,19 @@ interface EventLog {
 }
 
 const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber: bigint, timestamp: bigint) => {
+  //Check if transaction already exists in DB
   let transaction = await prisma.trade.findFirst({
     where: {
       hash: hash
     }
   });
 
+  //If transaction has been processed, we don't need to update keyRelationship
+  if (transaction && transaction.processed) {
+    return false;
+  }
+
+  //If transaction doesn't exist, we create it
   if (!transaction) {
     transaction = await prisma.trade.create({
       data: {
@@ -40,24 +49,29 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
         block: blockNumber,
         timestamp: timestamp,
         holderAddress: log.args.builder.toLowerCase(),
-        ownerAddress: log.args.trader.toLowerCase()
+        ownerAddress: log.args.trader.toLowerCase(),
+        //Transaction has been found, but not processed yet
+        processed: false
       }
     });
   }
 
-  console.log("Searching owner: " + log.args.builder.toLowerCase());
-  const owner = await prisma.user.findUniqueOrThrow({
+  const owner = await prisma.user.findUnique({
     where: {
       wallet: log.args.builder.toLowerCase()
     }
   });
 
-  console.log("Searching holder: " + log.args.trader.toLowerCase());
-  const holder = await prisma.user.findUniqueOrThrow({
+  const holder = await prisma.user.findUnique({
     where: {
       wallet: log.args.trader.toLowerCase()
     }
   });
+
+  //If one of the users doesn't exist, we leave the transaction as unprocessed
+  if (!owner || !holder) {
+    return false;
+  }
 
   await prisma.$transaction(async tx => {
     const key = await tx.keyRelationship.findFirst({
@@ -85,6 +99,15 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
         }
       });
     }
+
+    await tx.trade.update({
+      where: {
+        hash: hash
+      },
+      data: {
+        processed: true
+      }
+    });
   });
 
   return true;
@@ -160,8 +183,8 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
   console.log("--------------------");
   console.log("START SYNC FROM BLOCK: ", lastProcessedBlock);
 
-  for (let i = lastProcessedBlock; i < latestBlock; i += 100n) {
-    const searchUntil = i + 100n;
+  for (let i = lastProcessedBlock; i < latestBlock; i += logsRange) {
+    const searchUntil = i + logsRange;
     const logs = await viemClient.getLogs({
       address: BUILDERFI_CONTRACT.address,
       event: parseAbiItem(BUIILDER_FI_V1_EVENT_SIGNATURE),

@@ -204,6 +204,11 @@ model Trade {
   hash          String  @unique
   timestamp     BigInt?
 
+  //Whether or not the keyRelationship has been updated to reflect the trade
+  //It will be false if the holder or the owner is not in the DB
+  //This it to allow for the trade to be processed later if a user registers
+  processed Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
