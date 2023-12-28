@@ -363,13 +363,13 @@ export const getTopUsersByAnswersGiven = async (offset: number) => {
 
 type TopUserByKeysOwned = Prisma.$UserPayload["scalars"] & {
   ownedKeys: number;
-  numberOfHolders: number;
+  numberOfHolders?: number;
 };
 
 export const getTopUsersByKeysOwned = async (offset: number) => {
   const users = (await prisma.$queryRaw`
-    SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys",
-    CAST(COUNT(DISTINCT "KeyRelationship"."holderId") AS INTEGER) as "numberOfHolders"
+    SELECT "User".*, 
+    CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
     FROM "User"
     LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
     WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
@@ -378,11 +378,32 @@ export const getTopUsersByKeysOwned = async (offset: number) => {
     LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
   `) as TopUserByKeysOwned[];
 
+  const usersNumberOfHolders = await prisma.user.findMany({
+    where: {
+      id: {
+        in: users.map(user => user.id)
+      }
+    },
+    include: {
+      keysOfSelf: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    }
+  });
+
+  users.forEach(user => {
+    const foundUser = usersNumberOfHolders.find(u => u.id === user.id);
+    user.numberOfHolders = foundUser?.keysOfSelf.length || 0;
+  });
+
   return { data: users };
 };
 
 type TopUser = Prisma.$UserPayload["scalars"] & {
-  soldKeys: number;
   numberOfHolders: number;
   numberOfQuestions: number;
   numberOfReplies: number;
@@ -390,8 +411,8 @@ type TopUser = Prisma.$UserPayload["scalars"] & {
 
 export const getTopUsers = async (offset: number) => {
   const users = (await prisma.$queryRaw`
-    SELECT "User".*, CAST(COALESCE(SUM(DISTINCT "KeyRelationship".amount), 0) AS INTEGER) as "soldKeys",
-    CAST(COUNT(DISTINCT "KeyRelationship"."holderId") AS INTEGER) as "numberOfHolders",
+    SELECT "User".*, 
+    CAST(COUNT(DISTINCT CASE WHEN "KeyRelationship".amount > 0 then "KeyRelationship".id END) AS INTEGER) as "numberOfHolders",
     CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "numberOfQuestions",
     CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "numberOfReplies"
     FROM "User"
@@ -399,7 +420,7 @@ export const getTopUsers = async (offset: number) => {
     LEFT JOIN "Question" ON "User".id = "Question"."replierId"
     WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
     GROUP BY "User".id
-    ORDER BY "soldKeys" DESC
+    ORDER BY "numberOfHolders" DESC
     LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
   `) as TopUser[];
 
