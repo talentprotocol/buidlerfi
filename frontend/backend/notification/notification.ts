@@ -109,19 +109,8 @@ export const sendNotification = async (
     "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
   >
 ) => {
+  //If tx is passed, use it. Otherwise, use the default prisma client
   const prismaClient = tx ?? prisma;
-  const targetUser = await prismaClient.user.findUniqueOrThrow({
-    where: {
-      id: targetUserId
-    },
-    include: {
-      notificationSettings: true
-    }
-  });
-
-  if (targetUser.notificationSettings.find(setting => setting.notificationType === type)?.isDisabled) {
-    return { data: null };
-  }
 
   const notification = await prismaClient.notification.create({
     data: {
