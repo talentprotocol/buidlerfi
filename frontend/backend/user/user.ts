@@ -395,8 +395,13 @@ export const getTopUsersByKeysOwned = async (offset: number) => {
     }
   });
 
+  const usersMap = new Map<number, (typeof usersNumberOfHolders)[number]>();
+  for (const user of usersNumberOfHolders) {
+    usersMap.set(user.id, user);
+  }
+
   users.forEach(user => {
-    const foundUser = usersNumberOfHolders.find(u => u.id === user.id);
+    const foundUser = usersMap.get(user.id);
     user.numberOfHolders = foundUser?.keysOfSelf.length || 0;
   });
 
