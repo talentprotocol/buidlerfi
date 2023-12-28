@@ -23,8 +23,12 @@ export default function NotificationPage() {
 
   const markAsRead = useMarkNotificationsAsRead();
 
+  //Refetch when opening page
   useEffect(() => {
     refetchNotifications();
+  }, [refetchNotifications]);
+
+  useEffect(() => {
     //Mark as read when leaving page
     return () => {
       const unreadNotifs = notifications?.filter(notif => !notif.isRead) || [];
