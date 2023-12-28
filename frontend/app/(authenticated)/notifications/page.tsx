@@ -24,18 +24,15 @@ export default function NotificationPage() {
 
   //Refetch when opening page
   useEffect(() => {
-    refetchNotifications();
-  }, [refetchNotifications]);
+    (async () => {
+      await refetchNotifications();
 
-  useEffect(() => {
-    //Mark as read when leaving page
-    return () => {
       const unreadNotifs = notifications?.filter(notif => !notif.isRead) || [];
       if (unreadNotifs.length > 0) {
         markAsRead.mutateAsync(unreadNotifs.map(notif => notif.id)).then(() => refetchNotifications());
       }
-    };
-  }, [markAsRead, notifications, refetchNotifications]);
+    })();
+  }, []);
 
   return (
     <Flex component={"main"} y grow>
