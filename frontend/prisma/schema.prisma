@@ -45,8 +45,8 @@ model User {
   SigningChallenge SigningChallenge[]
   recommendedTo    RecommendedUser[]  @relation("recommendationTarget")
   recommendedUsers RecommendedUser[]  @relation("recommendationSource")
-  keysOwned        KeyRelationship[]  @relation("owner")
-  keysOfSelf       KeyRelationship[]  @relation("holder")
+  keysOfSelf       KeyRelationship[]  @relation("owner")
+  keysOwned        KeyRelationship[]  @relation("holder")
 }
 
 enum SocialProfileType {
