@@ -64,25 +64,15 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type }) => {
                   {question.questioner?.displayName}
                 </Typography>
               ) : (
-                <>
-                  <Typography
-                    level="title-sm"
-                    whiteSpace="pre-line"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => router.push(`/profile/${question.questioner?.wallet}`)}
-                  >
+                <Typography level="body-sm">
+                  <strong onClick={() => router.push(`/profile/${question.questioner?.wallet}`)}>
                     {question.questioner?.displayName || shortAddress(question.questioner?.wallet)}
-                  </Typography>
-                  <Typography level="body-sm"> asked </Typography>
-                  <Typography
-                    level="title-sm"
-                    whiteSpace="pre-line"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => router.push(`/profile/${question.replier?.wallet}`)}
-                  >
+                  </strong>{" "}
+                  asked{" "}
+                  <strong onClick={() => router.push(`/profile/${question.replier?.wallet}`)}>
                     {question.replier?.displayName}
-                  </Typography>
-                </>
+                  </strong>
+                </Typography>
               )}
 
               <Typography level="helper">•</Typography>

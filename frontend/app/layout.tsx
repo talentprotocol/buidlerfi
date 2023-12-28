@@ -1,5 +1,6 @@
 import { Flex } from "@/components/shared/flex";
 import { Metadata } from "next";
+import Head from "next/head";
 import Script from "next/script";
 import "./globals.css";
 import InnerLayout from "./innerLayout";
@@ -20,26 +21,28 @@ export const metadata: Metadata = {
     images: ["https://builder.fi/thumbnail.jpg?2"],
     card: "summary_large_image"
   },
-  viewport: {
-    minimumScale: 1
-  },
   manifest: "/manifest.json"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Flex lang="en" component={"html"} suppressHydrationWarning grow>
-      <InnerLayout> {children}</InnerLayout>
-      <Script src="https://www.googletagmanager.com/gtag/js?id=G-DSXS61BZPF" />
-      <Script id="google-analytics">
-        {`
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <Flex lang="en" component={"html"} suppressHydrationWarning grow>
+        <InnerLayout> {children}</InnerLayout>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-DSXS61BZPF" />
+        <Script id="google-analytics">
+          {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
           gtag('config', 'G-DSXS61BZPF');
         `}
-      </Script>
-    </Flex>
+        </Script>
+      </Flex>
+    </>
   );
 }

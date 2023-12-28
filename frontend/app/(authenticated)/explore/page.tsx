@@ -197,7 +197,7 @@ export default function ExplorePage() {
                 <UnifiedUserItem
                   user={user}
                   holdersAndKeys={{
-                    numberOfHolders: user.numberOfHolders,
+                    numberOfHolders: user.numberOfHolders || 0,
                     ownedKeys: user.ownedKeys
                   }}
                 />
