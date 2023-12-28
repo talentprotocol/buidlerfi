@@ -315,7 +315,10 @@ export const getFriendsTransactions = async (privyUserId: string, offset: number
 
   const friends = await prisma.recommendedUser.findMany({
     where: {
-      wallet: currentUser.wallet.toLowerCase()
+      forId: currentUser.id,
+      userId: {
+        not: null
+      }
     }
   });
 

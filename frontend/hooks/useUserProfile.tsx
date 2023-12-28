@@ -43,7 +43,10 @@ export const useUserProfile = (wallet?: string) => {
       ownedKeysCount: Number(myShares?.amount) || 0,
       hasKeys: (myShares && myShares.amount > BigInt(0)) || false,
       isLoading:
-        isLoadingHolders || getQuestionsFromReplierQuery.isLoading || isLoadingRecommendedUser || isLoadingHoldings,
+        isLoadingHolders ||
+        (socialData?.userId && getQuestionsFromReplierQuery.isLoading) ||
+        isLoadingRecommendedUser ||
+        isLoadingHoldings,
       questions: getQuestionsFromReplierQuery.data,
       refetch: refetchAll,
       socialData,
