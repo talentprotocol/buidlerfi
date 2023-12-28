@@ -7,9 +7,11 @@ import { Flex } from "@/components/shared/flex";
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Flex y grow pb={"56px"}>
+    <Flex y grow>
       <Topbar />
-      {children}
+      <Flex y grow>
+        {children}
+      </Flex>
       <BottomNav />
     </Flex>
   );

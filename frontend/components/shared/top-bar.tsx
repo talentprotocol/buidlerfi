@@ -23,7 +23,8 @@ export const Topbar = () => {
         backgroundColor: theme => theme.palette.background.body,
         position: "sticky",
         top: 0,
-        zIndex: 2
+        zIndex: 2,
+        minHeight: "41px"
       }}
       borderBottom={"1px solid var(--neutral-outlined-border, #CDD7E1)"}
       ref={topBarRef}

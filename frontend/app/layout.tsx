@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     images: ["https://builder.fi/thumbnail.jpg?2"],
     card: "summary_large_image"
   },
+  viewport: {
+    minimumScale: 1
+  },
   manifest: "/manifest.json"
 };
 

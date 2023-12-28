@@ -23,11 +23,11 @@ export function BottomNav() {
     () => [
       {
         path: "/home",
-        label: <HomeIcon fontSize="xl2" />
+        label: <HomeIcon fontSize="xl" />
       },
       {
         path: "/explore",
-        label: <SearchIcon fontSize="xl2" />
+        label: <SearchIcon fontSize="xl" />
       },
       {
         path: "/question",
@@ -46,13 +46,13 @@ export function BottomNav() {
       },
       {
         path: "/keys",
-        label: <KeyIcon fontSize="xl2" />
+        label: <KeyIcon fontSize="xl" />
       },
       {
         path: "/notifications",
         label: (
           <Badge invisible={unreadNotifsCount === 0} badgeContent={unreadNotifsCount}>
-            <NotificationIcon fontSize="xl2" />
+            <NotificationIcon fontSize="xl" />
           </Badge>
         )
       }
@@ -64,21 +64,15 @@ export function BottomNav() {
     <Flex
       x
       yc
-      xsb
+      xsa
       component="nav"
-      grow
-      px={2}
-      py={1}
+      pt={1}
+      pb={1.5}
       sx={{
-        width: "calc(min(100vw, 500px) - 32px)",
-        position: "fixed",
-        bottom: 0,
-        left: "50%",
-        transform: "translate(-50%)",
-        backgroundColor: "white",
         borderTop: "1px solid var(--neutral-outlined-border, #CDD7E1)",
-        borderLeft: "1px solid var(--neutral-outlined-border, #CDD7E1)",
-        borderRight: "1px solid var(--neutral-outlined-border, #CDD7E1)",
+        position: "sticky",
+        bottom: 0,
+        backgroundColor: "white",
         backdropFilter: "blur(10px)"
       }}
     >
