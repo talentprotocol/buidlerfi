@@ -3,10 +3,12 @@ import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetComments } from "@/hooks/useCommentApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { formatText, getDifference } from "@/lib/utils";
+import { formatText } from "@/lib/markdown-formatter";
+import { getDifference } from "@/lib/utils";
 import { Avatar, Typography } from "@mui/joy";
+import { useQuery } from "@tanstack/react-query";
 import router from "next/router";
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import { CommentContextMenu } from "./comment-context-menu";
 
 interface Props {
@@ -17,7 +19,9 @@ interface Props {
 export const CommentEntry: FC<Props> = ({ comment, refetch }) => {
   const { user: currentUser } = useUserContext();
 
-  const commentContent = useMemo(() => formatText(comment.content), [comment]);
+  const { data: commentContent } = useQuery(["commentContent", comment?.content], () => formatText(comment.content), {
+    enabled: !!comment.content
+  });
 
   return (
     <Flex x gap1>
@@ -49,7 +53,7 @@ export const CommentEntry: FC<Props> = ({ comment, refetch }) => {
         </Flex>
         <Flex y xsa>
           <Typography fontWeight={300} level="body-sm" textColor={"neutral.800"}>
-            <div className="remove-text-transform" dangerouslySetInnerHTML={{ __html: commentContent }} />
+            <div className="remove-text-transform" dangerouslySetInnerHTML={{ __html: commentContent || "" }} />
           </Typography>
           {comment.authorId === currentUser?.id && (
             <CommentReactions

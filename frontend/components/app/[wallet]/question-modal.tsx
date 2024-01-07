@@ -12,9 +12,11 @@ import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
 import { useGetUserStats } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { formatText, getDifference } from "@/lib/utils";
+import { formatText } from "@/lib/markdown-formatter";
+import { getDifference } from "@/lib/utils";
 import { FileUploadOutlined, LockOutlined } from "@mui/icons-material";
 import { Avatar, Button, Divider, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -60,9 +62,17 @@ export default function QuestionModal({ questionId, close, profile }: Props) {
     }
   };
 
-  const sanitizedContent = useMemo(() => formatText(question?.questionContent || ""), [question?.questionContent]);
+  const { data: sanitizedContent } = useQuery(
+    ["sanitizedContent", question?.questionContent],
+    () => formatText(question?.questionContent || ""),
+    { enabled: !!question?.questionContent }
+  );
 
-  const sanitizedReply = useMemo(() => formatText(question?.reply || ""), [question?.reply]);
+  const { data: sanitizedReply } = useQuery(
+    ["sanitizedReply", question?.reply],
+    () => formatText(question?.reply || ""),
+    { enabled: !!question?.reply }
+  );
 
   if (!question) return <></>;
 

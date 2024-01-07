@@ -57,8 +57,8 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit, ow
           questionId: questionToEdit,
           questionContent: questionContent
         })
-        .then(() => {
-          refetch();
+        .then(async () => {
+          await refetch();
           close();
         });
     } else {
@@ -66,7 +66,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit, ow
         questionContent: questionContent,
         replierId: ownerUser.id
       });
-      refetch();
+      await refetch();
       close();
     }
   };

@@ -2,9 +2,11 @@ import { Flex } from "@/components/shared/flex";
 import { Reactions } from "@/components/shared/reactions";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetHotQuestions, useGetKeyQuestions, useGetQuestionsFromUser } from "@/hooks/useQuestionsApi";
-import { formatText, getDifference, shortAddress } from "@/lib/utils";
+import { formatText } from "@/lib/markdown-formatter";
+import { getDifference, shortAddress } from "@/lib/utils";
 import theme from "@/theme";
 import { Avatar, AvatarGroup, Chip, Typography } from "@mui/joy";
+import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 import { QuestionContextMenu } from "./question-context-menu";
 
@@ -21,7 +23,13 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type, refetch }) =
   const askedOn = useMemo(() => getDifference(question?.createdAt), [question?.createdAt]);
   const router = useBetterRouter();
 
-  const sanitizedContent = useMemo(() => formatText(question?.questionContent || ""), [question?.questionContent]);
+  const { data: sanitizedContent } = useQuery(
+    ["sanitizedContent", question?.questionContent],
+    () => formatText(question?.questionContent || ""),
+    {
+      enabled: !!question?.questionContent
+    }
+  );
 
   if (!question) return <></>;
 
@@ -79,6 +87,7 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type, refetch }) =
             <QuestionContextMenu question={question} refetch={async () => refetch?.()} />
           </Flex>
           <Typography
+            textColor="neutral.800"
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();
@@ -88,7 +97,7 @@ export const QuestionEntry: FC<Props> = ({ question, onClick, type, refetch }) =
             fontWeight={400}
             level="body-sm"
           >
-            <span className="remove-text-transform" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+            <span className="remove-text-transform" dangerouslySetInnerHTML={{ __html: sanitizedContent || "" }} />
           </Typography>
         </Flex>
       </Flex>

@@ -3,6 +3,7 @@ const nextConfig = {};
 
 // Injected content via PWA below
 
+//eslint-disable-next-line
 const withPWA = require("next-pwa")({
   dest: "public"
 });
@@ -10,7 +11,7 @@ const withPWA = require("next-pwa")({
 module.exports = process.env.NODE_ENV === "production" ? withPWA(nextConfig) : nextConfig;
 
 // Injected content via Sentry wizard below
-
+//eslint-disable-next-line
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(

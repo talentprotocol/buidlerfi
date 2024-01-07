@@ -1,9 +1,8 @@
 import { AxiosError } from "axios";
 import { differenceInMinutes, startOfDay, subDays, subMonths } from "date-fns";
+
 import { URLSearchParams } from "url";
 import { formatUnits, parseEther } from "viem";
-import markdownit from "markdown-it";
-import sanitize from "sanitize-html";
 
 export const shortAddress = (address?: string) => {
   if (!address) return "";
@@ -154,14 +153,4 @@ export function sortIntoPeriods<T extends { createdAt: Date }>(toSort: T[]) {
   });
 
   return sorted;
-}
-
-export function formatText(inputText: string): string {
-  const md = markdownit({
-    html: false,
-    linkify: true,
-    breaks: false,
-    typographer: true
-  }).disable(["image"]);
-  return md.render(sanitize(inputText));
 }
