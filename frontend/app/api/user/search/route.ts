@@ -13,7 +13,8 @@ export async function GET(req: NextRequest) {
     if (!searchValue || !privyUserId) {
       return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
     }
-    return NextResponse.json(await search(privyUserId, searchValue, includeOwnedKeysOnly, offset));
+    const res = await search(privyUserId, searchValue, includeOwnedKeysOnly, offset);
+    return NextResponse.json(res);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });

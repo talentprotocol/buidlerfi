@@ -6,7 +6,8 @@ export async function GET(req: NextRequest) {
   try {
     const privyUserId = req.headers.get("privyUserId");
     if (!privyUserId) return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
-    return NextResponse.json(await getCurrentUser(privyUserId));
+    const res = await getCurrentUser(privyUserId);
+    return NextResponse.json(res);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });

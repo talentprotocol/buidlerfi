@@ -9,7 +9,8 @@ export async function GET(req: NextRequest) {
       ? (req.nextUrl.searchParams.get("side") as "holder" | "owner")
       : "holder";
     if (!address) return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
-    return NextResponse.json(await getKeyRelationships(address, side));
+    const res = await getKeyRelationships(address, side);
+    return NextResponse.json(res);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });
