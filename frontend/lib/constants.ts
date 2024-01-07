@@ -39,6 +39,7 @@ export const ONBOARDING_WALLET_CREATED_KEY = "onboarding-wallet-created";
 export const MIN_BALANCE_ONBOARDING = parseEther("0.001");
 export const PAGINATION_LIMIT = 20;
 export const USER_BIO_MAX_LENGTH = 160;
+export const MAX_COMMENT_LENGTH = 2000;
 
 // FARCASTER
 export const NEW_BUILDERFI_QUESTION_CAST =

@@ -21,7 +21,6 @@ export default function LinkedAccountPage() {
   } = usePrivy();
 
   const numberOfLinkedAccounts = user?.linkedAccounts.filter(acc => acc.type !== "wallet").length;
-  console.log(numberOfLinkedAccounts);
   const linkedAccount = ({
     label,
     labelButton,

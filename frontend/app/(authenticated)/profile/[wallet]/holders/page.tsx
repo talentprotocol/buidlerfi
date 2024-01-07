@@ -5,12 +5,14 @@ import { Flex } from "@/components/shared/flex";
 import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
-import { useProfileContext } from "@/contexts/profileContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { Chat, Lock } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { useParams } from "next/navigation";
 
 export default function HoldersPage() {
-  const { holders, holdings, isOwnProfile, user } = useProfileContext();
+  const { wallet } = useParams();
+  const { holders, holdings, isOwnProfile, user } = useUserProfile(wallet as `0x${string}`);
 
   return (
     <Flex y component={"main"} grow>

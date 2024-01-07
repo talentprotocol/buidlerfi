@@ -5,23 +5,14 @@ import { QuestionsList } from "@/components/app/[wallet]/questions-list";
 import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
 import { Flex } from "@/components/shared/flex";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { isEVMAddress } from "@/lib/utils";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useMemo, useState } from "react";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
-  const {
-    hasKeys,
-    holders,
-    ownedKeysCount,
-    refetch: refetchProfileInfo,
-    user,
-    isOwnProfile,
-    questions,
-    questionsAsked
-  } = useProfileContext();
+  const profile = useUserProfile(params.wallet);
   const router = useBetterRouter();
 
   const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
@@ -38,38 +29,40 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   return (
     <Flex component={"main"} y grow>
-      <InjectTopBar withBack title={user?.displayName || undefined} />
+      <InjectTopBar withBack title={profile.user?.displayName || undefined} />
       {router.searchParams.ask && (
         <AskQuestionModal
-          refetch={() => refetchProfileInfo()}
+          ownerUser={profile.user}
+          refetch={() => profile.refetch()}
           close={() => router.replace({ searchParams: { ask: undefined } })}
         />
       )}
       {buyModalState !== "closed" && (
         <TradeKeyModal
-          supporterKeysCount={ownedKeysCount || 0}
-          hasKeys={hasKeys}
-          isFirstKey={isOwnProfile && holders?.length === 0}
+          keyOwner={profile.user}
+          supporterKeysCount={profile.ownedKeysCount || 0}
+          hasKeys={profile.hasKeys}
+          isFirstKey={profile.isOwnProfile && profile.holders?.length === 0}
           side={buyModalState}
           close={async () => {
-            await refetchProfileInfo();
+            await profile.refetch();
             setBuyModalState("closed");
           }}
-          targetBuilderAddress={(user?.wallet as `0x${string}`) || undefined}
+          targetBuilderAddress={(profile.user?.wallet as `0x${string}`) || undefined}
         />
       )}
 
-      <Overview setBuyModalState={setBuyModalState} />
+      <Overview profile={profile} setBuyModalState={setBuyModalState} />
       <Tabs defaultValue={"answers"}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
-          <Tab value="answers">{questions?.length} Answers</Tab>
-          <Tab value="questions">{questionsAsked?.length} Questions</Tab>
+          <Tab value="answers">{profile.questions?.length} Answers</Tab>
+          <Tab value="questions">{profile.questionsAsked?.length} Questions</Tab>
         </TabList>
         <TabPanel value="answers" sx={{ p: 0 }}>
-          <QuestionsList type="answers" onBuyKeyClick={() => setBuyModalState("buy")} />
+          <QuestionsList profile={profile} type="answers" onBuyKeyClick={() => setBuyModalState("buy")} />
         </TabPanel>
         <TabPanel value="questions" sx={{ p: 0 }}>
-          <QuestionsList type="questions" onBuyKeyClick={() => setBuyModalState("buy")} />
+          <QuestionsList profile={profile} type="questions" onBuyKeyClick={() => setBuyModalState("buy")} />
         </TabPanel>
       </Tabs>
     </Flex>

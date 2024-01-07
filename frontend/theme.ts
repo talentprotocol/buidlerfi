@@ -63,7 +63,7 @@ const theme = extendTheme({
     },
     JoyTabs: {
       styleOverrides: {
-        root: props => ({
+        root: () => ({
           flexGrow: 1
         })
       }

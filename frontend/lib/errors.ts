@@ -23,5 +23,7 @@ export const ERRORS = {
   USER_NOT_ON_FARCASTER: "User not on farcaster",
   TAGS_COUNT_INVALID: "You can only select up to 3 tags",
   NOT_FOUND: "Not found",
-  BIO_LENGTH_INVALID: "Bio too long. Maximum 160 characters"
+  BIO_LENGTH_INVALID: "Bio too long. Maximum 160 characters",
+  INVALID_LENGTH: "Invalid length",
+  QUESTION_NOT_REPLIED: "Question has not been replied to yet"
 } as const;

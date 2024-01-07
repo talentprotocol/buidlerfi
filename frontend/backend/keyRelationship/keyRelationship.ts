@@ -30,3 +30,35 @@ export const getKeyRelationships = async (address: string, side: "owner" | "hold
 
   return { data: relationships };
 };
+
+//Can pass either userId, privyUserId or wallet for user
+export const ownsKey = async (
+  ownerUser: { userId?: number; privyUserId?: string; wallet?: string },
+  holderUser: { userId?: number; privyUserId?: string; wallet?: string }
+) => {
+  if (
+    (!holderUser.privyUserId && !holderUser.userId && !holderUser.wallet) ||
+    (!ownerUser.privyUserId && !ownerUser.userId && !ownerUser.wallet)
+  )
+    return false;
+
+  const key = await prisma.keyRelationship.findFirst({
+    where: {
+      owner: {
+        id: ownerUser.userId,
+        privyUserId: ownerUser.privyUserId,
+        wallet: ownerUser.wallet?.toLowerCase()
+      },
+      holder: {
+        id: holderUser.userId,
+        privyUserId: holderUser.privyUserId,
+        wallet: holderUser.wallet?.toLowerCase()
+      },
+      amount: {
+        gt: 0
+      }
+    }
+  });
+
+  return !!key;
+};

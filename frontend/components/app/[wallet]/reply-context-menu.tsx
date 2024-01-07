@@ -1,5 +1,4 @@
 import { OpenDialog } from "@/contexts/DialogContainer";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useDeleteReply, useGetQuestion, useGetQuestionsFromUser } from "@/hooks/useQuestionsApi";
 import { DeleteOutline, EditOutlined, MoreHoriz } from "@mui/icons-material";
@@ -15,7 +14,6 @@ interface Props {
 }
 
 export const ReplyContextMenu: FC<Props> = ({ question, refetchQuestion, onEdit }) => {
-  const { refetch } = useProfileContext();
   const { user } = useUserContext();
   const deleteReply = useDeleteReply();
   const isEditable = question.replierId === user?.id;
@@ -25,7 +23,6 @@ export const ReplyContextMenu: FC<Props> = ({ question, refetchQuestion, onEdit 
       type: "confirm",
       submit: () =>
         deleteReply.mutateAsync(question.id).then(() => {
-          refetch();
           refetchQuestion();
         }),
       body: "Are you sure you want to delete this reply ?",

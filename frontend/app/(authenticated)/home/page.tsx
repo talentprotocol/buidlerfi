@@ -40,6 +40,7 @@ export default function Home() {
               key={question.id}
               question={question}
               onClick={() => router.push(`/question/${question.id}`)}
+              refetch={newQuestions?.refetch}
             />
           ))}
           {<LoadMoreButton query={newQuestions} />}
@@ -52,6 +53,7 @@ export default function Home() {
               key={question.id}
               question={question}
               onClick={() => router.push(`/question/${question.id}`)}
+              refetch={hotQuestions?.refetch}
             />
           ))}
           {<LoadMoreButton query={hotQuestions} />}
@@ -75,6 +77,7 @@ export default function Home() {
                 key={question.id}
                 question={question}
                 onClick={() => router.push(`/question/${question.id}`)}
+                refetch={keysQuestions?.refetch}
               />
             ))
           )}

@@ -51,7 +51,12 @@ export const QuestionContextMenu: FC<Props> = ({ question, refetch }) => {
   return (
     <>
       {isEditQuestion && (
-        <AskQuestionModal questionToEdit={question.id} refetch={refetch} close={() => setIsEditQuestion(false)} />
+        <AskQuestionModal
+          ownerUser={{ displayName: question.replier.displayName, id: question.replier.id }}
+          questionToEdit={question.id}
+          refetch={refetch}
+          close={() => setIsEditQuestion(false)}
+        />
       )}
       <Dropdown>
         <MenuButton variant="plain">

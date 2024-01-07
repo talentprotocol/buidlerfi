@@ -8,6 +8,10 @@ import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useContractRead } from "wagmi";
 import { LoadingPage } from "../shared/loadingPage";
 
+interface Navigator extends globalThis.Navigator {
+  standalone?: boolean;
+}
+
 export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
   const user = useUserContext();
@@ -21,6 +25,9 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     args: [user.user?.wallet as `0x${string}`, user.user?.wallet as `0x${string}`],
     enabled: !!user.user?.wallet
   });
+
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  const { standalone } = navigator as Navigator;
 
   const redirect = useCallback(
     (path: string) => {
@@ -46,6 +53,13 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       return redirect("/onboarding/buykey");
     } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
+    } else if (
+      !document.referrer.startsWith("android-app://") &&
+      !standalone &&
+      !isStandalone &&
+      router.searchParams.skipInstall !== "1"
+    ) {
+      return redirect("/onboarding/installapp");
     } else {
       updateUser
         .mutateAsync({ hasFinishedOnboarding: true })
@@ -55,7 +69,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
         );
       return false;
     }
-  }, [user, router, supporterKeys, redirect, updateUser]);
+  }, [user, router, supporterKeys, standalone, isStandalone, redirect, updateUser]);
 
   useEffect(() => {
     if (router.searchParams.inviteCode)

@@ -1,10 +1,10 @@
 import { Flex } from "@/components/shared/flex";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
 import { formatToDisplayString } from "@/lib/utils";
 import { Close } from "@mui/icons-material";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Tooltip, Typography } from "@mui/joy";
+import { User } from "@prisma/client";
 import { FC, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { parseEther } from "viem";
@@ -17,6 +17,7 @@ interface Props {
   side: "buy" | "sell";
   isFirstKey: boolean;
   targetBuilderAddress?: `0x${string}`;
+  keyOwner?: User;
 }
 
 export const TradeKeyModal: FC<Props> = ({
@@ -25,7 +26,8 @@ export const TradeKeyModal: FC<Props> = ({
   supporterKeysCount,
   isFirstKey,
   side,
-  targetBuilderAddress
+  targetBuilderAddress,
+  keyOwner
 }) => {
   const { address } = useUserContext();
   const { data: balance } = useBalance({
@@ -33,9 +35,8 @@ export const TradeKeyModal: FC<Props> = ({
   });
   const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const { user } = useProfileContext();
   const { refetch, buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } =
-    useGetBuilderInfo(user?.wallet);
+    useGetBuilderInfo(keyOwner?.wallet);
 
   const closeOrShowSuccessPurchase = () => {
     if (hasKeys) {
@@ -132,13 +133,13 @@ export const TradeKeyModal: FC<Props> = ({
         {showSuccessMessage ? (
           <Flex y gap1>
             <Typography level="body-lg" textColor="neutral.600">
-              Congrats, you bought your first {user?.displayName} key!
+              Congrats, you bought your first {keyOwner?.displayName} key!
             </Typography>
             <Typography level="body-lg" textColor="neutral.600">
               The next step is asking them a question.
             </Typography>
             <Typography level="body-lg" textColor="neutral.600">
-              If you&apos;re bullish on {user?.displayName}, you can buy multiple keys!
+              If you&apos;re bullish on {keyOwner?.displayName}, you can buy multiple keys!
             </Typography>
             <Flex x yc gap1 alignSelf="flex-end" mt={2}>
               <Button variant="outlined" onClick={() => close()}>

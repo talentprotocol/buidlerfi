@@ -4,7 +4,6 @@ import { getTags } from "@/backend/tags/tags";
 import { socialInfo, socialsOrder } from "@/components/app/[wallet]/overview";
 import { Flex } from "@/components/shared/flex";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser, useUpdateUser } from "@/hooks/useUserApi";
@@ -19,19 +18,18 @@ import { toast } from "react-toastify";
 
 export default function EditProfilePage() {
   const { user: currentUser, refetch } = useUserContext();
-  const { user, refetch: refetchProfile } = useProfileContext();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [bio, setBio] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsready] = useState(false);
 
   useEffect(() => {
-    if (user && !isReady) {
-      setBio(user.bio || "");
-      setSelectedTags(user.tags.map(tag => tag.name));
+    if (currentUser && !isReady) {
+      setBio(currentUser.bio || "");
+      setSelectedTags(currentUser.tags.map(tag => tag.name));
       setIsready(true);
     }
-  }, [isReady, user]);
+  }, [isReady, currentUser]);
 
   const updateUser = useUpdateUser();
   const router = useRouter();
@@ -42,7 +40,7 @@ export default function EditProfilePage() {
       .mutateAsync({ tags: selectedTags, bio: bio })
       .then(async () => {
         toast.success("Profile updated");
-        await refetchProfile();
+        await refetch();
         router.replace("/profile/" + currentUser?.wallet.toLowerCase());
       })
       .catch(err => {

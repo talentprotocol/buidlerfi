@@ -5,7 +5,7 @@ import { Flex } from "./flex";
 
 interface Props {
   avatarUrl?: string;
-  placeholder: string;
+  placeholder?: string;
   value: string;
   onChange: (value: ChangeEvent<HTMLTextAreaElement>) => void;
 }
@@ -45,7 +45,10 @@ export const FullTextArea: FC<Props> = ({ avatarUrl, placeholder, value, onChang
         grow
         sx={{ cursor: "text" }}
         onClick={() => {
-          (textAreadRef.current?.firstChild as HTMLInputElement).focus();
+          const val = textAreadRef.current?.firstChild as HTMLInputElement;
+          val.focus();
+          //Move cursor to end of input
+          val.selectionStart = val.selectionEnd = val.value.length;
         }}
       />
     </Flex>

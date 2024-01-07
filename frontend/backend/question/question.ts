@@ -7,7 +7,7 @@ import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
 import { shortAddress } from "@/lib/utils";
 import { Prisma, ReactionType, SocialProfileType } from "@prisma/client";
-import { getKeyRelationships } from "../keyRelationship/keyRelationship";
+import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
 export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
@@ -218,18 +218,12 @@ export const getQuestion = async (questionId: number, privyUserId?: string) => {
     }
   });
 
-  //We need to check privyUserId also because if it's undefined, it's going to return the system user
+  //We need to check privyUserId explicitely also because if it's undefined, it's going to return the system user
   if (!privyUserId) return { data: exclude(question, ["reply"]) };
 
-  const currentUser = await prisma.user.findUnique({
-    where: { privyUserId: privyUserId },
-    include: { keysOwned: true }
-  });
+  const hasKey = await ownsKey({ userId: question.replierId }, { privyUserId });
 
-  if (!currentUser) return { data: exclude(question, ["reply"]) };
-  const key = currentUser.keysOwned.find(key => key.ownerId === question.replierId);
-
-  if (key && key.amount > BigInt(0)) return { data: question };
+  if (hasKey) return { data: question };
   else return { data: exclude(question, ["reply"]) };
 };
 
@@ -253,26 +247,20 @@ export const deleteQuestion = async (privyUserId: string, questionId: number) =>
     return { error: ERRORS.UNAUTHORIZED };
   }
 
-  const res = await prisma.$transaction(async tx => {
-    const res = await prisma.question.delete({
-      where: {
-        id: questionId
-      }
-    });
-
-    // Make sure to delete reactions when deleting question
-    await tx.reaction.deleteMany({
-      where: {
-        questionId: questionId
-      }
-    });
-    return res;
+  const res = await prisma.question.delete({
+    where: {
+      id: questionId
+    }
   });
 
   return { data: res };
 };
 
 export const editQuestion = async (privyUserId: string, questionId: number, questionContent: string) => {
+  if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
+    return { error: ERRORS.QUESTION_LENGTH_INVALID };
+  }
+
   const question = await prisma.question.findUniqueOrThrow({
     where: {
       id: questionId

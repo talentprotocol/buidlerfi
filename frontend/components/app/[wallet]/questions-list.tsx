@@ -4,8 +4,8 @@ import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Button } from "@mui/joy";
 import { FC } from "react";
@@ -15,25 +15,15 @@ import QuestionModal from "./question-modal";
 interface Props {
   onBuyKeyClick: () => void;
   type: "answers" | "questions";
+  profile?: ReturnType<typeof useUserProfile>;
 }
 
-export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type }) => {
-  const {
-    isOwnProfile,
-    user,
-    hasKeys,
-    questions,
-    questionsAsked,
-    isLoading,
-    refetch,
-    getQuestionsFromReplierQuery,
-    hasLaunchedKeys
-  } = useProfileContext();
+export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   const router = useBetterRouter();
-  const questionsToUse = type === "answers" ? questions : questionsAsked;
+  const questionsToUse = type === "answers" ? profile?.questions : profile?.questionsAsked;
   const hasQuestion: boolean = !!questionsToUse?.length;
   // const hasQuestion: boolean = false;
-  if (isLoading) {
+  if (!profile || profile.isLoading) {
     return <LoadingPage />;
   }
 
@@ -43,11 +33,11 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type }) => {
     }
 
     if (type === "questions") {
-      if (!isOwnProfile) {
+      if (!profile?.isOwnProfile) {
         return {
           title: "no questions to show",
           icon: <AccessTimeOutlined />,
-          text: user?.displayName + " didn’t ask any questions to other builders yet"
+          text: profile?.user?.displayName + " didn’t ask any questions to other builders yet"
         };
       } else {
         return {
@@ -58,19 +48,19 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type }) => {
       }
     }
 
-    if (!isOwnProfile) {
-      if (hasLaunchedKeys) {
-        if (!hasKeys) {
+    if (!profile?.isOwnProfile) {
+      if (profile?.hasLaunchedKeys) {
+        if (!profile?.hasKeys) {
           return {
-            title: `you don't hold any keys of ${user?.displayName}`,
+            title: `you don't hold any keys of ${profile?.user?.displayName}`,
             icon: <AccessTimeOutlined />,
-            text: "hold " + user?.displayName + "'s keys to ask him a question"
+            text: "hold " + profile?.user?.displayName + "'s keys to ask him a question"
           };
         } else {
           return {
             title: "you have a key",
             icon: <KeyIcon />,
-            text: "ask the first question to " + user?.displayName,
+            text: "ask the first question to " + profile?.user?.displayName,
             button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
           };
         }
@@ -78,11 +68,11 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type }) => {
         return {
           title: "not accepting questions yet",
           icon: <AccessTimeOutlined />,
-          text: user?.displayName + " didn’t create their keys, but we can notify you when they do"
+          text: profile?.user?.displayName + " didn’t create their keys, but we can notify you when they do"
         };
       }
     } else {
-      if (!hasLaunchedKeys) {
+      if (!profile?.hasLaunchedKeys) {
         return {
           title: "Unlock Q&A",
           icon: <KeyIcon />,
@@ -117,9 +107,10 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type }) => {
     <>
       {router.searchParams.question && (
         <QuestionModal
+          profile={profile}
           questionId={Number(router.searchParams.question)}
           close={() => {
-            refetch();
+            profile?.refetch();
             router.replace("./");
           }}
         />
@@ -129,6 +120,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type }) => {
           {questionsToUse?.map(question => {
             return (
               <QuestionEntry
+                refetch={profile.refetch}
                 key={question.id}
                 question={question}
                 type={"home"}
@@ -136,7 +128,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type }) => {
               />
             );
           })}
-          <LoadMoreButton query={getQuestionsFromReplierQuery} />
+          <LoadMoreButton query={profile?.getQuestionsFromReplierQuery} />
         </Flex>
       </Flex>
     </>

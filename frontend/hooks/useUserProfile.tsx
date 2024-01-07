@@ -5,19 +5,25 @@ import { useCallback, useMemo } from "react";
 import { useGetKeyRelationships } from "./useKeyRelationshipApi";
 
 export const useUserProfile = (wallet?: string) => {
+  const formattedWallet = useMemo(() => wallet?.toLowerCase(), [wallet]);
   const { user: currentUser } = useUserContext();
-  const { data: holders, refetch, isLoading: isLoadingHolders } = useGetKeyRelationships(wallet, "owner");
+  const { data: holders, refetch, isLoading: isLoadingHolders } = useGetKeyRelationships(formattedWallet, "owner");
 
   const {
     data: holdings,
     refetch: refetchHoldings,
     isLoading: isLoadingHoldings
-  } = useGetKeyRelationships(wallet, "holder");
+  } = useGetKeyRelationships(formattedWallet, "holder");
 
-  const { isLoading: isLoadingRecommendedUser, data: recommendedUser } = useGetRecommendedUser(wallet as `0x${string}`);
+  const { isLoading: isLoadingRecommendedUser, data: recommendedUser } = useGetRecommendedUser(
+    formattedWallet as `0x${string}` | undefined
+  );
 
-  const { data: user, refetch: refetchUser, isLoading: isLoadingUser } = useGetUser(wallet as `0x${string}`);
-  console.log(user);
+  const {
+    data: user,
+    refetch: refetchUser,
+    isLoading: isLoadingUser
+  } = useGetUser(formattedWallet as `0x${string}` | undefined);
   const getQuestionsFromReplierQuery = useGetQuestionsFromUser(user?.id);
   const getQuestionsFromQuestionerQuery = useGetQuestionsFromUser(user?.id, "questions");
 
@@ -42,55 +48,26 @@ export const useUserProfile = (wallet?: string) => {
     ]);
   }, [refetch, getQuestionsFromReplierQuery, refetchHoldings, getQuestionsFromQuestionerQuery, refetchUser]);
 
-  console.log({
-    isLoadingHolders,
-    getQuestions: getQuestionsFromQuestionerQuery.isLoading,
-    getReplies: getQuestionsFromReplierQuery.isLoading,
-    isLoadingRecommendedUser,
-    isLoadingHoldings,
-    isLoadingUser
-  });
-
-  const value = useMemo(() => {
-    return {
-      holders: sortedHolders,
-      holdings,
-      supporterNumber,
-      ownedKeysCount: Number(myShares?.amount) || 0,
-      hasKeys: (myShares && myShares.amount > BigInt(0)) || false,
-      isLoading:
-        isLoadingHolders ||
-        (user?.id && getQuestionsFromReplierQuery.isLoading) ||
-        isLoadingRecommendedUser ||
-        isLoadingHoldings ||
-        isLoadingUser,
-      questions: getQuestionsFromReplierQuery.data,
-      questionsAsked: getQuestionsFromQuestionerQuery.data,
-      refetch: refetchAll,
-      user,
-      recommendedUser,
-      isOwnProfile: currentUser?.wallet?.toLowerCase() === wallet?.toLowerCase(),
-      getQuestionsFromReplierQuery,
-      getQuestionsFromQuestionerQuery,
-      hasLaunchedKeys: !!holdings?.find(key => key.holder.id === key.owner.id)
-    };
-  }, [
-    sortedHolders,
+  return {
+    holders: sortedHolders,
     holdings,
     supporterNumber,
-    myShares,
-    isLoadingHolders,
-    getQuestionsFromQuestionerQuery,
-    getQuestionsFromReplierQuery,
-    isLoadingRecommendedUser,
-    isLoadingHoldings,
-    isLoadingUser,
-    refetchAll,
+    ownedKeysCount: Number(myShares?.amount) || 0,
+    hasKeys: (myShares && myShares.amount > BigInt(0)) || false,
+    isLoading:
+      isLoadingHolders ||
+      (user?.id && getQuestionsFromReplierQuery.isLoading) ||
+      isLoadingRecommendedUser ||
+      isLoadingHoldings ||
+      isLoadingUser,
+    questions: getQuestionsFromReplierQuery.data,
+    questionsAsked: getQuestionsFromQuestionerQuery.data,
+    refetch: refetchAll,
     user,
     recommendedUser,
-    currentUser?.wallet,
-    wallet
-  ]);
-
-  return value;
+    isOwnProfile: currentUser?.wallet?.toLowerCase() === formattedWallet,
+    getQuestionsFromReplierQuery,
+    getQuestionsFromQuestionerQuery,
+    hasLaunchedKeys: !!holdings?.find(key => key.holder.id === key.owner.id)
+  };
 };

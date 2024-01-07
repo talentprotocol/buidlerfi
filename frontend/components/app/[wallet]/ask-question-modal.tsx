@@ -1,7 +1,6 @@
 import { Flex } from "@/components/shared/flex";
 import { FullTextArea } from "@/components/shared/full-text-area";
 import { OpenDialog } from "@/contexts/DialogContainer";
-import { useProfileContext } from "@/contexts/profileContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useEditQuestion, useGetQuestion, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
@@ -13,11 +12,14 @@ interface Props {
   questionToEdit?: number;
   close: () => void;
   refetch: () => Promise<unknown>;
+  ownerUser?: {
+    displayName: string | null;
+    id: number;
+  };
 }
 
-export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) => {
+export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit, ownerUser }) => {
   const { user: currentUser } = useUserContext();
-  const { user } = useProfileContext();
   const [questionContent, setQuestionContent] = useState("");
   const [showBadQuestionLabel, setShowBadQuestionLabel] = useState(false);
   const postQuestion = usePostQuestion();
@@ -37,7 +39,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
   const isEditMode = questionToEdit !== undefined;
 
   const sendQuestion = async () => {
-    if (!user) {
+    if (!ownerUser) {
       toast.error("Not ready yet");
       return;
     }
@@ -62,7 +64,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
     } else {
       await postQuestion.mutateAsync({
         questionContent: questionContent,
-        replierId: user.id
+        replierId: ownerUser.id
       });
       refetch();
       close();
@@ -85,7 +87,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
       <ModalDialog layout="center" sx={{ width: "min(100vw, 500px)", padding: 0, overflowY: "auto" }}>
         <Flex y gap2 p={2} grow>
           <Flex x xsb yc>
-            <Typography level="title-sm">Ask to {user?.displayName}</Typography>
+            <Typography level="title-sm">Ask to {ownerUser?.displayName}</Typography>
             <Button
               loading={postQuestion.isLoading}
               disabled={questionContent.length < MIN_QUESTION_LENGTH || questionContent.length > MAX_QUESTION_LENGTH}
@@ -95,7 +97,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) 
             </Button>
           </Flex>
           <FullTextArea
-            placeholder={`Ask ${user?.displayName} a question...`}
+            placeholder={`Ask ${ownerUser?.displayName} a question...`}
             avatarUrl={currentUser?.avatarUrl || undefined}
             onChange={e => setQuestionContent(e.target.value)}
             value={questionContent}

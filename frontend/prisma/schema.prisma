@@ -92,11 +92,12 @@ model Question {
 }
 
 model Comment {
-  content    String   @db.VarChar(500)
-  question   Question @relation(fields: [questionId], references: [id])
+  content    String     @db.VarChar
+  question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int
-  author     User     @relation(fields: [authorId], references: [id])
+  author     User       @relation(fields: [authorId], references: [id])
   authorId   Int
+  reactions  Reaction[]
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -113,10 +114,12 @@ model Reaction {
   reactionType ReactionType
   user         User         @relation(fields: [userId], references: [id])
   userId       Int
-  question     Question?    @relation(fields: [questionId], references: [id])
+  question     Question?    @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   Int?
-  reply        Question?    @relation(fields: [replyId], references: [id], name: "ReplyReaction")
+  reply        Question?    @relation(fields: [replyId], references: [id], name: "ReplyReaction", onDelete: Cascade)
   replyId      Int?
+  comment      Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId    Int?
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -124,6 +127,7 @@ model Reaction {
 
   @@unique([userId, questionId])
   @@unique([userId, replyId])
+  @@unique([userId, commentId])
 }
 
 model InviteCode {

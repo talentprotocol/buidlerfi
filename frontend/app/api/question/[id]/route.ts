@@ -1,5 +1,6 @@
 import { sendNotification } from "@/backend/notification/notification";
 import { publishNewAnswerCast } from "@/lib/api/backend/farcaster";
+import { MAX_COMMENT_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { shortAddress } from "@/lib/utils";
@@ -9,7 +10,11 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
   try {
     const body = await req.json();
     const question = await prisma.question.findUnique({ where: { id: Number(params.id) } });
-    if (!question) return Response.json({ error: ERRORS.QUESTION_NOT_FOUND }, { status: 404 });
+    const answerContent = body["answerContent"];
+    if (!question || !answerContent) return Response.json({ error: ERRORS.QUESTION_NOT_FOUND }, { status: 404 });
+
+    if (answerContent.length < 5 || answerContent.length > MAX_COMMENT_LENGTH)
+      return Response.json({ error: ERRORS.INVALID_LENGTH }, { status: 400 });
 
     const replier = await prisma.user.findUniqueOrThrow({
       where: { privyUserId: req.headers.get("privyUserId")! },

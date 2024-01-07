@@ -43,7 +43,6 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
     if (myVote === reaction || (reaction === "LIKE" && hasLikedReply))
       await deleteReaction.mutateAsync({ questionId: questionId, reactionType: reaction });
     else await addReaction.mutateAsync({ questionId: questionId, reactionType: reaction });
-
     refetchReactions();
   };
 
