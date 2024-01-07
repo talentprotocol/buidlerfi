@@ -61,7 +61,7 @@ export const useBetterRouter = () => {
   const replace = useCallback(
     (url: CustomUrl | string, options?: BetterRouterOptions) => {
       const formattedUrl = formatUrl(url, options);
-      nextRouter.replace(formattedUrl);
+      nextRouter.replace(formattedUrl, { scroll: false });
     },
     [formatUrl, nextRouter]
   );
@@ -69,7 +69,7 @@ export const useBetterRouter = () => {
   const push = useCallback(
     (url: CustomUrl | string, options?: BetterRouterOptions) => {
       const formattedUrl = formatUrl(url, options);
-      nextRouter.push(formattedUrl);
+      nextRouter.push(formattedUrl, { scroll: false });
     },
     [formatUrl, nextRouter]
   );

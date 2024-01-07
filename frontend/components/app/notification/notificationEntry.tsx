@@ -1,10 +1,10 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetNotifications, useMarkNotificationsAsRead } from "@/hooks/useNotificationApi";
 import { getDifference, shortAddress } from "@/lib/utils";
 import { Avatar, Badge, Typography } from "@mui/joy";
 import { NotificationType } from "@prisma/client";
-import { useRouter } from "next/navigation";
 import { FC } from "react";
 
 export type BuilderfiNotification = NonNullable<ReturnType<typeof useGetNotifications>["data"]>[number];
@@ -53,7 +53,7 @@ interface Props {
 }
 
 export const NotificationEntry: FC<Props> = ({ notification }) => {
-  const router = useRouter();
+  const router = useBetterRouter();
   const { refetchNotifications } = useUserContext();
   const markAsRead = useMarkNotificationsAsRead();
   const dateDiff = getDifference(notification.createdAt);

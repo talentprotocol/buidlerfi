@@ -1,10 +1,10 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { Button, Typography } from "@mui/joy";
-import { useRouter } from "next/navigation";
 
 export default function WelcomePage() {
-  const router = useRouter();
+  const router = useBetterRouter();
   return (
     <Flex y grow gap2 component={"main"} px={4} py={2}>
       <Typography level="h3">builder.fi is in private alpha!</Typography>

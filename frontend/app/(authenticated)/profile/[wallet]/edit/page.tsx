@@ -5,6 +5,7 @@ import { socialInfo, socialsOrder } from "@/components/app/[wallet]/overview";
 import { Flex } from "@/components/shared/flex";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser, useUpdateUser } from "@/hooks/useUserApi";
 import { USER_BIO_MAX_LENGTH } from "@/lib/constants";
@@ -12,7 +13,6 @@ import { formatError, shortAddress } from "@/lib/utils";
 import { RefreshOutlined } from "@mui/icons-material";
 import { Avatar, Button, Card, Chip, Link as JoyLink, Textarea, Typography } from "@mui/joy";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -32,7 +32,7 @@ export default function EditProfilePage() {
   }, [isReady, currentUser]);
 
   const updateUser = useUpdateUser();
-  const router = useRouter();
+  const router = useBetterRouter();
 
   const handleSaveProfile = async () => {
     setIsLoading(true);

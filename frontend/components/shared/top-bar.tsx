@@ -1,9 +1,10 @@
 "use client";
 import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { ArrowBackOutlined } from "@mui/icons-material";
 import { Avatar, IconButton, Typography } from "@mui/joy";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FC, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Flex } from "./flex";
@@ -42,7 +43,7 @@ interface InjectProps {
 }
 
 export const BackButton = () => {
-  const router = useRouter();
+  const router = useBetterRouter();
   return (
     <IconButton onClick={() => router.back()}>
       <ArrowBackOutlined />

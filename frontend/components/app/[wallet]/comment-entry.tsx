@@ -2,11 +2,10 @@ import { CommentReactions } from "@/components/shared/comment-reaction";
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetComments } from "@/hooks/useCommentApi";
+import { useMarkdown } from "@/hooks/useMarkdown";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { formatText } from "@/lib/markdown-formatter";
 import { getDifference } from "@/lib/utils";
 import { Avatar, Typography } from "@mui/joy";
-import { useQuery } from "@tanstack/react-query";
 import router from "next/router";
 import { FC } from "react";
 import { CommentContextMenu } from "./comment-context-menu";
@@ -19,9 +18,7 @@ interface Props {
 export const CommentEntry: FC<Props> = ({ comment, refetch }) => {
   const { user: currentUser } = useUserContext();
 
-  const { data: commentContent } = useQuery(["commentContent", comment?.content], () => formatText(comment.content), {
-    enabled: !!comment.content
-  });
+  const content = useMarkdown(comment.content);
 
   return (
     <Flex x gap1>
@@ -52,9 +49,7 @@ export const CommentEntry: FC<Props> = ({ comment, refetch }) => {
           </Flex>
         </Flex>
         <Flex y xsa>
-          <Typography fontWeight={300} level="body-sm" textColor={"neutral.800"}>
-            <div className="remove-text-transform" dangerouslySetInnerHTML={{ __html: commentContent || "" }} />
-          </Typography>
+          {content}
           {comment.authorId === currentUser?.id && (
             <CommentReactions
               sx={{ margin: "0" }}

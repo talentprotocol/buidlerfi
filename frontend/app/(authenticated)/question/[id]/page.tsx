@@ -11,15 +11,14 @@ import { Reactions } from "@/components/shared/reactions";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { useMarkdown } from "@/hooks/useMarkdown";
 import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
 import { useGetUserStats } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { formatText } from "@/lib/markdown-formatter";
 import { getDifference, shortAddress } from "@/lib/utils";
 import { FileUploadOutlined, LockOutlined } from "@mui/icons-material";
 import { Avatar, Button, Divider, IconButton, Typography } from "@mui/joy";
-import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -46,17 +45,8 @@ export default function QuestionPage() {
   };
   const repliedOn = useMemo(() => getDifference(question?.repliedOn || undefined), [question?.repliedOn]);
 
-  const { data: sanitizedContent } = useQuery(
-    ["sanitizedContent", question?.questionContent],
-    () => formatText(question?.questionContent || ""),
-    { enabled: !!question?.questionContent }
-  );
-
-  const { data: sanitizedReply } = useQuery(
-    ["sanitizedReply", question?.reply],
-    () => formatText(question?.reply || ""),
-    { enabled: !!question?.reply }
-  );
+  const questionContent = useMarkdown(question?.questionContent);
+  const replyContent = useMarkdown(question?.reply);
 
   if (!question) return <></>;
 
@@ -84,9 +74,7 @@ export default function QuestionPage() {
           />
           <QuestionContextMenu question={question} refetch={() => refetch()} />
         </Flex>
-        <Typography fontWeight={300} level="body-sm" textColor={"neutral.800"}>
-          <div className="remove-text-transform" dangerouslySetInnerHTML={{ __html: sanitizedContent || "" }} />
-        </Typography>
+        {questionContent}
         <Typography level="helper">{format(question.createdAt, "MMM dd, yyyy")}</Typography>
         <Flex x yc xsb>
           <Flex x yc gap3>
@@ -155,9 +143,7 @@ export default function QuestionPage() {
                   />
                 </Flex>
               </Flex>
-              <Typography fontWeight={300} level="body-sm" textColor={"neutral.800"}>
-                <div className="remove-text-transform" dangerouslySetInnerHTML={{ __html: sanitizedReply || "" }} />
-              </Typography>
+              {replyContent}
             </Flex>
           </Flex>
         )}

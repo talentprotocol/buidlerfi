@@ -1,4 +1,5 @@
 import { useUserContext } from "@/contexts/userContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
@@ -29,7 +30,6 @@ import {
 } from "@mui/joy";
 import { ListItemIcon, ListItemText } from "@mui/material";
 import { usePrivy } from "@privy-io/react-auth";
-import { useRouter } from "next/navigation";
 import { FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
@@ -58,7 +58,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { data: balance } = useBalance({
     address
   });
-  const router = useRouter();
+  const router = useBetterRouter();
 
   const { logout } = usePrivy();
   const handleLogout = useCallback(async () => {

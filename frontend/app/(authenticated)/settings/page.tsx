@@ -2,16 +2,16 @@
 
 import { Flex } from "@/components/shared/flex";
 import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { ArrowForwardIosOutlined, Logout } from "@mui/icons-material";
 import { Typography } from "@mui/joy";
 import Button from "@mui/joy/Button";
 import ButtonGroup from "@mui/joy/ButtonGroup";
 import { usePrivy } from "@privy-io/react-auth";
-import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 export default function SettingsPage() {
-  const router = useRouter();
+  const router = useBetterRouter();
   const { logout, exportWallet, user } = usePrivy();
 
   const renderButton = ({ label, path, onClick }: { label: string; path?: string; onClick?: () => void }) => {

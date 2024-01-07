@@ -1,10 +1,10 @@
 "use client";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { getDifference, shortAddress } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Typography } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
-import { useRouter } from "next/navigation";
 import { FC, useMemo } from "react";
 import { Flex } from "./flex";
 
@@ -72,7 +72,7 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   py = 1,
   isButton = true
 }) => {
-  const router = useRouter();
+  const router = useBetterRouter();
   const joinedAt = useMemo(() => getDifference(createdAt), [createdAt]);
   return (
     <Flex

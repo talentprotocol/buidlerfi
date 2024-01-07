@@ -1,5 +1,5 @@
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { Avatar, AvatarGroup } from "@mui/joy";
-import { useRouter } from "next/navigation";
 
 interface SimpleUser {
   avatarUrl: string | null;
@@ -8,7 +8,7 @@ interface SimpleUser {
 }
 
 export const UserGroupAvatars = ({ user1, user2 }: { user1?: SimpleUser; user2?: SimpleUser }) => {
-  const router = useRouter();
+  const router = useBetterRouter();
   return (
     <AvatarGroup sx={{ "--AvatarGroup-gap": "-1rem" }}>
       <Avatar

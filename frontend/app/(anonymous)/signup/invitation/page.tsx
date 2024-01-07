@@ -2,17 +2,17 @@
 
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useCreateUser } from "@/hooks/useUserApi";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { INTRO_BLOG_POST_LINK, WAITLIST_LINK } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
 import { Button, FormControl, FormHelperText, Input, Typography } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function InvitationCode() {
-  const { replace } = useRouter();
+  const { replace } = useBetterRouter();
   const { user: privyUser, logout } = usePrivy();
   const { refetch } = useUserContext();
   const [inviteCode, setInviteCode] = useState<string>(window.localStorage.getItem("inviteCode") || "");
