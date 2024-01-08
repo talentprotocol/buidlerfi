@@ -295,7 +295,7 @@ export const getTransactions = async (
     userMap.set(user.wallet.toLowerCase(), user);
   }
 
-  const res = transactions
+  const res = _.uniqBy(transactions, tx => tx.id)
     .filter(tx => userMap.has(tx.holderAddress.toLowerCase()) && userMap.has(tx.ownerAddress.toLowerCase()))
     .map(transaction => ({
       ...transaction,
@@ -361,7 +361,7 @@ export const getFriendsTransactions = async (privyUserId: string, offset: number
     userMap.set(user.wallet.toLowerCase(), user);
   }
 
-  const res = transactions
+  const res = _.uniqBy(transactions, tx => tx.id)
     .filter(tx => userMap.has(tx.holderAddress.toLowerCase()) && userMap.has(tx.ownerAddress.toLowerCase()))
     .map(transaction => ({
       ...transaction,
