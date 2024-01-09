@@ -4,7 +4,6 @@ import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
-import { MIN_BALANCE_ONBOARDING } from "@/lib/constants";
 import { Button, Typography } from "@mui/joy";
 import { useState } from "react";
 
@@ -35,7 +34,7 @@ export default function BuyKeyPage() {
     router.push({ searchParams: { skipLaunchingKeys: "1" } }, { preserveSearchParams: true });
   };
 
-  const hasEnoughBalance = balance && balance >= MIN_BALANCE_ONBOARDING;
+  const hasEnoughBalance = balance && balance >= 0;
 
   return (
     <Flex y ysb grow fullwidth>
