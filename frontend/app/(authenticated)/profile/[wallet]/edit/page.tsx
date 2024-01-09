@@ -8,6 +8,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser, useUpdateUser } from "@/hooks/useUserApi";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { USER_BIO_MAX_LENGTH } from "@/lib/constants";
 import { formatError, shortAddress } from "@/lib/utils";
 import { RefreshOutlined } from "@mui/icons-material";
@@ -18,6 +19,8 @@ import { toast } from "react-toastify";
 
 export default function EditProfilePage() {
   const { user: currentUser, refetch } = useUserContext();
+
+  const profile = useUserProfile(currentUser?.wallet);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [bio, setBio] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +43,7 @@ export default function EditProfilePage() {
       .mutateAsync({ tags: selectedTags, bio: bio })
       .then(async () => {
         toast.success("Profile updated");
-        await refetch();
+        await profile.refetch();
         router.replace("/profile/" + currentUser?.wallet.toLowerCase());
       })
       .catch(err => {
