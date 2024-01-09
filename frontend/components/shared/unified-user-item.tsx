@@ -91,8 +91,8 @@ export const UnifiedUserItem: FC<Props> = ({
 
     if (joinedAndReplies) {
       const diff = getDifference(joinedAndReplies.createdAt);
-      return `Joined builder.fi ${diff} ago • ${joinedAndReplies.numberOfReplies}/${
-        joinedAndReplies.numberOfQuestions
+      return `Joined builder.fi ${diff} ago • ${joinedAndReplies.numberOfQuestions}/${
+        joinedAndReplies.numberOfReplies
       } ${pluralize("answer", joinedAndReplies.numberOfReplies)}`;
     }
 

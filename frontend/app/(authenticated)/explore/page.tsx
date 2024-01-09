@@ -159,8 +159,8 @@ export default function ExplorePage() {
                   user={user}
                   holdersAndReplies={{
                     numberOfHolders: user.numberOfHolders,
-                    numberOfReplies: user.questionsAsked,
-                    numberOfQuestions: user.questionsAnswered,
+                    numberOfReplies: user.questionsAnswered,
+                    numberOfQuestions: user.questionsAsked,
                     label: "question"
                   }}
                 />
@@ -179,8 +179,8 @@ export default function ExplorePage() {
                   user={user}
                   holdersAndReplies={{
                     numberOfHolders: user.numberOfHolders,
-                    numberOfReplies: user.questionsReceived,
-                    numberOfQuestions: user.questionsAnswered
+                    numberOfReplies: user.questionsAnswered,
+                    numberOfQuestions: user.questionsReceived
                   }}
                 />
               </div>
