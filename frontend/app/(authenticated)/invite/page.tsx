@@ -105,7 +105,7 @@ export default function Invite() {
       <Divider />
       <Flex y xs py={2} gap2>
         <Typography level="h4">Leaderboard</Typography>
-        {position !== "Unkown" ? (
+        {position !== "Unknown" ? (
           <Flex x yc gap1>
             <Avatar size="sm">{position}</Avatar>
             <Avatar
