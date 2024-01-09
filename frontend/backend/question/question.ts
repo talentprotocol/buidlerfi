@@ -87,7 +87,7 @@ type getHotQuestionResponse = Prisma.QuestionGetPayload<{
   };
 }>;
 
-export async function getHotQuestions(offset: number) {
+export async function getHotQuestions(offset: number, filters: { questionerId?: number; replierId?: number } = {}) {
   const rawResult: any[] = await prisma.$queryRaw`
     SELECT
       q.id,
@@ -113,6 +113,12 @@ export async function getHotQuestions(offset: number) {
       "User" AS "questioner" ON q."questionerId" = questioner.id
     LEFT JOIN
       "Reaction" AS r ON q.id = r."questionId"
+    WHERE
+        (${filters.questionerId || 0} != 0 AND q."questionerId" = ${filters.questionerId})
+      OR
+        (${filters.replierId || 0} != 0 AND q."replierId" = ${filters.replierId})
+      OR
+        (${filters.questionerId || 0} = 0 AND ${filters.replierId || 0} = 0)
     GROUP BY
 		q.id,
 		"questioner".id,
@@ -159,19 +165,18 @@ export async function getKeysQuestions(privyUserId: string, offset: number) {
     }
   });
   const keys = await getKeyRelationships(currentUser.wallet, "holder");
-  const res = await getQuestions(
-    {
-      orderBy: { createdAt: "desc" },
-      where: {
-        replier: {
-          id: { in: keys.data?.map(holding => holding.owner.id) }
-        }
+  const res = await prisma.question.findMany({
+    orderBy: { createdAt: "desc" },
+    where: {
+      replier: {
+        id: { in: keys.data?.map(holding => holding.owner.id) }
       }
     },
-    offset
-  );
+    take: PAGINATION_LIMIT,
+    skip: offset
+  });
 
-  return { data: res.data };
+  return { data: res };
 }
 
 export async function getReactions(questionId: number, type: "like" | "upvote") {
@@ -203,7 +208,6 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
 
   return { data: exclude(questions, ["reply"]) };
 }
-
 //We allow privyUserId to be undefiend for public endpoint
 export const getQuestion = async (questionId: number, privyUserId?: string) => {
   const question = await prisma.question.findUniqueOrThrow({

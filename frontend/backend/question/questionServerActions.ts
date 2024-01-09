@@ -10,8 +10,6 @@ import {
   editQuestion,
   getHotQuestions,
   getQuestion,
-  getQuestions,
-  getQuestionsArgs,
   getReactions
 } from "./question";
 
@@ -29,10 +27,6 @@ export const deleteReactionSA = async (
   options: ServerActionOptions
 ) => {
   return serverActionWrapper(data => deleteReaction(data.privyUserId, questionId, reactionType), options);
-};
-
-export const getQuestionsSA = (args: getQuestionsArgs, options: ServerActionOptions) => {
-  return serverActionWrapper(() => getQuestions(args, options.pagination?.offset || 0), options);
 };
 
 export const createQuestionSA = (questionContent: string, replierId: number, options: ServerActionOptions) => {
