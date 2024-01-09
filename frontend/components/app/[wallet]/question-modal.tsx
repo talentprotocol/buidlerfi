@@ -30,7 +30,10 @@ interface Props {
 }
 
 export default function QuestionModal({ questionId, close, profile }: Props) {
-  const { data: question, refetch } = useGetQuestion(Number(questionId));
+  const { data: question, refetch } = useGetQuestion(Number(questionId), {
+    cacheTime: 0,
+    staleTime: 0
+  });
   const [isEditingReply, setIsEditingReply] = useState(false);
   const [reply, setReply] = useState("");
   const putQuestion = usePutQuestion();

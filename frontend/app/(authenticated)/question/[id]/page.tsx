@@ -26,7 +26,10 @@ import { toast } from "react-toastify";
 
 export default function QuestionPage() {
   const { id: questionId } = useParams();
-  const { data: question, refetch } = useGetQuestion(Number(questionId));
+  const { data: question, refetch } = useGetQuestion(Number(questionId), {
+    cacheTime: 0,
+    staleTime: 0
+  });
   const [isEditingReply, setIsEditingReply] = useState(false);
   const { hasKeys, user, isOwnProfile } = useUserProfile(question?.replier.wallet as `0x${string}`);
   const [reply, setReply] = useState("");
