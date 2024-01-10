@@ -129,7 +129,7 @@ export const storeTransaction = async (hash: `0x${string}`) => {
     });
   } catch (err) {
     console.log("Transaction not mined yet... waiting for confirmations for: ", hash);
-    onchainTransaction = await viemClient.waitForTransactionReceipt({ hash });
+    onchainTransaction = await viemClient.waitForTransactionReceipt({ hash, confirmations: 5 });
   }
 
   if (!onchainTransaction) {

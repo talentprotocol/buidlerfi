@@ -27,6 +27,8 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   if (!isValidWallet) return <></>;
 
+  useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
+
   return (
     <Flex component={"main"} y grow>
       <InjectTopBar withBack title={profile.user?.displayName || undefined} />
