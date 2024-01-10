@@ -46,7 +46,6 @@
     "sanitize-html": "^2.11.0",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.0.0",
     "viem": "^1.10.8",
     "wagmi": "^1.4.1"
   },
@@ -59,9 +58,11 @@
     "@types/sanitize-html": "^2.9.5",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "csvtojson": "^2.0.10",
+    "esbuild": "^0.19.11",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
     "prisma": "^5.7.0",
+    "tsx": "^4.0.0",
     "typescript": "5.2.2"
   }
 }
