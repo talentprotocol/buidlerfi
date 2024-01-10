@@ -1,3 +1,4 @@
+import { addMinutes, addWeeks, isSameDay, nextFriday, setHours, setMinutes, setSeconds } from "date-fns";
 import { parseEther } from "viem";
 import { builderFIV1Abi } from "./abi/BuidlerFiV1";
 
@@ -67,3 +68,21 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
   "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";
 
 export const BUILDERFI_FARCASTER_FID = 210833;
+
+export const GET_NEXT_AIRDROP_DATE = () => {
+  let nextFridayDate = nextFriday(new Date());
+
+  // If today is Friday, we need to check if it's before or after 12 PM
+  if (isSameDay(new Date(), nextFridayDate) && nextFridayDate.getHours() >= 12) {
+    // If it's after 12 PM, get the next Friday
+    nextFridayDate = addWeeks(nextFridayDate, 1);
+  }
+
+  // Set the time to 12 PM (noon)
+  nextFridayDate = setHours(nextFridayDate, 12);
+  nextFridayDate = setMinutes(nextFridayDate, 0);
+  nextFridayDate = setSeconds(nextFridayDate, 0);
+
+  //Convert to local time
+  return addMinutes(nextFridayDate, -nextFridayDate.getTimezoneOffset());
+};

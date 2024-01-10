@@ -24,3 +24,15 @@ export const getCurrentPosition = async (privyUserId: string) => {
     return { data: [] };
   }
 };
+
+export const getPointsHistory = async (privyUserId: string) => {
+  const res = await prisma.point.findMany({
+    where: {
+      user: {
+        privyUserId
+      }
+    }
+  });
+
+  return { data: res };
+};

@@ -76,7 +76,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       {
         text: "Points",
         icon: <PointsIcon />,
-        path: "/invite"
+        path: "/points"
       },
       {
         text: "Settings",
