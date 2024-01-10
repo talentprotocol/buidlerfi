@@ -11,28 +11,23 @@ interface quests {
 const quests = [
   {
     description: "install app & turn on notifications",
-    points: 50,
-    isActive: true
+    points: 50
   },
   {
     description: "link your web3 socials",
-    points: 100,
-    isActive: true
+    points: 100
   },
   {
     description: "create your key",
-    points: 200,
-    isActive: true
+    points: 200
   },
   {
     description: "deposit >0.01 eth",
-    points: 350,
-    isActive: true
+    points: 350
   },
   {
     description: "buy 1 key and ask 1 question",
-    points: 300,
-    isActive: true
+    points: 300
   }
 ];
 
@@ -54,7 +49,8 @@ async function main() {
       const res = await prisma.quest.create({
         data: {
           description: item.description,
-          points: item.points
+          points: item.points,
+          isActive: true
         }
       });
 
