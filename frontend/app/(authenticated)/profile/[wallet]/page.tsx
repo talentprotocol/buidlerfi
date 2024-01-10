@@ -17,6 +17,8 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
 
+  useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
+
   const isValidWallet = useMemo(() => {
     return isEVMAddress(params.wallet);
   }, [params]);

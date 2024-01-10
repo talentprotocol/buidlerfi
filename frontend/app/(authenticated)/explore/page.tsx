@@ -21,7 +21,7 @@ import {
 } from "@/hooks/useUserApi";
 import { PersonSearchOutlined, SupervisorAccountOutlined } from "@mui/icons-material";
 import { TabPanel, Tabs } from "@mui/joy";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ExplorePage() {
   const [selectedTab, setSelectedTab] = useState<TabsEnum>("Friends");
@@ -35,6 +35,8 @@ export default function ExplorePage() {
   const topUsersByKeys = useGetTopUsersByKeysOwned();
 
   const router = useBetterRouter();
+
+  useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 
   const { isLoading: isLoadingRecommendedUsers, data: recommendedUsers } = useRecommendedUsers(
     user?.wallet as `0x${string}`
