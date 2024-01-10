@@ -129,7 +129,7 @@ export const storeTransaction = async (hash: `0x${string}`) => {
     });
   } catch (err) {
     console.log("Transaction not mined yet... waiting for confirmations for: ", hash);
-    onchainTransaction = await viemClient.waitForTransactionReceipt({ hash, confirmations: 5 });
+    onchainTransaction = await viemClient.waitForTransactionReceipt({ hash });
   }
 
   if (!onchainTransaction) {
@@ -222,7 +222,7 @@ export const processAnyPendingTransactions = async (privyUserId: string) => {
         blockHash: log.blockHash
       });
 
-      await storeTransactionInternal(log, log.blockHash, log.blockNumber, block.timestamp).catch(err =>
+      await storeTransactionInternal(log, log.transactionHash, log.blockNumber, block.timestamp).catch(err =>
         console.error(err)
       );
     }
