@@ -8,6 +8,7 @@ import { NotificationType } from "@prisma/client";
 import _ from "lodash";
 import { decodeEventLog, parseAbiItem } from "viem";
 import { sendNotification } from "../notification/notification";
+import { publishNewTradeKeysCast, publishNewUserCast } from "../farcaster/farcaster";
 
 const logsRange = process.env.LOGS_RANGE_SIZE ? BigInt(process.env.LOGS_RANGE_SIZE) : 100n;
 
@@ -39,6 +40,10 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
     console.log("Transaction already processed");
     return null;
   }
+
+  //Transaction can be about a new key or an existing key
+  const isNewKey = Number(log.args.ethAmount) == 0 && log.args.trader.toLowerCase() === log.args.builder.toLowerCase();
+  const existingKey = Number(log.args.ethAmount) != 0 && log.args.trader.toLowerCase() !== log.args.builder.toLowerCase();
 
   //If transaction doesn't exist, we create it
   if (!transaction) {
@@ -118,6 +123,14 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
     return key;
   });
 
+  //If transaction is a new key, we publish a new user cast on Farcaster through the bot
+  if (isNewKey && owner?.privyUserId) {
+    await publishNewUserCast(owner.privyUserId);
+  } 
+  if (existingKey && owner?.privyUserId && holder?.privyUserId) {
+    await publishNewTradeKeysCast(owner.privyUserId, holder.privyUserId, log.args.isBuy)
+  }
+
   return res;
 };
 
@@ -171,7 +184,6 @@ export const storeTransaction = async (hash: `0x${string}`) => {
       eventLog.args.isBuy ? NotificationType.KEYBUY : NotificationType.KEYSELL
     );
   }
-
   return { data: hash };
 };
 

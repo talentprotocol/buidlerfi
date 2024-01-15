@@ -1,12 +1,14 @@
 import {
   NEW_BUILDERFI_ANSWER_CAST,
   NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH,
+  NEW_BUILDERFI_BUY_TRADE_CAST,
   NEW_BUILDERFI_QUESTION_CAST,
   NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH,
   NEW_BUILDERFI_QUESTION_REPLY_CAST,
   NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER,
   NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR,
   NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR,
+  NEW_BUILDERFI_SELL_TRADE_CAST,
   NEW_BUILDERFI_USER_CAST,
   NEW_BUILDERFI_USER_PARENT_CAST_HASH
 } from "@/lib/constants";
@@ -58,6 +60,16 @@ export const publishNewUserKeysCast = async (user: string, link: string) => {
   const text = NEW_BUILDERFI_USER_CAST.replace("{user}", user).replace("{link}", link);
   return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
 };
+
+export const publishBuyTradeUserKeysCast = async (holder: string, owner: string, link: string) => {
+  const text = NEW_BUILDERFI_BUY_TRADE_CAST.replace("{holder}", holder).replace("{owner}", owner).replace("{link}", link);
+  return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
+} 
+
+export const publishSellTradeUserKeysCast = async (holder: string, owner: string, link: string) => {
+  const text = NEW_BUILDERFI_SELL_TRADE_CAST.replace("{holder}", holder).replace("{owner}", owner).replace("{link}", link);
+  return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
+} 
 
 export const replyToNewQuestionCastSuccess = async (castHash: string, link: string) => {
   const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
