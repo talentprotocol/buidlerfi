@@ -1,9 +1,8 @@
 import { sendNotification } from "@/backend/notification/notification";
-import { publishNewAnswerCast } from "@/lib/api/backend/farcaster";
+import { getFarcasterProfileName, publishNewAnswerCast } from "@/lib/api/backend/farcaster";
 import { MAX_COMMENT_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
-import { shortAddress } from "@/lib/utils";
 import { SocialProfileType } from "@prisma/client";
 
 export async function PUT(req: Request, { params }: { params: { id: number } }) {
@@ -48,12 +47,8 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
       console.log("FOUND replier -> ", !!replierFarcaster);
 
       if (questionerFarcaster || replierFarcaster) {
-        const replierName = replierFarcaster?.profileName
-          ? `@${replierFarcaster?.profileName}`
-          : replier.displayName || shortAddress(replier.wallet || "");
-        const questionerName = questionerFarcaster?.profileName
-          ? `@${questionerFarcaster?.profileName}`
-          : questioner?.displayName || shortAddress(questioner?.wallet || "");
+        const replierName = getFarcasterProfileName(replier!, replierFarcaster);
+        const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
         // if one of the two has farcaster, publish the cast
         console.log("CASTING NEW ANSWER");
         await publishNewAnswerCast(

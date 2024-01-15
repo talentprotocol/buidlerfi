@@ -1,4 +1,5 @@
 import {
+  getFarcasterProfileName,
   publishBuyTradeUserKeysCast,
   publishNewUserKeysCast,
   publishSellTradeUserKeysCast
@@ -45,15 +46,15 @@ export async function publishNewTradeKeysCast(ownerPrivyUserId: string, holderPr
     // Check if is a buy or sell cast
     if (isBuy) {
       const castHash = await publishBuyTradeUserKeysCast(
-        `@${holderFarcaster?.profileName ?? "someone"}`,
-        `@${ownerFarcaster?.profileName ?? "someone"}`,
+        getFarcasterProfileName(holder!, holderFarcaster),
+        getFarcasterProfileName(owner!, ownerFarcaster),
         `https://app.builder.fi/profile/${holder?.wallet}`
       );
       return { data: { hash: castHash } };
     } else {
       const castHash = await publishSellTradeUserKeysCast(
-        `@${holderFarcaster?.profileName ?? "someone"}`,
-        `@${ownerFarcaster?.profileName ?? "someone"}`,
+        getFarcasterProfileName(holder!, holderFarcaster),
+        getFarcasterProfileName(owner!, ownerFarcaster),
         `https://app.builder.fi/profile/${holder?.wallet}`
       );
       return { data: { hash: castHash } };

@@ -12,6 +12,8 @@ import {
   NEW_BUILDERFI_USER_CAST,
   NEW_BUILDERFI_USER_PARENT_CAST_HASH
 } from "@/lib/constants";
+import { shortAddress } from "@/lib/utils";
+import { SocialProfile, User } from "@prisma/client";
 import { NeynarAPIClient } from "@standard-crypto/farcaster-js-neynar";
 
 export const publishCast = async (text: string) => {
@@ -62,14 +64,18 @@ export const publishNewUserKeysCast = async (user: string, link: string) => {
 };
 
 export const publishBuyTradeUserKeysCast = async (holder: string, owner: string, link: string) => {
-  const text = NEW_BUILDERFI_BUY_TRADE_CAST.replace("{holder}", holder).replace("{owner}", owner).replace("{link}", link);
+  const text = NEW_BUILDERFI_BUY_TRADE_CAST.replace("{holder}", holder)
+    .replace("{owner}", owner)
+    .replace("{link}", link);
   return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
-} 
+};
 
 export const publishSellTradeUserKeysCast = async (holder: string, owner: string, link: string) => {
-  const text = NEW_BUILDERFI_SELL_TRADE_CAST.replace("{holder}", holder).replace("{owner}", owner).replace("{link}", link);
+  const text = NEW_BUILDERFI_SELL_TRADE_CAST.replace("{holder}", holder)
+    .replace("{owner}", owner)
+    .replace("{link}", link);
   return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
-} 
+};
 
 export const replyToNewQuestionCastSuccess = async (castHash: string, link: string) => {
   const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
@@ -95,3 +101,9 @@ export const replyToNewQuestionErrorNotKeyHolder = async (castHash: string, user
 };
 
 export const getCastUrl = (castHash: string) => `https://warpcast.com/~/conversations/${castHash}`;
+
+export const getFarcasterProfileName = (profile: User, socialProfile?: SocialProfile) => {
+  return socialProfile?.profileName
+    ? `@${socialProfile?.profileName}`
+    : profile.displayName || shortAddress(profile.wallet || "");
+};
