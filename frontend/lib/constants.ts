@@ -56,6 +56,7 @@ export const NEW_BUILDERFI_BUY_TRADE_CAST = "{holder} just bought {owner} keys o
 export const NEW_BUILDERFI_SELL_TRADE_CAST = "{holder} just sold {owner} keys on builder.fi!\n\n{link}";
 
 export const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
+export const NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH = "0xded82314b7ada765c08fe1ce2fbf157edadaa598";
 export const UNISWAP_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR =

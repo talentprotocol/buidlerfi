@@ -2,6 +2,7 @@ import {
   NEW_BUILDERFI_ANSWER_CAST,
   NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH,
   NEW_BUILDERFI_BUY_TRADE_CAST,
+  NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH,
   NEW_BUILDERFI_QUESTION_CAST,
   NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH,
   NEW_BUILDERFI_QUESTION_REPLY_CAST,
@@ -67,14 +68,14 @@ export const publishBuyTradeUserKeysCast = async (holder: string, owner: string,
   const text = NEW_BUILDERFI_BUY_TRADE_CAST.replace("{holder}", holder)
     .replace("{owner}", owner)
     .replace("{link}", link);
-  return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
+  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
 };
 
 export const publishSellTradeUserKeysCast = async (holder: string, owner: string, link: string) => {
   const text = NEW_BUILDERFI_SELL_TRADE_CAST.replace("{holder}", holder)
     .replace("{owner}", owner)
     .replace("{link}", link);
-  return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
+  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
 };
 
 export const replyToNewQuestionCastSuccess = async (castHash: string, link: string) => {
