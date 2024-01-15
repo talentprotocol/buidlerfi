@@ -67,3 +67,5 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
   "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";
 
 export const BUILDERFI_FARCASTER_FID = 210833;
+
+export const NEW_BUILDERFI_INVITE_CAST = "hey @{username} join me on builder.fi!\n\n{link}";

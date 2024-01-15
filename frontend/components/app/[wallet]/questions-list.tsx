@@ -1,13 +1,18 @@
 "use client";
 import { KeyIcon } from "@/components/icons/key";
+import { ParachuteIcon } from "@/components/icons/parachute";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
+import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { NEW_BUILDERFI_INVITE_CAST } from "@/lib/constants";
+import { encodeQueryData } from "@/lib/utils";
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Button } from "@mui/joy";
+import Link from "next/link";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
 import QuestionModal from "./question-modal";
@@ -20,6 +25,7 @@ interface Props {
 
 export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   const router = useBetterRouter();
+  const { user: currentUser } = useUserContext();
   const questionsToUse = type === "answers" ? profile?.questions : profile?.questionsAsked;
   const hasQuestion: boolean = !!questionsToUse?.length;
   // const hasQuestion: boolean = false;
@@ -65,11 +71,38 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           };
         }
       } else {
-        return {
-          title: "not accepting questions yet",
-          icon: <AccessTimeOutlined />,
-          text: profile?.user?.displayName + " didn’t create their keys, but we can notify you when they do"
-        };
+        const profileName =
+          profile?.recommendedUser?.talentProtocol ||
+          profile?.recommendedUser?.farcaster ||
+          profile?.recommendedUser?.ens ||
+          profile?.recommendedUser?.lens;
+        const validInviteCode = currentUser?.inviteCodes?.find(code => code.maxUses > code.used) || { code: "test" };
+        if (profile?.recommendedUser?.farcaster && validInviteCode) {
+          return {
+            title: `${profileName} is not builder.fi`,
+            icon: <ParachuteIcon />,
+            text: "invite them to join and earn points",
+            button: (
+              <Link
+                href={`https://warpcast.com/~/compose?${encodeQueryData({
+                  text: NEW_BUILDERFI_INVITE_CAST.replace(
+                    "{link}",
+                    window.location.origin + "?inviteCode=" + validInviteCode.code
+                  ).replace("{username}", profile?.recommendedUser?.farcaster)
+                })}`}
+                target="_blank"
+              >
+                <Button>invite</Button>
+              </Link>
+            )
+          };
+        } else {
+          return {
+            title: "not accepting questions yet",
+            icon: <AccessTimeOutlined />,
+            text: profileName + " didn’t create their keys, but we can notify you when they do"
+          };
+        }
       }
     } else {
       if (!profile?.hasLaunchedKeys) {
