@@ -68,4 +68,4 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
 
 export const BUILDERFI_FARCASTER_FID = 210833;
 
-export const NEW_BUILDERFI_INVITE_CAST = "hey @{username} join me on builder.fi!\n\n{link}";
+export const NEW_BUILDERFI_INVITE_CAST = "hey @{username}! i invite you to join builder.fi, a q&a marketplace built on top of so farcaster where builders can monetize their knowledge.\n\nif you'd like to give it a try, just let me know, and i'll send you an invite.\n\nlooking forward to ask you a question on builder.fi!";

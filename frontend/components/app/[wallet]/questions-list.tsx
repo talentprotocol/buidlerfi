@@ -5,7 +5,6 @@ import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
-import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { NEW_BUILDERFI_INVITE_CAST } from "@/lib/constants";
@@ -25,7 +24,6 @@ interface Props {
 
 export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   const router = useBetterRouter();
-  const { user: currentUser } = useUserContext();
   const questionsToUse = type === "answers" ? profile?.questions : profile?.questionsAsked;
   const hasQuestion: boolean = !!questionsToUse?.length;
   // const hasQuestion: boolean = false;
@@ -76,8 +74,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           profile?.recommendedUser?.farcaster ||
           profile?.recommendedUser?.ens ||
           profile?.recommendedUser?.lens;
-        const validInviteCode = currentUser?.inviteCodes?.find(code => code.maxUses > code.used) || { code: "test" };
-        if (profile?.recommendedUser?.farcaster && validInviteCode) {
+        if (profile?.recommendedUser?.farcaster) {
           return {
             title: `${profileName} is not builder.fi`,
             icon: <ParachuteIcon />,
@@ -85,10 +82,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             button: (
               <Link
                 href={`https://warpcast.com/~/compose?${encodeQueryData({
-                  text: NEW_BUILDERFI_INVITE_CAST.replace(
-                    "{link}",
-                    window.location.origin + "?inviteCode=" + validInviteCode.code
-                  ).replace("{username}", profile?.recommendedUser?.farcaster)
+                  text: NEW_BUILDERFI_INVITE_CAST.replace("{username}", profile?.recommendedUser?.farcaster)
                 })}`}
                 target="_blank"
               >
