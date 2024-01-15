@@ -9,6 +9,7 @@ import _ from "lodash";
 import { decodeEventLog, parseAbiItem } from "viem";
 import { sendNotification } from "../notification/notification";
 import { publishNewTradeKeysCast, publishNewUserCast } from "../farcaster/farcaster";
+import { formatBigIntToFixedDecimals } from "@/lib/utils";
 
 const logsRange = process.env.LOGS_RANGE_SIZE ? BigInt(process.env.LOGS_RANGE_SIZE) : 100n;
 
@@ -127,14 +128,16 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
     return key;
   });
 
-  //If transaction is a new key, we publish a new user cast on Farcaster through the bot
+  //If transaction is a new key, we publish a new cast on Farcaster through the bot
   if (isNewKey && owner?.privyUserId) {
     await publishNewUserCast(owner.privyUserId);
-  } 
+  }
 
-  //If transaction is an existing key, we publish a new trade cast on Farcaster through the bot
+  //If transaction is an existing, we publish the trade info with a new cast on Farcaster through the bot
   if (existingKey && owner?.privyUserId && holder?.privyUserId) {
-    await publishNewTradeKeysCast(owner.privyUserId, holder.privyUserId, log.args.isBuy)
+    //Show max 5 decimals
+    const price = formatBigIntToFixedDecimals(log.args.ethAmount, 18, 5);
+    await publishNewTradeKeysCast(owner.privyUserId, holder.privyUserId, log.args.isBuy, price);
   }
 
   return res;

@@ -64,17 +64,19 @@ export const publishNewUserKeysCast = async (user: string, link: string) => {
   return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
 };
 
-export const publishBuyTradeUserKeysCast = async (holder: string, owner: string, link: string) => {
+export const publishBuyTradeUserKeysCast = async (holder: string, owner: string, link: string, price: string) => {
   const text = NEW_BUILDERFI_BUY_TRADE_CAST.replace("{holder}", holder)
     .replace("{owner}", owner)
-    .replace("{link}", link);
+    .replace("{link}", link)
+    .replace("{price}", price)
   return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
 };
 
-export const publishSellTradeUserKeysCast = async (holder: string, owner: string, link: string) => {
+export const publishSellTradeUserKeysCast = async (holder: string, owner: string, link: string, price: string) => {
   const text = NEW_BUILDERFI_SELL_TRADE_CAST.replace("{holder}", holder)
     .replace("{owner}", owner)
-    .replace("{link}", link);
+    .replace("{link}", link)
+    .replace("{price}", price)
   return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
 };
 

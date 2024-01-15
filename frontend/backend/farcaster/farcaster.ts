@@ -23,7 +23,7 @@ export async function publishNewUserCast(privyUserId: string) {
   return { data: { hash: "" } };
 }
 
-export async function publishNewTradeKeysCast(ownerPrivyUserId: string, holderPrivyUserId2: string, isBuy: boolean) {
+export async function publishNewTradeKeysCast(ownerPrivyUserId: string, holderPrivyUserId2: string, isBuy: boolean, price: string) {
   if (process.env.ENABLE_FARCASTER === "true") {
     // Check for owner
     const owner = await prisma.user.findUnique({
@@ -48,6 +48,7 @@ export async function publishNewTradeKeysCast(ownerPrivyUserId: string, holderPr
       const castHash = await publishBuyTradeUserKeysCast(
         getFarcasterProfileName(holder!, holderFarcaster),
         getFarcasterProfileName(owner!, ownerFarcaster),
+        `${price}`,
         `https://app.builder.fi/profile/${holder?.wallet}`
       );
       return { data: { hash: castHash } };
@@ -55,6 +56,7 @@ export async function publishNewTradeKeysCast(ownerPrivyUserId: string, holderPr
       const castHash = await publishSellTradeUserKeysCast(
         getFarcasterProfileName(holder!, holderFarcaster),
         getFarcasterProfileName(owner!, ownerFarcaster),
+        `${price}`,
         `https://app.builder.fi/profile/${holder?.wallet}`
       );
       return { data: { hash: castHash } };
