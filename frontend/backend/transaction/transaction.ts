@@ -41,8 +41,12 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
     return null;
   }
 
-  //Transaction can be about a new key or an existing key
+  // Transactions can be about a new key or an existing key
+
+  // if the amount is 0, it's a new key (the first key is bought for free by the builder)
   const isNewKey = Number(log.args.ethAmount) == 0 && log.args.trader.toLowerCase() === log.args.builder.toLowerCase();
+  
+  // if the amount is not 0, it's an existing key
   const existingKey = Number(log.args.ethAmount) != 0 && log.args.trader.toLowerCase() !== log.args.builder.toLowerCase();
 
   //If transaction doesn't exist, we create it
@@ -127,6 +131,8 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
   if (isNewKey && owner?.privyUserId) {
     await publishNewUserCast(owner.privyUserId);
   } 
+
+  //If transaction is an existing key, we publish a new trade cast on Farcaster through the bot
   if (existingKey && owner?.privyUserId && holder?.privyUserId) {
     await publishNewTradeKeysCast(owner.privyUserId, holder.privyUserId, log.args.isBuy)
   }
