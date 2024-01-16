@@ -86,3 +86,6 @@ export const GET_NEXT_AIRDROP_DATE = () => {
   //Convert to local time
   return addMinutes(nextFridayDate, -nextFridayDate.getTimezoneOffset());
 };
+
+//Unclaimed points expire after 14 days
+export const AIRDROP_EXPIRATION_AFTER_CREATION = 14;

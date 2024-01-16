@@ -1,8 +1,9 @@
 import { getPointsHistory } from "@/backend/point/point";
-import { getCurrentPositionSA } from "@/backend/point/pointServerAction";
+import { claimSA, getCurrentPositionSA } from "@/backend/point/pointServerAction";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { useQuery } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
+import { useMutationSA } from "./useMutationSA";
 import { useQuerySA } from "./useQuerySA";
 
 export function useGetCurrentPosition(queryOptions?: SimpleUseQueryOptions) {
@@ -19,4 +20,8 @@ export function useGetPointHistory() {
       .then(res => res.data)
       .then(res => res.data)
   );
+}
+
+export function useClaimPoint() {
+  return useMutationSA(options => claimSA(options));
 }

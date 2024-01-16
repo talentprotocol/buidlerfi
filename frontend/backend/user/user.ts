@@ -57,7 +57,11 @@ export const getCurrentUser = async (privyUserId: string) => {
         }
       },
       socialProfiles: true,
-      points: true,
+      points: {
+        where: {
+          hidden: false
+        }
+      },
       tags: true
     }
   });

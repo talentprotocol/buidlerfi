@@ -6,22 +6,36 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetCurrentPosition } from "@/hooks/usePointApi";
+import { useClaimPoint, useGetCurrentPosition } from "@/hooks/usePointApi";
 import { useGetQuest, useGetUserQuest } from "@/hooks/useQuestAPI";
-import { GET_NEXT_AIRDROP_DATE } from "@/lib/constants";
+import { AIRDROP_EXPIRATION_AFTER_CREATION, GET_NEXT_AIRDROP_DATE } from "@/lib/constants";
 import { getFullTimeDifference, shortAddress } from "@/lib/utils";
 import { CheckCircle, ContentCopyOutlined, HelpOutline } from "@mui/icons-material";
 import { Button, ButtonGroup, Card, Chip, IconButton, Tab, TabList, TabPanel, Tabs, Typography } from "@mui/joy";
+import { differenceInDays } from "date-fns";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function Invite() {
-  const { user } = useUserContext();
+  const { user, refetch, isLoading } = useUserContext();
   const { data: currentPosition } = useGetCurrentPosition();
   const [showPointInfoModal, setShowPointInfoModal] = useState(false);
   const [showAllInvitesCode, setShowAllInvitesCode] = useState(false);
   const router = useBetterRouter();
-  const points = useMemo(() => user?.points?.reduce((prev, curr) => prev + curr.points, 0), [user?.points]);
+  const points = useMemo(
+    () => user?.points?.filter(point => point.claimed).reduce((prev, curr) => prev + curr.points, 0),
+    [user?.points]
+  );
+  const unclaimedPoints = useMemo(() => {
+    return (
+      user?.points
+        ?.filter(
+          point => !point.claimed && differenceInDays(point.createdAt, new Date()) < AIRDROP_EXPIRATION_AFTER_CREATION
+        )
+        .reduce((prev, curr) => prev + curr.points, 0) || 0
+    );
+  }, [user?.points]);
+
   const invitations = useMemo(() => user?.inviteCodes.flatMap(inviteCode => inviteCode.invitations), [user]);
   const position = useMemo(() => {
     if (!currentPosition) {
@@ -37,9 +51,10 @@ export default function Invite() {
   };
   const { data: quests } = useGetQuest();
   const { data: userQuests } = useGetUserQuest();
-  const canBeClaimed = false;
 
   const time = useMemo(() => getFullTimeDifference(GET_NEXT_AIRDROP_DATE()), []);
+
+  const claimPoints = useClaimPoint();
 
   return (
     <Flex y grow component={"main"} p={2}>
@@ -63,9 +78,19 @@ export default function Invite() {
           </Flex>
           <Typography level="h4"> {points}</Typography>
         </Flex>
-        <Button disabled={canBeClaimed ? false : true} color="primary" size="lg">
-          {canBeClaimed ? (
-            "Claim " + points + " points"
+        <Button
+          onClick={async () => {
+            const res = await claimPoints.mutateAsync();
+            await refetch();
+            if (res.count > 0) toast.success("Claimed successfully");
+          }}
+          disabled={unclaimedPoints > 0 ? false : true}
+          loading={claimPoints.isLoading || isLoading}
+          color="primary"
+          size="lg"
+        >
+          {unclaimedPoints > 0 ? (
+            "Claim " + unclaimedPoints + " points"
           ) : (
             <>
               <ParachuteIcon sx={{ mr: 1 }} /> Next drop {time}
