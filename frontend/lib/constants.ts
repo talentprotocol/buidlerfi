@@ -89,3 +89,31 @@ export const GET_NEXT_AIRDROP_DATE = () => {
 
 //Unclaimed points expire after 14 days
 export const AIRDROP_EXPIRATION_AFTER_CREATION = 14;
+
+export const QUESTS = [
+  {
+    description: "install app & turn on notifications",
+    points: 50,
+    isActive: false
+  },
+  {
+    description: "link your web3 socials",
+    points: 100,
+    isActive: true
+  },
+  {
+    description: "create your key",
+    points: 200,
+    isActive: true
+  },
+  {
+    description: "deposit >0.01 eth",
+    points: 350,
+    isActive: true
+  },
+  {
+    description: "buy 1 key and ask 1 question",
+    points: 300,
+    isActive: true
+  }
+] as const;

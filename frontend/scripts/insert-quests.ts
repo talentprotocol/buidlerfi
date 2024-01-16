@@ -1,40 +1,10 @@
+import { QUESTS } from "@/lib/constants";
 import { PrismaClient } from "@prisma/client";
-
-interface quests {
-  description: string;
-  points: number;
-  isActive: boolean;
-  id: number;
-  createdAt: string;
-  updatedAt: string;
-}
-const quests = [
-  {
-    description: "install app & turn on notifications",
-    points: 50
-  },
-  {
-    description: "link your web3 socials",
-    points: 100
-  },
-  {
-    description: "create your key",
-    points: 200
-  },
-  {
-    description: "deposit >0.01 eth",
-    points: 350
-  },
-  {
-    description: "buy 1 key and ask 1 question",
-    points: 300
-  }
-];
 
 const prisma = new PrismaClient();
 
 async function main() {
-  for (const item of quests) {
+  for (const item of QUESTS) {
     const existingQuest = await prisma.quest.findFirst({
       where: {
         description: item.description
@@ -50,7 +20,7 @@ async function main() {
         data: {
           description: item.description,
           points: item.points,
-          isActive: true
+          isActive: item.isActive
         }
       });
 

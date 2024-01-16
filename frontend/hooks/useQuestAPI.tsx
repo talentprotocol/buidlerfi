@@ -1,6 +1,8 @@
 import { getAllQuest, getUserQuest } from "@/backend/quest/quest";
-import { useAxios } from "./useAxios";
+import { verifyAllQuestsSA } from "@/backend/quest/questServerAction";
 import { useQuery } from "@tanstack/react-query";
+import { useAxios } from "./useAxios";
+import { useMutationSA } from "./useMutationSA";
 
 export function useGetQuest() {
   const axios = useAxios();
@@ -16,3 +18,6 @@ export function useGetUserQuest() {
       .then(res => res.data)
   );
 }
+export const useVerifyQuests = () => {
+  return useMutationSA(options => verifyAllQuestsSA(options));
+};

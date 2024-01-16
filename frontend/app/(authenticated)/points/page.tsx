@@ -7,11 +7,12 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useClaimPoint, useGetCurrentPosition } from "@/hooks/usePointApi";
-import { useGetQuest, useGetUserQuest } from "@/hooks/useQuestAPI";
+import { useGetQuest, useGetUserQuest, useVerifyQuests } from "@/hooks/useQuestAPI";
 import { AIRDROP_EXPIRATION_AFTER_CREATION, GET_NEXT_AIRDROP_DATE } from "@/lib/constants";
 import { getFullTimeDifference, shortAddress } from "@/lib/utils";
 import { CheckCircle, ContentCopyOutlined, HelpOutline } from "@mui/icons-material";
 import { Button, ButtonGroup, Card, Chip, IconButton, Tab, TabList, TabPanel, Tabs, Typography } from "@mui/joy";
+import { useQuery } from "@tanstack/react-query";
 import { differenceInDays } from "date-fns";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -56,8 +57,18 @@ export default function Invite() {
 
   const claimPoints = useClaimPoint();
 
+  const verifyQuests = useVerifyQuests();
+
+  const {} = useQuery(
+    ["verifyQuests"],
+    () => {
+      verifyQuests.mutateAsync().then(() => refetch());
+    },
+    { enabled: !!verifyQuests && !!refetch }
+  );
+
   return (
-    <Flex y grow component={"main"} p={2}>
+    <Flex y grow component={"main"} py={2}>
       <InjectTopBar
         title="Points"
         withBack
@@ -67,7 +78,7 @@ export default function Invite() {
           </IconButton>
         }
       />
-      <Card sx={{ gap: 1, border: 1, borderColor: "#CDD7E1" }} variant="plain">
+      <Card sx={{ gap: 1, border: 1, borderColor: "#CDD7E1", mx: 2 }} variant="plain">
         <Flex x xsb p={2}>
           <Flex x gap1>
             <UserAvatar user={user} size="md" />
@@ -76,7 +87,7 @@ export default function Invite() {
               <Typography level="body-sm">Your Rank</Typography>
             </Flex>
           </Flex>
-          <Typography level="h4"> {points}</Typography>
+          <Typography level="h4"> {points} pts</Typography>
         </Flex>
         <Button
           onClick={async () => {
@@ -106,9 +117,9 @@ export default function Invite() {
           <Tab value="invited"> Invited</Tab>
           <Tab value="quests">Quests</Tab>
         </TabList>
-        <TabPanel value="invited" sx={{ py: 2, gap: 1 }}>
+        <TabPanel value="invited" sx={{ p: 2, gap: 1 }}>
           <Flex y gap1>
-            <Typography level="title-sm" textColor={"neutral.600"}>
+            <Typography level="title-sm" textColor={"neutral.600"} fontWeight="600">
               Your unique invite codes
             </Typography>
             <Flex
@@ -172,7 +183,7 @@ export default function Invite() {
             )}
           </Flex>
           <Flex y gap2>
-            <Typography level="title-sm" textColor={"neutral.600"}>
+            <Typography level="title-sm" textColor={"neutral.600"} fontWeight="600">
               builders invited
             </Typography>
             {invitations?.map(invitation => (
@@ -186,23 +197,23 @@ export default function Invite() {
             ))}
           </Flex>
         </TabPanel>
-        <TabPanel value="quests" sx={{ p: 0 }}>
-          <Flex y p={1.5} gap1>
+        <TabPanel value="quests" sx={{ p: 2 }}>
+          <Flex y gap1>
             {quests?.data?.map(quest => {
               const isCompleted = userQuests && userQuests.some(key => key.questId == quest.id);
               return (
                 <Card
-                  sx={{ flexGrow: 1, gap: 1 }}
+                  sx={{ flexGrow: 1, gap: 0.5 }}
                   key={quest.id}
                   invertedColors={isCompleted}
                   variant={isCompleted ? "soft" : "outlined"}
                   color={isCompleted ? "primary" : "neutral"}
                 >
-                  <Typography level="title-sm">
-                    {isCompleted ? <CheckCircle fontSize="inherit" sx={{ verticalAlign: "middle" }} /> : null}{" "}
-                    {quest.description}
-                  </Typography>
-                  <Typography level="body-sm"> {quest.points} points </Typography>
+                  <Flex x yc gap={0.5}>
+                    {isCompleted && <CheckCircle fontSize="small" />}
+                    <Typography level="title-sm">{quest.description}</Typography>
+                  </Flex>
+                  <Typography level="body-sm"> + {quest.points} points </Typography>
                 </Card>
               );
             })}
