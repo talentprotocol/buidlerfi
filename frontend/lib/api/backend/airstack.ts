@@ -16,6 +16,9 @@ const getWalletSocialsQuery = `query GetWallet($identity: Identity!) {
       dappName
       profileName
       profileImage
+      followerCount
+      followingCount
+      profileBio
     }
     xmtp {
       isXMTPEnabled
@@ -35,6 +38,9 @@ export interface AirstackSocialProfiles {
     dappName: string;
     profileName: string;
     profileImage: string;
+    followerCount: number;
+    followingCount: number;
+    profileBio: string;
   }[];
   xmtp?: {
     isXMTPEnabled: boolean;

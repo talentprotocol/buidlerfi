@@ -58,13 +58,16 @@ enum SocialProfileType {
 }
 
 model SocialProfile {
-  type         SocialProfileType
-  profileName  String            @db.VarChar(255)
-  profileImage String?           @db.VarChar(500)
-  user         User              @relation(fields: [userId], references: [id])
-  userId       Int
+  type           SocialProfileType
+  profileName    String            @db.VarChar(255)
+  profileImage   String?           @db.VarChar(500)
+  bio            String?           @db.VarChar(500)
+  followerCount  Int?
+  followingCount Int?
+  user           User              @relation(fields: [userId], references: [id])
+  userId         Int
   //Just in case we need to store data specific to each social platform
-  socialData   Json?
+  socialData     Json?
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())

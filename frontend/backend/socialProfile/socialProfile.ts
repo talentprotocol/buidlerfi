@@ -10,9 +10,12 @@ interface airstackSocial {
   dappName: string;
   profileName: string;
   profileImage: string;
+  profileBio: string;
+  followerCount: number;
+  followingCount: number;
 }
 
-export const updateUserSocialProfiles = async (userId: number, wallet: string) => {
+export const updateUserSocialProfiles = async (userId: number, wallet: string, userBio?: string) => {
   let ensProfile: { name?: string | null; avatar?: string } = {};
   let talentProtocolProfile: GetTalentResponse | undefined;
   let lensProfile: airstackSocial | undefined;
@@ -93,7 +96,6 @@ export const updateUserSocialProfiles = async (userId: number, wallet: string) =
     if (farcasterProfile?.profileImage) {
       farcasterProfile.profileImage = ipfsToURL(farcasterProfile.profileImage);
     }
-
     if (lensProfile) {
       await prisma.socialProfile.upsert({
         where: {
@@ -104,13 +106,19 @@ export const updateUserSocialProfiles = async (userId: number, wallet: string) =
         },
         update: {
           profileName: lensProfile.profileName,
-          profileImage: lensProfile.profileImage
+          profileImage: lensProfile.profileImage,
+          bio: lensProfile.profileBio,
+          followerCount: lensProfile.followerCount,
+          followingCount: lensProfile.followingCount
         },
         create: {
           profileName: lensProfile.profileName,
           profileImage: lensProfile.profileImage,
           type: SocialProfileType.LENS,
-          userId: userId
+          userId: userId,
+          bio: lensProfile.profileBio,
+          followerCount: lensProfile.followerCount,
+          followingCount: lensProfile.followingCount
         }
       });
     }
@@ -125,11 +133,17 @@ export const updateUserSocialProfiles = async (userId: number, wallet: string) =
         },
         update: {
           profileName: farcasterProfile.profileName,
-          profileImage: farcasterProfile.profileImage
+          profileImage: farcasterProfile.profileImage,
+          bio: farcasterProfile.profileBio,
+          followerCount: farcasterProfile.followerCount,
+          followingCount: farcasterProfile.followingCount
         },
         create: {
           profileName: farcasterProfile.profileName,
           profileImage: farcasterProfile.profileImage,
+          bio: farcasterProfile.profileBio,
+          followerCount: farcasterProfile.followerCount,
+          followingCount: farcasterProfile.followingCount,
           type: SocialProfileType.FARCASTER,
           userId: userId
         }
@@ -151,6 +165,8 @@ export const updateUserSocialProfiles = async (userId: number, wallet: string) =
     where: { id: userId },
     data: {
       avatarUrl: defaultAvatar,
+      // if user has no bio, pick a social bio
+      ...(userBio ? {} : { bio: farcasterProfile?.profileBio || lensProfile?.profileBio || "" }),
       //defaultName || undefined to avoid setting displayName to empty string and erasing user-defined username
       displayName: defaultName || undefined
     },

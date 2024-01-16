@@ -188,6 +188,20 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
               <Typography level="body-sm">
                 <strong>{profile.holdings?.length}</strong> holding
               </Typography>
+              {profile.user?.socialProfiles?.find(
+                socialProfile => socialProfile.type === SocialProfileType.FARCASTER
+              ) && (
+                <Typography level="body-sm">
+                  <strong>
+                    {
+                      profile.user?.socialProfiles?.find(
+                        socialProfile => socialProfile.type === SocialProfileType.FARCASTER
+                      )?.followerCount
+                    }
+                  </strong>{" "}
+                  followers
+                </Typography>
+              )}
             </Flex>
           )}
 
