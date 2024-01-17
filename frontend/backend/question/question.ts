@@ -1,11 +1,10 @@
 "use server";
 
-import { publishNewQuestionCast } from "@/lib/api/backend/farcaster";
+import { getFarcasterProfileName, publishNewQuestionCast } from "@/lib/api/backend/farcaster";
 import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
-import { shortAddress } from "@/lib/utils";
 import { Prisma, ReactionType, SocialProfileType } from "@prisma/client";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
@@ -44,12 +43,8 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     console.log("FOUND replier -> ", !!replierFarcaster);
 
     if (questionerFarcaster || replierFarcaster) {
-      const replierName = replierFarcaster?.profileName
-        ? `@${replierFarcaster?.profileName}`
-        : replier.displayName || shortAddress(replier.wallet || "");
-      const questionerName = questionerFarcaster?.profileName
-        ? `@${questionerFarcaster?.profileName}`
-        : questioner?.displayName || shortAddress(questioner?.wallet || "");
+      const replierName = getFarcasterProfileName(replier, replierFarcaster);
+      const questionerName = getFarcasterProfileName(questioner, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW QUESTION");
       await publishNewQuestionCast(

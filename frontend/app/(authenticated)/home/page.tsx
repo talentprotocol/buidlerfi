@@ -11,7 +11,7 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
 import { Key } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const { holding } = useUserContext();
@@ -21,6 +21,8 @@ export default function Home() {
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();
   const keysQuestions = useGetKeyQuestions();
+
+  useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 
   return (
     <Flex component={"main"} y grow>
