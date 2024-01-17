@@ -8,6 +8,8 @@ import { NotificationType } from "@prisma/client";
 import _ from "lodash";
 import { decodeEventLog, parseAbiItem } from "viem";
 import { sendNotification } from "../notification/notification";
+import { publishNewTradeKeysCast, publishNewUserCast } from "../farcaster/farcaster";
+import { formatBigIntToFixedDecimals } from "@/lib/utils";
 
 const logsRange = process.env.LOGS_RANGE_SIZE ? BigInt(process.env.LOGS_RANGE_SIZE) : 100n;
 
@@ -39,6 +41,14 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
     console.log("Transaction already processed");
     return null;
   }
+
+  // Transactions can be about a new key or an existing key
+
+  // if the amount is 0, it's a new key (the first key is bought for free by the builder)
+  const isNewKey = Number(log.args.ethAmount) == 0 && log.args.trader.toLowerCase() === log.args.builder.toLowerCase();
+  
+  // if the amount is not 0, it's an existing key
+  const existingKey = Number(log.args.ethAmount) != 0 && log.args.trader.toLowerCase() !== log.args.builder.toLowerCase();
 
   //If transaction doesn't exist, we create it
   if (!transaction) {
@@ -118,6 +128,18 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
     return key;
   });
 
+  //If transaction is a new key, we publish a new cast on Farcaster through the bot
+  if (isNewKey && owner?.privyUserId) {
+    await publishNewUserCast(owner.privyUserId);
+  }
+
+  //If transaction is an existing, we publish the trade info with a new cast on Farcaster through the bot
+  if (existingKey && owner?.privyUserId && holder?.privyUserId) {
+    //Show max 5 decimals
+    const price = formatBigIntToFixedDecimals(log.args.ethAmount, 18, 5);
+    await publishNewTradeKeysCast(owner.privyUserId, holder.privyUserId, log.args.isBuy, price);
+  }
+
   return res;
 };
 
@@ -171,7 +193,6 @@ export const storeTransaction = async (hash: `0x${string}`) => {
       eventLog.args.isBuy ? NotificationType.KEYBUY : NotificationType.KEYSELL
     );
   }
-
   return { data: hash };
 };
 

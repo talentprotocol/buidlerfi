@@ -43,7 +43,7 @@ export default function EditProfilePage() {
       .mutateAsync({ tags: selectedTags, bio: bio })
       .then(async () => {
         toast.success("Profile updated");
-        await profile.refetch();
+        await Promise.allSettled([profile.refetch(), refetch()]);
         router.replace("/profile/" + currentUser?.wallet.toLowerCase());
       })
       .catch(err => {

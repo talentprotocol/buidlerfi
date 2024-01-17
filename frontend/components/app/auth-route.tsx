@@ -1,11 +1,9 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUpdateUser } from "@/hooks/useUserApi";
-import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
-import { BUILDERFI_CONTRACT, MIN_BALANCE_ONBOARDING, ONBOARDING_WALLET_CREATED_KEY } from "@/lib/constants";
+import { MIN_BALANCE_ONBOARDING, ONBOARDING_WALLET_CREATED_KEY } from "@/lib/constants";
 import { usePathname } from "next/navigation";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { useContractRead } from "wagmi";
 import { LoadingPage } from "../shared/loadingPage";
 
 interface Navigator extends globalThis.Navigator {
@@ -18,13 +16,6 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const router = useBetterRouter();
   const updateUser = useUpdateUser();
-  const { data: supporterKeys } = useContractRead({
-    address: BUILDERFI_CONTRACT.address,
-    abi: builderFIV1Abi,
-    functionName: "builderKeysBalance",
-    args: [user.user?.wallet as `0x${string}`, user.user?.wallet as `0x${string}`],
-    enabled: !!user.user?.wallet
-  });
 
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
   const { standalone } = navigator as Navigator;
@@ -39,6 +30,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
   );
 
   const handleOnboardingRedirect = useCallback(() => {
+    console.log(user.holding);
     if (user.user?.tags.length === 0 && router.searchParams.skipTags !== "1") {
       return redirect("/onboarding/tags");
     } else if (window.localStorage.getItem(ONBOARDING_WALLET_CREATED_KEY) !== "true") {
@@ -49,7 +41,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
       router.searchParams.skipFund !== "1"
     ) {
       return redirect("/onboarding/fund");
-    } else if (Number(supporterKeys) === 0 && router.searchParams.skipLaunchingKeys !== "1") {
+    } else if ((!user.holding || user.holding.length === 0) && router.searchParams.skipLaunchingKeys !== "1") {
       return redirect("/onboarding/buykey");
     } else if (!user.user?.socialWallet && router.searchParams.skiplink !== "1") {
       return redirect("/onboarding/linkwallet");
@@ -69,7 +61,7 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
         );
       return false;
     }
-  }, [user, router, supporterKeys, standalone, isStandalone, redirect, updateUser]);
+  }, [user, router, standalone, isStandalone, redirect, updateUser]);
 
   useEffect(() => {
     if (router.searchParams.inviteCode)
@@ -114,7 +106,16 @@ export const AuthRoute = ({ children }: { children: ReactNode }) => {
     }
 
     setIsReady(true);
-  }, [handleOnboardingRedirect, pathname, redirect, router, user, user.isLoading, user.privyUser]);
+  }, [
+    handleOnboardingRedirect,
+    pathname,
+    redirect,
+    router,
+    updateUser.isLoading,
+    user,
+    user.isLoading,
+    user.privyUser
+  ]);
 
   if (user.isLoading || !isReady) {
     return <LoadingPage />;

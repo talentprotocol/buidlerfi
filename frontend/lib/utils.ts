@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { differenceInMinutes, startOfDay, subDays, subMonths } from "date-fns";
+import { differenceInMinutes, differenceInSeconds, startOfDay, subDays, subMonths } from "date-fns";
 
 import { URLSearchParams } from "url";
 import { formatUnits, parseEther } from "viem";
@@ -113,6 +113,18 @@ export const getDifference = (date?: Date) => {
   return `${years}y`;
 };
 
+export const getFullTimeDifference = (date?: Date) => {
+  if (!date) return "";
+  const seconds = differenceInSeconds(date, new Date());
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ${minutes % 60}m`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ${hours % 24}h ${minutes % 60}m`;
+};
+
 export function isNumeric(n: string) {
   return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
 }
@@ -153,4 +165,27 @@ export function sortIntoPeriods<T extends { createdAt: Date }>(toSort: T[]) {
   });
 
   return sorted;
+}
+
+export function formatBigIntToFixedDecimals(bigNumber: bigint, currentDecimals: number, targetDecimals: number): string {
+  // Check if target decimals is greater than current decimals
+  if (targetDecimals > currentDecimals) {
+      throw new Error("Target decimals cannot be greater than current decimals");
+  }
+
+  // Define the divisor as a BigInt
+  const divisor: bigint = BigInt(10 ** (currentDecimals - targetDecimals));
+
+  // Divide and round the big number
+  const rounded: bigint = (bigNumber + divisor / BigInt(2)) / divisor;
+
+  // Convert to a string and format with a decimal point
+  const asString: string = rounded.toString();
+  const len: number = asString.length;
+
+  // Pad with zeros if necessary (for numbers less than 1.00000 based on target decimals)
+  const padded: string = len > targetDecimals ? asString : '0'.repeat(targetDecimals - len + 1) + asString;
+
+  // Insert the decimal point
+  return `${padded.slice(0, -targetDecimals)}.${padded.slice(-targetDecimals)}`;
 }

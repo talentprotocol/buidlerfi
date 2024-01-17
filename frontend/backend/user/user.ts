@@ -51,10 +51,17 @@ export const getCurrentUser = async (privyUserId: string) => {
       inviteCodes: {
         where: {
           isActive: true
+        },
+        include: {
+          invitations: true
         }
       },
       socialProfiles: true,
-      points: true,
+      points: {
+        where: {
+          hidden: false
+        }
+      },
       tags: true
     }
   });

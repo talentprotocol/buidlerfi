@@ -8,10 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "vercel-build": "prisma generate && prisma migrate deploy && tsx ./scripts/insert-quests.ts && next build"
   },
   "dependencies": {
     "@airstack/airstack-react": "^0.5.2",
@@ -61,6 +58,7 @@
     "@types/sanitize-html": "^2.9.5",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "csvtojson": "^2.0.10",
+    "esbuild": "^0.19.11",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
     "prisma": "^5.7.0",
