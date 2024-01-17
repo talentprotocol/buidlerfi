@@ -191,16 +191,19 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
               {profile.user?.socialProfiles?.find(
                 socialProfile => socialProfile.type === SocialProfileType.FARCASTER
               ) && (
-                <Typography level="body-sm">
-                  <strong>
-                    {
-                      profile.user?.socialProfiles?.find(
-                        socialProfile => socialProfile.type === SocialProfileType.FARCASTER
-                      )?.followerCount
-                    }
-                  </strong>{" "}
-                  followers
-                </Typography>
+                <Flex flexDirection={"row"} alignItems={"center"}>
+                  <Image width={17} height={17} src={FARCASTER_LOGO} alt="Farcaster logo" />
+                  <Typography level="body-sm">
+                    <strong>
+                      {
+                        profile.user?.socialProfiles?.find(
+                          socialProfile => socialProfile.type === SocialProfileType.FARCASTER
+                        )?.followerCount
+                      }
+                    </strong>{" "}
+                    followers
+                  </Typography>
+                </Flex>
               )}
             </Flex>
           )}
