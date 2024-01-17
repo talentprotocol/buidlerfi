@@ -1,4 +1,4 @@
-import { getAirstackSocialData } from "@/lib/api/backend/airstack";
+import { getAirstackSocialData } from "@/lib/api/backend/airstack/social-profile";
 import { getEnsProfile } from "@/lib/api/common/ens";
 import prisma from "@/lib/prisma";
 import { ipfsToURL } from "@/lib/utils";

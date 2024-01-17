@@ -11,6 +11,7 @@ import { Prisma } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
 import { sendNotification } from "../notification/notification";
+import { syncFarcasterFollowings } from "../socialProfile/farcasterFollowing";
 import { updateRecommendations } from "../socialProfile/recommendation";
 import { updateUserSocialProfiles } from "../socialProfile/socialProfile";
 
@@ -39,6 +40,7 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
 
   const res = await updateUserSocialProfiles(user.id, user.socialWallet);
   updateRecommendations(user.socialWallet.toLowerCase());
+  syncFarcasterFollowings(user.id);
   return { data: res };
 };
 

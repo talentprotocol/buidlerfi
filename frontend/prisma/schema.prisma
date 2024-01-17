@@ -67,12 +67,28 @@ model SocialProfile {
   //Just in case we need to store data specific to each social platform
   socialData   Json?
 
+  followedBy SocialProfileFollowing[] @relation("followedBy")
+  followings SocialProfileFollowing[] @relation("followings")
+
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   //Only 1 profile type per user
   @@unique([userId, type])
+}
+
+model SocialProfileFollowing {
+  profile     SocialProfile @relation(name: "followings", fields: [profileId], references: [id])
+  profileId   Int
+  following   SocialProfile @relation(name: "followedBy", fields: [followingId], references: [id])
+  followingId Int
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([profileId, followingId])
 }
 
 model Question {
