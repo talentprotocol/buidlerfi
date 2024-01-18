@@ -11,6 +11,7 @@ import { Prisma } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
 import { sendNotification } from "../notification/notification";
+import { syncFarcasterFollowings } from "../socialProfile/farcasterFollowing";
 import { updateRecommendations } from "../socialProfile/recommendation";
 import { updateUserSocialProfiles } from "../socialProfile/socialProfile";
 
@@ -38,6 +39,7 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
   if (!user.socialWallet) return { error: ERRORS.NO_SOCIAL_PROFILE_FOUND };
 
   const res = await updateUserSocialProfiles(user.id, user.socialWallet, user.bio!);
+  await syncFarcasterFollowings(user.id);
   updateRecommendations(user.socialWallet.toLowerCase());
   return { data: res };
 };
@@ -56,7 +58,15 @@ export const getCurrentUser = async (privyUserId: string) => {
           invitations: true
         }
       },
-      socialProfiles: true,
+      socialProfiles: {
+        include: {
+          followings: {
+            include: {
+              following: true
+            }
+          }
+        }
+      },
       points: {
         where: {
           hidden: false

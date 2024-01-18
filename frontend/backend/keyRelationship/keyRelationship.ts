@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { SocialProfileType } from "@prisma/client";
 
 export const getKeyRelationships = async (address: string, side: "owner" | "holder") => {
   const relationships = await prisma.keyRelationship.findMany({
@@ -16,13 +17,24 @@ export const getKeyRelationships = async (address: string, side: "owner" | "hold
           }
         : {
             holder: {
-              wallet: address.toLowerCase()
+              wallet: address.toLowerCase(),
             },
             amount: {
               gt: 0
             }
           },
-    include: { holder: true, owner: true },
+    include: {
+      holder: {
+        include: {
+          socialProfiles: {
+            where: {
+              type: SocialProfileType.FARCASTER
+            }
+          }
+        }
+      },
+      owner: true
+    },
     orderBy: {
       amount: "desc"
     }
