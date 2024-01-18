@@ -121,8 +121,7 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
 
     return currentUserFarcasterFollowings
       .filter(profile => profileHolders.some(holder => holder.id === profile.id))
-      .map(profile => profile)
-      .concat([{ profileName: "limone.eth" } as unknown] as unknown);
+      .map(profile => profile);
   }, [currentUser?.socialProfiles, profile.holders, profile.user]);
 
   return (
