@@ -11,7 +11,7 @@ import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib
 import { formatEth, shortAddress } from "@/lib/utils";
 import { EditOutlined } from "@mui/icons-material";
 import { Avatar, Button, Chip, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
-import { SocialProfileType } from "@prisma/client";
+import { SocialProfile, SocialProfileType } from "@prisma/client";
 import Image from "next/image";
 import { FC, useMemo } from "react";
 
@@ -108,6 +108,22 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
     }
   }, [profile.user, profile.recommendedUser]);
 
+  const followingAndHoldersIntersection = useMemo(() => {
+    const currentUserFarcasterFollowings: SocialProfile[] =
+      currentUser?.socialProfiles
+        .find(s => s.type === SocialProfileType.FARCASTER)
+        ?.followings?.map(f => f.following) || [];
+    const profileHolders: SocialProfile[] =
+      (profile.holders
+        ?.filter(h => h.holderId !== profile.user?.id)
+        .map(h => h.holder.socialProfiles.find(s => s.type === SocialProfileType.FARCASTER))
+        .filter(Boolean) as SocialProfile[]) || [];
+
+    return currentUserFarcasterFollowings
+      .filter(profile => profileHolders.some(holder => holder.id === profile.id))
+      .map(profile => profile.profileName);
+  }, [currentUser?.socialProfiles, profile.holders, profile.user]);
+
   return (
     <>
       <Flex y gap2 p={2}>
@@ -161,6 +177,11 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
                 {profile.ownedKeysCount > 0 && (
                   <Typography level="body-sm">
                     • You own {profile.ownedKeysCount?.toString()} {keysPlural()}
+                  </Typography>
+                )}
+                {followingAndHoldersIntersection?.length > 0 && (
+                  <Typography level="body-sm">
+                    • Owned by {followingAndHoldersIntersection.length === 1 ? followingAndHoldersIntersection[0] : `${followingAndHoldersIntersection[0]} and ${followingAndHoldersIntersection.length} others`}
                   </Typography>
                 )}
               </Flex>
