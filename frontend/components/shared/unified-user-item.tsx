@@ -90,7 +90,7 @@ export const UnifiedUserItem: FC<Props> = ({
     }
 
     if (joinedAndReplies) {
-      return `${user?.bio ? `${user.bio.substring(0,20)}... • ` : ""}${joinedAndReplies.numberOfQuestions}/${
+      return `${user?.bio ? `${user.bio.substring(0,60)}... • ` : ""}${joinedAndReplies.numberOfQuestions}/${
         joinedAndReplies.numberOfReplies
       } ${pluralize("answer", joinedAndReplies.numberOfReplies)}`;
     }
