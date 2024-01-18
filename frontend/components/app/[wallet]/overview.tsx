@@ -116,7 +116,7 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
     const profileHolders: SocialProfile[] =
       (profile.holders
         ?.filter(h => h.holderId !== profile.user?.id)
-        .map(h => h.holder.socialProfiles.find(s => s.type === SocialProfileType.FARCASTER))
+        .map(h => h.holder.socialProfiles?.find(s => s.type === SocialProfileType.FARCASTER))
         .filter(Boolean) as SocialProfile[]) || [];
 
     return currentUserFarcasterFollowings
