@@ -197,7 +197,7 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
   });
 
   try {
-    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase());
+    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase(), user.bio!);
     updateRecommendations(challenge.publicKey.toLowerCase());
   } catch (err) {
     console.error("Error while updating social profiles: ", err);

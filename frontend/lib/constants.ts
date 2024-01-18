@@ -94,7 +94,7 @@ export const GET_NEXT_AIRDROP_DATE = () => {
 };
 
 export const NEW_BUILDERFI_INVITE_CAST =
-  "hey @{username}! i invite you to join builder.fi, a q&a marketplace built on top of so farcaster where builders can monetize their knowledge.\n\nif you'd like to give it a try, just let me know, and i'll send you an invite.\n\nlooking forward to ask you a question on builder.fi!";
+  "hey @{username}! i invite you to join builder.fi, a q&a marketplace on top of farcaster.\n\nif you'd like to give it a try, let me know, and i'll send you an invite.\n\nlooking forward to ask you a question on builder.fi!";
 
 //Unclaimed points expire after 14 days
 export const AIRDROP_EXPIRATION_AFTER_CREATION = 14;
