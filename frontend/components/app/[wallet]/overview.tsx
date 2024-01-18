@@ -121,7 +121,8 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
 
     return currentUserFarcasterFollowings
       .filter(profile => profileHolders.some(holder => holder.id === profile.id))
-      .map(profile => profile.profileName);
+      .map(profile => profile)
+      .concat([{ profileName: "limone.eth" } as unknown] as unknown);
   }, [currentUser?.socialProfiles, profile.holders, profile.user]);
 
   return (
@@ -179,11 +180,6 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
                     • You own {profile.ownedKeysCount?.toString()} {keysPlural()}
                   </Typography>
                 )}
-                {followingAndHoldersIntersection?.length > 0 && (
-                  <Typography level="body-sm">
-                    • Owned by {followingAndHoldersIntersection.length === 1 ? followingAndHoldersIntersection[0] : `${followingAndHoldersIntersection[0]} and ${followingAndHoldersIntersection.length} others`}
-                  </Typography>
-                )}
               </Flex>
             </Flex>
           </Flex>
@@ -225,6 +221,25 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
                   </Typography>
                 </Flex>
               )}
+            </Flex>
+          )}
+
+          {followingAndHoldersIntersection?.length > 0 && (
+            <Flex x gap1 alignItems={"center"}>
+              <Avatar size="sm" src={followingAndHoldersIntersection[0].profileImage!} />
+              <Typography level="body-sm">
+                {followingAndHoldersIntersection.length === 1 ? (
+                  <div>
+                    <Typography fontWeight={600}>{followingAndHoldersIntersection[0].profileName}</Typography> also owns
+                    keys
+                  </div>
+                ) : (
+                  <div>
+                    <Typography fontWeight={600}>{followingAndHoldersIntersection[0].profileName}</Typography> and{" "}
+                    {followingAndHoldersIntersection.length - 1} others that you know also own keys
+                  </div>
+                )}
+              </Typography>
             </Flex>
           )}
 
