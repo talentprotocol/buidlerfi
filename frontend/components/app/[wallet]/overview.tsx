@@ -207,7 +207,6 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
               {profile.user?.socialProfiles?.find(socialProfile => socialProfile.type === SocialProfileType.FARCASTER)
                 ?.followerCount && (
                 <Flex flexDirection={"row"} alignItems={"center"}>
-                  <Image width={17} height={17} src={FARCASTER_LOGO} alt="Farcaster logo" />
                   <Typography level="body-sm">
                     <strong>
                       {
@@ -216,7 +215,7 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
                         )?.followerCount
                       }
                     </strong>{" "}
-                    followers
+                    followers on Farcaster
                   </Typography>
                 </Flex>
               )}
