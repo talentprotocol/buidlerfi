@@ -73,6 +73,7 @@ export default function EditProfilePage() {
     if (currentUser?.socialWallet) {
       await refreshData.mutateAsync();
       await refetch();
+      setBio(currentUser.bio || "");
       toast.success("Profile info imported from your web3 social profiles");
     } else {
       linkWallet(refetch);
