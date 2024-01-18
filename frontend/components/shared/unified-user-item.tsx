@@ -1,6 +1,6 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { getDifference, shortAddress } from "@/lib/utils";
+import { shortAddress } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Avatar, Chip, Skeleton, Typography } from "@mui/joy";
 import { SxProps, TypographySystem } from "@mui/joy/styles/types";
@@ -90,8 +90,7 @@ export const UnifiedUserItem: FC<Props> = ({
     }
 
     if (joinedAndReplies) {
-      const diff = getDifference(joinedAndReplies.createdAt);
-      return `Joined builder.fi ${diff} ago • ${joinedAndReplies.numberOfQuestions}/${
+      return `${user?.bio ? `${user.bio.substring(0,20)}... • ` : ""}${joinedAndReplies.numberOfQuestions}/${
         joinedAndReplies.numberOfReplies
       } ${pluralize("answer", joinedAndReplies.numberOfReplies)}`;
     }

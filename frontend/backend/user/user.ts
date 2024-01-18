@@ -18,7 +18,7 @@ export const refreshAllUsersProfile = async () => {
   const users = await prisma.user.findMany();
   for (const user of users.filter(user => user.socialWallet)) {
     try {
-      await updateUserSocialProfiles(user.id, user.socialWallet!);
+      await updateUserSocialProfiles(user.id, user.socialWallet!, user.bio!);
     } catch (err) {
       console.error("Error while updating social profiles for user: ", user.wallet, err);
     }
@@ -37,7 +37,7 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
   if (!user) return { error: ERRORS.USER_NOT_FOUND };
   if (!user.socialWallet) return { error: ERRORS.NO_SOCIAL_PROFILE_FOUND };
 
-  const res = await updateUserSocialProfiles(user.id, user.socialWallet);
+  const res = await updateUserSocialProfiles(user.id, user.socialWallet, user.bio!);
   updateRecommendations(user.socialWallet.toLowerCase());
   return { data: res };
 };
@@ -506,7 +506,8 @@ export const getRecommendedUsers = async (address: string) => {
       userId: !!foundUser ? foundUser.id : rec.userId,
       questions: !!foundUser ? foundUser.replies.length : 0,
       replies: !!foundUser ? foundUser.replies.filter(reply => !!reply.repliedOn).length : 0,
-      createdAt: !!foundUser ? foundUser.createdAt : rec.createdAt
+      createdAt: !!foundUser ? foundUser.createdAt : rec.createdAt,
+      bio: !!foundUser ? foundUser.bio : ""
     };
   });
 

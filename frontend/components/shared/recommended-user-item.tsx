@@ -1,11 +1,11 @@
 "use client";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { getDifference, shortAddress } from "@/lib/utils";
+import { shortAddress } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Typography } from "@mui/joy";
 import Avatar from "@mui/joy/Avatar";
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import { Flex } from "./flex";
 
 interface RecommendedUserItemProps {
@@ -19,6 +19,7 @@ interface RecommendedUserItemProps {
   questions: number;
   createdAt?: Date;
   userId?: number;
+  bio: string;
 }
 
 export const RecommendedUserItem: FC<RecommendedUserItemProps> = ({
@@ -31,7 +32,8 @@ export const RecommendedUserItem: FC<RecommendedUserItemProps> = ({
   replies,
   questions,
   createdAt,
-  userId
+  userId,
+  bio = ""
 }) => {
   const displayName = () => talentProtocol || farcaster || ens || lens || shortAddress(wallet || "");
   return (
@@ -43,6 +45,7 @@ export const RecommendedUserItem: FC<RecommendedUserItemProps> = ({
       userId={userId}
       replies={replies}
       questions={questions}
+      bio={bio}
     />
   );
 };
@@ -51,6 +54,7 @@ interface UserItemInnerProps {
   address: string;
   avatar?: string;
   name: string;
+  bio?: string;
   userId?: number;
   createdAt?: Date;
   replies: number;
@@ -65,7 +69,7 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   avatar,
   name,
   userId,
-  createdAt,
+  bio,
   replies,
   questions,
   px = 2,
@@ -73,7 +77,6 @@ const UserItemInner: FC<UserItemInnerProps> = ({
   isButton = true
 }) => {
   const router = useBetterRouter();
-  const joinedAt = useMemo(() => getDifference(createdAt), [createdAt]);
   return (
     <Flex
       x
@@ -107,7 +110,8 @@ const UserItemInner: FC<UserItemInnerProps> = ({
           </Typography>
           {userId !== undefined && userId > 0 ? (
             <Typography textColor={"neutral.600"} level="body-sm">
-              Joined builder.fi {joinedAt} ago • {replies}/{questions} answers
+              {bio ? `${bio} • ` : ""}
+              {replies}/{questions} answers
             </Typography>
           ) : (
             <Typography textColor={"neutral.600"} level="body-sm">

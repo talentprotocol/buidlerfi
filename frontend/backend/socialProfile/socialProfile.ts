@@ -160,7 +160,6 @@ export const updateUserSocialProfiles = async (userId: number, wallet: string, u
     ensProfile.avatar;
   const defaultName =
     talentProtocolProfile?.talent.name || farcasterProfile?.profileName || lensProfile?.profileName || ensProfile.name;
-
   return await prisma.user.update({
     where: { id: userId },
     data: {
