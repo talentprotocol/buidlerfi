@@ -230,6 +230,45 @@ export const getQuestion = async (questionId: number, privyUserId?: string) => {
   else return { data: exclude(question, ["reply"]) };
 };
 
+export const getQuestionContent = async (questionId: number) => {
+  const question = await prisma.question.findUniqueOrThrow({
+    where: {
+      id: questionId
+    }
+  });
+
+  return { data: question.questionContent };
+}
+
+export async function getMostUpvotedQuestionInTimeWindow(daysBack: number) {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - daysBack);
+
+  const mostUpvotedQuestions = await prisma.reaction.groupBy({
+    where: {
+      reactionType: 'UPVOTE',
+      createdAt: {
+        gte: startDate
+      },
+      questionId: {
+        not: null
+      }
+    },
+    by: ['questionId'],
+    _count: {
+      questionId: true
+    },
+    orderBy: {
+      _count: {
+        questionId: 'desc'
+      }
+    },
+    take: 1 // get the most upvoted question
+  });
+
+  return mostUpvotedQuestions[0].questionId; // Return the top question or null if none found
+}
+
 export const deleteQuestion = async (privyUserId: string, questionId: number) => {
   const question = await prisma.question.findUniqueOrThrow({
     where: {

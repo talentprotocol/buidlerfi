@@ -525,11 +525,56 @@ export const getTopUsersByKeysOwned = async (offset: number) => {
   return { data: users };
 };
 
+export const getTopUsersByKeysOwnedAndNumber = async (offset: number) => {
+  const users = (await prisma.$queryRaw`
+    SELECT "User".*, 
+    CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
+    FROM "User"
+    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
+    WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
+    GROUP BY "User".id
+    ORDER BY "ownedKeys" DESC
+    LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
+  `) as TopUserByKeysOwned[];
+
+  const usersNumberOfHolders = await prisma.user.findMany({
+    where: {
+      id: {
+        in: users.map(user => user.id)
+      }
+    },
+    include: {
+      keysOfSelf: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    }
+  });
+
+  const usersMap = new Map<number, (typeof usersNumberOfHolders)[number]>();
+  for (const user of usersNumberOfHolders) {
+    usersMap.set(user.id, user);
+  }
+
+  users.forEach(user => {
+    const foundUser = usersMap.get(user.id);
+    user.numberOfHolders = foundUser?.keysOfSelf.length || 0;
+  });
+
+  return { data: users, numberOfUsers: usersNumberOfHolders };
+};
+
+
+
 type TopUser = Prisma.$UserPayload["scalars"] & {
   numberOfHolders: number;
   numberOfQuestions: number;
   numberOfReplies: number;
 };
+
 
 export const getTopUsers = async (offset: number) => {
   const users = (await prisma.$queryRaw`

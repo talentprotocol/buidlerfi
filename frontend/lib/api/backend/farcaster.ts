@@ -11,7 +11,12 @@ import {
   NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR,
   NEW_BUILDERFI_SELL_TRADE_CAST,
   NEW_BUILDERFI_USER_CAST,
-  NEW_BUILDERFI_USER_PARENT_CAST_HASH
+  NEW_BUILDERFI_USER_PARENT_CAST_HASH,
+  NEW_FARCASTER_KEY_HOLDERS_CAST,
+  NEW_FARCASTER_KEY_VALUE_CAST,
+  NEW_FARCASTER_NUMBER_ANSWERS_CAST,
+  NEW_FARCASTER_NUMBER_QUESTIONS_CAST,
+  NEW_FARCASTER_QUESTION_WEEK_CAST
 } from "@/lib/constants";
 import { shortAddress } from "@/lib/utils";
 import { SocialProfile, User } from "@prisma/client";
@@ -79,6 +84,47 @@ export const publishSellTradeUserKeysCast = async (holder: string, owner: string
     .replace("{price}", price);
   return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
 };
+
+export const publishTopFarcasterKeyValueCast = async (owners: string[], prices: string[]) => {
+  const text = NEW_FARCASTER_KEY_VALUE_CAST/*.replace("{holder}", holder)
+    .replace("{owner}", owner)
+    .replace("{link}", link)
+    .replace("{price}", price);*/
+  return publishCast(text);
+}
+
+export const publishTopFarcasterKeyHoldersCast = async (owner: string[], holdersNumber: string[]) => {
+  const text = NEW_FARCASTER_KEY_HOLDERS_CAST/*.replace("{holder}", holder)
+    .replace("{owner}", owner)
+    .replace("{link}", link)
+    .replace("{price}", price);*/
+  return publishCast(text);
+}
+
+export const publishTopFarcasterQuestionsCast = async (owner: string[], questionNumber: string[]) => {
+  const text = NEW_FARCASTER_NUMBER_QUESTIONS_CAST/*.replace("{holder}", holder)
+    .replace("{owner}", owner)
+    .replace("{link}", link)
+    .replace("{price}", price);*/
+  return publishCast(text);
+}
+
+export const publishTopFarcasterAnswersCast = async (owner: string[], answerNumber: string[]) => {
+  const text = NEW_FARCASTER_NUMBER_ANSWERS_CAST/*.replace("{holder}", holder)
+    .replace("{owner}", owner)
+    .replace("{link}", link)
+    .replace("{price}", price);*/
+  return publishCast(text);
+}
+
+export const publishQuestionsOfTheWeekCast = async (content: string, questioner: string, replier: string) => {
+  const text = NEW_FARCASTER_QUESTION_WEEK_CAST/*.replace("{holder}", holder)
+    .replace("{owner}", owner)
+    .replace("{link}", link)
+    .replace("{price}", price);*/
+  return publishCast(text);
+}
+
 
 export const replyToNewQuestionCastSuccess = async (castHash: string, link: string) => {
   const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
