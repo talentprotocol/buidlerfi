@@ -13,7 +13,16 @@ frontend/public/worker-*.js
 frontend/scripts/*.csv
 
 docker-compose.yml
-
-docker-compose.yml
-
-docker-compose.yml
+.DS_Store
+frontend/.env
+.idea
+todo.md
+frontend/.env.dev
+frontend/.env.production
+dumps/*
+frontend/public/sw.js
+frontend/public/sw.js.map
+frontend/public/workbox-*.js
+frontend/public/workbox-*.js.map
+frontend/public/worker-*.js
+frontend/scripts/*.csv
