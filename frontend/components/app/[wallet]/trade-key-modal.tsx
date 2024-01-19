@@ -16,15 +16,24 @@ interface Props {
   supporterKeysCount?: number;
   side: "buy" | "sell";
   isFirstKey: boolean;
-  keyOwner: User;
+  targetBuilderAddress?: `0x${string}`;
+  keyOwner?: User;
 }
 
-export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, isFirstKey, side, keyOwner }) => {
+export const TradeKeyModal: FC<Props> = ({
+  hasKeys,
+  close,
+  supporterKeysCount,
+  isFirstKey,
+  side,
+  targetBuilderAddress,
+  keyOwner
+}) => {
   const { address } = useUserContext();
   const { data: balance } = useBalance({
     address
   });
-  const tx = useTradeKey(side, keyOwner, () => closeOrShowSuccessPurchase());
+  const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { refetch, buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } =
     useGetBuilderInfo(keyOwner?.wallet);
@@ -48,7 +57,7 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
 
   const handleBuy = async (recalculatePrice = false) => {
     if (isFirstKey) {
-      tx.mutateAsync(buyPriceAfterFee!);
+      tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceAfterFee });
       return;
     }
 
@@ -70,11 +79,11 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
       return;
     }
 
-    tx.mutateAsync(buyPrice);
+    tx.executeTx({ args: [targetBuilderAddress!], value: buyPrice });
   };
 
   const handleSell = () => {
-    tx.mutateAsync(sellPriceAfterFee!);
+    tx.executeTx({ args: [targetBuilderAddress!] });
   };
 
   const hasEnoughBalance = useMemo(() => {

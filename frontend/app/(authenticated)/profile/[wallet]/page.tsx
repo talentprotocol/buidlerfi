@@ -39,7 +39,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
           close={() => router.replace({ searchParams: { ask: undefined } })}
         />
       )}
-      {buyModalState !== "closed" && profile.user && (
+      {buyModalState !== "closed" && (
         <TradeKeyModal
           keyOwner={profile.user}
           supporterKeysCount={profile.ownedKeysCount || 0}
@@ -50,6 +50,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
             await profile.refetch();
             setBuyModalState("closed");
           }}
+          targetBuilderAddress={(profile.user?.wallet as `0x${string}`) || undefined}
         />
       )}
 
