@@ -6,7 +6,7 @@ const globalForViem = global as unknown as { viemClient: PublicClient };
 export const viemClient =
   globalForViem.viemClient ||
   createPublicClient({
-    transport: http(process.env.INFURA_API_KEY),
+    transport: http(process.env.NEXT_PUBLIC_INFURA_APY_KEY),
     chain: process.env.NODE_ENV === "production" ? base : baseGoerli
   });
 

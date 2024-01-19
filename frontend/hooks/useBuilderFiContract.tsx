@@ -8,6 +8,7 @@ import { useContractRead } from "wagmi";
 import { useGlobalContext } from "@/contexts/globalContext";
 import { useUserContext } from "@/contexts/userContext";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
+import { viemClient } from "@/lib/viemClient";
 import { User } from "@prisma/client";
 import { UnsignedTransactionRequest, usePrivy } from "@privy-io/react-auth";
 import { useMutation } from "@tanstack/react-query";
@@ -141,6 +142,20 @@ export const useTradeKey = (side: "buy" | "sell", keyOwner?: User, successFn?: (
         args: [user.wallet as `0x${string}`]
       });
 
+      console.log("CALCULATING");
+      console.log({ keyPrice, side, rpcUrl: viemClient.transport.url });
+
+      const gasLimit = await viemClient.estimateContractGas({
+        abi: BUILDERFI_CONTRACT.abi,
+        functionName: TRADE_DATA[side].functionName,
+        args: [user.wallet as `0x${string}`],
+        address: BUILDERFI_CONTRACT.address,
+        account: user.wallet as `0x${string}`,
+        value: side === "buy" ? keyPrice : 0n
+      });
+
+      console.log({ gasLimit });
+
       const unsignedTransaction: UnsignedTransactionRequest = {
         data: encodedData,
         value: side === "buy" ? keyPrice : 0n,
@@ -175,6 +190,7 @@ export const useTradeKey = (side: "buy" | "sell", keyOwner?: User, successFn?: (
         throw new Error("Transaction reverted");
       }
     } catch (err) {
+      console.log(err);
       if (
         err &&
         typeof err === "object" &&

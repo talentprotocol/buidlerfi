@@ -48,7 +48,7 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
 
   const handleBuy = async (recalculatePrice = false) => {
     if (isFirstKey) {
-      tx.mutateAsync(buyPriceAfterFee!);
+      await tx.mutateAsync(buyPriceAfterFee!);
       return;
     }
 
@@ -70,7 +70,7 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
       return;
     }
 
-    tx.mutateAsync(buyPrice);
+    await tx.mutateAsync(buyPrice);
   };
 
   const handleSell = () => {
