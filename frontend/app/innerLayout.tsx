@@ -86,7 +86,8 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
           defaultChain: supportedChain,
           appearance: {
             theme: "light",
-            accentColor: "#0B6EF9"
+            accentColor: "#0B6EF9",
+            showWalletLoginFirst: false
           },
           fiatOnRamp: {
             useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"
