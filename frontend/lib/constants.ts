@@ -23,7 +23,8 @@ export const BUILDERFI_CONTRACT = {
   address: process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET : BASE_GOERLI_TESTNET,
   abi: builderFIV1Abi,
   startBlock:
-    process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_START_BLOCK : BASE_TESTNET_START_BLOCK
+    process.env.NEXT_PUBLIC_CONTRACTS_ENV == "production" ? BASE_MAINNET_START_BLOCK : BASE_TESTNET_START_BLOCK,
+  chainId: IN_USE_CHAIN_ID
 } as const;
 export const THE_GRAPH_PAGE_SIZE = 50;
 export const MIN_QUESTION_LENGTH = 10;
