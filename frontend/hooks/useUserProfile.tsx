@@ -34,7 +34,7 @@ export const useUserProfile = (wallet?: string) => {
 
   const [myShares, supporterNumber] = useMemo(() => {
     if (!holders) return [undefined, undefined];
-    const index = holders.findIndex(h => h.holder.id === currentUser?.id);
+    const index = holders.findIndex(h => h.holderId === currentUser?.id);
     return [holders[index], index + 1];
   }, [holders, currentUser?.id]);
 
@@ -68,6 +68,6 @@ export const useUserProfile = (wallet?: string) => {
     isOwnProfile: currentUser?.wallet?.toLowerCase() === formattedWallet,
     getQuestionsFromReplierQuery,
     getQuestionsFromQuestionerQuery,
-    hasLaunchedKeys: !!holdings?.find(key => key.holder.id === key.owner.id)
+    hasLaunchedKeys: !!holdings?.find(key => key.holderId === key.ownerId)
   };
 };

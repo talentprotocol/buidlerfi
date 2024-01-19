@@ -1,3 +1,4 @@
+import { addMinutes, addWeeks, isSameDay, nextFriday, setHours, setMinutes, setSeconds } from "date-fns";
 import { parseEther } from "viem";
 import { builderFIV1Abi } from "./abi/BuidlerFiV1";
 
@@ -51,7 +52,13 @@ export const NEW_BUILDERFI_ANSWER_CAST =
 export const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
 
 export const NEW_BUILDERFI_USER_CAST = "{user} just launched their keys on builder.fi!\n\n{link}";
+
+export const NEW_BUILDERFI_BUY_TRADE_CAST =
+  "{holder} just bought {owner} keys on builder.fi for {price} ETH!\n\n{link}";
+export const NEW_BUILDERFI_SELL_TRADE_CAST = "{holder} just sold {owner} keys on builder.fi for {price} ETH!\n\n{link}";
+
 export const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
+export const NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH = "0xded82314b7ada765c08fe1ce2fbf157edadaa598";
 export const UNISWAP_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_AUTHOR_ERROR =
@@ -67,3 +74,55 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
   "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";
 
 export const BUILDERFI_FARCASTER_FID = 210833;
+
+export const GET_NEXT_AIRDROP_DATE = () => {
+  let nextFridayDate = nextFriday(new Date());
+
+  // If today is Friday, we need to check if it's before or after 12 PM
+  if (isSameDay(new Date(), nextFridayDate) && nextFridayDate.getHours() >= 12) {
+    // If it's after 12 PM, get the next Friday
+    nextFridayDate = addWeeks(nextFridayDate, 1);
+  }
+
+  // Set the time to 12 PM (noon)
+  nextFridayDate = setHours(nextFridayDate, 12);
+  nextFridayDate = setMinutes(nextFridayDate, 0);
+  nextFridayDate = setSeconds(nextFridayDate, 0);
+
+  //Convert to local time
+  return addMinutes(nextFridayDate, -nextFridayDate.getTimezoneOffset());
+};
+
+export const NEW_BUILDERFI_INVITE_CAST =
+  "hey @{username}! i invite you to join builder.fi, a q&a marketplace on top of farcaster.\n\nif you'd like to give it a try, let me know, and i'll send you an invite.\n\nlooking forward to ask you a question on builder.fi!";
+
+//Unclaimed points expire after 14 days
+export const AIRDROP_EXPIRATION_AFTER_CREATION = 14;
+
+export const QUESTS = [
+  {
+    description: "install app & turn on notifications",
+    points: 50,
+    isActive: false
+  },
+  {
+    description: "link your web3 socials",
+    points: 100,
+    isActive: true
+  },
+  {
+    description: "create your key",
+    points: 200,
+    isActive: true
+  },
+  {
+    description: "deposit >0.01 eth",
+    points: 350,
+    isActive: true
+  },
+  {
+    description: "buy 1 key and ask 1 question",
+    points: 300,
+    isActive: true
+  }
+] as const;

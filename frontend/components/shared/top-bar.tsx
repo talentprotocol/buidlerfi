@@ -60,7 +60,7 @@ export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, 
 
   if (!topBarRef?.current) return <></>;
 
-  if (fullItem) return createPortal(fullItem, topBarRef.current);
+  if (fullItem) return createPortal(<>{fullItem}</>, topBarRef.current);
   else if (startItem || endItem || centerItem) {
     return createPortal(
       <>
