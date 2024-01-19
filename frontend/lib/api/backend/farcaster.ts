@@ -12,11 +12,11 @@ import {
   NEW_BUILDERFI_SELL_TRADE_CAST,
   NEW_BUILDERFI_USER_CAST,
   NEW_BUILDERFI_USER_PARENT_CAST_HASH,
-  NEW_FARCASTER_KEY_HOLDERS_CAST,
-  NEW_FARCASTER_KEY_VALUE_CAST,
-  NEW_FARCASTER_NUMBER_ANSWERS_CAST,
-  NEW_FARCASTER_NUMBER_QUESTIONS_CAST,
-  NEW_FARCASTER_QUESTION_WEEK_CAST
+  TOP_FARCASTER_USERS_BY_KEY_HOLDERS_CAST,
+  TOP_FARCASTER_USERS_BY_KEY_VALUE_CAST,
+  TOP_FARCASTER_USERS_BY_NUMBER_ANSWERS_CAST,
+  TOP_FARCASTER_USERS_BY_NUMBER_QUESTIONS_CAST,
+  TOP_QUESTION_UPVOTE_BY_WEEK_CAST
 } from "@/lib/constants";
 import { shortAddress } from "@/lib/utils";
 import { SocialProfile, User } from "@prisma/client";
@@ -25,6 +25,9 @@ import { NeynarAPIClient } from "@standard-crypto/farcaster-js-neynar";
 export const publishCast = async (text: string) => {
   if (!process.env.FARCASTER_API_KEY || !process.env.FARCASTER_SIGNER_UUID) {
     throw new Error("FARCASTER_API_KEY and FARCASTER_SIGNER_UUID must be set in the environment");
+  }
+  if (process.env.ENABLE_FARCASTER === "false") {
+    return;
   }
   const signerUuid = process.env.FARCASTER_SIGNER_UUID as string;
   const client = new NeynarAPIClient(process.env.FARCASTER_API_KEY as string);
@@ -39,6 +42,9 @@ export const publishCast = async (text: string) => {
 export const replyToCast = async (existingCastHash: string, reply: string) => {
   if (!process.env.FARCASTER_API_KEY || !process.env.FARCASTER_SIGNER_UUID) {
     throw new Error("FARCASTER_API_KEY and FARCASTER_SIGNER_UUID must be set in the environment");
+  }
+  if (process.env.ENABLE_FARCASTER === "false") {
+    return;
   }
   const signerUuid = process.env.FARCASTER_SIGNER_UUID as string;
   const client = new NeynarAPIClient(process.env.FARCASTER_API_KEY as string);
@@ -85,46 +91,34 @@ export const publishSellTradeUserKeysCast = async (holder: string, owner: string
   return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
 };
 
-export const publishTopFarcasterKeyValueCast = async (owners: string[], prices: string[]) => {
-  const text = NEW_FARCASTER_KEY_VALUE_CAST/*.replace("{holder}", holder)
-    .replace("{owner}", owner)
-    .replace("{link}", link)
-    .replace("{price}", price);*/
-  return publishCast(text);
-}
+export const publishTopFarcasterKeyValueCast = async (data: { username: string; price: string }[]) => {
+  await publishRankingOnCast(data, TOP_FARCASTER_USERS_BY_KEY_VALUE_CAST, "price", "ETH");
+};
 
-export const publishTopFarcasterKeyHoldersCast = async (owner: string[], holdersNumber: string[]) => {
-  const text = NEW_FARCASTER_KEY_HOLDERS_CAST/*.replace("{holder}", holder)
-    .replace("{owner}", owner)
-    .replace("{link}", link)
-    .replace("{price}", price);*/
-  return publishCast(text);
-}
+export const publishTopFarcasterKeyHoldersCast = async (data: { username: string; numHolders: number }[]) => {
+  await publishRankingOnCast(data, TOP_FARCASTER_USERS_BY_KEY_HOLDERS_CAST, "numHolders", "holders");
+};
 
-export const publishTopFarcasterQuestionsCast = async (owner: string[], questionNumber: string[]) => {
-  const text = NEW_FARCASTER_NUMBER_QUESTIONS_CAST/*.replace("{holder}", holder)
-    .replace("{owner}", owner)
-    .replace("{link}", link)
-    .replace("{price}", price);*/
-  return publishCast(text);
-}
+export const publishTopFarcasterQuestionsCast = async (data: { username: string; numQuestions: number }[]) => {
+  await publishRankingOnCast(data, TOP_FARCASTER_USERS_BY_NUMBER_QUESTIONS_CAST, "numQuestions", "questions");
+};
 
-export const publishTopFarcasterAnswersCast = async (owner: string[], answerNumber: string[]) => {
-  const text = NEW_FARCASTER_NUMBER_ANSWERS_CAST/*.replace("{holder}", holder)
-    .replace("{owner}", owner)
-    .replace("{link}", link)
-    .replace("{price}", price);*/
-  return publishCast(text);
-}
+export const publishTopFarcasterAnswersCast = async (data: { username: string; numAnswers: number }[]) => {
+  await publishRankingOnCast(data, TOP_FARCASTER_USERS_BY_NUMBER_ANSWERS_CAST, "numAnswers", "answers");
+};
 
-export const publishQuestionsOfTheWeekCast = async (content: string, questioner: string, replier: string) => {
-  const text = NEW_FARCASTER_QUESTION_WEEK_CAST/*.replace("{holder}", holder)
-    .replace("{owner}", owner)
-    .replace("{link}", link)
-    .replace("{price}", price);*/
-  return publishCast(text);
-}
-
+export const publishQuestionsOfTheWeekCast = async (
+  content: string,
+  questioner: string,
+  replier: string,
+  link: string
+) => {
+  const text = TOP_QUESTION_UPVOTE_BY_WEEK_CAST.replace("{questionContent}", content)
+    .replace("{questioner}", questioner)
+    .replace("{replier}", replier)
+    .replace("{link}", link);
+  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
+};
 
 export const replyToNewQuestionCastSuccess = async (castHash: string, link: string) => {
   const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
@@ -155,4 +149,32 @@ export const getFarcasterProfileName = (profile: User, socialProfile?: SocialPro
   return socialProfile?.profileName
     ? `@${socialProfile?.profileName}`
     : profile.displayName || shortAddress(profile.wallet || "");
+};
+
+const publishRankingOnCast = async (
+  data: { username: string; [key: string]: string | number }[],
+  text: string,
+  valueKey: string,
+  label: string
+) => {
+  const top3 = data
+    .slice(0, 3)
+    .map((d, index) => `${index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"} @${d.username} - ${d[valueKey]} ${label}`);
+  const rest = data.slice(3);
+
+  const rootText = `${text}\n\n${top3.join("\n")}\n\ncontinues...👇`;
+  const rootCast = await publishCast(rootText);
+
+  const firstReplyText = `${rest
+    .slice(0, 3)
+    .map((d, index) => `${index + 4}. @${d.username} - ${d[valueKey]} ${label}`)
+    .join("\n\n")}\n\ncontinues...👇`;
+  const firstReplyCast = await replyToCast(rootCast!, firstReplyText);
+
+  const secondReplyText = `${rest
+    .slice(3, 6)
+    .map((d, index) => `${index + 7}. @${d.username} - ${d[valueKey]} ${label}`)
+    .join("\n\n")}`;
+  await replyToCast(firstReplyCast!, secondReplyText);
+  console.log({ data, rootText, firstReplyText, secondReplyText });
 };

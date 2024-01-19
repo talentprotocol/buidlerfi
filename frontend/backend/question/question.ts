@@ -1,7 +1,7 @@
 "use server";
 
 import { getFarcasterProfileName, publishNewQuestionCast } from "@/lib/api/backend/farcaster";
-import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT } from "@/lib/constants";
+import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
@@ -230,23 +230,10 @@ export const getQuestion = async (questionId: number, privyUserId?: string) => {
   else return { data: exclude(question, ["reply"]) };
 };
 
-export const getQuestionContent = async (questionId: number) => {
-  const question = await prisma.question.findUniqueOrThrow({
-    where: {
-      id: questionId
-    }
-  });
-
-  return { data: question.questionContent };
-}
-
-export async function getMostUpvotedQuestionInTimeWindow(daysBack: number) {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - daysBack);
-
+export async function getMostUpvotedQuestion(startDate: Date = new Date(new Date().getTime() - WEEK_IN_MILLISECONDS)) {
   const mostUpvotedQuestions = await prisma.reaction.groupBy({
     where: {
-      reactionType: 'UPVOTE',
+      reactionType: "UPVOTE",
       createdAt: {
         gte: startDate
       },
@@ -254,13 +241,13 @@ export async function getMostUpvotedQuestionInTimeWindow(daysBack: number) {
         not: null
       }
     },
-    by: ['questionId'],
+    by: ["questionId"],
     _count: {
       questionId: true
     },
     orderBy: {
       _count: {
-        questionId: 'desc'
+        questionId: "desc"
       }
     },
     take: 1 // get the most upvoted question

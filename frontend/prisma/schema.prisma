@@ -48,6 +48,9 @@ model User {
   recommendedUsers RecommendedUser[]  @relation("recommendationSource")
   keysOfSelf       KeyRelationship[]  @relation("owner")
   keysOwned        KeyRelationship[]  @relation("holder")
+
+  tradesAsHolder Trade[] @relation("buyer")
+  tradesAsOwner  Trade[] @relation("seller")
 }
 
 enum SocialProfileType {
@@ -246,16 +249,19 @@ model UserNotificationSetting {
 }
 
 model Trade {
+  holder        User   @relation(fields: [holderAddress], references: [wallet], name: "buyer")
   holderAddress String
-  ownerAddress  String
-  amount        BigInt
-  ethCost       BigInt?
-  protocolFee   BigInt?
-  ownerFee      BigInt?
-  block         BigInt
-  chainId       Int
-  hash          String  @unique
-  timestamp     BigInt?
+
+  owner        User    @relation(fields: [ownerAddress], references: [wallet], name: "seller")
+  ownerAddress String
+  amount       BigInt
+  ethCost      BigInt?
+  protocolFee  BigInt?
+  ownerFee     BigInt?
+  block        BigInt
+  chainId      Int
+  hash         String  @unique
+  timestamp    BigInt?
 
   //Whether or not the keyRelationship has been updated to reflect the trade
   //It will be false if the holder or the owner is not in the DB

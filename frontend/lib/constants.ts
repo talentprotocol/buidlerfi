@@ -41,6 +41,10 @@ export const PAGINATION_LIMIT = 20;
 export const USER_BIO_MAX_LENGTH = 160;
 export const MAX_COMMENT_LENGTH = 2000;
 
+// DATE CONSTANTS
+export const DAY_IN_MILLISECONDS = 86400000;
+export const WEEK_IN_MILLISECONDS = 604800000;
+
 // FARCASTER
 export const NEW_BUILDERFI_QUESTION_CAST =
   "{questionAuthor} just asked {questionRecipient} a question on builder.fi!\n\n{link}";
@@ -52,16 +56,9 @@ export const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c
 
 export const NEW_BUILDERFI_USER_CAST = "{user} just launched their keys on builder.fi!\n\n{link}";
 
-export const NEW_BUILDERFI_BUY_TRADE_CAST = "{holder} just bought {owner} keys on builder.fi for {price} ETH!\n\n{link}";
+export const NEW_BUILDERFI_BUY_TRADE_CAST =
+  "{holder} just bought {owner} keys on builder.fi for {price} ETH!\n\n{link}";
 export const NEW_BUILDERFI_SELL_TRADE_CAST = "{holder} just sold {owner} keys on builder.fi for {price} ETH!\n\n{link}";
-
-export const NEW_FARCASTER_KEY_VALUE_CAST = " ";
-export const NEW_FARCASTER_KEY_HOLDERS_CAST = " ";
-export const NEW_FARCASTER_NUMBER_QUESTIONS_CAST = " ";
-export const NEW_FARCASTER_NUMBER_ANSWERS_CAST = " ";
-export const NEW_FARCASTER_QUESTION_WEEK_CAST = " ";
-
-
 
 export const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
 export const NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH = "0xded82314b7ada765c08fe1ce2fbf157edadaa598";
@@ -81,4 +78,19 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
 
 export const BUILDERFI_FARCASTER_FID = 210833;
 
-export const NEW_BUILDERFI_INVITE_CAST = "hey @{username}! i invite you to join builder.fi, a q&a marketplace built on top of so farcaster where builders can monetize their knowledge.\n\nif you'd like to give it a try, just let me know, and i'll send you an invite.\n\nlooking forward to ask you a question on builder.fi!";
+export const NEW_BUILDERFI_INVITE_CAST =
+  "hey @{username}! i invite you to join builder.fi, a q&a marketplace built on top of so farcaster where builders can monetize their knowledge.\n\nif you'd like to give it a try, just let me know, and i'll send you an invite.\n\nlooking forward to ask you a question on builder.fi!";
+
+export const TOP_FARCASTER_USERS_BY_KEY_VALUE_CAST = "🔑 meet the top 10 farcaster users by key value in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_KEY_HOLDERS_CAST =
+  "👥 meet the top 10 farcaster users by number of key holders in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_NUMBER_QUESTIONS_CAST =
+  "📥 meet the top 10 farcaster users by questions received in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_NUMBER_ANSWERS_CAST =
+  "✔️ meet the top 10 farcaster users by questions answered in builder.fi";
+
+export const TOP_QUESTION_UPVOTE_BY_WEEK_CAST = "🔝 this week’s most upvoted question in builder.fi\n\n{questioner} asked {replier}:\n{questionContent}\n\n{link}";
+

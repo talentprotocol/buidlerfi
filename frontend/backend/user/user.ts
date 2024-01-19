@@ -1,13 +1,13 @@
 "use server";
 
-import { PAGINATION_LIMIT, USER_BIO_MAX_LENGTH } from "@/lib/constants";
+import { DAY_IN_MILLISECONDS, PAGINATION_LIMIT, USER_BIO_MAX_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
 import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
-import { Prisma } from "@prisma/client";
+import { Prisma, SocialProfileType } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
 import { sendNotification } from "../notification/notification";
@@ -331,11 +331,13 @@ export const getTopUsersByQuestionsAsked = async (offset: number) => {
   return { data: res };
 };
 
-export const getTopUsersByQuestionsAskedInTimeInterval = async (offset: number, weeks: number) => {
-  // Calculate the start date for the week window
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - weeks * 7);
-
+export const getTopUsersByQuestionsAskedInTimeInterval = async (
+  options: { startDate?: Date; limit?: number } = {
+    startDate: new Date(new Date().getTime() - 7 * DAY_IN_MILLISECONDS),
+    limit: 10
+  }
+) => {
+  const { startDate, limit } = options;
   const users = await prisma.user.findMany({
     orderBy: {
       questions: {
@@ -350,6 +352,11 @@ export const getTopUsersByQuestionsAskedInTimeInterval = async (offset: number, 
           }
         }
       },
+      socialProfiles: {
+        where: {
+          type: SocialProfileType.FARCASTER
+        }
+      },
       keysOfSelf: {
         where: {
           amount: {
@@ -362,6 +369,11 @@ export const getTopUsersByQuestionsAskedInTimeInterval = async (offset: number, 
       isActive: true,
       hasFinishedOnboarding: true,
       displayName: { not: null },
+      socialProfiles: {
+        some: {
+          type: SocialProfileType.FARCASTER
+        }
+      },
       questions: {
         some: {
           createdAt: {
@@ -370,8 +382,7 @@ export const getTopUsersByQuestionsAskedInTimeInterval = async (offset: number, 
         }
       }
     },
-    take: PAGINATION_LIMIT,
-    skip: offset
+    take: limit,
   });
 
   const res = users.map(user => {
@@ -384,7 +395,6 @@ export const getTopUsersByQuestionsAskedInTimeInterval = async (offset: number, 
 
   return { data: res };
 };
-
 
 export const getTopUsersByAnswersGiven = async (offset: number) => {
   const users = await prisma.user.findMany({
@@ -423,15 +433,17 @@ export const getTopUsersByAnswersGiven = async (offset: number) => {
   return { data: res };
 };
 
-export const getTopUsersByAnswersGivenInTimeInterval = async (offset: number, weeks: number) => {
-  // Calculate the start date for the time interval 
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - weeks * 7);
-
+export const getTopUsersByAnswersGivenInTimeInterval = async (
+  options: { startDate?: Date; limit?: number } = {
+    startDate: new Date(new Date().getTime() - 7 * DAY_IN_MILLISECONDS),
+    limit: 10
+  }
+) => {
+  const { startDate, limit } = options;
   const users = await prisma.user.findMany({
     orderBy: {
       replies: {
-        _count: 'desc'
+        _count: "desc"
       }
     },
     include: {
@@ -440,6 +452,11 @@ export const getTopUsersByAnswersGivenInTimeInterval = async (offset: number, we
           createdAt: {
             gte: startDate
           }
+        }
+      },
+      socialProfiles: {
+        where: {
+          type: SocialProfileType.FARCASTER
         }
       },
       keysOfSelf: {
@@ -459,11 +476,15 @@ export const getTopUsersByAnswersGivenInTimeInterval = async (offset: number, we
           createdAt: {
             gte: startDate
           }
+        },
+      },
+      socialProfiles: {
+        some: {
+          type: SocialProfileType.FARCASTER
         }
       }
     },
-    take: PAGINATION_LIMIT,
-    skip: offset
+    take: limit
   });
 
   const res = users.map(user => {
@@ -477,18 +498,25 @@ export const getTopUsersByAnswersGivenInTimeInterval = async (offset: number, we
   return { data: res };
 };
 
-
 type TopUserByKeysOwned = Prisma.$UserPayload["scalars"] & {
   ownedKeys: number;
+  socialProfileName?: string;
   numberOfHolders?: number;
 };
 
-export const getTopUsersByKeysOwned = async (offset: number) => {
+export const getTopUsersByKeysOwned = async (offset: number, socialProfileType?: SocialProfileType) => {
   const users = (await prisma.$queryRaw`
     SELECT "User".*, 
-    CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
+    ${
+      socialProfileType ? `"SocialProfile"."profileName" as "socialProfileName",` : ""
+    }    CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
     FROM "User"
     LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
+    ${
+      socialProfileType
+        ? `INNER JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId" AND "SocialProfile"."type" = '${socialProfileType}'`
+        : ""
+    }
     WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
     GROUP BY "User".id
     ORDER BY "ownedKeys" DESC
@@ -525,56 +553,11 @@ export const getTopUsersByKeysOwned = async (offset: number) => {
   return { data: users };
 };
 
-export const getTopUsersByKeysOwnedAndNumber = async (offset: number) => {
-  const users = (await prisma.$queryRaw`
-    SELECT "User".*, 
-    CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
-    FROM "User"
-    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
-    WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
-    GROUP BY "User".id
-    ORDER BY "ownedKeys" DESC
-    LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
-  `) as TopUserByKeysOwned[];
-
-  const usersNumberOfHolders = await prisma.user.findMany({
-    where: {
-      id: {
-        in: users.map(user => user.id)
-      }
-    },
-    include: {
-      keysOfSelf: {
-        where: {
-          amount: {
-            gt: 0
-          }
-        }
-      }
-    }
-  });
-
-  const usersMap = new Map<number, (typeof usersNumberOfHolders)[number]>();
-  for (const user of usersNumberOfHolders) {
-    usersMap.set(user.id, user);
-  }
-
-  users.forEach(user => {
-    const foundUser = usersMap.get(user.id);
-    user.numberOfHolders = foundUser?.keysOfSelf.length || 0;
-  });
-
-  return { data: users, numberOfUsers: usersNumberOfHolders };
-};
-
-
-
 type TopUser = Prisma.$UserPayload["scalars"] & {
   numberOfHolders: number;
   numberOfQuestions: number;
   numberOfReplies: number;
 };
-
 
 export const getTopUsers = async (offset: number) => {
   const users = (await prisma.$queryRaw`
