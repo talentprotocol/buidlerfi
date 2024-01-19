@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { BuilderFiAlphaV1__factory } from "./BuilderFiAlphaV1__factory";
+export { BuilderFiTopicsV1__factory } from "./BuilderFiTopicsV1__factory";
 export { BuilderFiV1__factory } from "./BuilderFiV1__factory";
