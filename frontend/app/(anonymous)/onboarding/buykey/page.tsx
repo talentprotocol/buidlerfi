@@ -5,19 +5,29 @@ import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetBuilderInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
 import { Button, Typography } from "@mui/joy";
+import { useState } from "react";
 
 export default function BuyKeyPage() {
   const router = useBetterRouter();
-  const { user, address, balance, refetch } = useUserContext();
+  const { address, balance } = useUserContext();
   const { buyPriceAfterFee } = useGetBuilderInfo(address!);
+  const [buyingKey, setBuyingKey] = useState(false);
 
-  const tx = useTradeKey("buy", user, async () => {
-    await refetch();
-    router.replace("./");
-  });
+  const tx = useTradeKey(
+    "buy",
+    () => {
+      // give time for the TX to actually process
+      setTimeout(() => {
+        router.replace("/onboarding/linkwallet");
+        setBuyingKey(false);
+      }, 2000);
+    },
+    () => setBuyingKey(false)
+  );
 
   const handleBuy = () => {
-    tx.mutateAsync(buyPriceAfterFee || 0n);
+    setBuyingKey(true);
+    tx.executeTx({ args: [address!], value: buyPriceAfterFee });
   };
 
   const skip = () => {
@@ -49,7 +59,7 @@ export default function BuyKeyPage() {
         </Flex>
       </Flex>
       <Flex y gap1>
-        <Button size="lg" fullWidth loading={tx.isLoading} onClick={handleBuy} disabled={!hasEnoughBalance}>
+        <Button size="lg" fullWidth loading={buyingKey} onClick={handleBuy} disabled={!hasEnoughBalance}>
           Create keys
         </Button>
         <Button size="lg" fullWidth variant="plain" onClick={skip}>
