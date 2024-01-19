@@ -46,6 +46,8 @@ export const DAY_IN_MILLISECONDS = 86400000;
 export const WEEK_IN_MILLISECONDS = 604800000;
 
 // FARCASTER
+export const FARCASTER_BUILDERFI_CHANNEL_ID = "builderfi";
+
 export const NEW_BUILDERFI_QUESTION_CAST =
   "{questionAuthor} just asked {questionRecipient} a question on builder.fi!\n\n{link}";
 export const NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
@@ -92,5 +94,5 @@ export const TOP_FARCASTER_USERS_BY_NUMBER_QUESTIONS_CAST =
 export const TOP_FARCASTER_USERS_BY_NUMBER_ANSWERS_CAST =
   "✔️ meet the top 10 farcaster users by questions answered in builder.fi";
 
-export const TOP_QUESTION_UPVOTE_BY_WEEK_CAST = "🔝 this week’s most upvoted question in builder.fi\n\n{questioner} asked {replier}:\n{questionContent}\n\n{link}";
-
+export const TOP_QUESTION_UPVOTE_BY_WEEK_CAST =
+  "🔝 this week’s most upvoted question in builder.fi\n\n{questioner} asked {replier}:\n{questionContent}\n\n{link}";

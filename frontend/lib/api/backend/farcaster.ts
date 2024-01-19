@@ -1,4 +1,5 @@
 import {
+  FARCASTER_BUILDERFI_CHANNEL_ID,
   NEW_BUILDERFI_ANSWER_CAST,
   NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH,
   NEW_BUILDERFI_BUY_TRADE_CAST,
@@ -19,10 +20,10 @@ import {
   TOP_QUESTION_UPVOTE_BY_WEEK_CAST
 } from "@/lib/constants";
 import { shortAddress } from "@/lib/utils";
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { SocialProfile, User } from "@prisma/client";
-import { NeynarAPIClient } from "@standard-crypto/farcaster-js-neynar";
 
-export const publishCast = async (text: string) => {
+export const publishCast = async (text: string, channelId?: string) => {
   if (!process.env.FARCASTER_API_KEY || !process.env.FARCASTER_SIGNER_UUID) {
     throw new Error("FARCASTER_API_KEY and FARCASTER_SIGNER_UUID must be set in the environment");
   }
@@ -32,7 +33,7 @@ export const publishCast = async (text: string) => {
   const signerUuid = process.env.FARCASTER_SIGNER_UUID as string;
   const client = new NeynarAPIClient(process.env.FARCASTER_API_KEY as string);
 
-  const publishedCast = await client.v2.publishCast(signerUuid, text);
+  const publishedCast = await client.publishCast(signerUuid, text, { channelId });
 
   console.log(`New cast hash: ${publishedCast.hash}`);
 
@@ -49,7 +50,7 @@ export const replyToCast = async (existingCastHash: string, reply: string) => {
   const signerUuid = process.env.FARCASTER_SIGNER_UUID as string;
   const client = new NeynarAPIClient(process.env.FARCASTER_API_KEY as string);
 
-  const publishedCast = await client.v2.publishCast(signerUuid, reply, { replyTo: existingCastHash });
+  const publishedCast = await client.publishCast(signerUuid, reply, { replyTo: existingCastHash });
 
   console.log(`Reply hash:${publishedCast.hash}`);
 
@@ -117,6 +118,7 @@ export const publishQuestionsOfTheWeekCast = async (
     .replace("{questioner}", questioner)
     .replace("{replier}", replier)
     .replace("{link}", link);
+  console.log(text);
   return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
 };
 
@@ -162,19 +164,28 @@ const publishRankingOnCast = async (
     .map((d, index) => `${index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"} @${d.username} - ${d[valueKey]} ${label}`);
   const rest = data.slice(3);
 
-  const rootText = `${text}\n\n${top3.join("\n")}\n\ncontinues...👇`;
-  const rootCast = await publishCast(rootText);
+  const rootText = `${text}\n\n${top3.join("\n")}${data.length > 3 ? "\n\ncontinues...👇" : ""}`;
+  const rootCast = await publishCast(rootText, FARCASTER_BUILDERFI_CHANNEL_ID);
 
-  const firstReplyText = `${rest
-    .slice(0, 3)
-    .map((d, index) => `${index + 4}. @${d.username} - ${d[valueKey]} ${label}`)
-    .join("\n\n")}\n\ncontinues...👇`;
-  const firstReplyCast = await replyToCast(rootCast!, firstReplyText);
+  console.log(rootText);
 
-  const secondReplyText = `${rest
-    .slice(3, 6)
-    .map((d, index) => `${index + 7}. @${d.username} - ${d[valueKey]} ${label}`)
-    .join("\n\n")}`;
-  await replyToCast(firstReplyCast!, secondReplyText);
-  console.log({ data, rootText, firstReplyText, secondReplyText });
+  if (data.length > 3) {
+    const firstReplyText = `${rest
+      .slice(0, 3)
+      .map((d, index) => `${index + 4}. @${d.username} - ${d[valueKey]} ${label}`)
+      .join("\n\n")}${data.length > 6 ? "\n\ncontinues...👇" : ""}`;
+    const firstReplyCast = await replyToCast(rootCast!, firstReplyText);
+
+    console.log(firstReplyText);
+
+    if (data.length > 6) {
+      const secondReplyText = `${rest
+        .slice(3, 6)
+        .map((d, index) => `${index + 7}. @${d.username} - ${d[valueKey]} ${label}`)
+        .join("\n\n")}`;
+      await replyToCast(firstReplyCast!, secondReplyText);
+
+      console.log(secondReplyText);
+    }
+  }
 };

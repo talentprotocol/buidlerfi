@@ -1,22 +1,37 @@
 import { getMostUpvotedQuestion, getQuestion } from "@/backend/question/question";
-import { publishQuestionsOfTheWeekCast } from "@/lib/api/backend/farcaster";
+import { getFarcasterProfileName, publishQuestionsOfTheWeekCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
+import { Question, SocialProfile, SocialProfileType, User } from "@prisma/client";
 
 export const GET = async () => {
   try {
     // Call the function and await the response
     const questionId = await getMostUpvotedQuestion();
 
-    const questionDetail = await getQuestion(questionId!);
+    const { data: questionDetail } = await getQuestion(questionId!, undefined, true);
+
+    const question = questionDetail as unknown as Question & {
+      questioner: { socialProfiles: SocialProfile[] };
+      replier: { socialProfiles: SocialProfile[]; wallet: string };
+    };
+
+    const questionerName = getFarcasterProfileName(
+      question.questioner as unknown as User,
+      question.questioner.socialProfiles.find(p => p.type === SocialProfileType.FARCASTER)
+    );
+
+    const replierName = getFarcasterProfileName(
+      question.replier as unknown as User,
+      question.replier.socialProfiles.find(p => p.type === SocialProfileType.FARCASTER)
+    );
 
     // publish cast on Farcaster
-    const cast = await publishQuestionsOfTheWeekCast(
-      questionDetail.data.questionContent, // Extract the 'data' property from questionContent
-      questionDetail.data.questioner.wallet, // Pass the 'wallet' property of questioner as the argument
-      questionDetail.data.replier.wallet,
-      `https://app.builder.fi/profile/${questionDetail.data.replier.wallet}?question=${questionId}`
+    await publishQuestionsOfTheWeekCast(
+      question.questionContent, // Extract the 'data' property from questionContent
+      questionerName, // Pass the 'wallet' property of questioner as the argument
+      replierName,
+      `https://app.builder.fi/profile/${question.replier.wallet}?question=${questionId}`
     );
-    console.log(cast);
     return Response.json({ message: "Done: Top upvoted question of the week" });
   } catch (error) {
     console.error(error);

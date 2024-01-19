@@ -14,8 +14,7 @@ export const GET = async () => {
     }));
 
     // publish cast on Farcaster
-    const cast = await publishTopFarcasterQuestionsCast(data);
-    console.log(cast);
+    await publishTopFarcasterQuestionsCast(data);
     return Response.json({ message: "Done: Top 10 Farcaster users with the most questions" });
   } catch (error) {
     console.error(error);
