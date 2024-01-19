@@ -144,7 +144,8 @@ export const useTradeKey = (side: "buy" | "sell", keyOwner?: User, successFn?: (
       const unsignedTransaction: UnsignedTransactionRequest = {
         data: encodedData,
         value: side === "buy" ? keyPrice : 0n,
-        to: BUILDERFI_CONTRACT.address
+        to: BUILDERFI_CONTRACT.address,
+        chainId: BUILDERFI_CONTRACT.chainId
       };
 
       const res = await sendTransaction(unsignedTransaction, {
