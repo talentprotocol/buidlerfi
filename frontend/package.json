@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && tsx ./scripts/insert-quests.ts && next build"
+    "vercel-build": "prisma generate && prisma migrate deploy && tsx ./scripts/insert-quests.ts && next build",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@airstack/airstack-react": "^0.5.2",
