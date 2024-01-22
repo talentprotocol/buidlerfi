@@ -73,6 +73,8 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
 
   const name = useMemo(() => profile.user?.displayName || recommendedName(), [profile.user, profile.recommendedUser]);
 
+  const isCurrentUserProfilePage = currentUser?.wallet.toLowerCase() === profile.user?.wallet.toLowerCase();
+  
   const allSocials = useMemo(() => {
     if (profile.user?.socialProfiles?.length) {
       return profile.user?.socialProfiles;
@@ -222,7 +224,7 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
             </Flex>
           )}
 
-          {followingAndHoldersIntersection?.length > 0 && (
+          {followingAndHoldersIntersection?.length > 0 && !isCurrentUserProfilePage && (
             <Flex x gap1 alignItems={"center"}>
               <Avatar size="sm" src={followingAndHoldersIntersection[0].profileImage!} />
               <Typography level="body-sm">
