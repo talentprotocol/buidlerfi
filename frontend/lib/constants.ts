@@ -61,7 +61,6 @@ export const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c
 export const NEW_BUILDERFI_USER_CAST = "{user} just launched their keys on builder.fi!\n\n{link}";
 
 export const NEW_BUILDERFI_BUY_TRADE_CAST =
- 
   "{holder} just bought {owner} keys on builder.fi for {price} ETH!\n\n{link}";
 export const NEW_BUILDERFI_SELL_TRADE_CAST = "{holder} just sold {owner} keys on builder.fi for {price} ETH!\n\n{link}";
 
@@ -80,6 +79,20 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR =
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
   "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";
+
+export const TOP_FARCASTER_USERS_BY_KEY_VALUE_CAST = "🔑 meet the top 10 farcaster users by key value in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_KEY_HOLDERS_CAST =
+  "👥 meet the top 10 farcaster users by number of key holders in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_NUMBER_QUESTIONS_CAST =
+  "📥 meet the top 10 farcaster users by questions received in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_NUMBER_ANSWERS_CAST =
+  "✔️ meet the top 10 farcaster users by questions answered in builder.fi";
+
+export const TOP_QUESTION_UPVOTE_BY_WEEK_CAST =
+  "🔝 this week’s most upvoted question in builder.fi\n\n{questioner} asked {replier}:\n{questionContent}\n\n{link}";
 
 export const BUILDERFI_FARCASTER_FID = 210833;
 

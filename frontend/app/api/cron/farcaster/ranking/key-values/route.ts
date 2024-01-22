@@ -19,6 +19,8 @@ export const GET = async () => {
       {}
     );
 
+    console.log(keyPrices.length);
+
     const keyRelationships = (
       await prisma.keyRelationship.groupBy({
         by: "ownerId",
@@ -43,7 +45,12 @@ export const GET = async () => {
         },
         take: 10
       })
-    ).map(trade => ({ ownerId: trade.ownerId, amount: parseInt(formatUnits(trade._sum.amount!, 18)) }));
+    ).map(keyRelationship => ({
+      ownerId: keyRelationship.ownerId,
+      amount: Number(keyRelationship._sum.amount)
+    }));
+
+    console.log({ keyRelationships });
 
     const users = await prisma.user.findMany({
       where: {

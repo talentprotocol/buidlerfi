@@ -49,9 +49,6 @@ model User {
   recommendedUsers RecommendedUser[]  @relation("recommendationSource")
   keysOfSelf       KeyRelationship[]  @relation("owner")
   keysOwned        KeyRelationship[]  @relation("holder")
-
-  tradesAsHolder Trade[] @relation("buyer")
-  tradesAsOwner  Trade[] @relation("seller")
 }
 
 enum SocialProfileType {
@@ -270,9 +267,7 @@ model UserNotificationSetting {
 }
 
 model Trade {
-  holder        User    @relation(fields: [holderAddress], references: [wallet], name: "buyer")
   holderAddress String
-  owner         User    @relation(fields: [ownerAddress], references: [wallet], name: "seller")
   ownerAddress  String
   amount        BigInt
   ethCost       BigInt?
@@ -346,5 +341,4 @@ model KeyPricing {
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
