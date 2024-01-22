@@ -102,6 +102,7 @@ export default function ExplorePage() {
                     questions={user.questions}
                     createdAt={user.createdAt}
                     userId={user.userId || 0}
+                    bio={user.bio || ""}
                   />
                 ))
               )}

@@ -49,7 +49,7 @@ export default function LinkedAccountPage() {
           <Typography level="title-sm" fontWeight={"600"}>
             {label}
           </Typography>
-          <Typography level="body-sm">{!isLinked ? "not link" : "linked"}</Typography>
+          <Typography level="body-sm">{!isLinked ? "not linked" : "linked"}</Typography>
         </Flex>
         <Button
           variant="outlined"

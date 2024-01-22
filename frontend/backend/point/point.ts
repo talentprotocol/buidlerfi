@@ -1,3 +1,4 @@
+import { AIRDROP_EXPIRATION_AFTER_CREATION } from "@/lib/constants";
 import prisma from "@/lib/prisma";
 
 export const getCurrentPosition = async (privyUserId: string) => {
@@ -23,4 +24,38 @@ export const getCurrentPosition = async (privyUserId: string) => {
   } else {
     return { data: [] };
   }
+};
+
+export const claim = async (privyUserId: string) => {
+  const res = await prisma.point.updateMany({
+    where: {
+      user: {
+        privyUserId
+      },
+      claimed: false,
+      createdAt: {
+        gt: new Date(Date.now() - AIRDROP_EXPIRATION_AFTER_CREATION * 24 * 60 * 60 * 1000)
+      },
+      hidden: false
+    },
+    data: {
+      claimed: true
+    }
+  });
+
+  return { data: res };
+};
+
+export const getPointsHistory = async (privyUserId: string) => {
+  const res = await prisma.point.findMany({
+    where: {
+      user: {
+        privyUserId
+      },
+      hidden: false,
+      claimed: true
+    }
+  });
+
+  return { data: res };
 };

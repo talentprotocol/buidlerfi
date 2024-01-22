@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { differenceInMinutes, startOfDay, subDays, subMonths } from "date-fns";
+import { differenceInMinutes, differenceInSeconds, startOfDay, subDays, subMonths } from "date-fns";
 
 import { URLSearchParams } from "url";
 import { formatUnits, parseEther } from "viem";
@@ -111,6 +111,18 @@ export const getDifference = (date?: Date) => {
   if (months < 12) return `${months}mo`;
   const years = Math.floor(months / 12);
   return `${years}y`;
+};
+
+export const getFullTimeDifference = (date?: Date) => {
+  if (!date) return "";
+  const seconds = differenceInSeconds(date, new Date());
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ${minutes % 60}m`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ${hours % 24}h ${minutes % 60}m`;
 };
 
 export function isNumeric(n: string) {

@@ -78,7 +78,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           return {
             title: `${profileName} is not builder.fi`,
             icon: <ParachuteIcon />,
-            text: "invite them to join and earn points",
+            text: `invite ${profileName} to join and earn points`,
             button: (
               <Link
                 href={`https://warpcast.com/~/compose?${encodeQueryData({
