@@ -1,41 +1,54 @@
 import { publishTopFarcasterKeyValueCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
-import { SocialProfileType } from "@prisma/client";
+import { KeyPricing, SocialProfileType } from "@prisma/client";
 import { formatUnits } from "viem";
 
 export const revalidate = 0;
 export const GET = async () => {
   try {
-    // Fetch trades, ordered by timestamp (or another field indicating recency)
-    const trades = await prisma.keyRelationship.groupBy({
-      by: "ownerId",
-      _sum: {
-        amount: true
+    const keyPrices = await prisma.keyPricing.findMany();
+    const keyPricesObj = keyPrices.reduce(
+      (acc: Record<number, { buyPrice: bigint; sellPrice: bigint }>, keyPrice: KeyPricing) => {
+        acc[keyPrice.shares] = {
+          buyPrice: keyPrice.buyPrice,
+          sellPrice: keyPrice.sellPrice
+        };
+        return acc;
       },
-      orderBy: {
+      {}
+    );
+
+    const keyRelationships = (
+      await prisma.keyRelationship.groupBy({
+        by: "ownerId",
         _sum: {
-          amount: "desc"
-        }
-      },
-      where: {
-        owner: {
-          isActive: true,
-          isAdmin: false,
-          socialProfiles: {
-            some: {
-              type: "FARCASTER"
+          amount: true
+        },
+        orderBy: {
+          _sum: {
+            amount: "desc"
+          }
+        },
+        where: {
+          owner: {
+            isActive: true,
+            isAdmin: false,
+            socialProfiles: {
+              some: {
+                type: "FARCASTER"
+              }
             }
           }
-        }
-      },
-      take: 10
-    });
+        },
+        take: 10
+      })
+    ).map(trade => ({ ownerId: trade.ownerId, amount: parseInt(formatUnits(trade._sum.amount!, 18)) }));
 
     const users = await prisma.user.findMany({
       where: {
         id: {
-          in: trades.map(trade => trade.ownerId)
+          in: keyRelationships.map(trade => trade.ownerId)
         }
       },
       include: {
@@ -45,8 +58,8 @@ export const GET = async () => {
 
     // Extracting owners and values
     const data = users.map(user => ({
-      username: user.socialProfiles.find(p => p.type === SocialProfileType.FARCASTER)?.profileName,
-      price: formatUnits(trade.amount, 18)
+      username: user.socialProfiles.find(p => p.type === SocialProfileType.FARCASTER)!.profileName,
+      price: formatUnits(keyPricesObj[keyRelationships.find(t => t.ownerId === user.id)!.amount].buyPrice, 18)
     }));
 
     // publish cast on Farcaster

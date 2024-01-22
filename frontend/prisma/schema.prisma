@@ -40,9 +40,6 @@ model User {
   sourceNotifications  Notification[]
   notificationSettings UserNotificationSetting[]
 
-  keyBuyPrice      BigInt?
-  keySellPrice     BigInt?
-
   id               Int                @id @default(autoincrement())
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
@@ -252,18 +249,18 @@ model UserNotificationSetting {
 }
 
 model Trade {
-  holder        User   @relation(fields: [holderAddress], references: [wallet], name: "buyer")
+  holder        User    @relation(fields: [holderAddress], references: [wallet], name: "buyer")
   holderAddress String
-  owner        User    @relation(fields: [ownerAddress], references: [wallet], name: "seller")
-  ownerAddress String
-  amount       BigInt
-  ethCost      BigInt?
-  protocolFee  BigInt?
-  ownerFee     BigInt?
-  block        BigInt
-  chainId      Int
-  hash         String  @unique
-  timestamp    BigInt?
+  owner         User    @relation(fields: [ownerAddress], references: [wallet], name: "seller")
+  ownerAddress  String
+  amount        BigInt
+  ethCost       BigInt?
+  protocolFee   BigInt?
+  ownerFee      BigInt?
+  block         BigInt
+  chainId       Int
+  hash          String  @unique
+  timestamp     BigInt?
 
   //Whether or not the keyRelationship has been updated to reflect the trade
   //It will be false if the holder or the owner is not in the DB
@@ -292,6 +289,16 @@ model KeyRelationship {
 model SystemSetting {
   key   String @unique
   value String
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model KeyPricing {
+  shares    Int
+  buyPrice  BigInt
+  sellPrice BigInt
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
