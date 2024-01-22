@@ -40,8 +40,8 @@ model User {
   sourceNotifications  Notification[]
   notificationSettings UserNotificationSetting[]
 
-  keyBuyPrice      BigInt
-  keySellPrice     BigInt
+  keyBuyPrice      BigInt?
+  keySellPrice     BigInt?
 
   id               Int                @id @default(autoincrement())
   createdAt        DateTime           @default(now())
