@@ -1,13 +1,13 @@
 "use server";
 
-import { PAGINATION_LIMIT, USER_BIO_MAX_LENGTH } from "@/lib/constants";
+import { DAY_IN_MILLISECONDS, PAGINATION_LIMIT, USER_BIO_MAX_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
 import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
-import { Prisma } from "@prisma/client";
+import { Prisma, SocialProfileType } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
 import { sendNotification } from "../notification/notification";
@@ -348,6 +348,84 @@ export const getTopUsersByQuestionsAsked = async (offset: number) => {
   return { data: res };
 };
 
+export const getTopUsersByQuestionsAskedInTimeInterval = async (
+  options: { startDate?: Date; limit?: number } = {
+    startDate: new Date(new Date().getTime() - 7 * DAY_IN_MILLISECONDS),
+    limit: 10
+  }
+) => {
+  const { startDate, limit } = options;
+
+  // First, get the users and their question counts
+  const usersWithQuestionCounts = await prisma.user.findMany({
+    select: {
+      id: true,
+      _count: {
+        select: { questions: true }
+      }
+    },
+    where: {
+      isActive: true,
+      hasFinishedOnboarding: true,
+      displayName: { not: null },
+      questions: {
+        some: {
+          createdAt: {
+            gte: startDate
+          }
+        }
+      },
+      socialProfiles: {
+        some: {
+          type: SocialProfileType.FARCASTER
+        }
+      }
+    }
+  });
+
+  // Filter out users with 0 questions and sort the remaining users by question count in descending order
+  const filteredUsers = usersWithQuestionCounts.filter(user => user._count.questions > 0);
+  filteredUsers.sort((a, b) => b._count.questions - a._count.questions);
+
+  // Get the IDs of the top users
+  const topUserIds = filteredUsers.slice(0, limit).map(user => user.id);
+
+  // Then, get the full user data for the top users
+  const users = await prisma.user.findMany({
+    where: {
+      id: {
+        in: topUserIds
+      },
+      socialProfiles: {
+        some: {
+          type: SocialProfileType.FARCASTER
+        }
+      }
+    },
+    include: {
+      questions: true,
+      socialProfiles: true,
+      keysOfSelf: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    }
+  });
+
+  const res = users.map(user => {
+    const questionsAsked = user.questions.length;
+    const questionsAnswered = user.questions.filter(question => !!question.repliedOn).length;
+    const numberOfHolders = user.keysOfSelf.length;
+    const strippedUser = exclude(user, ["keysOfSelf", "questions"]);
+    return { ...strippedUser, questionsAsked, questionsAnswered, numberOfHolders };
+  });
+
+  return { data: res };
+};
+
 export const getTopUsersByAnswersGiven = async (offset: number) => {
   const users = await prisma.user.findMany({
     orderBy: {
@@ -385,22 +463,143 @@ export const getTopUsersByAnswersGiven = async (offset: number) => {
   return { data: res };
 };
 
+export const getTopUsersByAnswersGivenInTimeInterval = async (
+  options: { startDate?: Date; limit?: number } = {
+    startDate: new Date(new Date().getTime() - 7 * DAY_IN_MILLISECONDS),
+    limit: 10
+  }
+) => {
+  const { startDate, limit } = options;
+  // First, get the users and their reply counts
+  const usersWithReplyCounts = await prisma.user.findMany({
+    select: {
+      id: true,
+      _count: {
+        select: { replies: true }
+      }
+    },
+    where: {
+      isActive: true,
+      hasFinishedOnboarding: true,
+      displayName: { not: null },
+      replies: {
+        some: {
+          repliedOn: {
+            gte: startDate
+          }
+        }
+      },
+      socialProfiles: {
+        some: {
+          type: SocialProfileType.FARCASTER
+        }
+      }
+    }
+  });
+
+  // Filter out users with 0 replies and sort the remaining users by reply count in descending order
+  const filteredUsers = usersWithReplyCounts.filter(user => user._count.replies > 0);
+  filteredUsers.sort((a, b) => b._count.replies - a._count.replies);
+
+  // Get the IDs of the top users
+  const topUserIds = filteredUsers.slice(0, limit).map(user => user.id);
+
+  // Then, get the full user data for the top users
+  const users = await prisma.user.findMany({
+    where: {
+      id: {
+        in: topUserIds
+      },
+      socialProfiles: {
+        some: {
+          type: SocialProfileType.FARCASTER
+        }
+      }
+    },
+    include: {
+      replies: true,
+      socialProfiles: true,
+      keysOfSelf: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    }
+  });
+
+  const res = users
+    .map(user => {
+      const questionsReceived = user.replies.length;
+      const questionsAnswered = user.replies.filter(reply => !!reply.repliedOn).length;
+      const numberOfHolders = user.keysOfSelf.length;
+      const strippedUser = exclude(user, ["keysOfSelf", "replies"]);
+      return { ...strippedUser, questionsReceived, questionsAnswered, numberOfHolders };
+    })
+    .sort((a, b) => b.questionsAnswered - a.questionsAnswered);
+
+  return { data: res };
+};
+
 type TopUserByKeysOwned = Prisma.$UserPayload["scalars"] & {
   ownedKeys: number;
+  socialProfileName?: string;
   numberOfHolders?: number;
 };
 
 export const getTopUsersByKeysOwned = async (offset: number) => {
   const users = (await prisma.$queryRaw`
-    SELECT "User".*, 
-    CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
-    FROM "User"
-    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
-    WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
-    GROUP BY "User".id
-    ORDER BY "ownedKeys" DESC
-    LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
-  `) as TopUserByKeysOwned[];
+      SELECT "User".*, CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
+      FROM "User"
+      LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
+      WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
+      GROUP BY "User".id
+      ORDER BY "ownedKeys" DESC
+      LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
+    `) as TopUserByKeysOwned[];
+
+  const usersNumberOfHolders = await prisma.user.findMany({
+    where: {
+      id: {
+        in: users.map(user => user.id)
+      }
+    },
+    include: {
+      keysOfSelf: {
+        where: {
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    }
+  });
+
+  const usersMap = new Map<number, (typeof usersNumberOfHolders)[number]>();
+  for (const user of usersNumberOfHolders) {
+    usersMap.set(user.id, user);
+  }
+
+  users.forEach(user => {
+    const foundUser = usersMap.get(user.id);
+    user.numberOfHolders = foundUser?.keysOfSelf.length || 0;
+  });
+
+  return { data: users };
+};
+
+export const getTopUsersByKeysOwnedWithSocials = async (limit: number = 10) => {
+  const users = (await prisma.$queryRaw`
+      SELECT "User".*, "SocialProfile"."profileName" as "socialProfileName", CAST(COALESCE(SUM("KeyRelationship".amount), 0) AS INTEGER) as "ownedKeys"
+      FROM "User"
+      LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."holderId"
+      INNER JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId" AND "SocialProfile"."type" = 'FARCASTER'
+      WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
+      GROUP BY "User".id, "SocialProfile"."profileName"
+      ORDER BY "ownedKeys" DESC
+        LIMIT ${limit}
+    `) as TopUserByKeysOwned[];
 
   const usersNumberOfHolders = await prisma.user.findMany({
     where: {

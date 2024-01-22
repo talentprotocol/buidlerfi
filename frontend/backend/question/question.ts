@@ -1,7 +1,7 @@
 "use server";
 
 import { getFarcasterProfileName, publishNewQuestionCast } from "@/lib/api/backend/farcaster";
-import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT } from "@/lib/constants";
+import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
@@ -207,16 +207,29 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
 
   return { data: exclude(questions, ["reply"]) };
 }
+
 //We allow privyUserId to be undefiend for public endpoint
-export const getQuestion = async (questionId: number, privyUserId?: string) => {
+export const getQuestion = async (questionId: number, privyUserId?: string, includeSocialProfiles: boolean = false) => {
   const question = await prisma.question.findUniqueOrThrow({
     where: {
       id: questionId
     },
     include: {
       reactions: true,
-      questioner: true,
-      replier: true,
+      questioner: {
+        ...(includeSocialProfiles && {
+          include: {
+            socialProfiles: true
+          }
+        })
+      },
+      replier: {
+        ...(includeSocialProfiles && {
+          include: {
+            socialProfiles: true
+          }
+        })
+      },
       replyReactions: true
     }
   });
@@ -229,6 +242,32 @@ export const getQuestion = async (questionId: number, privyUserId?: string) => {
   if (hasKey) return { data: question };
   else return { data: exclude(question, ["reply"]) };
 };
+
+export async function getMostUpvotedQuestion(startDate: Date = new Date(new Date().getTime() - WEEK_IN_MILLISECONDS)) {
+  const mostUpvotedQuestions = await prisma.reaction.groupBy({
+    where: {
+      reactionType: "UPVOTE",
+      createdAt: {
+        gte: startDate
+      },
+      questionId: {
+        not: null
+      }
+    },
+    by: ["questionId"],
+    _count: {
+      questionId: true
+    },
+    orderBy: {
+      _count: {
+        questionId: "desc"
+      }
+    },
+    take: 1 // get the most upvoted question
+  });
+
+  return mostUpvotedQuestions[0].questionId; // Return the top question or null if none found
+}
 
 export const deleteQuestion = async (privyUserId: string, questionId: number) => {
   const question = await prisma.question.findUniqueOrThrow({

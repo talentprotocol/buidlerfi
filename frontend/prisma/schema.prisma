@@ -333,3 +333,12 @@ model UserQuest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model KeyPricing {
+  shares    Int
+  buyPrice  BigInt
+  sellPrice BigInt
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
