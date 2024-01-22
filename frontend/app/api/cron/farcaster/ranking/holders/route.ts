@@ -2,6 +2,7 @@ import { getTopUsersByKeysOwnedWithSocials } from "@/backend/user/user";
 import { publishTopFarcasterKeyHoldersCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 
+export const revalidate = 0;
 export const GET = async () => {
   try {
     // return the number of keys owned by each user

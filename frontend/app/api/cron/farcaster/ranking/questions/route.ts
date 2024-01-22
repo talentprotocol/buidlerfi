@@ -2,6 +2,7 @@ import { getTopUsersByQuestionsAskedInTimeInterval } from "@/backend/user/user";
 import { publishTopFarcasterQuestionsCast } from "@/lib/api/backend/farcaster";
 import { ERRORS } from "@/lib/errors";
 
+export const revalidate = 0;
 export const GET = async () => {
   try {
     // Call the function and await the response

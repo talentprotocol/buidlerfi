@@ -3,6 +3,7 @@ import { getFarcasterProfileName, publishQuestionsOfTheWeekCast } from "@/lib/ap
 import { ERRORS } from "@/lib/errors";
 import { Question, SocialProfile, SocialProfileType, User } from "@prisma/client";
 
+export const revalidate = 0;
 export const GET = async () => {
   try {
     // Call the function and await the response
