@@ -5,10 +5,13 @@ import { Question, SocialProfile, SocialProfileType, User } from "@prisma/client
 
 export const revalidate = 0;
 export const GET = async () => {
+  console.log("Running cron job: Top upvoted question of the week");
   try {
     // Call the function and await the response
+    console.log("Fetching top upvoted question of the week");
     const questionId = await getMostUpvotedQuestion();
 
+    // Extract the data from the response
     const { data: questionDetail } = await getQuestion(questionId!, undefined, true);
 
     const question = questionDetail as unknown as Question & {
@@ -16,6 +19,7 @@ export const GET = async () => {
       replier: { socialProfiles: SocialProfile[]; wallet: string };
     };
 
+    console.log("Getting questioner and replier names");
     const questionerName = getFarcasterProfileName(
       question.questioner as unknown as User,
       question.questioner.socialProfiles.find(p => p.type === SocialProfileType.FARCASTER)
@@ -26,6 +30,7 @@ export const GET = async () => {
       question.replier.socialProfiles.find(p => p.type === SocialProfileType.FARCASTER)
     );
 
+    console.log("Publishing cast");
     // publish cast on Farcaster
     await publishQuestionsOfTheWeekCast(
       question.questionContent, // Extract the 'data' property from questionContent
