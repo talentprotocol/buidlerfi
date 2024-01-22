@@ -251,7 +251,6 @@ model UserNotificationSetting {
 model Trade {
   holder        User   @relation(fields: [holderAddress], references: [wallet], name: "buyer")
   holderAddress String
-
   owner        User    @relation(fields: [ownerAddress], references: [wallet], name: "seller")
   ownerAddress String
   amount       BigInt
