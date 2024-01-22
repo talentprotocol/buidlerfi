@@ -45,33 +45,79 @@ describe("BuilderFi-topics", () => {
     });
 
     it("does not allow anyone to buy a topic share before its creation", async () => {
-      const action = builderFi.connect(creator).buyShares("test#1", creator.address);
-
-      await expect(action).to.be.reverted;
+      await expect(
+        builderFi.connect(creator).buyShares("test#1", creator.address)
+      ).to.be.revertedWith("OnlyOwnerCanCreateFirstShare");
     });
 
     it("does not allow an address other than the owner to create a topic share", async () => {
-      const action = builderFi.connect(shareBuyer).createTopic(["test#2"]);
-
-      await expect(action).to.be.reverted;
+      await expect(
+        builderFi.connect(shareBuyer).createTopic(["test#2"])
+      ).to.be.reverted;
     });
 
     it("allows the owner to create a topic share", async () => {
-      const action = builderFi.connect(creator).createTopic(["test#3"]);
-
-      await expect(action).not.to.be.reverted;
+      await expect(builderFi.connect(creator).createTopic(["test#3"])).not.to.be.reverted;
     });
 
     it("does not allow the owner to create another time an existing key", async () => {
-      const action = builderFi.connect(shareBuyer).createTopic(["test#3"]);
-
-      await expect(action).to.be.reverted;
+      // First, create the topic
+      await builderFi.connect(creator).createTopic(["test#3"]);
+    
+      // Now, try to create the same topic again and expect it to revert
+      await expect(
+        builderFi.connect(creator).createTopic(["test#3"])
+      ).to.be.revertedWith("Topic already exists");
     });
 
     it("allows the owner to create multiple topic shares at once", async () => {
-      const action = builderFi.connect(creator).createTopic(["test#4", "test#5", "test#6"]);
+      await expect(
+        builderFi.connect(creator).createTopic(["test#4", "test#5", "test#6"])
+      ).not.to.be.reverted;
+    });
 
-      await expect(action).not.to.be.reverted;
+    it("can buy an existing topic share", async () => {
+      const enabling = await builderFi.connect(creator).enableTrading();
+
+      // Ensure the topic exists
+      await builderFi.connect(creator).createTopic(["test#6"]);
+
+      const price = await builderFi.getBuyPriceAfterFee("test#6");
+
+      // Attempt to buy shares in the topic
+      await expect(
+        builderFi.connect(shareBuyer).buyShares("test#6", shareBuyer.address, { value: price })
+      ).not.to.be.reverted;
+    });
+
+    it("can't buy an existing topic share if trading is not enabled", async () => {
+      console.log("trading is enable", await builderFi.tradingEnabled());
+      const enabling = await builderFi.connect(creator).disableTrading();
+      console.log("trading is enable", await builderFi.tradingEnabled());
+
+      // Ensure the topic exists
+      await builderFi.connect(creator).createTopic(["test#6"]);
+
+      const price = await builderFi.getBuyPriceAfterFee("test#6");
+
+      // Attempt to buy shares in the topic
+      await expect(
+        builderFi.connect(shareBuyer).buyShares("test#6", shareBuyer.address, { value: price })
+      ).to.be.reverted;
+    });
+
+    it("can't buy an existing topic share for less than the amount expected", async () => {
+      const enabling = await builderFi.connect(creator).enableTrading();
+
+      // Ensure the topic exists
+      await builderFi.connect(creator).createTopic(["test#6"]);
+
+      const price = await builderFi.getBuyPriceAfterFee("test#6");
+    
+      // Attempt to buy shares in the topic
+      await expect(
+        builderFi.connect(shareBuyer).buyShares("test#6", shareBuyer.address, { value: price.sub(1) })
+      ).to.be.reverted;
     });
 
     ///
