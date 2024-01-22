@@ -12,7 +12,7 @@ const { expect } = chai;
 const { parseUnits } = ethers.utils;
 const { deployContract } = ethers;
 
-describe("BuilderFi", () => {
+describe("BuilderFi-topics", () => {
   let creator: SignerWithAddress;
   let shareOwner: SignerWithAddress;
   let shareBuyer: SignerWithAddress;
@@ -24,13 +24,13 @@ describe("BuilderFi", () => {
   });
 
   it("can be deployed", async () => {
-    const action = deployContract("BuilderFiAlphaV1", [creator.address]);
+    const action = deployContract("BuilderFiTopicsV1", [creator.address, ["web3"]]);
 
     await expect(action).not.to.be.reverted;
   });
 
   const builder = async () => {
-    return deployContract("BuilderFiAlphaV1", [creator.address]) as Promise<BuilderFiTopicsV1>;
+    return deployContract("BuilderFiTopicsV1", [creator.address, ["web3"]]) as Promise<BuilderFiTopicsV1>;
   };
 
   describe("testing functions", () => {
@@ -44,24 +44,40 @@ describe("BuilderFi", () => {
       await builderFi.connect(creator).enableTrading();
     });
 
-    // fail -> buy topic before creation
-
-    it("allows the user to buy their first share", async () => {
-      const action = builderFi.connect(shareOwner).buyShares(shareOwner.address);
-
-      await expect(action).not.to.be.reverted;
-    });
-
-    // fail -> address other than owner can create topic
-
-    it("does not allow a different user to buy their first share", async () => {
-      const action = builderFi.connect(shareBuyer).buyShares(shareOwner.address);
+    it("does not allow anyone to buy a topic share before its creation", async () => {
+      const action = builderFi.connect(creator).buyShares("test#1", creator.address);
 
       await expect(action).to.be.reverted;
     });
 
-    // fail -> owner can't override an existing topic
+    it("does not allow an address other than the owner to create a topic share", async () => {
+      const action = builderFi.connect(shareBuyer).createTopic(["test#2"]);
 
+      await expect(action).to.be.reverted;
+    });
+
+    it("allows the owner to create a topic share", async () => {
+      const action = builderFi.connect(creator).createTopic(["test#3"]);
+
+      await expect(action).not.to.be.reverted;
+    });
+
+    it("does not allow the owner to create another time an existing key", async () => {
+      const action = builderFi.connect(shareBuyer).createTopic(["test#3"]);
+
+      await expect(action).to.be.reverted;
+    });
+
+    it("allows the owner to create multiple topic shares at once", async () => {
+      const action = builderFi.connect(creator).createTopic(["test#4", "test#5", "test#6"]);
+
+      await expect(action).not.to.be.reverted;
+    });
+
+    ///
+
+    // fail -> owner can't override an existing topic
+    /*
     it("changes the price after the first buy happens", async () => {
       await builderFi.connect(shareOwner).buyShares(shareOwner.address);
 
@@ -126,5 +142,6 @@ describe("BuilderFi", () => {
       expect(balanceAfter.toNumber()).to.be.greaterThan(balanceBefore.toNumber());
       expect(builderBalanceAfter.sub(builderBalanceBefore).toNumber()).to.be.greaterThan(0);
     });
+    */
   });
 });

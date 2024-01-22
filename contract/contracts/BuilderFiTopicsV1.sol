@@ -2,6 +2,9 @@
 
 pragma solidity ^0.8.19;
 
+//TODO: REMOVE tradingEnabled CHECK ON SELL FUNCTION
+//TODO: MOVE FROM STRING TO BYTES FOR
+
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -9,7 +12,6 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 // It includes functionality for buying and selling shares, managing fees, and enabling/disabling trading.
 contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   // Custom errors for specific revert conditions
-  error FundsTransferFailed();
   error OnlyOwnerCanCreateFirstShare();
   error CannotSellLastShare();
   error InsufficientPayment();
@@ -54,14 +56,12 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   mapping(string => mapping(address => uint256)) public topicsKeysBalance;
 
   // Mapping to track total supply of keys per topics
-  mapping(string => uint256) public topcisKeysSupply;
+  mapping(string => uint256) public topicsKeysSupply;
 
-  // Mapping to track all holders
-  mapping(string => address[]) public topicsKeysHolders; //NOT USES IN CURRENT IMPLEMENTATION
-
-  // Constructor to set the initial admin role
-  constructor(address _owner) {
+  // Constructor to set the initial admin role and initial topics
+  constructor(address _owner, string[] memory topics) {
     _grantRole(DEFAULT_ADMIN_ROLE, _owner);
+    createTopic(topics);
   }
 
   // Admin management functions
@@ -109,11 +109,11 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
 
   // Functions to get buying and selling prices, considering fees
   function getBuyPrice(string memory topic) public view returns (uint256) {
-    return getPrice(topcisKeysSupply[topic], 1);
+    return getPrice(topicsKeysSupply[topic], 1);
   }
 
   function getSellPrice(string memory topic, uint256 amount) public view returns (uint256) {
-    return getPrice(topcisKeysSupply[topic] - amount, amount);
+    return getPrice(topicsKeysSupply[topic] - amount, amount);
   }
 
   function getBuyPriceAfterFee(string memory topic) public view returns (uint256) {
@@ -130,13 +130,19 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     return price - protocolFee - builderFee;
   }
 
-  function createTopic(string memory topicDescription) onlyRole(DEFAULT_ADMIN_ROLE) public payable nonReentrant {
+  function createTopic(string[] memory topicDescriptions) onlyRole(DEFAULT_ADMIN_ROLE) public {
+    for (uint256 i = 0; i < topicDescriptions.length; i++) {
+      createTopic(topicDescriptions[i]);
+    }
+  }
+
+  function createTopic(string memory topicDescription) internal {
     /// Check if topicDescription is not empty
     require(bytes(topicDescription).length > 0, "Topic description cannot be empty");
     /// Check if topicDescription is not already in use
-    require(topcisKeysSupply[topicDescription] == 0, "Topic already exists");
+    require(topicsKeysSupply[topicDescription] == 0, "Topic already exists");
     /// Increment supply for that topic
-    topcisKeysSupply[topicDescription]++;
+    topicsKeysSupply[topicDescription]++;
     /// Emit NewTopic
     emit NewTopic(
       msg.sender, 
@@ -148,10 +154,10 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   /// Function to buy shares
   /// Includes checks for trading status, payment sufficiency, and first share purchase conditions
   /// @notice Can only buy one share at a time
-  function buyShares(string memory topic) public payable nonReentrant {
+  function buyShares(string memory topic, address _receiver) public payable nonReentrant {
     require(tradingEnabled == true, "Trading is not enabled");
 
-    uint256 supply = topcisKeysSupply[topic];
+    uint256 supply = topicsKeysSupply[topic];
     if(supply == 0) revert OnlyOwnerCanCreateFirstShare();
 
     uint256 price = getPrice(supply, 1);
@@ -161,11 +167,12 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     uint256 builderFee = price * builderFeePercent / 1 ether;
 
     if(msg.value < price + protocolFee + builderFee) revert InsufficientPayment();
+    address receiver = _receiver == address(0) ? msg.sender : _receiver;
     
-    topicsKeysBalance[topic][msg.sender]++;
-    topcisKeysSupply[topic]++;
+    topicsKeysBalance[topic][receiver]++;
+    topicsKeysSupply[topic]++;
     emit Trade(
-      msg.sender, 
+      receiver, 
       topic, 
       true, 
       1, 
@@ -183,10 +190,11 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   /// Function to sell shares
   /// Includes checks for trading status, payment sufficiency, and first share purchase conditions
   /// @notice Can only buy one share at a time
-  function sellShares(string memory topic) public payable nonReentrant {
+  function sellShares(string memory topic, address _receiver) public payable nonReentrant {
+    //  TODO: this check should be removed to not create single point of centralization
     require(tradingEnabled == true, "Trading is not enabled");
 
-    uint256 supply = topcisKeysSupply[topic];
+    uint256 supply = topicsKeysSupply[topic];
     if(supply <= 1) revert CannotSellLastShare();
     if(topicsKeysBalance[topic][msg.sender] < 1) revert InsufficientShares();
 
@@ -201,7 +209,7 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     uint256 builderFee = price * builderFeePercent / 1 ether;
 
     topicsKeysBalance[topic][msg.sender] -= 1;
-    topcisKeysSupply[topic] = supply - 1;
+    topicsKeysSupply[topic] = supply - 1;
     
     emit Trade(
       msg.sender,
@@ -214,8 +222,10 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
       supply - 1,
       nextPrice
     );
+    // Send the payout to the external receiver if specified, otherwise send it to the sender
+    address receiver = _receiver == address(0) ? msg.sender : _receiver;
 
-    payout(msg.sender, price - protocolFee - builderFee);
+    payout(receiver, price - protocolFee - builderFee);
     payout(protocolFeeDestination, protocolFee);
     payout(poolPrize, builderFee);
   }
@@ -223,7 +233,10 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   function payout(address payee, uint256 amount) internal {
     (bool success, ) = payee.call{value: amount}("");
     if (!success) {
-      pendingPayouts[payee] += amount;
+        uint256 currentPending = pendingPayouts[payee];
+        uint256 newPending = currentPending + amount;
+        require(newPending >= currentPending, "Overflow detected");
+        pendingPayouts[payee] = newPending;
     }
   }
 
