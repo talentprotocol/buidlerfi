@@ -24,7 +24,7 @@ import { TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useState } from "react";
 
 export default function ExplorePage() {
-  const [selectedTab, setSelectedTab] = useState<TabsEnum>("Friends");
+  const [selectedTab, setSelectedTab] = useState<TabsEnum>("New");
   const [searchValue, setSearchValue] = useState("");
 
   const { user } = useUserContext();

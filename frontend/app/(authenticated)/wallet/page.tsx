@@ -16,7 +16,7 @@ import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetTransactions } from "@/hooks/useTransaction";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { formatToDisplayString, sortIntoPeriods, tryParseBigInt } from "@/lib/utils";
-import { ArrowDownwardOutlined, ArrowUpwardOutlined, HistoryOutlined } from "@mui/icons-material";
+import { ArrowDownwardOutlined, ArrowForwardIos, ArrowUpwardOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Button, DialogTitle, Divider, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
 import { MoonpayConfig, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
@@ -103,13 +103,13 @@ export default function ChatsPage() {
           <Typography fontWeight="600" textAlign={"center"} level="body-sm">
             Builderfi balance
           </Typography>
-          <Typography textAlign={"center"} level="h2" lineHeight="150%">
+          <Typography textAlign={"center"} level="h2" lineHeight="150%" sx={{ textTransform: "uppercase !important" }}>
             {formatToDisplayString(balance?.value, balance?.decimals)} ETH
           </Typography>
           {!!mainWallet && <WalletAddress address={mainWallet} level="body-sm" />}
         </Flex>
       </Flex>
-      <Flex x xc gap3>
+      <Flex x xc gap={5}>
         <RoundButton variant="soft" icon={<ExportIcon />} title={"Bridge"} onClick={() => setFundModalType("bridge")} />
         <RoundButton
           variant="soft"
@@ -129,9 +129,12 @@ export default function ChatsPage() {
           onClick={() => router.push("/wallet/portfolio")}
         >
           <Typography level="title-md">Portfolio value</Typography>
-          <Typography fontWeight={300} level="body-sm">
-            {formatToDisplayString(portfolio, 18)} ETH
-          </Typography>
+          <Flex x gap1>
+            <Typography fontWeight={300} level="body-sm" className="remove-text-transform">
+              {formatToDisplayString(portfolio, 18)} ETH
+            </Typography>
+            <ArrowForwardIos fontSize="small" sx={{ color: "neutral.400" }} />
+          </Flex>
         </Button>
         <Divider />
         <Button
@@ -143,9 +146,12 @@ export default function ChatsPage() {
           onClick={() => router.push("/wallet/fees")}
         >
           <Typography level="title-md">Fees earned</Typography>
-          <Typography fontWeight={300} level="body-sm">
-            {formatToDisplayString(tradingFees, 18)} ETH
-          </Typography>
+          <Flex x gap1>
+            <Typography fontWeight={300} level="body-sm" className="remove-text-transform">
+              {formatToDisplayString(tradingFees, 18)} ETH
+            </Typography>
+            <ArrowForwardIos fontSize="small" sx={{ color: "neutral.400" }} />
+          </Flex>
         </Button>
       </Flex>
       <Flex y grow>

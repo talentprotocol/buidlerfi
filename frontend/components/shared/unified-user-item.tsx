@@ -1,7 +1,6 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { shortAddress } from "@/lib/utils";
-import { ChevronRight } from "@mui/icons-material";
 import { Avatar, Chip, Skeleton, Typography } from "@mui/joy";
 import { SxProps, TypographySystem } from "@mui/joy/styles/types";
 import { User } from "@prisma/client";
@@ -39,9 +38,14 @@ interface Props {
     numberOfHolders: number;
   };
 
+  //Type 5: number of holders and answers
+  holdersAndAnswers?: {
+    numberOfHolders: number;
+    numberOfAnswers: number;
+  };
+
   //Style
   sx?: SxProps;
-  hideChevron?: boolean;
   nameLevel?: keyof TypographySystem;
 
   //Interactivity
@@ -58,10 +62,10 @@ export const UnifiedUserItem: FC<Props> = ({
   isLoading,
   holderInfo,
   holdersAndReplies,
+  holdersAndAnswers,
   sx,
   onClick,
   nonClickable,
-  hideChevron,
   nameLevel,
   joinedAndReplies,
   holdersAndKeys
@@ -90,7 +94,7 @@ export const UnifiedUserItem: FC<Props> = ({
     }
 
     if (joinedAndReplies) {
-      return `${user?.bio ? `${user.bio.substring(0,60)}... • ` : ""}${joinedAndReplies.numberOfQuestions}/${
+      return `${user?.bio ? `${user.bio.substring(0, 60)}... • ` : ""}${joinedAndReplies.numberOfQuestions}/${
         joinedAndReplies.numberOfReplies
       } ${pluralize("answer", joinedAndReplies.numberOfReplies)}`;
     }
@@ -99,6 +103,11 @@ export const UnifiedUserItem: FC<Props> = ({
       return `${holdersAndKeys.numberOfHolders} ${pluralize("holder", holdersAndKeys.numberOfHolders)} • ${
         holdersAndKeys.ownedKeys
       } ${pluralize("key", holdersAndKeys.ownedKeys)} owned`;
+    }
+    if (holdersAndAnswers) {
+      return `${holdersAndAnswers.numberOfHolders} ${pluralize("holder", holdersAndAnswers.numberOfHolders)} • ${
+        holdersAndAnswers.numberOfAnswers
+      } ${pluralize("answer", holdersAndAnswers.numberOfAnswers)}`;
     }
   };
 
@@ -143,7 +152,7 @@ export const UnifiedUserItem: FC<Props> = ({
             </Typography>
             {(isHolder || isHeld) && (
               <Chip size="sm" variant="outlined">
-                {isHolder && isHeld ? "Mutual" : isHolder ? "Holder" : "Holding"}
+                {isHolder && isHeld ? "Mutual" : isHolder ? "Holding" : "Holder"}
               </Chip>
             )}
           </Flex>
@@ -152,7 +161,7 @@ export const UnifiedUserItem: FC<Props> = ({
           </Typography>
         </Flex>
       </Flex>
-      {!hideChevron && !nonClickable && <ChevronRight />}
+      {/* {!hideChevron && !nonClickable && <ChevronRight />} */}
     </Flex>
   );
 };

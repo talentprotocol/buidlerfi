@@ -3,13 +3,13 @@ import { builderFIV1Abi } from "@/lib/abi/BuidlerFiV1";
 import { BUIILDER_FI_V1_EVENT_SIGNATURE, BUILDERFI_CONTRACT, IN_USE_CHAIN_ID, PAGINATION_LIMIT } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { prisma } from "@/lib/prisma";
+import { formatBigIntToFixedDecimals } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
 import { NotificationType } from "@prisma/client";
 import _ from "lodash";
 import { decodeEventLog, parseAbiItem } from "viem";
-import { sendNotification } from "../notification/notification";
 import { publishNewTradeKeysCast, publishNewUserCast } from "../farcaster/farcaster";
-import { formatBigIntToFixedDecimals } from "@/lib/utils";
+import { sendNotification } from "../notification/notification";
 
 const logsRange = process.env.LOGS_RANGE_SIZE ? BigInt(process.env.LOGS_RANGE_SIZE) : 100n;
 
@@ -46,9 +46,10 @@ const storeTransactionInternal = async (log: EventLog, hash: string, blockNumber
 
   // if the amount is 0, it's a new key (the first key is bought for free by the builder)
   const isNewKey = Number(log.args.ethAmount) == 0 && log.args.trader.toLowerCase() === log.args.builder.toLowerCase();
-  
+
   // if the amount is not 0, it's an existing key
-  const existingKey = Number(log.args.ethAmount) != 0 && log.args.trader.toLowerCase() !== log.args.builder.toLowerCase();
+  const existingKey =
+    Number(log.args.ethAmount) != 0 && log.args.trader.toLowerCase() !== log.args.builder.toLowerCase();
 
   //If transaction doesn't exist, we create it
   if (!transaction) {
@@ -189,8 +190,8 @@ export const storeTransaction = async (hash: `0x${string}`) => {
   if (keyRelationship) {
     await sendNotification(
       keyRelationship.ownerId,
-      keyRelationship.holderId,
-      eventLog.args.isBuy ? NotificationType.KEYBUY : NotificationType.KEYSELL
+      eventLog.args.isBuy ? NotificationType.KEYBUY : NotificationType.KEYSELL,
+      keyRelationship.holderId
     );
   }
   return { data: hash };

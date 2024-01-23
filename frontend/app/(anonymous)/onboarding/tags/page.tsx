@@ -45,8 +45,11 @@ export default function TagsPage() {
             {(tags || []).map(tag => (
               <Chip
                 size="lg"
-                variant={selectedTags.includes(tag.name) ? "soft" : "outlined"}
+                variant="outlined"
                 color="neutral"
+                sx={{
+                  ".MuiChip-action": { backgroundColor: selectedTags.includes(tag.name) ? "neutral.200" : undefined }
+                }}
                 key={tag.id}
                 onClick={() =>
                   setSelectedTags(prev =>

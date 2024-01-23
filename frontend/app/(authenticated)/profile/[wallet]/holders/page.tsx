@@ -18,7 +18,7 @@ export default function HoldersPage() {
     <Flex y component={"main"} grow>
       <InjectTopBar withBack title={user?.displayName || undefined} />
       <Tabs defaultValue={"holders"}>
-        <TabList tabFlex={1} className="grid w-full grid-cols-3">
+        <TabList tabFlex={1} sx={{ position: "sticky", top: "55px", width: "100%", maxWidth: "500px" }}>
           <Tab value="holders">{holders?.length} Holders</Tab>
           <Tab value="holding">{holdings?.length} Holding</Tab>
         </TabList>
@@ -40,14 +40,14 @@ export default function HoldersPage() {
               )}
             </Flex>
           ) : (
-            holders?.map((holdingItem, i) => (
+            holders?.map(holderItem => (
               <UnifiedUserItem
-                user={holdingItem.holder}
-                holderInfo={{
-                  holderNumber: i + 1,
-                  numberOfKeys: Number(holdingItem.amount)
+                user={holderItem.holder}
+                holdersAndAnswers={{
+                  numberOfHolders: 10,
+                  numberOfAnswers: 10
                 }}
-                key={`home-${holdingItem.id}`}
+                key={`home-${holderItem.id}`}
               />
             ))
           )}
@@ -70,12 +70,12 @@ export default function HoldersPage() {
               )}
             </Flex>
           ) : (
-            holdings?.map((holdingItem, i) => (
+            holdings?.map(holdingItem => (
               <UnifiedUserItem
                 user={holdingItem.owner}
-                holderInfo={{
-                  holderNumber: i + 1,
-                  numberOfKeys: Number(holdingItem.amount)
+                holdersAndAnswers={{
+                  numberOfHolders: 10,
+                  numberOfAnswers: 10
                 }}
                 key={`home-${holdingItem.id}`}
               />

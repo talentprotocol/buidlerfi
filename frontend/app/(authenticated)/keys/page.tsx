@@ -42,7 +42,7 @@ export default function KeysPage() {
       <InjectTopBar />
       {router.searchParams.welcome === "1" && <WelcomeModal />}
       <Tabs defaultValue="you" value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)}>
-        <TabList tabFlex={1} className="grid w-full grid-cols-2">
+        <TabList tabFlex={1} sx={{ position: "sticky", top: "55px", width: "100%", maxWidth: "500px" }}>
           <Tab value="you">You</Tab>
           <Tab value="global">Global</Tab>
           <Tab value="friends">Friends</Tab>
@@ -63,7 +63,9 @@ export default function KeysPage() {
                 .map(key => {
                   return (
                     <Flex y key={key}>
-                      <Typography sx={{ px: 2, py: 1 }}>{key}</Typography>
+                      <Typography level="body-sm" fontWeight={600} sx={{ px: 2, py: 2 }}>
+                        {key}
+                      </Typography>
                       {sortedTransactions[key as keyof typeof sortedTransactions]?.map(transaction => {
                         return (
                           <TransactionEntry
@@ -97,7 +99,9 @@ export default function KeysPage() {
                 .map(key => {
                   return (
                     <Flex y key={key}>
-                      <Typography sx={{ px: 2, py: 1 }}>{key}</Typography>
+                      <Typography level="body-sm" fontWeight={600} sx={{ px: 2, py: 2 }}>
+                        {key}
+                      </Typography>
                       {sortedAllTransactions[key as keyof typeof sortedAllTransactions]?.map(transaction => {
                         return (
                           <TransactionEntry
@@ -131,7 +135,9 @@ export default function KeysPage() {
                 .map(key => {
                   return (
                     <Flex y key={key}>
-                      <Typography sx={{ px: 2, py: 1 }}>{key}</Typography>
+                      <Typography level="body-sm" fontWeight={600} sx={{ px: 2, py: 2 }}>
+                        {key}
+                      </Typography>
                       {sortedFriendsTransactions[key as keyof typeof sortedFriendsTransactions]?.map(transaction => {
                         return (
                           <TransactionEntry

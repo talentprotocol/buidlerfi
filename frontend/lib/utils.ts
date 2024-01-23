@@ -146,12 +146,14 @@ export function sortIntoPeriods<T extends { createdAt: Date }>(toSort: T[]) {
   const today = startOfDay(now);
   const lastWeek = subDays(now, 7);
   const lastMonth = subMonths(now, 1);
+  const last6Month = subMonths(now, 6);
   const lastYear = subMonths(now, 12);
 
   const sorted = {
     today: [] as T[],
     "last 7 days": [] as T[],
     "last 30 days": [] as T[],
+    "last 6 months": [] as T[],
     "last year": [] as T[],
     "all time": [] as T[]
   };
@@ -160,6 +162,7 @@ export function sortIntoPeriods<T extends { createdAt: Date }>(toSort: T[]) {
     if (item.createdAt > today) sorted["today"].push(item);
     else if (item.createdAt > lastWeek) sorted["last 7 days"].push(item);
     else if (item.createdAt > lastMonth) sorted["last 30 days"].push(item);
+    else if (item.createdAt > last6Month) sorted["last 6 months"].push(item);
     else if (item.createdAt > lastYear) sorted["last year"].push(item);
     else sorted["all time"].push(item);
   });

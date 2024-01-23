@@ -11,8 +11,9 @@ import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useSearch } from "@/hooks/useUserApi";
+import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { PersonSearchOutlined } from "@mui/icons-material";
-import { Input, useTheme } from "@mui/joy";
+import { Avatar, Input, Typography, useTheme } from "@mui/joy";
 import { useState } from "react";
 
 export default function QuestionPage() {
@@ -29,7 +30,7 @@ export default function QuestionPage() {
     <Flex y grow component="main">
       <InjectTopBar withBack title="Ask a question" />
 
-      <Flex x border={"1px solid " + theme.palette.divider} px={2} py={1}>
+      <Flex y gap2 border={"1px solid " + theme.palette.divider} px={2} py={1}>
         <Input
           value={searchValue}
           onChange={e => setSearchValue(e.target.value)}
@@ -41,6 +42,19 @@ export default function QuestionPage() {
 
       {!searchValue && (
         <Flex y grow>
+          <Flex
+            x
+            px={2}
+            py={1}
+            gap2
+            sx={{ cursor: "pointer", ":hover": { bgcolor: theme.palette.neutral[100] } }}
+            onClick={() => router.push({ searchParams: { ask: true } })}
+          >
+            <Avatar size="sm" src={LOGO_BLUE_BACK} alt="logo" />
+            <Typography level="title-sm" sx={{ alignSelf: "center" }}>
+              Ask an Open Question
+            </Typography>
+          </Flex>
           {isLoading ? (
             <LoadingPage />
           ) : (
@@ -50,14 +64,12 @@ export default function QuestionPage() {
                 <UnifiedUserItem
                   key={holding.id}
                   user={holding.owner}
-                  hideChevron
                   onClick={() => router.push({ searchParams: { ask: true, wallet: holding.owner.wallet } })}
                 />
               ))
           )}
         </Flex>
       )}
-
       {searchValue && (
         <Flex y grow>
           {searchUsers.isLoading ? (
@@ -73,7 +85,6 @@ export default function QuestionPage() {
               <UnifiedUserItem
                 key={user.id}
                 user={user}
-                hideChevron
                 holdersAndReplies={{
                   numberOfReplies: user.numberOfReplies,
                   numberOfHolders: user.numberOfHolders,

@@ -160,7 +160,7 @@ export const createUser = async (privyUserId: string, inviteCode: string) => {
     return newUser;
   });
 
-  await sendNotification(existingCode.userId, newUser.id, "USER_INVITED", newUser.id);
+  await sendNotification(existingCode.userId, "USER_INVITED", newUser.id, newUser.id);
 
   return { data: newUser };
 };

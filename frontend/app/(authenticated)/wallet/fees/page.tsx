@@ -62,7 +62,9 @@ export default function FeesPage() {
             .map(key => {
               return (
                 <Flex y key={key}>
-                  <Typography sx={{ px: 2, py: 1 }}>{key}</Typography>
+                  <Typography level="body-sm" fontWeight={600} sx={{ px: 2, py: 1 }}>
+                    {key}
+                  </Typography>
                   {sortedTransactions[key as keyof typeof sortedTransactions]?.map(transaction => {
                     return (
                       <TransactionEntry key={transaction.id} transaction={transaction} type="your" feeType="fee" />

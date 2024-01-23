@@ -67,18 +67,20 @@ export default function InvitationCode() {
             Join waitlist
           </a>
         </Typography>
-        <Button
-          loading={createUser.isLoading || overrideLoading}
-          disabled={inviteCode.length === 0}
-          fullWidth
-          size="lg"
-          onClick={handleOnClickProceed}
-        >
-          Continue
-        </Button>
-        <Button disabled={createUser.isLoading} fullWidth onClick={handleLogout} variant="plain">
-          Log out
-        </Button>
+        <Flex y gap1>
+          <Button
+            loading={createUser.isLoading || overrideLoading}
+            disabled={inviteCode.length === 0}
+            fullWidth
+            size="lg"
+            onClick={handleOnClickProceed}
+          >
+            Continue
+          </Button>
+          <Button disabled={createUser.isLoading} fullWidth onClick={handleLogout} variant="plain">
+            Log out
+          </Button>
+        </Flex>
       </Flex>
     </Flex>
   );

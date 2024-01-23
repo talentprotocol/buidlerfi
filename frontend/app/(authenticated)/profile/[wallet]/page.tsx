@@ -1,11 +1,9 @@
 "use client";
-import { AskQuestionModal } from "@/components/app/[wallet]/ask-question-modal";
 import { Overview } from "@/components/app/[wallet]/overview";
 import { QuestionsList } from "@/components/app/[wallet]/questions-list";
 import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
 import { Flex } from "@/components/shared/flex";
 import { InjectTopBar } from "@/components/shared/top-bar";
-import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { isEVMAddress } from "@/lib/utils";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
@@ -13,7 +11,6 @@ import { useEffect, useMemo, useState } from "react";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
   const profile = useUserProfile(params.wallet);
-  const router = useBetterRouter();
 
   const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
 
@@ -32,14 +29,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   return (
     <Flex component={"main"} y grow>
       <InjectTopBar withBack title={profile.user?.displayName || undefined} />
-      {router.searchParams.ask && (
-        <AskQuestionModal
-          ownerUser={profile.user}
-          refetch={() => profile.refetch()}
-          close={() => router.replace({ searchParams: { ask: undefined } })}
-        />
-      )}
-      {buyModalState !== "closed" && (
+      {buyModalState !== "closed" && profile.user && (
         <TradeKeyModal
           keyOwner={profile.user}
           supporterKeysCount={profile.ownedKeysCount || 0}
