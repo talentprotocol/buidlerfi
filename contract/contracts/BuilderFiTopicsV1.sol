@@ -34,6 +34,7 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   event Trade(
     address trader,
     string topic,
+    bytes32 topicHash,
     bool isBuy,
     uint256 shareAmount,
     uint256 ethAmount,
@@ -53,10 +54,10 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   mapping(address => uint256) public pendingPayouts;
 
   // Mapping to track balances of topics keys for each holder
-  mapping(string => mapping(address => uint256)) public topicsKeysBalance;
+  mapping(bytes32 => mapping(address => uint256)) public topicsKeysBalance;
 
   // Mapping to track total supply of keys per topics
-  mapping(string => uint256) public topicsKeysSupply;
+  mapping(bytes32 => uint256) public topicsKeysSupply;
 
   // Constructor to set the initial admin role and initial topics
   constructor(address _owner, string[] memory topics) {
@@ -109,11 +110,13 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
 
   // Functions to get buying and selling prices, considering fees
   function getBuyPrice(string memory topic) public view returns (uint256) {
-    return getPrice(topicsKeysSupply[topic], 1);
+    bytes32 topicHash = keccak256(abi.encodePacked(topic));
+    return getPrice(topicsKeysSupply[topicHash], 1);
   }
 
   function getSellPrice(string memory topic, uint256 amount) public view returns (uint256) {
-    return getPrice(topicsKeysSupply[topic] - amount, amount);
+    bytes32 topicHash = keccak256(abi.encodePacked(topic));
+    return getPrice(topicsKeysSupply[topicHash] - amount, amount);
   }
 
   function getBuyPriceAfterFee(string memory topic) public view returns (uint256) {
@@ -130,6 +133,10 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     return price - protocolFee - builderFee;
   }
 
+  function getTopicToBytes32(string memory topic) public pure returns (bytes32) {
+    return keccak256(abi.encodePacked(topic));
+  }
+  
   function createTopic(string[] memory topicDescriptions) onlyRole(DEFAULT_ADMIN_ROLE) public {
     for (uint256 i = 0; i < topicDescriptions.length; i++) {
       createTopic(topicDescriptions[i]);
@@ -137,12 +144,14 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   }
 
   function createTopic(string memory topicDescription) internal {
+    /// Convert string to hash (bytes32)
+    bytes32 topicHash = keccak256(abi.encodePacked(topicDescription));
     /// Check if topicDescription is not empty
-    require(bytes(topicDescription).length > 0, "Topic description cannot be empty");
+    require(topicHash.length > 0, "Topic description cannot be empty");
     /// Check if topicDescription is not already in use
-    require(topicsKeysSupply[topicDescription] == 0, "Topic already exists");
+    require(topicsKeysSupply[topicHash] == 0, "Topic already exists");
     /// Increment supply for that topic
-    topicsKeysSupply[topicDescription]++;
+    topicsKeysSupply[topicHash]++;
     /// Emit NewTopic
     emit NewTopic(
       msg.sender, 
@@ -156,8 +165,9 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   /// @notice Can only buy one share at a time
   function buyShares(string memory topic, address _receiver) public payable nonReentrant {
     require(tradingEnabled == true, "Trading is not enabled");
+    bytes32 topicHash = keccak256(abi.encodePacked(topic));
 
-    uint256 supply = topicsKeysSupply[topic];
+    uint256 supply = topicsKeysSupply[topicHash];
     if(supply == 0) revert OnlyOwnerCanCreateFirstShare();
 
     uint256 price = getPrice(supply, 1);
@@ -169,11 +179,12 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     if(msg.value < price + protocolFee + builderFee) revert InsufficientPayment();
     address receiver = _receiver == address(0) ? msg.sender : _receiver;
     
-    topicsKeysBalance[topic][receiver]++;
-    topicsKeysSupply[topic]++;
+    topicsKeysBalance[topicHash][receiver]++;
+    topicsKeysSupply[topicHash]++;
     emit Trade(
       receiver, 
       topic, 
+      topicHash,
       true, 
       1, 
       price, 
@@ -193,10 +204,11 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   function sellShares(string memory topic, address _receiver) public payable nonReentrant {
     //  TODO: this check should be removed to not create single point of centralization
     require(tradingEnabled == true, "Trading is not enabled");
+    bytes32 topicHash = keccak256(abi.encodePacked(topic));
 
-    uint256 supply = topicsKeysSupply[topic];
+    uint256 supply = topicsKeysSupply[topicHash];
     if(supply <= 1) revert CannotSellLastShare();
-    if(topicsKeysBalance[topic][msg.sender] < 1) revert InsufficientShares();
+    if(topicsKeysBalance[topicHash][msg.sender] < 1) revert InsufficientShares();
 
     uint256 price = getPrice(supply - 1, 1);
     uint256 nextPrice = 0;
@@ -208,12 +220,13 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     uint256 protocolFee = price * protocolFeePercent / 1 ether;
     uint256 builderFee = price * builderFeePercent / 1 ether;
 
-    topicsKeysBalance[topic][msg.sender] -= 1;
-    topicsKeysSupply[topic] = supply - 1;
+    topicsKeysBalance[topicHash][msg.sender] -= 1;
+    topicsKeysSupply[topicHash] = supply - 1;
     
     emit Trade(
       msg.sender,
       topic,
+      topicHash,
       false,
       1,
       price - protocolFee - builderFee,

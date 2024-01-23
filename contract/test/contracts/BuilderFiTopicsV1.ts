@@ -120,9 +120,66 @@ describe("BuilderFi-topics", () => {
       ).to.be.reverted;
     });
 
-    ///
+    it("can buy an existing topic share for more than the amount expected", async () => {
+      const enabling = await builderFi.connect(creator).enableTrading();
 
-    // fail -> owner can't override an existing topic
+      // Ensure the topic exists
+      await builderFi.connect(creator).createTopic(["test#6"]);
+
+      const price = await builderFi.getBuyPriceAfterFee("test#6");
+      // Attempt to buy shares in the topic
+      await expect(
+        builderFi.connect(shareBuyer).buyShares("test#6", shareBuyer.address, { value: price.add(1) })
+      ).not.to.be.reverted;
+    });
+
+    /// Supply tests
+
+    it("changes the supply of topic keys after buys happens", async () => {
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: initialPrice })
+      const finalPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(creator).buyShares("test#6", creator.address, { value: finalPrice })
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      expect(await builderFi.topicsKeysSupply(topic)).to.eq(3);
+    });
+
+    it("changes the supply of topic keys after sells happens", async () => {
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", creator.address, { value: initialPrice })
+      expect(await builderFi.topicsKeysSupply(topic)).to.eq(2);
+      await builderFi.connect(creator).sellShares("test#6", creator.address)
+      expect(await builderFi.topicsKeysSupply(topic)).to.eq(1);
+    });
+
+    /// Price tests
+    it("changes the price of topic keys after buys happens", async () => {
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", creator.address, { value: initialPrice })
+      const finalPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(creator).buyShares("test#6", creator.address, { value: finalPrice })
+     
+      expect(finalPrice.gt(initialPrice)).to.be.true;
+    });
+
+    it("changes the price of topic keys after sells happens", async () => {
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", creator.address, { value: initialPrice })
+      await builderFi.connect(creator).sellShares("test#6", creator.address)
+      const finalPrice = await builderFi.getBuyPriceAfterFee("test#6");
+
+      expect(finalPrice.gt(initialPrice)).to.be.false;
+    });
+
+
+
     /*
     it("changes the price after the first buy happens", async () => {
       await builderFi.connect(shareOwner).buyShares(shareOwner.address);
@@ -130,12 +187,7 @@ describe("BuilderFi-topics", () => {
       expect(await builderFi.getBuyPrice(shareOwner.address)).to.eq(parseUnits("0.0000625"));
     });
 
-    it("changes the supply of builder keys after the first buy happens", async () => {
-      await builderFi.connect(shareOwner).buyShares(shareOwner.address);
-
-      expect(await builderFi.builderKeysSupply(shareOwner.address)).to.eq(1);
-    });
-
+    
     it("changes the balance of builder keys after the first buy happens", async () => {
       await builderFi.connect(shareOwner).buyShares(shareOwner.address);
 
