@@ -18,11 +18,16 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     where: { privyUserId },
     include: { socialProfiles: true, keysOwned: true }
   });
-  const replier = await prisma.user.findUniqueOrThrow({ where: { id: replierId }, include: { socialProfiles: true } });
+  const replier = await prisma.user.findUniqueOrThrow({
+    where: { id: replierId },
+    include: { socialProfiles: true, keysOfSelf: true }
+  });
 
-  const key = questioner.keysOwned.find(key => key.ownerId === replierId);
-  if (!key || key.amount === BigInt(0)) {
-    return { error: ERRORS.MUST_HOLD_KEY };
+  if (replier.keysOfSelf.length > 0) {
+    const key = questioner.keysOwned.find(key => key.ownerId === replierId);
+    if (!key || key.amount === BigInt(0)) {
+      return { error: ERRORS.MUST_HOLD_KEY };
+    }
   }
 
   const question = await prisma.$transaction(async tx => {

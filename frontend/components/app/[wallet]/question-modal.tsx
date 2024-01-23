@@ -30,6 +30,7 @@ interface Props {
 }
 
 export default function QuestionModal({ questionId, close, profile }: Props) {
+  console.log(profile);
   const { data: question, refetch } = useGetQuestion(Number(questionId), {
     cacheTime: 0,
     staleTime: 0
@@ -46,9 +47,10 @@ export default function QuestionModal({ questionId, close, profile }: Props) {
       id: question.id,
       answerContent: reply
     });
-    setReply("");
+    setReply(reply);
     setIsEditingReply(false);
     refetch();
+    console.log("refetched", { question });
   };
 
   const repliedOn = useMemo(() => getDifference(question?.repliedOn || undefined), [question?.repliedOn]);
@@ -95,7 +97,9 @@ export default function QuestionModal({ questionId, close, profile }: Props) {
             <Flex x yc xsb>
               <Flex x yc gap3>
                 <Reactions questionId={question.id} />
-                {question.repliedOn && profile.hasKeys && <AddCommentButton questionId={question?.id} />}
+                {question.repliedOn && (profile?.hasKeys || !profile.hasLaunchedKeys) && (
+                  <AddCommentButton questionId={question?.id} />
+                )}
               </Flex>
               <IconButton
                 onClick={e => {
@@ -127,7 +131,7 @@ export default function QuestionModal({ questionId, close, profile }: Props) {
                 value={reply}
               />
             )}
-            {question.repliedOn && profile?.hasKeys && !isEditingReply && (
+            {question.repliedOn && (profile?.hasKeys || !profile.hasLaunchedKeys) && !isEditingReply && (
               <Flex x ys gap={1} grow fullwidth>
                 <Avatar
                   size="sm"
@@ -163,7 +167,7 @@ export default function QuestionModal({ questionId, close, profile }: Props) {
                 </Flex>
               </Flex>
             )}
-            {!profile?.hasKeys && question.repliedOn && (
+            {!profile?.hasKeys && profile.hasLaunchedKeys && question.repliedOn && (
               <PageMessage
                 title="Unlock answer"
                 icon={<LockOutlined />}
@@ -176,13 +180,13 @@ export default function QuestionModal({ questionId, close, profile }: Props) {
                 title="Waiting for answer ..."
                 icon={<Avatar size="sm" src={profile?.user?.avatarUrl || undefined} />}
                 text={
-                  profile?.hasKeys
+                  profile?.hasKeys || !profile.hasLaunchedKeys
                     ? `You will get notified when ${profile?.user?.displayName} answers`
                     : `Buy a key, and get notified when ${profile?.user?.displayName} answers`
                 }
               />
             )}
-            {question.repliedOn && profile?.hasKeys && !isEditingReply && (
+            {question.repliedOn && (profile?.hasKeys || !profile.hasLaunchedKeys) && !isEditingReply && (
               <Reactions questionId={question.id} type="like" />
             )}
           </Flex>

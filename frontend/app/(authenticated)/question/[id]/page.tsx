@@ -31,7 +31,7 @@ export default function QuestionPage() {
     staleTime: 0
   });
   const [isEditingReply, setIsEditingReply] = useState(false);
-  const { hasKeys, user, isOwnProfile } = useUserProfile(question?.replier.wallet as `0x${string}`);
+  const { hasKeys, user, isOwnProfile, hasLaunchedKeys } = useUserProfile(question?.replier.wallet as `0x${string}`);
   const [reply, setReply] = useState("");
   const putQuestion = usePutQuestion();
   const { data: questionerStats } = useGetUserStats(question?.questioner?.id);
@@ -45,6 +45,7 @@ export default function QuestionPage() {
     setReply("");
     setIsEditingReply(false);
     refetch();
+    console.log("refetched", { question });
   };
   const repliedOn = useMemo(() => getDifference(question?.repliedOn || undefined), [question?.repliedOn]);
 
@@ -82,7 +83,7 @@ export default function QuestionPage() {
         <Flex x yc xsb>
           <Flex x yc gap3>
             <Reactions questionId={question.id} />
-            {question.repliedOn && hasKeys && <AddCommentButton questionId={question?.id} />}
+            {question.repliedOn && (hasKeys || !hasLaunchedKeys) && <AddCommentButton questionId={question?.id} />}
           </Flex>
           <IconButton
             onClick={e => {
@@ -114,7 +115,7 @@ export default function QuestionPage() {
             value={reply}
           />
         )}
-        {question.repliedOn && hasKeys && !isEditingReply && (
+        {question.repliedOn && (hasKeys || !hasLaunchedKeys) && !isEditingReply && (
           <Flex x ys gap={1} grow fullwidth>
             <Avatar
               size="sm"
@@ -150,7 +151,7 @@ export default function QuestionPage() {
             </Flex>
           </Flex>
         )}
-        {!hasKeys && question.repliedOn && (
+        {!hasKeys && hasLaunchedKeys && question.repliedOn && (
           <PageMessage
             title="Unlock answer"
             icon={<LockOutlined />}
@@ -169,7 +170,9 @@ export default function QuestionPage() {
             }
           />
         )}
-        {question.repliedOn && hasKeys && !isEditingReply && <Reactions questionId={question.id} type="like" />}
+        {question.repliedOn && (hasKeys || !hasLaunchedKeys) && !isEditingReply && (
+          <Reactions questionId={question.id} type="like" />
+        )}
       </Flex>
       {question.repliedOn && (
         <Flex y sx={{ borderTop: "1px solid #E5E5E5" }}>

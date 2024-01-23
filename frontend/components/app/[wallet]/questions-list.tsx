@@ -31,6 +31,8 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
     return <LoadingPage />;
   }
 
+  profile.hasLaunchedKeys = false;
+
   const getMessage = () => {
     if (hasQuestion) {
       return null;
@@ -69,6 +71,14 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           };
         }
       } else {
+        if (profile?.user) {
+          return {
+            title: "this profile is public",
+            icon: <KeyIcon />,
+            text: "ask the first question to " + profile?.user?.displayName,
+            button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
+          }
+        }
         const profileName =
           profile?.recommendedUser?.talentProtocol ||
           profile?.recommendedUser?.farcaster ||
@@ -99,20 +109,12 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
         }
       }
     } else {
-      if (!profile?.hasLaunchedKeys) {
-        return {
-          title: "Unlock Q&A",
-          icon: <KeyIcon />,
-          text: "Create your keys to allow others to ask you direct questions",
-          button: <Button onClick={() => onBuyKeyClick()}>Create keys</Button>
-        };
-      } else {
-        return {
-          title: "no answers to show",
-          icon: <AccessTimeOutlined />,
-          text: "You haven't received any questions yet"
-        };
-      }
+      return {
+        title: "no answers to show",
+        icon: <AccessTimeOutlined />,
+        text: "You haven't received any questions yet",
+        button: <Button onClick={() => onBuyKeyClick()}>Create keys to make your answers private</Button>
+      };
     }
   };
 
