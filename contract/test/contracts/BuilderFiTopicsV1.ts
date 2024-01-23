@@ -91,9 +91,7 @@ describe("BuilderFi-topics", () => {
     });
 
     it("can't buy an existing topic share if trading is not enabled", async () => {
-      console.log("trading is enable", await builderFi.tradingEnabled());
       const enabling = await builderFi.connect(creator).disableTrading();
-      console.log("trading is enable", await builderFi.tradingEnabled());
 
       // Ensure the topic exists
       await builderFi.connect(creator).createTopic(["test#6"]);
@@ -178,68 +176,120 @@ describe("BuilderFi-topics", () => {
       expect(finalPrice.gt(initialPrice)).to.be.false;
     });
 
+    /// Balance tests
 
+    it("changes the balance of topic keys holder after buys happens", async () => {
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      const initialBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: initialPrice })
+      const meadBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      const meadPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: meadPrice })
 
-    /*
-    it("changes the price after the first buy happens", async () => {
-      await builderFi.connect(shareOwner).buyShares(shareOwner.address);
+      const finalBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      const finalPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: finalPrice })
 
-      expect(await builderFi.getBuyPrice(shareOwner.address)).to.eq(parseUnits("0.0000625"));
+      expect(initialBalance).to.eq(0);
+      expect(meadBalance).to.eq(1);
+      expect(finalBalance).to.eq(2);
     });
 
-    
-    it("changes the balance of builder keys after the first buy happens", async () => {
-      await builderFi.connect(shareOwner).buyShares(shareOwner.address);
+    it("changes the balance of topic keys holder after sells happens", async () => {
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      const initialBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: initialPrice })
+      const meadBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      await builderFi.connect(shareOwner).sellShares("test#6", shareOwner.address)
 
-      expect(await builderFi.builderKeysBalance(shareOwner.address, shareOwner.address)).to.eq(1);
+      const finalBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      const finalPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: finalPrice })
+
+      expect(initialBalance).to.eq(0);
+      expect(meadBalance).to.eq(1);
+      expect(finalBalance).to.eq(0);
     });
 
-    it("does not allow a key to be purchased for less than the amount expected", async () => {
-      await builderFi.connect(shareOwner).buyShares(shareOwner.address);
+    it("can't sell more topic keys more than owned", async () => {
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      const initialBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
 
-      const price = await builderFi.getBuyPriceAfterFee(shareOwner.address);
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: initialPrice })
+      const meadPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", shareOwner.address, { value: meadPrice })
+      const meadPrice2 = await builderFi.getBuyPriceAfterFee("test#6");
+      await builderFi.connect(shareOwner).buyShares("test#6", creator.address, { value: meadPrice2 })
 
-      const action = builderFi.connect(shareBuyer).buyShares(shareOwner.address, { value: price.sub(1) });
+      const meadBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      await builderFi.connect(shareOwner).sellShares("test#6", shareOwner.address)
+      await builderFi.connect(shareOwner).sellShares("test#6", shareOwner.address)
+      // Fail to sell more than owned
+      await expect(
+        builderFi.connect(shareOwner).sellShares("test#6", shareOwner.address)
+      ).to.be.revertedWith("InsufficientShares");
 
-      await expect(action).to.be.reverted;
+      const finalBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      
+      expect(initialBalance).to.eq(0);
+      expect(meadBalance).to.eq(2);
+      expect(finalBalance).to.eq(0);
     });
 
-    it("allows a owner to sell their key", async () => {
-      await builderFi.connect(shareOwner).buyShares(shareOwner.address);
+    it("changes the price of topic keys after buys/sells happens for an external address receiver", async () => {
+      const topic = await builderFi.getTopicToBytes32("test#6")
+      await builderFi.connect(creator).createTopic(["test#6"]);
 
-      const price = await builderFi.getBuyPriceAfterFee(shareOwner.address);
+      const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
+      const initialBalance = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      const initialBalanceOwnerETH = await ethers.provider.getBalance(shareOwner.address)
+      const initialBalanceBuyerETH = await ethers.provider.getBalance(shareBuyer.address)
 
-      await builderFi.connect(shareBuyer).buyShares(shareOwner.address, { value: price });
+      await builderFi.connect(shareOwner).buyShares("test#6", shareBuyer.address, { value: initialPrice })
 
-      expect(await builderFi.builderKeysBalance(shareOwner.address, shareBuyer.address)).to.eq(1);
+      const meadBalanceOwner = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      const meadBalanceOwnerETH = await ethers.provider.getBalance(shareOwner.address)
+      const meadBalanceBuyer = await builderFi.topicsKeysBalance(topic, shareBuyer.address)
+      const meadBalanceBuyerETH = await ethers.provider.getBalance(shareBuyer.address)
 
-      await builderFi.connect(shareBuyer).sellShares(shareOwner.address);
+      const txResponse = await builderFi.connect(shareBuyer).sellShares("test#6", shareOwner.address)
+      const sellTxReceipt = await txResponse.wait();
+      const gasUsed = sellTxReceipt.gasUsed;
+      const effectiveGasPrice = sellTxReceipt.effectiveGasPrice;
+      const totalGasCost = gasUsed.mul(effectiveGasPrice);
 
-      expect(await builderFi.builderKeysBalance(shareOwner.address, shareBuyer.address)).to.eq(0);
+      const finalBalanceOwner = await builderFi.topicsKeysBalance(topic, shareOwner.address)
+      const finalBalanceOwnerETH = await ethers.provider.getBalance(shareOwner.address)
+      const finalBalanceBuyer = await builderFi.topicsKeysBalance(topic, shareBuyer.address)
+      const finalBalanceBuyerETH = await ethers.provider.getBalance(shareBuyer.address)
+      const adjustedBalanceBuyerETH = finalBalanceBuyerETH.add(totalGasCost);
+      const finalPrice = await builderFi.getBuyPriceAfterFee("test#6");
+
+      expect(initialBalance).to.eq(0);
+      expect(initialBalanceOwnerETH.gt(meadBalanceOwnerETH)).to.be.true; 
+      expect(meadBalanceBuyerETH.eq(initialBalanceBuyerETH)).to.be.true; 
+      expect(meadBalanceOwner).to.eq(0);
+      expect(meadBalanceBuyer).to.eq(1);
+
+      expect(finalBalanceOwnerETH.gt(meadBalanceOwnerETH)).to.be.true; 
+      expect(adjustedBalanceBuyerETH.eq(meadBalanceBuyerETH)).to.be.true;
+
+      expect(finalBalanceOwner).to.eq(0);
+      expect(finalBalanceBuyer).to.eq(0);
     });
 
-    it("selling keys increased the amount of Eth the owner and the protocol have", async () => {
-      await builderFi.connect(shareOwner).buyShares(shareOwner.address);
-
-      const priceFirstKey = await builderFi.getBuyPriceAfterFee(shareOwner.address);
-      await builderFi.connect(shareBuyer).buyShares(shareOwner.address, { value: priceFirstKey });
-
-      const priceSecondKey = await builderFi.getBuyPriceAfterFee(shareOwner.address);
-      await builderFi.connect(shareBuyer).buyShares(shareOwner.address, { value: priceSecondKey });
-
-      const balanceBefore = await ethers.provider.getBalance("0x33041027dd8F4dC82B6e825FB37ADf8f15d44053");
-      const builderBalanceBefore = await ethers.provider.getBalance(shareOwner.address);
-
-      await builderFi.connect(shareBuyer).sellShares(shareOwner.address);
-
-      expect(await builderFi.builderKeysBalance(shareOwner.address, shareBuyer.address)).to.eq(1);
-
-      const balanceAfter = await ethers.provider.getBalance("0x33041027dd8F4dC82B6e825FB37ADf8f15d44053");
-      const builderBalanceAfter = await ethers.provider.getBalance(shareOwner.address);
-
-      expect(balanceAfter.toNumber()).to.be.greaterThan(balanceBefore.toNumber());
-      expect(builderBalanceAfter.sub(builderBalanceBefore).toNumber()).to.be.greaterThan(0);
+    // Protocol fees tests
+    it("Check protocol fees increase", async () => {
     });
-    */
+
+    // Pool prizes tests
+    it("Check Pool prize fees increase", async () => {
+    });
   });
 });
