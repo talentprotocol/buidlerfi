@@ -1,6 +1,6 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { shortAddress } from "@/lib/utils";
+import { getDifference, shortAddress } from "@/lib/utils";
 import { Avatar, Chip, Skeleton, Typography } from "@mui/joy";
 import { SxProps, TypographySystem } from "@mui/joy/styles/types";
 import { User } from "@prisma/client";
@@ -20,15 +20,13 @@ interface Props {
   //Type 2: Holders and replies count. (Used in most places)
   holdersAndReplies?: {
     numberOfHolders: number;
-    numberOfQuestions: number;
-    numberOfReplies: number;
+    questionsCount: number;
     label?: "answer" | "question";
   };
 
   //Type 3: Joined and replies/questions
   joinedAndReplies?: {
     createdAt: Date;
-    numberOfQuestions: number;
     numberOfReplies: number;
   };
 
@@ -43,6 +41,9 @@ interface Props {
     numberOfHolders: number;
     numberOfAnswers: number;
   };
+
+  //Type 6: bio
+  bio?: string;
 
   //Style
   sx?: SxProps;
@@ -63,6 +64,7 @@ export const UnifiedUserItem: FC<Props> = ({
   holderInfo,
   holdersAndReplies,
   holdersAndAnswers,
+  bio,
   sx,
   onClick,
   nonClickable,
@@ -79,35 +81,58 @@ export const UnifiedUserItem: FC<Props> = ({
 
   const renderSubtitle = () => {
     if (holdersAndReplies) {
-      return `${holdersAndReplies.numberOfHolders} ${pluralize("holder", holdersAndReplies.numberOfHolders)} • ${
-        holdersAndReplies.numberOfReplies
-      }/${holdersAndReplies.numberOfQuestions} ${pluralize(
-        holdersAndReplies.label || "answer",
-        holdersAndReplies.numberOfQuestions
-      )}`;
+      return (
+        <>
+          <strong>{holdersAndReplies.numberOfHolders}</strong> {pluralize("holder", holdersAndReplies.numberOfHolders)}{" "}
+          • <strong>{holdersAndReplies.questionsCount}</strong>{" "}
+          {pluralize(holdersAndReplies.label || "answer", holdersAndReplies.questionsCount)}
+        </>
+      );
     }
 
     if (holderInfo) {
-      const nbrKeys = `${holderInfo.numberOfKeys} ${pluralize("key", holderInfo.numberOfKeys)}`;
-      const holderNum = holderInfo.holderNumber ? `• Holder #${holderInfo.holderNumber}` : "";
-      return nbrKeys + " " + holderNum;
+      return (
+        <>
+          <strong>{holderInfo.numberOfKeys}</strong> {pluralize("key", holderInfo.numberOfKeys)}
+          {holderInfo.holderNumber && (
+            <>
+              <strong>{holderInfo.holderNumber}</strong> • Holder # {holderInfo.holderNumber}
+            </>
+          )}
+        </>
+      );
     }
 
     if (joinedAndReplies) {
-      return `${user?.bio ? `${user.bio.substring(0, 60)}... • ` : ""}${joinedAndReplies.numberOfQuestions}/${
-        joinedAndReplies.numberOfReplies
-      } ${pluralize("answer", joinedAndReplies.numberOfReplies)}`;
+      const diff = getDifference(joinedAndReplies.createdAt);
+      return (
+        <>
+          Joined <strong>{diff}</strong> ago • <strong>{joinedAndReplies.numberOfReplies}</strong>{" "}
+          {pluralize("answer", joinedAndReplies.numberOfReplies)}
+        </>
+      );
     }
 
     if (holdersAndKeys) {
-      return `${holdersAndKeys.numberOfHolders} ${pluralize("holder", holdersAndKeys.numberOfHolders)} • ${
-        holdersAndKeys.ownedKeys
-      } ${pluralize("key", holdersAndKeys.ownedKeys)} owned`;
+      return (
+        <>
+          <strong>{holdersAndKeys.numberOfHolders}</strong> {pluralize("holder", holdersAndKeys.numberOfHolders)} •{" "}
+          <strong>{holdersAndKeys.ownedKeys}</strong> {pluralize("key", holdersAndKeys.ownedKeys)} owned
+        </>
+      );
     }
     if (holdersAndAnswers) {
-      return `${holdersAndAnswers.numberOfHolders} ${pluralize("holder", holdersAndAnswers.numberOfHolders)} • ${
-        holdersAndAnswers.numberOfAnswers
-      } ${pluralize("answer", holdersAndAnswers.numberOfAnswers)}`;
+      return (
+        <>
+          <strong>{holdersAndAnswers.numberOfHolders}</strong> {pluralize("holder", holdersAndAnswers.numberOfHolders)}{" "}
+          • <strong>{holdersAndAnswers.numberOfAnswers}</strong>{" "}
+          {pluralize("answer", holdersAndAnswers.numberOfAnswers)}
+        </>
+      );
+    }
+
+    if (bio) {
+      return bio;
     }
   };
 
@@ -156,7 +181,12 @@ export const UnifiedUserItem: FC<Props> = ({
               </Chip>
             )}
           </Flex>
-          <Typography textColor={"neutral.600"} level="body-sm">
+          <Typography
+            textColor={"neutral.600"}
+            level="body-sm"
+            noWrap
+            sx={{ textOverflow: "ellipsis", overflow: "hidden", width: "min(calc(100vw - 70px), 430px)" }}
+          >
             {renderSubtitle()}
           </Typography>
         </Flex>

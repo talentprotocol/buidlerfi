@@ -427,12 +427,18 @@ export const getTopUsersByQuestionsAskedInTimeInterval = async (
 };
 
 export const getTopUsersByAnswersGiven = async (offset: number) => {
+  //First get all questions grouped by replier, and sort by replies count
+  const questions = await prisma.question.groupBy({
+    where: { reply: { not: null }, replierId: { not: null } },
+    by: ["replierId"],
+    orderBy: { _count: { reply: "desc" } },
+    _count: { reply: true },
+    take: PAGINATION_LIMIT,
+    skip: offset
+  });
+  const repliers =
+    questions?.filter(question => !!question.replierId).map(question => question.replierId as number) || [];
   const users = await prisma.user.findMany({
-    orderBy: {
-      replies: {
-        _count: "desc"
-      }
-    },
     include: {
       replies: true,
       keysOfSelf: {
@@ -446,10 +452,11 @@ export const getTopUsersByAnswersGiven = async (offset: number) => {
     where: {
       isActive: true,
       hasFinishedOnboarding: true,
-      displayName: { not: null }
-    },
-    take: PAGINATION_LIMIT,
-    skip: offset
+      displayName: { not: null },
+      id: {
+        in: repliers
+      }
+    }
   });
 
   const res = users.map(user => {
@@ -460,7 +467,7 @@ export const getTopUsersByAnswersGiven = async (offset: number) => {
     return { ...strippedUser, questionsReceived, questionsAnswered, numberOfHolders };
   });
 
-  return { data: res };
+  return { data: res.sort((a, b) => b.questionsAnswered - a.questionsAnswered) };
 };
 
 export const getTopUsersByAnswersGivenInTimeInterval = async (

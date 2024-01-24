@@ -44,8 +44,8 @@ export default function HoldersPage() {
               <UnifiedUserItem
                 user={holderItem.holder}
                 holdersAndAnswers={{
-                  numberOfHolders: 10,
-                  numberOfAnswers: 10
+                  numberOfHolders: holderItem.holder?._count?.keysOfSelf,
+                  numberOfAnswers: holderItem.holder?._count.replies
                 }}
                 key={`home-${holderItem.id}`}
               />
@@ -74,8 +74,8 @@ export default function HoldersPage() {
               <UnifiedUserItem
                 user={holdingItem.owner}
                 holdersAndAnswers={{
-                  numberOfHolders: 10,
-                  numberOfAnswers: 10
+                  numberOfHolders: holdingItem.owner?._count?.keysOfSelf,
+                  numberOfAnswers: holdingItem.owner?._count.replies
                 }}
                 key={`home-${holdingItem.id}`}
               />
