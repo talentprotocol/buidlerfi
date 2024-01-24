@@ -34,7 +34,7 @@ export default function CreateWallet() {
       <Flex y yc xc grow>
         <img src={WEB3_SOCIALS_IMAGE} width="100%" />
       </Flex>
-      <Flex y gap1>
+      <Flex y gap1 mb={3}>
         <Button size="lg" fullWidth loading={isLoading} onClick={() => handleLinkWallet()}>
           Connect web3 socials
         </Button>

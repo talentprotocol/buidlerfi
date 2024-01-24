@@ -1,12 +1,13 @@
 import { getQuestion } from "@/backend/question/question";
-import { OG_BACKGROUND_IMAGE, OG_BACKGROUND_IMAGE_FALLBACK } from "@/lib/assets";
+import { DEFAULT_PROFILE_PICTURE, OG_BACKGROUND_IMAGE, OG_BACKGROUND_IMAGE_FALLBACK } from "@/lib/assets";
+import { shortAddress } from "@/lib/utils";
 import { format } from "date-fns";
 import { ImageResponse } from "next/og";
 // Route segment config
 export const runtime = "edge";
 
 // Image metadata
-export const alt = "About Acme";
+export const alt = "builder.fi by Talent Protocol";
 export const size = {
   width: 1200,
   height: 630
@@ -68,7 +69,6 @@ export default async function Image({ params }: { params: { id: string } }) {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            maxWidth: "50%",
             gap: "20px"
           }}
         >
@@ -76,13 +76,13 @@ export default async function Image({ params }: { params: { id: string } }) {
             <img
               width="80px"
               height="80px"
-              src={question.data.questioner.avatarUrl || undefined}
+              src={question.data.questioner.avatarUrl || `${baseUrl}${DEFAULT_PROFILE_PICTURE}`}
               style={{ borderRadius: "50%" }}
             />
             <img
               width="80px"
               height="80px"
-              src={question.data.replier.avatarUrl || undefined}
+              src={question.data.replier?.avatarUrl || `${baseUrl}${DEFAULT_PROFILE_PICTURE}`}
               style={{ borderRadius: "50%", marginLeft: "-40px" }}
             />
           </div>
@@ -96,9 +96,9 @@ export default async function Image({ params }: { params: { id: string } }) {
             }}
           >
             <span>
-              {question.data.questioner.displayName}
+              {question.data.questioner.displayName || shortAddress(question.data.questioner?.wallet)}
               <span style={{ marginLeft: "15px", marginRight: "15px", fontFamily: "Inter Light" }}>asked</span>
-              {question.data.replier.displayName}
+              {question.data.replier?.displayName || shortAddress(question.data.replier?.wallet)}
             </span>
             <div style={{ fontSize: "24px", color: "grey" }}>
               {format(new Date(question.data.createdAt), "MMM dd, yyyy")}

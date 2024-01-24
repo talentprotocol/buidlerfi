@@ -5,7 +5,7 @@ import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/l
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
-import { Prisma, ReactionType, SocialProfileType } from "@prisma/client";
+import { NotificationType, Prisma, ReactionType, SocialProfileType } from "@prisma/client";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
@@ -34,7 +34,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     const question = await tx.question.create({
       data: { questionerId: questioner.id, replierId: replier.id, questionContent: questionContent }
     });
-    await sendNotification(replier.id, questioner.id, "ASKED_QUESTION", question.id, tx);
+    await sendNotification(replier.id, "ASKED_QUESTION", questioner.id, question.id, tx);
 
     return question;
   });
@@ -62,6 +62,47 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
   return { data: question };
 };
 
+export const createOpenQuestion = async (privyUserId: string, questionContent: string, tag?: string) => {
+  if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
+    return { error: ERRORS.QUESTION_LENGTH_INVALID };
+  }
+
+  if (tag) {
+    await prisma.tag.findUniqueOrThrow({ where: { name: tag } });
+  }
+
+  const questioner = await prisma.user.findUniqueOrThrow({
+    where: { privyUserId },
+    include: { socialProfiles: true }
+  });
+  const res = await prisma.$transaction(async tx => {
+    const question = await tx.question.create({
+      data: {
+        questionerId: questioner.id,
+        replierId: null,
+        questionContent: questionContent,
+        tags: tag
+          ? {
+              connect: {
+                name: tag
+              }
+            }
+          : undefined
+      }
+    });
+    if (tag) {
+      const usersWithTag = await tx.user.findMany({ where: { tags: { some: { name: tag } } } });
+      for (const user of usersWithTag) {
+        await sendNotification(user.id, NotificationType.NEW_OPEN_QUESTION, questioner.id, question.id, tx);
+      }
+    }
+
+    return question;
+  });
+
+  return { data: res };
+};
+
 type getHotQuestionResponse = Prisma.QuestionGetPayload<{
   select: {
     id: true;
@@ -84,6 +125,7 @@ type getHotQuestionResponse = Prisma.QuestionGetPayload<{
         wallet: true;
       };
     };
+    tags: { select: { name: true } };
   };
 }>;
 
@@ -104,7 +146,8 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
       replier."wallet" AS "replierWallet",
       COALESCE(SUM(CASE WHEN r."reactionType" = 'UPVOTE' THEN 1 ELSE 0 END), 0) 
       - COALESCE(SUM(CASE WHEN r."reactionType" = 'DOWNVOTE' THEN 1 ELSE 0 END), 0) 
-      AS net_upvotes
+      AS net_upvotes,
+      STRING_AGG(t.name, ', ') AS tags
     FROM
       "Question" AS q
   	LEFT JOIN
@@ -113,6 +156,10 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
       "User" AS "questioner" ON q."questionerId" = questioner.id
     LEFT JOIN
       "Reaction" AS r ON q.id = r."questionId"
+    LEFT JOIN
+    "_QuestionToTag" AS qt ON q.id = qt."A"
+    LEFT JOIN
+      "Tag" AS t ON qt."B" = t.id
     WHERE
         (${filters.questionerId || 0} != 0 AND q."questionerId" = ${filters.questionerId})
       OR
@@ -150,7 +197,8 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
         displayName: row.replierDisplayName,
         avatarUrl: row.replierAvatarUrl,
         wallet: row.questionerWallet
-      }
+      },
+      tags: row.tags?.split(",").map((tag: string) => ({ name: tag })) || []
     };
     return question;
   });
@@ -174,7 +222,8 @@ export async function getKeysQuestions(privyUserId: string, offset: number) {
     },
     include: {
       questioner: true,
-      replier: true
+      replier: true,
+      tags: true
     },
     take: PAGINATION_LIMIT,
     skip: offset
@@ -203,7 +252,8 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
     },
     include: {
       questioner: true,
-      replier: true
+      replier: true,
+      tags: true
     },
     take: PAGINATION_LIMIT,
     orderBy: args.orderBy,
@@ -221,6 +271,11 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
     },
     include: {
       reactions: true,
+      _count: {
+        select: {
+          comments: true
+        }
+      },
       questioner: {
         ...(includeSocialProfiles && {
           include: {
@@ -242,7 +297,7 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
   //We need to check privyUserId explicitely also because if it's undefined, it's going to return the system user
   if (!privyUserId) return { data: exclude(question, ["reply"]) };
 
-  const hasKey = await ownsKey({ userId: question.replierId }, { privyUserId });
+  const hasKey = !question.replierId || (await ownsKey({ userId: question.replierId }, { privyUserId }));
 
   if (hasKey) return { data: question };
   else return { data: exclude(question, ["reply"]) };
@@ -381,11 +436,12 @@ export const addReaction = async (privyUserId: string, questionId: number, react
 
     //Only send notification when not reacting to own question/
     const target = isLike ? question.replierId : question.questionerId;
-    if (target !== user.id) {
+    if (target && target !== user.id) {
       await sendNotification(
         target,
-        user.id,
         isLike ? "REPLY_REACTION" : reactionType === "DOWNVOTE" ? "QUESTION_DOWNVOTED" : "QUESTION_UPVOTED",
+        //We want to make it anonymous
+        undefined,
         question.id,
         tx
       );

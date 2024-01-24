@@ -1,6 +1,7 @@
 import { getHotQuestions, getQuestions, getReactions } from "@/backend/question/question";
 import {
   addReactionSA,
+  createOpenQuestionSA,
   createQuestionSA,
   deleteQuestionSA,
   deleteReactionSA,
@@ -20,6 +21,10 @@ export function useGetQuestion(id: number, queryOptions?: SimpleUseQueryOptions)
   return useQuerySA(["useGetQuestion", id], options => getQuestionSA(id!, options), {
     ...queryOptions
   });
+}
+
+export function useGetOpenQuestions() {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getQuestions>>>(["useGetOpenQuestions"], "/api/question/open");
 }
 
 export const useGetNewQuestions = () => {
@@ -42,6 +47,11 @@ export const useGetQuestionsFromUser = (userId?: number, side: "questions" | "re
 export const usePostQuestion = () => {
   return useMutationSA((options, params: { replierId: number; questionContent: string }) =>
     createQuestionSA(params.questionContent, params.replierId, options)
+  );
+};
+export const usePostOpenQuestion = () => {
+  return useMutationSA((options, params: { questionContent: string; tag: string }) =>
+    createOpenQuestionSA(params.questionContent, params.tag, options)
   );
 };
 

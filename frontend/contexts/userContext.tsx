@@ -38,6 +38,7 @@ interface UserContextType {
   fetchNotificationNextPage: () => Promise<unknown>;
   holding: ReturnType<typeof useGetKeyRelationships>["data"];
   holders: ReturnType<typeof useGetKeyRelationships>["data"];
+  hasLaunchedKeys: boolean;
 }
 const userContext = createContext<UserContextType>({
   user: undefined,
@@ -52,7 +53,8 @@ const userContext = createContext<UserContextType>({
   refetchNotifications: () => Promise.resolve(),
   fetchNotificationNextPage: () => Promise.resolve(),
   holding: [],
-  holders: []
+  holders: [],
+  hasLaunchedKeys: false
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -117,7 +119,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       refetchNotifications,
       fetchNotificationNextPage,
       holding,
-      holders
+      holders,
+      hasLaunchedKeys: !!holders?.find(h => h.holderId === h.ownerId)
     }),
     [
       user.data,

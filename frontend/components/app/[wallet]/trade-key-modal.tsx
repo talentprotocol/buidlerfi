@@ -16,19 +16,10 @@ interface Props {
   supporterKeysCount?: number;
   side: "buy" | "sell";
   isFirstKey: boolean;
-  targetBuilderAddress?: `0x${string}`;
-  keyOwner?: User;
+  keyOwner: User;
 }
 
-export const TradeKeyModal: FC<Props> = ({
-  hasKeys,
-  close,
-  supporterKeysCount,
-  isFirstKey,
-  side,
-  targetBuilderAddress,
-  keyOwner
-}) => {
+export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, isFirstKey, side, keyOwner }) => {
   const { address } = useUserContext();
   const { data: balance } = useBalance({
     address
@@ -36,7 +27,7 @@ export const TradeKeyModal: FC<Props> = ({
   const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { refetch, buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } =
-    useGetBuilderInfo(keyOwner?.wallet);
+    useGetBuilderInfo(keyOwner.wallet);
 
   const closeOrShowSuccessPurchase = () => {
     if (hasKeys) {
@@ -57,7 +48,7 @@ export const TradeKeyModal: FC<Props> = ({
 
   const handleBuy = async (recalculatePrice = false) => {
     if (isFirstKey) {
-      tx.executeTx({ args: [targetBuilderAddress!], value: buyPriceAfterFee });
+      tx.executeTx({ args: [keyOwner.wallet as `0x${string}`], value: buyPriceAfterFee });
       return;
     }
 
@@ -79,11 +70,11 @@ export const TradeKeyModal: FC<Props> = ({
       return;
     }
 
-    tx.executeTx({ args: [targetBuilderAddress!], value: buyPrice });
+    tx.executeTx({ args: [keyOwner.wallet as `0x${string}`], value: buyPrice });
   };
 
   const handleSell = () => {
-    tx.executeTx({ args: [targetBuilderAddress!] });
+    tx.executeTx({ args: [keyOwner.wallet as `0x${string}`] });
   };
 
   const hasEnoughBalance = useMemo(() => {
@@ -133,13 +124,13 @@ export const TradeKeyModal: FC<Props> = ({
         {showSuccessMessage ? (
           <Flex y gap1>
             <Typography level="body-lg" textColor="neutral.600">
-              Congrats, you bought your first {keyOwner?.displayName} key!
+              Congrats, you bought your first {keyOwner.displayName} key!
             </Typography>
             <Typography level="body-lg" textColor="neutral.600">
               The next step is asking them a question.
             </Typography>
             <Typography level="body-lg" textColor="neutral.600">
-              If you&apos;re bullish on {keyOwner?.displayName}, you can buy multiple keys!
+              If you&apos;re bullish on {keyOwner.displayName}, you can buy multiple keys!
             </Typography>
             <Flex x yc gap1 alignSelf="flex-end" mt={2}>
               <Button variant="outlined" onClick={() => close()}>

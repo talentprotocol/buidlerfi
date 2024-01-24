@@ -1,11 +1,11 @@
 import { Typography, useTheme } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
-import { FC, ReactElement, cloneElement } from "react";
+import { FC, ReactElement, ReactNode, cloneElement } from "react";
 import { Flex } from "./flex";
 
 interface Props {
   title?: string;
-  text: string;
+  text: string | ReactNode;
   icon: ReactElement;
   sx?: SxProps;
 }

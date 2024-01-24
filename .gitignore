@@ -11,5 +11,5 @@ frontend/public/workbox-*.js
 frontend/public/workbox-*.js.map
 frontend/public/worker-*.js
 frontend/scripts/*.csv
-
+node_modules
 docker-compose.yml

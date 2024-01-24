@@ -24,7 +24,7 @@ export default function CreateWalletPage() {
       <Flex y yc xc grow>
         <img src={CREATE_WALLET_IMAGE} width="100%" />
       </Flex>
-      <Flex y gap1>
+      <Flex y gap1 mb={3}>
         <Button
           size="lg"
           loading={isLoading}

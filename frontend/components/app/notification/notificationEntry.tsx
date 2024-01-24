@@ -2,6 +2,7 @@ import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetNotifications, useMarkNotificationsAsRead } from "@/hooks/useNotificationApi";
+import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference, shortAddress } from "@/lib/utils";
 import { Avatar, Badge, Typography } from "@mui/joy";
 import { NotificationType } from "@prisma/client";
@@ -20,33 +21,38 @@ const NotificationContent = {
   [NotificationType.KEYBUY]: "bought your key",
   [NotificationType.KEYSELL]: "sold your key",
   [NotificationType.REPLIED_OTHER_QUESTION]: "answered a question you follow",
+  [NotificationType.NEW_OPEN_QUESTION]: "asked a question that might interest you",
   //In this case we return the description of the notification from the DB.
   [NotificationType.SYSTEM]: (notification: BuilderfiNotification) => notification.description,
   [NotificationType.POINTS_DROP]: "you received new points",
   [NotificationType.NEW_INVITE_CODE]: "you received a new invite code"
 } as const;
 
-const NotificationClick = {
-  [NotificationType.ASKED_QUESTION]: (notification: BuilderfiNotification) =>
-    `/profile/${notification.targetUser.wallet}?question=${notification.referenceId}`,
-  [NotificationType.REPLIED_YOUR_QUESTION]: (notification: BuilderfiNotification) =>
-    `/profile/${notification.sourceUser?.wallet}?question=${notification.referenceId}`,
-  [NotificationType.USER_INVITED]: (notification: BuilderfiNotification) =>
-    `/profile/${notification.sourceUser?.wallet}`,
-  [NotificationType.QUESTION_UPVOTED]: (notification: BuilderfiNotification) => `/question/${notification.referenceId}`,
-  [NotificationType.QUESTION_DOWNVOTED]: (notification: BuilderfiNotification) =>
-    `/question/${notification.referenceId}`,
-  [NotificationType.REPLY_REACTION]: (notification: BuilderfiNotification) => `/question/${notification.referenceId}`,
-  [NotificationType.FRIEND_JOINED]: (notification: BuilderfiNotification) =>
-    `/profile/${notification.sourceUser?.wallet}`,
-  [NotificationType.KEYBUY]: (notification: BuilderfiNotification) => `/profile/${notification.sourceUser?.wallet}`,
-  [NotificationType.KEYSELL]: (notification: BuilderfiNotification) => `/profile/${notification.sourceUser?.wallet}`,
-  [NotificationType.POINTS_DROP]: () => `/invite`,
-  [NotificationType.NEW_INVITE_CODE]: () => `/invite`,
-  //TODO
-  [NotificationType.REPLIED_OTHER_QUESTION]: () => "",
-  [NotificationType.SYSTEM]: () => ""
-} as const;
+const GetNotificationPath = (notification: BuilderfiNotification) => {
+  switch (notification.type) {
+    case NotificationType.ASKED_QUESTION:
+    case NotificationType.REPLIED_YOUR_QUESTION:
+    case NotificationType.QUESTION_UPVOTED:
+    case NotificationType.QUESTION_DOWNVOTED:
+    case NotificationType.REPLY_REACTION:
+    case NotificationType.NEW_OPEN_QUESTION:
+      return `/question/${notification.referenceId}`;
+    case NotificationType.USER_INVITED:
+    case NotificationType.FRIEND_JOINED:
+    case NotificationType.KEYBUY:
+    case NotificationType.KEYSELL:
+      return `/profile/${notification.sourceUser?.wallet}`;
+    case NotificationType.POINTS_DROP:
+    case NotificationType.NEW_INVITE_CODE:
+      return `/invite`;
+
+    //Not used yet
+    case NotificationType.REPLIED_OTHER_QUESTION:
+    case NotificationType.SYSTEM:
+    default:
+      return "/home";
+  }
+};
 
 interface Props {
   notification: BuilderfiNotification;
@@ -66,22 +72,22 @@ export const NotificationEntry: FC<Props> = ({ notification }) => {
     if (!notification.isRead) await markAsRead.mutateAsync([notification.id]);
     refetchNotifications();
 
-    const url = NotificationClick[notification.type](notification);
+    const url = GetNotificationPath(notification);
     router.push(url);
   };
 
   return (
     <Flex x yc xsb p={2} pointer hover onClick={handleNotificationClick}>
       <Flex x xs yc gap1>
-        <Badge invisible={notification.isRead}>
-          <Avatar src={notification.sourceUser?.avatarUrl || undefined} />
+        <Badge badgeInset="14%" size="sm" invisible={notification.isRead}>
+          <Avatar src={notification.sourceUser ? notification.sourceUser.avatarUrl || undefined : LOGO_BLUE_BACK} />
         </Badge>
         <Flex y>
-          {notification.sourceUser && (
-            <Typography fontWeight={notification.isRead ? 400 : 600} level="title-sm">
-              {notification.sourceUser.displayName || shortAddress(notification.sourceUser.wallet)}
-            </Typography>
-          )}
+          <Typography fontWeight={notification.isRead ? 400 : 600} level="title-sm">
+            {notification.sourceUser
+              ? notification.sourceUser.displayName || shortAddress(notification.sourceUser.wallet)
+              : "A user"}
+          </Typography>
           <Typography level="body-sm">{content}</Typography>
         </Flex>
       </Flex>

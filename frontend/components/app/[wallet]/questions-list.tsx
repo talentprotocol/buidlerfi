@@ -14,7 +14,6 @@ import { Button } from "@mui/joy";
 import Link from "next/link";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
-import QuestionModal from "./question-modal";
 
 interface Props {
   onBuyKeyClick: () => void;
@@ -121,7 +120,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   const message = getMessage();
   if (message) {
     return (
-      <Flex y m={2}>
+      <Flex y grow>
         <PageMessage title={message.title} icon={message.icon} text={message.text} />
         {!message.button ? null : (
           <Flex y gap2 xc grow yc>
@@ -133,33 +132,13 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   }
 
   return (
-    <>
-      {router.searchParams.question && (
-        <QuestionModal
-          profile={profile}
-          questionId={Number(router.searchParams.question)}
-          close={() => {
-            profile?.refetch();
-            router.replace("./");
-          }}
-        />
-      )}
-      <Flex y grow>
-        <Flex y grow sx={{ "& > div:last-child": { border: "none" } }}>
-          {questionsToUse?.map(question => {
-            return (
-              <QuestionEntry
-                refetch={profile.refetch}
-                key={question.id}
-                question={question}
-                type={"home"}
-                onClick={() => router.replace({ searchParams: { question: question.id.toString() } })}
-              />
-            );
-          })}
-          <LoadMoreButton query={profile?.getQuestionsFromReplierQuery} />
-        </Flex>
+    <Flex y grow>
+      <Flex y grow sx={{ "& > div:last-child": { border: "none" } }}>
+        {questionsToUse?.map(question => {
+          return <QuestionEntry refetch={profile.refetch} key={question.id} question={question} />;
+        })}
+        <LoadMoreButton query={profile?.getQuestionsFromReplierQuery} />
       </Flex>
-    </>
+    </Flex>
   );
 };

@@ -101,14 +101,15 @@ export const updateNotificationSettings = async (privyUserId: string, settings: 
 
 export const sendNotification = async (
   targetUserId: number,
-  sourceUserId: number,
   type: NotificationType,
+  sourceUserId?: number,
   referenceId?: number,
   tx?: Omit<
     PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
     "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
   >
 ) => {
+  if (sourceUserId === targetUserId) return { data: null };
   //If tx is passed, use it. Otherwise, use the default prisma client
   const prismaClient = tx ?? prisma;
 

@@ -16,12 +16,12 @@ export const BannerCard: FC<Props> = ({ body, title, children, onClose }) => {
       sx={{
         backgroundColor: theme => theme.palette.primary[50],
         ".MuiTypography-root": {
-          color: theme => theme.palette.primary[400]
+          color: theme => theme.palette.primary[500]
         }
       }}
     >
       <Flex x xsb>
-        <Typography textColor="primary.400" level="title-sm">
+        <Typography textColor="primary.400" fontWeight="600" level="title-sm">
           {title}
         </Typography>
         {onClose && (

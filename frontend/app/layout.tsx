@@ -9,7 +9,11 @@ export const metadata: Metadata = {
   title: "builder.fi by Talent Protocol",
   description: "Where experienced builders can monetize their knowledge and earn crypto by answering questions.",
   metadataBase:
-    process.env.NODE_ENV === "production" ? new URL("https://builder.fi") : new URL("http://localhost:3000"),
+    process.env.ENVIRONMENT === "production"
+      ? new URL("https://app.builder.fi")
+      : process.env.ENVIRONMENT === "development"
+      ? new URL("https://dev.builder.fi")
+      : new URL("http://localhost:3000"),
   openGraph: {
     images: ["https://builder.fi/thumbnail.jpg?2"],
     type: "website",

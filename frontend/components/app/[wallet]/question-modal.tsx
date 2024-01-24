@@ -200,3 +200,4 @@ export default function QuestionModal({ questionId, close, profile }: Props) {
     </Modal>
   );
 }
+
