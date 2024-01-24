@@ -109,7 +109,7 @@ export const sendNotification = async (
     "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
   >
 ) => {
-  // if (sourceUserId === targetUserId) return { data: null };
+  if (sourceUserId === targetUserId) return { data: null };
   //If tx is passed, use it. Otherwise, use the default prisma client
   const prismaClient = tx ?? prisma;
 

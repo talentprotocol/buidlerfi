@@ -70,20 +70,22 @@ export const AskQuestion = () => {
           <Typography level="title-sm">
             Ask {isOpenQuestion ? "an open question" : profile.user?.displayName || shortAddress(profile.user?.wallet)}
           </Typography>
-          <Select
-            placeholder="Select a topic"
-            size="sm"
-            value={tag}
-            sx={{ minWidth: "150px" }}
-            onChange={(e, newVal) => setTag(newVal === "none" ? null : newVal)}
-          >
-            <Option value={"none"}>None</Option>
-            {(tags || []).map(tag => (
-              <Option key={tag.id} value={tag.name}>
-                {tag.name}
-              </Option>
-            ))}
-          </Select>
+          {isOpenQuestion && (
+            <Select
+              placeholder="Select a topic"
+              size="sm"
+              value={tag}
+              sx={{ minWidth: "150px" }}
+              onChange={(e, newVal) => setTag(newVal === "none" ? null : newVal)}
+            >
+              <Option value={"none"}>None</Option>
+              {(tags || []).map(tag => (
+                <Option key={tag.id} value={tag.name}>
+                  {tag.name}
+                </Option>
+              ))}
+            </Select>
+          )}
         </Flex>
         <FullTextArea
           placeholder={`Ask a question...`}

@@ -6,9 +6,10 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetCommentsCount } from "@/hooks/useCommentApi";
 import { useMarkdown } from "@/hooks/useMarkdown";
 import { useGetHotQuestions, useGetKeyQuestions, useGetQuestionsFromUser } from "@/hooks/useQuestionsApi";
+import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference } from "@/lib/utils";
 import theme from "@/theme";
-import { AvatarGroup, Box, Chip, Typography } from "@mui/joy";
+import { Avatar, AvatarGroup, Box, Chip, Typography } from "@mui/joy";
 import { FC, useMemo } from "react";
 import { QuestionContextMenu } from "./question-context-menu";
 
@@ -46,9 +47,17 @@ export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
     <Flex y gap1 p={2} borderBottom={"1px solid " + theme.palette.divider}>
       <Flex x ys gap1>
         <AvatarGroup>
-          <UserAvatar sx={{ width: "24px", height: "24px" }} user={question.questioner} />
-          {question.replier?.id && !askedHimself && (
+          <UserAvatar
+            sx={{
+              width: "24px",
+              height: "24px"
+            }}
+            user={question.questioner}
+          />
+          {question.replier?.id ? (
             <UserAvatar sx={{ width: "24px", height: "24px" }} user={question?.replier} />
+          ) : (
+            <Avatar sx={{ width: "24px", height: "24px" }} src={LOGO_BLUE_BACK} />
           )}
         </AvatarGroup>
         <Flex y basis="100%">

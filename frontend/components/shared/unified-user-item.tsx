@@ -147,6 +147,7 @@ export const UnifiedUserItem: FC<Props> = ({
       x
       xsb
       yc
+      maxWidth="100%"
       py={1}
       px={2}
       sx={{
@@ -156,7 +157,7 @@ export const UnifiedUserItem: FC<Props> = ({
       }}
       onClick={onClick ? onClick : goToProfile}
     >
-      <Flex x yc gap2>
+      <Flex x yc gap2 width="100%">
         <Avatar
           size="sm"
           src={user?.avatarUrl || undefined}
@@ -164,7 +165,7 @@ export const UnifiedUserItem: FC<Props> = ({
           sx={{ cursor: "pointer" }}
           onClick={goToProfile}
         ></Avatar>
-        <Flex y gap={0.5}>
+        <Flex y gap={0.5} width="100%">
           <Flex x gap1>
             <Typography
               onClick={goToProfile}
@@ -185,7 +186,7 @@ export const UnifiedUserItem: FC<Props> = ({
             textColor={"neutral.600"}
             level="body-sm"
             noWrap
-            sx={{ textOverflow: "ellipsis", overflow: "hidden", width: "min(calc(100vw - 70px), 430px)" }}
+            sx={{ textOverflow: "ellipsis", overflow: "hidden", maxWidth: "calc(100% - 50px)" }}
           >
             {renderSubtitle()}
           </Typography>
