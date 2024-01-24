@@ -19,14 +19,6 @@ interface Props {
 }
 
 export const QuestionReply: FC<Props> = ({ question, profile, refetch, reply, setReply }) => {
-  console.log({
-    replier: question.replier,
-    repliedOn: question.repliedOn,
-    reply: question.reply,
-    hasKeys: profile.hasKeys,
-    hasLanchedKeys: profile.hasLaunchedKeys,
-    user: profile.user
-  });
   return (
     <>
       {!profile.hasKeys && profile.hasLaunchedKeys && question?.repliedOn && <UnlockAnswer {...{ profile, refetch }} />}
