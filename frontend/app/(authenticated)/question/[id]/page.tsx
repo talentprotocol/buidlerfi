@@ -30,7 +30,6 @@ export default function QuestionPage() {
     });
     setReply("");
     refetch();
-    console.log("refetched", { question });
   };
 
   const isOpenQuestion = !question?.replierId;
