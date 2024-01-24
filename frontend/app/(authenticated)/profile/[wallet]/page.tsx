@@ -40,7 +40,6 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
             await profile.refetch();
             setBuyModalState("closed");
           }}
-          targetBuilderAddress={(profile.user?.wallet as `0x${string}`) || undefined}
         />
       )}
 
