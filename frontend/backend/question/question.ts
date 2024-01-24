@@ -298,8 +298,9 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
   if (!privyUserId) return { data: exclude(question, ["reply"]) };
 
   const hasKey = !question.replierId || (await ownsKey({ userId: question.replierId }, { privyUserId }));
-
-  if (hasKey) return { data: question };
+  const hasLaunchedKey =
+    question.replierId && (await ownsKey({ userId: question.replierId! }, { userId: question.replierId }));
+  if (hasKey || !hasLaunchedKey) return { data: question };
   else return { data: exclude(question, ["reply"]) };
 };
 
