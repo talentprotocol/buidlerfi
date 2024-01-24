@@ -30,8 +30,7 @@ export const QuestionContent: FC<Props> = ({ question, refetch, profile }) => {
           sx={{ px: 0, py: 0 }}
           user={question.questioner}
           nameLevel="title-sm"
-          bio={question.questioner.bio || undefined}
-          holdersAndReplies={question.questioner.bio ? undefined : questionerStats}
+          holdersAndReplies={questionerStats}
         />
         <QuestionContextMenu question={question} refetch={() => refetch()} />
       </Flex>
