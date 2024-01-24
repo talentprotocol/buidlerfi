@@ -32,7 +32,7 @@ export default function QuestionPage() {
     refetch();
   };
 
-  const isOpenQuestion = !question?.replierId;
+  const isOpenQuestion = !question?.replierId || !profile.hasLaunchedKeys;
   if (!question) return <></>;
   return (
     <Flex y grow>
