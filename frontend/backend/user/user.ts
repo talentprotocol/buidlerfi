@@ -826,8 +826,7 @@ export const getUserStats = async (id: number) => {
   return {
     data: {
       numberOfHolders: user.keysOfSelf.length,
-      numberOfQuestions: user.replies.length,
-      numberOfReplies: user.replies.filter(reply => !!reply.repliedOn).length
+      questionsCount: user.replies.filter(reply => !!reply.repliedOn).length
     }
   };
 };

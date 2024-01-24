@@ -19,6 +19,7 @@ const NotificationTypeToLabel = {
   [NotificationType.KEYBUY]: "Someone buys your key",
   [NotificationType.KEYSELL]: "Someone sells your key",
   [NotificationType.REPLIED_OTHER_QUESTION]: "Someone answers a question you follow",
+  [NotificationType.NEW_OPEN_QUESTION]: "Someone asks a question that might interest you",
   [NotificationType.SYSTEM]: "System notification",
   [NotificationType.POINTS_DROP]: "You receive new points",
   [NotificationType.NEW_INVITE_CODE]: "You receive a new invite code"

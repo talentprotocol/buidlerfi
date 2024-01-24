@@ -64,6 +64,10 @@ export default function QuestionPage() {
                 <UnifiedUserItem
                   key={holding.id}
                   user={holding.owner}
+                  holdersAndReplies={{
+                    numberOfHolders: holding.owner?._count?.keysOfSelf,
+                    questionsCount: holding.owner?._count?.replies
+                  }}
                   onClick={() => router.push({ searchParams: { ask: true, wallet: holding.owner.wallet } })}
                 />
               ))
@@ -86,9 +90,8 @@ export default function QuestionPage() {
                 key={user.id}
                 user={user}
                 holdersAndReplies={{
-                  numberOfReplies: user.numberOfReplies,
                   numberOfHolders: user.numberOfHolders,
-                  numberOfQuestions: user.numberOfQuestions
+                  questionsCount: user.numberOfQuestions
                 }}
                 onClick={() => router.push({ searchParams: { ask: true, wallet: user.wallet } })}
               />
