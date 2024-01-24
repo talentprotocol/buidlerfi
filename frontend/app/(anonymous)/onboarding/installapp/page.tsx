@@ -23,7 +23,7 @@ export default function InstallAppPage() {
           </Flex>
         </Flex>
       </Flex>
-      <Flex y ye xc p={2}>
+      <Flex y ye xc p={2} mb={3}>
         <Button
           fullWidth
           size="lg"

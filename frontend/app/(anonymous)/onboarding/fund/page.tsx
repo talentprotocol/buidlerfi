@@ -141,7 +141,7 @@ export default function FundPage() {
           </Flex>
         </Button>
       </Flex>
-      <Flex y gap2>
+      <Flex y gap2 mb={3}>
         <Flex x yc xc gap1 fullwidth>
           <Typography level="body-md" textColor={"neutral.600"} textAlign="center">
             <Skeleton loading={balanceIsLoading}>

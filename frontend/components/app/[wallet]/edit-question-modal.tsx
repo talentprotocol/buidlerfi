@@ -6,19 +6,14 @@ import { useEditQuestion, useGetQuestion, usePostQuestion } from "@/hooks/useQue
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
 import { FC, useState } from "react";
-import { toast } from "react-toastify";
 
 interface Props {
-  questionToEdit?: number;
+  questionToEdit: number;
   close: () => void;
   refetch: () => Promise<unknown>;
-  ownerUser?: {
-    displayName: string | null;
-    id: number;
-  };
 }
 
-export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit, ownerUser }) => {
+export const EditQuestionModal: FC<Props> = ({ close, refetch, questionToEdit }) => {
   const { user: currentUser } = useUserContext();
   const [questionContent, setQuestionContent] = useState("");
   const [showBadQuestionLabel, setShowBadQuestionLabel] = useState(false);
@@ -36,14 +31,7 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit, ow
     staleTime: 0
   });
 
-  const isEditMode = questionToEdit !== undefined;
-
   const sendQuestion = async () => {
-    if (!ownerUser) {
-      toast.error("Not ready yet");
-      return;
-    }
-
     if (!questionContent.includes("?")) {
       setShowBadQuestionLabel(true);
       return;
@@ -51,24 +39,15 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit, ow
       setShowBadQuestionLabel(false);
     }
 
-    if (isEditMode) {
-      await editQuestion
-        .mutateAsync({
-          questionId: questionToEdit,
-          questionContent: questionContent
-        })
-        .then(async () => {
-          await refetch();
-          close();
-        });
-    } else {
-      await postQuestion.mutateAsync({
-        questionContent: questionContent,
-        replierId: ownerUser.id
+    await editQuestion
+      .mutateAsync({
+        questionId: questionToEdit,
+        questionContent: questionContent
+      })
+      .then(async () => {
+        await refetch();
+        close();
       });
-      await refetch();
-      close();
-    }
   };
 
   const handleClose = () => {
@@ -87,17 +66,17 @@ export const AskQuestionModal: FC<Props> = ({ close, refetch, questionToEdit, ow
       <ModalDialog layout="center" sx={{ width: "min(100vw, 500px)", padding: 0, overflowY: "auto" }}>
         <Flex y gap2 p={2} grow>
           <Flex x xsb yc>
-            <Typography level="title-sm">Ask to {ownerUser?.displayName}</Typography>
+            <Typography level="title-sm">Edit question</Typography>
             <Button
               loading={postQuestion.isLoading}
               disabled={questionContent.length < MIN_QUESTION_LENGTH || questionContent.length > MAX_QUESTION_LENGTH}
               onClick={sendQuestion}
             >
-              {isEditMode ? "Edit" : "Ask"}
+              Edit
             </Button>
           </Flex>
           <FullTextArea
-            placeholder={`Ask ${ownerUser?.displayName} a question...`}
+            placeholder={`Edit your question...`}
             avatarUrl={currentUser?.avatarUrl || undefined}
             onChange={e => setQuestionContent(e.target.value)}
             value={questionContent}

@@ -30,7 +30,7 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
           repliedOn: new Date()
         }
       });
-      await sendNotification(question.questionerId, replier.id, "REPLIED_YOUR_QUESTION", question.id, tx);
+      await sendNotification(question.questionerId, "REPLIED_YOUR_QUESTION", replier.id, question.id, tx);
       return question;
     });
 

@@ -1,7 +1,20 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { SocialProfileType } from "@prisma/client";
+
+// interface KeyRelationshipResponse
+//   extends Prisma.KeyRelationshipGetPayload<{
+//     include: {
+//       holder: {
+//         include: {
+//           socialProfiles: true;
+//         };
+//       };
+//       owner: true;
+//     };
+//   }> {
+//   holdersCount: number;
+// }
 
 export const getKeyRelationships = async (address: string, side: "owner" | "holder") => {
   const relationships = await prisma.keyRelationship.findMany({
@@ -17,7 +30,7 @@ export const getKeyRelationships = async (address: string, side: "owner" | "hold
           }
         : {
             holder: {
-              wallet: address.toLowerCase(),
+              wallet: address.toLowerCase()
             },
             amount: {
               gt: 0
@@ -25,15 +38,87 @@ export const getKeyRelationships = async (address: string, side: "owner" | "hold
           },
     include: {
       holder: {
-        include: {
+        select: {
           socialProfiles: {
             where: {
-              type: SocialProfileType.FARCASTER
+              type: "FARCASTER"
+            }
+          },
+          wallet: true,
+          avatarUrl: true,
+          displayName: true,
+          id: true,
+          bio: true,
+          isActive: true,
+          isAdmin: true,
+          createdAt: true,
+          updatedAt: true,
+          privyUserId: true,
+          socialWallet: true,
+          hasFinishedOnboarding: true,
+          invitedById: true,
+          lastRecommendationsSyncedAt: true,
+          _count: {
+            select: {
+              keysOfSelf: {
+                where: {
+                  amount: {
+                    gt: 0
+                  }
+                }
+              },
+              replies: {
+                where: {
+                  repliedOn: {
+                    not: null
+                  }
+                }
+              }
             }
           }
         }
       },
-      owner: true
+      owner: {
+        select: {
+          socialProfiles: {
+            where: {
+              type: "FARCASTER"
+            }
+          },
+          wallet: true,
+          avatarUrl: true,
+          displayName: true,
+          id: true,
+          bio: true,
+          isActive: true,
+          isAdmin: true,
+          createdAt: true,
+          updatedAt: true,
+          privyUserId: true,
+          socialWallet: true,
+          hasFinishedOnboarding: true,
+          invitedById: true,
+          lastRecommendationsSyncedAt: true,
+          _count: {
+            select: {
+              keysOfSelf: {
+                where: {
+                  amount: {
+                    gt: 0
+                  }
+                }
+              },
+              replies: {
+                where: {
+                  repliedOn: {
+                    not: null
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     orderBy: {
       amount: "desc"

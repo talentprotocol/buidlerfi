@@ -50,7 +50,7 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
 
   if (type === "like") {
     return (
-      <Flex x yc ml={4} sx={sx}>
+      <Flex x yc sx={sx}>
         <IconButton onClick={e => handleAddReaction(e, "LIKE")} variant="plain">
           {hasLikedReply ? (
             <Favorite htmlColor={theme.palette.primary[500]} fontSize="small" />
@@ -66,18 +66,22 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
   return (
     <Flex x yc xsb sx={sx}>
       <Flex x yc gap={0.5}>
-        <IconButton onClick={e => handleAddReaction(e, "UPVOTE")} color={myVote === "UPVOTE" ? "primary" : undefined}>
+        <IconButton
+          size="sm"
+          onClick={e => handleAddReaction(e, "UPVOTE")}
+          color={myVote === "UPVOTE" ? "primary" : undefined}
+        >
           <ArrowUpward fontSize="small" />
         </IconButton>
         <Typography
           textColor={!myVote ? undefined : myVote === "UPVOTE" ? "primary.500" : "danger.500"}
           level="body-sm"
           textAlign="center"
-          sx={{ minWidth: "35px" }}
         >
           {upvotes}
         </Typography>
         <IconButton
+          size="sm"
           onClick={e => handleAddReaction(e, "DOWNVOTE")}
           color={myVote === "DOWNVOTE" ? "danger" : undefined}
         >

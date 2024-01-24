@@ -1,47 +1,29 @@
+import { getTags } from "@/backend/tags/tags";
 import { Flex } from "@/components/shared/flex";
 import { FullTextArea } from "@/components/shared/full-text-area";
-import { LoadingPage } from "@/components/shared/loadingPage";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useEditQuestion, useGetQuestion, usePostQuestion } from "@/hooks/useQuestionsApi";
-import { useSocialData } from "@/hooks/useSocialData";
+import { usePostOpenQuestion, usePostQuestion } from "@/hooks/useQuestionsApi";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { shortAddress } from "@/lib/utils";
-import { Button, Typography } from "@mui/joy";
-import { useMemo, useState } from "react";
+import { Button, Option, Select, Typography } from "@mui/joy";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 export const AskQuestion = () => {
   const { user } = useUserContext();
   const router = useBetterRouter();
-  const { wallet, questionToEdit } = router.searchParams;
-  const socialData = useSocialData(wallet as `0x${string}`);
+  const { wallet } = router.searchParams;
+  const [tag, setTag] = useState<string | null>(null);
+  const profile = useUserProfile(wallet as `0x${string}`);
   const [questionContent, setQuestionContent] = useState("");
   const [showBadQuestionLabel, setShowBadQuestionLabel] = useState(false);
   const postQuestion = usePostQuestion();
-  const editQuestion = useEditQuestion();
-
-  const { data: question, isLoading } = useGetQuestion(questionToEdit as number, {
-    enabled: !!questionToEdit,
-    //Need to fix this to add typescript inference
-    onSuccess: (data: unknown) => {
-      const questionData = data as { questionContent: string };
-      setQuestionContent(questionData.questionContent);
-    },
-    cacheTime: 0,
-    staleTime: 0
-  });
-
-  const { userId, displayName } = useMemo(() => {
-    return question
-      ? {
-          userId: question.replier.id,
-          displayName: question.replier.displayName || shortAddress(question.replier.wallet)
-        }
-      : { ...socialData };
-  }, [question, socialData]);
-
-  const isEditMode = questionToEdit !== undefined;
+  const postOpenQuestion = usePostOpenQuestion();
+  const isOpenQuestion = !wallet;
+  const { data: tags } = useQuery(["tags"], () => getTags(), { select: data => data.data });
 
   const sendQuestion = async () => {
     if (!questionContent.includes("?")) {
@@ -51,20 +33,18 @@ export const AskQuestion = () => {
       setShowBadQuestionLabel(false);
     }
 
-    if (isEditMode) {
-      await editQuestion
-        .mutateAsync({
-          questionId: questionToEdit as number,
-          questionContent: questionContent
-        })
-        .then(res => {
-          router.replace(`/question/${res?.id}`);
-        });
-    } else {
+    if (!isOpenQuestion && profile.user?.id) {
       await postQuestion
         .mutateAsync({
           questionContent: questionContent,
-          replierId: userId
+          replierId: profile.user.id
+        })
+        .then(res => router.replace(`/question/${res?.id}`));
+    } else {
+      await postOpenQuestion
+        .mutateAsync({
+          questionContent: questionContent,
+          tag: tag || ""
         })
         .then(res => router.replace(`/question/${res?.id}`));
     }
@@ -81,38 +61,48 @@ export const AskQuestion = () => {
             disabled={questionContent.length < MIN_QUESTION_LENGTH || questionContent.length > MAX_QUESTION_LENGTH}
             onClick={sendQuestion}
           >
-            {isEditMode ? "Edit" : "Ask"}
+            Ask
           </Button>
         }
       />
-      {questionToEdit && isLoading ? (
-        <LoadingPage minHeight="300px" />
-      ) : (
-        <>
-          <Flex y gap2 p={2} grow>
-            <Flex x xsb yc>
-              <Typography level="title-sm">Ask {displayName}</Typography>
-            </Flex>
-            <FullTextArea
-              placeholder={`Ask a question...`}
-              avatarUrl={user?.avatarUrl || undefined}
-              onChange={e => setQuestionContent(e.target.value)}
-              value={questionContent}
-            />
-          </Flex>
-          {showBadQuestionLabel && (
-            <Typography color={"danger"} level="helper" paddingLeft={2} paddingRight={2}>
-              builder.fi is designed to ask thoughtful questions to other builders. Make sure you&apos;re posting a
-              question.
-            </Typography>
-          )}
-          <Flex x alignSelf={"flex-end"} pb={2} pr={2}>
-            <Typography color={questionContent.length > MAX_QUESTION_LENGTH ? "danger" : undefined} level="helper">
-              {questionContent.length}/{MAX_QUESTION_LENGTH}
-            </Typography>
-          </Flex>
-        </>
+      <Flex y gap2 p={2} grow>
+        <Flex x xsb yc>
+          <Typography level="title-sm">
+            Ask {isOpenQuestion ? "an open question" : profile.user?.displayName || shortAddress(profile.user?.wallet)}
+          </Typography>
+          <Select
+            placeholder="Select a topic"
+            size="sm"
+            value={tag}
+            sx={{ minWidth: "150px" }}
+            onChange={(e, newVal) => setTag(newVal === "none" ? null : newVal)}
+          >
+            <Option value={"none"}>None</Option>
+            {(tags || []).map(tag => (
+              <Option key={tag.id} value={tag.name}>
+                {tag.name}
+              </Option>
+            ))}
+          </Select>
+        </Flex>
+        <FullTextArea
+          placeholder={`Ask a question...`}
+          avatarUrl={user?.avatarUrl || undefined}
+          onChange={e => setQuestionContent(e.target.value)}
+          value={questionContent}
+        />
+      </Flex>
+      {showBadQuestionLabel && (
+        <Typography color={"danger"} level="helper" paddingLeft={2} paddingRight={2}>
+          builder.fi is designed to ask thoughtful questions to other builders. Make sure you&apos;re posting a
+          question.
+        </Typography>
       )}
+      <Flex x alignSelf={"flex-end"} pb={2} pr={2}>
+        <Typography color={questionContent.length > MAX_QUESTION_LENGTH ? "danger" : undefined} level="helper">
+          {questionContent.length}/{MAX_QUESTION_LENGTH}
+        </Typography>
+      </Flex>
     </>
   );
 };

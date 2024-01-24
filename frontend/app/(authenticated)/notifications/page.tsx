@@ -54,7 +54,9 @@ export default function NotificationPage() {
           .map(key => {
             return (
               <Flex y key={key}>
-                <Typography sx={{ px: 2, pt: 2 }}>{key}</Typography>
+                <Typography level="body-sm" fontWeight={600} sx={{ px: 2, pt: 2 }}>
+                  {key}
+                </Typography>
                 {sorted[key as keyof typeof sorted]?.map(notification => {
                   return <NotificationEntry key={notification.id} notification={notification} />;
                 })}

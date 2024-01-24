@@ -17,8 +17,8 @@ export const UserAvatar: FC<Props> = ({ user, ...props }) => {
       src={user?.avatarUrl || undefined}
       alt={user?.displayName || undefined}
       onClick={() => user && router.push(`/profile/${user.wallet}`)}
-      sx={{ cursor: "pointer", ...props.sx }}
       {...props}
+      sx={{ cursor: "pointer", ...props.sx }}
     />
   );
 };
