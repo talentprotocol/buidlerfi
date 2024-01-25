@@ -8,11 +8,13 @@ import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
-import { formatEth, shortAddress } from "@/lib/utils";
+import { NEW_BUILDERFI_INVITE_CAST } from "@/lib/constants";
+import { encodeQueryData, formatEth, shortAddress } from "@/lib/utils";
 import { EditOutlined } from "@mui/icons-material";
 import { Avatar, Button, Chip, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
 import { SocialProfile, SocialProfileType } from "@prisma/client";
 import Image from "next/image";
+import Link from "next/link";
 import { FC, useMemo } from "react";
 
 interface Props {
@@ -74,7 +76,7 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
   const name = useMemo(() => profile.user?.displayName || recommendedName(), [profile.user, profile.recommendedUser]);
 
   const isCurrentUserProfilePage = currentUser?.wallet.toLowerCase() === profile.user?.wallet.toLowerCase();
-  
+
   const allSocials = useMemo(() => {
     if (profile.user?.socialProfiles?.length) {
       return profile.user?.socialProfiles;
@@ -126,6 +128,8 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
       .map(profile => profile);
   }, [currentUser?.socialProfiles, profile.holders, profile.user]);
 
+  const farcasterProfile = allSocials.find(socialProfile => socialProfile.type === SocialProfileType.FARCASTER);
+
   return (
     <>
       <Flex y gap2 p={2}>
@@ -155,9 +159,24 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
                 </Button>
               )}
 
-              <Button onClick={() => setBuyModalState("buy")} disabled={supply === BigInt(0) && !profile.isOwnProfile}>
-                {profile.isOwnProfile && profile.holders?.length === 0 ? "Create keys" : "Buy"}
-              </Button>
+              {profile.hasLaunchedKeys && profile.user && (
+                <Button
+                  onClick={() => setBuyModalState("buy")}
+                  disabled={supply === BigInt(0) && !profile.isOwnProfile}
+                >
+                  {profile.isOwnProfile && profile.holders?.length === 0 ? "Create keys" : "Buy"}
+                </Button>
+              )}
+              {!profile.user && farcasterProfile && (
+                <Link
+                  href={`https://warpcast.com/~/compose?${encodeQueryData({
+                    text: NEW_BUILDERFI_INVITE_CAST.replace("{username}", farcasterProfile.profileName)
+                  })}`}
+                  target="_blank"
+                >
+                  <Button>invite</Button>
+                </Link>
+              )}
             </Flex>
           </Flex>
           <Flex x yc gap1>

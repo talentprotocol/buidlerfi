@@ -1,17 +1,13 @@
 "use client";
 import { KeyIcon } from "@/components/icons/key";
-import { ParachuteIcon } from "@/components/icons/parachute";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { NEW_BUILDERFI_INVITE_CAST } from "@/lib/constants";
-import { encodeQueryData } from "@/lib/utils";
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Button } from "@mui/joy";
-import Link from "next/link";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
 
@@ -74,7 +70,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             icon: <KeyIcon />,
             text: "ask the first question to " + profile?.user?.displayName,
             button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
-          }
+          };
         }
         const profileName =
           profile?.recommendedUser?.talentProtocol ||
@@ -83,19 +79,10 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           profile?.recommendedUser?.lens;
         if (profile?.recommendedUser?.farcaster) {
           return {
-            title: `${profileName} is not builder.fi`,
-            icon: <ParachuteIcon />,
-            text: `invite ${profileName} to join and earn points`,
-            button: (
-              <Link
-                href={`https://warpcast.com/~/compose?${encodeQueryData({
-                  text: NEW_BUILDERFI_INVITE_CAST.replace("{username}", profile?.recommendedUser?.farcaster)
-                })}`}
-                target="_blank"
-              >
-                <Button>invite</Button>
-              </Link>
-            )
+            title: `this profile is on farcaster`,
+            icon: <KeyIcon />,
+            text: "ask the first question to " + profile?.recommendedUser?.farcaster,
+            button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
           };
         } else {
           return {
