@@ -1,16 +1,15 @@
-import { ERRORS } from "@/lib/errors";
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { NextRequest, NextResponse } from "next/server";
-import { SocialProfileType } from "@prisma/client";
-import prisma from "@/lib/prisma";
 import { BUILDERFI_FARCASTER_FID } from "@/lib/constants";
-
+import { ERRORS } from "@/lib/errors";
+import prisma from "@/lib/prisma";
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { SocialProfileType } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const castHash = req.headers.get("castHash");
+    const {castHash} = await req.json();
     if (!castHash) {
-        return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
+      return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
     }
     const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY as string);
 
@@ -36,19 +35,24 @@ export async function GET(req: NextRequest) {
     });
 
     // Create a map from profileName to UserId
-    const profileNameToUserIdMap = new Map(authorsWithBuilderfiAccount.map(profile => [profile.profileName, profile.userId]));
+    const profileNameToUserIdMap = new Map(
+      authorsWithBuilderfiAccount.map(profile => [profile.profileName, profile.userId])
+    );
 
     // Filter casts by authors with a Builderfi account
     const builderfiAuthorsCasts = casts.filter(cast => {
       const username = fidToUsernameMap.get(Number(cast.author.fid));
       return username && profileNameToUserIdMap.has(username);
     });
-    
+
     // save on db ....
-   
 
-    return NextResponse.json({ /*savedCasts*/ }, { status: 200 });
-
+    return NextResponse.json(
+      {
+        /*savedCasts*/
+      },
+      { status: 200 }
+    );
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });
