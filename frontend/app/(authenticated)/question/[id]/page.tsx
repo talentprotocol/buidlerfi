@@ -42,7 +42,7 @@ export default function QuestionPage() {
         endItem={
           profile.isOwnProfile && !question.repliedOn ? (
             <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>
-              Reply
+              Answer
             </Button>
           ) : undefined
         }

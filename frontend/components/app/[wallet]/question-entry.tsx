@@ -14,7 +14,7 @@ import { FC, useMemo } from "react";
 import { QuestionContextMenu } from "./question-context-menu";
 
 const pluralize = (amount: number) => {
-  return amount <= 1 ? "reply" : `replies`;
+  return amount <= 1 ? "answer" : `answers`;
 };
 
 interface Props {

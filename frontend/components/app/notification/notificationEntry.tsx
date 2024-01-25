@@ -16,7 +16,7 @@ const NotificationContent = {
   [NotificationType.USER_INVITED]: "joined builder.fi with your invite",
   [NotificationType.QUESTION_UPVOTED]: "upvoted your question",
   [NotificationType.QUESTION_DOWNVOTED]: "downvoted your question",
-  [NotificationType.REPLY_REACTION]: "liked your reply",
+  [NotificationType.REPLY_REACTION]: "liked your answer",
   [NotificationType.FRIEND_JOINED]: "joined builder.fi",
   [NotificationType.KEYBUY]: "bought your key",
   [NotificationType.KEYSELL]: "sold your key",

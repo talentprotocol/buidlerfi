@@ -52,10 +52,6 @@ export const createComment = async (privyUserId: string, questionId: number, com
 
     const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
     if (!hasKey) return { error: ERRORS.MUST_HOLD_KEY };
-  } else {
-    //To reply to open question, holder must have launched his keys
-    const hasLaunchedKey = await ownsKey({ privyUserId }, { privyUserId });
-    if (!hasLaunchedKey) return { error: ERRORS.MUST_LAUNCH_KEY };
   }
 
   const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
