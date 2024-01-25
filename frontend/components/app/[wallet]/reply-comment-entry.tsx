@@ -5,7 +5,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useMarkdown } from "@/hooks/useMarkdown";
-import { getDifference } from "@/lib/utils";
+import { getDifference, shortAddress } from "@/lib/utils";
 import { Typography, useTheme } from "@mui/joy";
 import { User } from "@prisma/client";
 import { FC, useState } from "react";
@@ -66,9 +66,9 @@ export const ReplyCommentEntry: FC<Props> = ({ id, type, content, author, refetc
             {/* if content is empty, it means the answer is locked (open question)*/}
             {type === "comment" && content === "" ? (
               <Typography level="body-sm" textColor="neutral.500" py={0.5}>
-                This reply is locked.{" "}
+                {author.displayName || shortAddress(author.wallet)}&apos;s answers are gated.{" "}
                 <a style={{ cursor: "pointer" }} onClick={() => setIsBuyingKey(true)}>
-                  Buy {author.displayName} key to unlock answer
+                  reveal them, buying {author.displayName || shortAddress(author.wallet)}&apos;s key
                 </a>
               </Typography>
             ) : (
@@ -77,7 +77,7 @@ export const ReplyCommentEntry: FC<Props> = ({ id, type, content, author, refetc
             {type === "reply" ? (
               <Reactions sx={{ ml: -1 }} type="like" questionId={id} />
             ) : (
-              <CommentReactions isReadOnly={content === ""} sx={{ ml: -1 }} commentId={id} refetch={refetch} />
+              <CommentReactions isReadOnly={content === ""} sx={{ ml: -1 }} commentId={id} />
             )}
           </Flex>
         </Flex>

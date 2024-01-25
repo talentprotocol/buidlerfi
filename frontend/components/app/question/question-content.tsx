@@ -27,7 +27,7 @@ export const QuestionContent: FC<Props> = ({ question, refetch, profile }) => {
       <Flex x yc xsb>
         <UnifiedUserItem
           nonClickable
-          sx={{ px: 0, py: 0 }}
+          sx={{ px: 0, py: 0, flexGrow: 1 }}
           user={question.questioner}
           nameLevel="title-sm"
           holdersAndReplies={questionerStats}

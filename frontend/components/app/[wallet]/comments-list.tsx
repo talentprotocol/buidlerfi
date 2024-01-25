@@ -1,7 +1,5 @@
-import { KeyIcon } from "@/components/icons/key";
 import { Flex } from "@/components/shared/flex";
 import { FullTextArea } from "@/components/shared/full-text-area";
-import { PageMessage } from "@/components/shared/page-message";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateComment, useGetComments } from "@/hooks/useCommentApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
@@ -20,7 +18,7 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
   const [newComment, setNewComment] = useState("");
   const postComment = useCreateComment();
   const { data: comments, refetch: refetchComment } = useGetComments(questionId);
-  const { user: currentUser, hasLaunchedKeys, refetch: refetchUserContext } = useUserContext();
+  const { user: currentUser, refetch: refetchUserContext } = useUserContext();
   const [isBuyKeyModalOpen, setIsBuyKeyModalOpen] = useState(false);
 
   const handleCreateComment = async () => {
@@ -68,37 +66,24 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
           }}
         />
       )}
-      {hasLaunchedKeys ? (
-        <Flex x sx={{ minHeight: "100px" }} p={2}>
-          <FullTextArea
-            avatarUrl={currentUser?.avatarUrl ?? DEFAULT_PROFILE_PICTURE}
-            placeholder={`Give your reply to this open question`}
-            onChange={e => setNewComment(e.target.value)}
-            value={newComment}
-          />
-          <Button
-            variant="outlined"
-            color="neutral"
-            sx={{ maxHeight: "20px", alignSelf: "flex-start" }}
-            onClick={handleCreateComment}
-          >
-            Reply
-          </Button>
-        </Flex>
-      ) : (
-        <PageMessage
-          icon={<KeyIcon />}
-          title="Launch your keys"
-          text={
-            <>
-              You must have launched your keys to answer this question.{" "}
-              <a style={{ cursor: "pointer" }} onClick={() => setIsBuyKeyModalOpen(true)}>
-                Launch your keys now to answer
-              </a>
-            </>
-          }
+      <Flex x sx={{ minHeight: "100px" }} p={2}>
+        <FullTextArea
+          avatarUrl={currentUser?.avatarUrl ?? DEFAULT_PROFILE_PICTURE}
+          placeholder={`Answer this open question`}
+          onChange={e => setNewComment(e.target.value)}
+          value={newComment}
         />
-      )}
+        <Button
+          color="primary"
+          sx={{ maxHeight: "20px", alignSelf: "flex-start" }}
+          disabled={newComment.length < 10}
+          loading={postComment.isLoading}
+          onClick={handleCreateComment}
+        >
+          Answer
+        </Button>
+      </Flex>
+
       <Divider />
       <Flex y yc grow gap1>
         {comments?.map(comment => (

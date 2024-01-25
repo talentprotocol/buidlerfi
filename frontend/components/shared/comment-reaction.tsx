@@ -9,19 +9,18 @@ import { Flex } from "./flex";
 interface Props {
   sx?: SxProps;
   commentId: number;
-  refetch: () => void;
   isReadOnly?: boolean;
 }
 
-export const CommentReactions: FC<Props> = ({ commentId, sx, refetch, isReadOnly }) => {
+export const CommentReactions: FC<Props> = ({ commentId, sx, isReadOnly }) => {
   const { user } = useUserContext();
   const theme = useTheme();
   const addCommentReaction = useAddCommentReaction();
-  const { data: reactions } = useGetCommentReactions();
+  const { data: reactions, refetch: refetchReactions } = useGetCommentReactions(commentId);
 
   const handleAddReaction = async () => {
     await addCommentReaction.mutateAsync(commentId);
-    refetch();
+    refetchReactions();
   };
 
   const hasLiked = useMemo(() => {

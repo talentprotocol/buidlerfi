@@ -31,8 +31,8 @@ export const ReplyCommentContextMenu: FC<Props> = ({ id, authorId, type, refetch
         deleteCommentOrReply.mutateAsync(id).then(() => {
           refetch();
         }),
-      body: `Are you sure you want to delete this ${type}?`,
-      title: `Delete ${type}`
+      body: `Are you sure you want to delete this ${type === "reply" ? "answer" : "comment"}?`,
+      title: `Delete ${type === "reply" ? "answer" : "comment"}`
     });
   };
 
