@@ -345,3 +345,15 @@ model KeyPricing {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
 }
+
+model CastInteraction {
+  id               Int            @id @default(autoincrement())
+  parentCastHash   String         @db.VarChar(255)
+  replyCastHash    String         @db.VarChar(255)
+  replyCastText   String          @db.VarChar(255)
+  authorFid        Int
+  authorName       String         @db.VarChar(255)
+  userId           Int    
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}

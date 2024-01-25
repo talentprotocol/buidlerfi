@@ -11,8 +11,10 @@ export async function GET(req: NextRequest) {
     if (!castHash) {
       return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
     }
+    // Initialize the Neynar API client
     const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY as string);
 
+    // Fetch all casts in the thread starting from a parent cast hash
     const { result } = await client.fetchAllCastsInThread(castHash);
 
     // retrieve the casts from the result
@@ -45,14 +47,30 @@ export async function GET(req: NextRequest) {
       return username && profileNameToUserIdMap.has(username);
     });
 
-    // save on db ....
+    // Prepare the data for saving to the database
+    const castInteractionData = builderfiAuthorsCasts.map(cast => {
+      const authorUsername = fidToUsernameMap.get(Number(cast.author.fid)) || 'default';
+      const userId = profileNameToUserIdMap.get(authorUsername!) || 0;
 
-    return NextResponse.json(
-      {
-        /*savedCasts*/
-      },
-      { status: 200 }
-    );
+      return {
+        parentCastHash: castHash, // The original cast hash from the request
+        replyCastHash: cast.hash, 
+        replyCastText: cast.text,
+        authorFid: Number(cast.author.fid),
+        authorName: authorUsername,
+        userId: userId
+      };
+    });
+
+    // Save the cast interactions to the database
+    const savedInteractions = await prisma.castInteraction.createMany({
+      data: castInteractionData,
+      skipDuplicates: true // To avoid inserting duplicates
+    });
+
+    // Return the saved interactions in the response
+    return NextResponse.json({ savedInteractions }, { status: 200 });
+
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });
