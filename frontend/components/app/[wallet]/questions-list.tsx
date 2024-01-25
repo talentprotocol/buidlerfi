@@ -30,8 +30,6 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
     return <LoadingPage />;
   }
 
-  profile.hasLaunchedKeys = false;
-
   const getMessage = () => {
     if (hasQuestion) {
       return null;
