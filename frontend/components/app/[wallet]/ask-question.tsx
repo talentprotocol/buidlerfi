@@ -68,7 +68,10 @@ export const AskQuestion = () => {
       <Flex y gap2 p={2} grow>
         <Flex x xsb yc>
           <Typography level="title-sm">
-            Ask {isOpenQuestion ? "an open question" : profile.user?.displayName || shortAddress(profile.user?.wallet)}
+            Ask{" "}
+            {isOpenQuestion
+              ? "an open question"
+              : profile.user?.displayName || shortAddress(profile.user?.wallet) || profile.recommendedUser?.farcaster}
           </Typography>
           {isOpenQuestion && (
             <Select

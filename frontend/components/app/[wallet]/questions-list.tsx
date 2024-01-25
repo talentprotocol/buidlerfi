@@ -61,7 +61,11 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             icon: <KeyIcon />,
             text: "ask the first question to " + profile?.user?.displayName,
             button: (
-              <Button onClick={() => router.push({ searchParams: { ask: true, wallet: profile.user?.wallet } })}>
+              <Button
+                onClick={() =>
+                  router.replace({ pathname: "/question", searchParams: { ask: true, wallet: profile.user?.wallet } })
+                }
+              >
                 Ask question
               </Button>
             )
@@ -74,7 +78,11 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             icon: <KeyIcon />,
             text: "ask the first question to " + profile?.user?.displayName,
             button: (
-              <Button onClick={() => router.push({ searchParams: { ask: true, wallet: profile.user?.wallet } })}>
+              <Button
+                onClick={() =>
+                  router.replace({ pathname: "/question", searchParams: { ask: true, wallet: profile.user?.wallet } })
+                }
+              >
                 Ask question
               </Button>
             )
@@ -90,7 +98,18 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             title: `this profile is on farcaster`,
             icon: <KeyIcon />,
             text: "ask the first question to " + profile?.recommendedUser?.farcaster,
-            button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
+            button: (
+              <Button
+                onClick={() =>
+                  router.replace({
+                    pathname: "/question",
+                    searchParams: { ask: true, wallet: profile.recommendedUser?.wallet }
+                  })
+                }
+              >
+                Ask question
+              </Button>
+            )
           };
         } else {
           return {
