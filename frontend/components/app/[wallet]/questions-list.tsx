@@ -60,7 +60,11 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             title: "you have a key",
             icon: <KeyIcon />,
             text: "ask the first question to " + profile?.user?.displayName,
-            button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
+            button: (
+              <Button onClick={() => router.push({ searchParams: { ask: true, wallet: profile.user?.wallet } })}>
+                Ask question
+              </Button>
+            )
           };
         }
       } else {
@@ -69,7 +73,11 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             title: "this profile is public",
             icon: <KeyIcon />,
             text: "ask the first question to " + profile?.user?.displayName,
-            button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
+            button: (
+              <Button onClick={() => router.push({ searchParams: { ask: true, wallet: profile.user?.wallet } })}>
+                Ask question
+              </Button>
+            )
           };
         }
         const profileName =
