@@ -9,6 +9,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { shortAddress } from "@/lib/utils";
 import { Button, Option, Select, Typography } from "@mui/joy";
+import { RecommendedUser } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -33,11 +34,12 @@ export const AskQuestion = () => {
       setShowBadQuestionLabel(false);
     }
 
-    if (!isOpenQuestion && profile.user?.id) {
+    if (!isOpenQuestion && (profile.user?.id || profile.recommendedUser?.farcaster)) {
       await postQuestion
         .mutateAsync({
           questionContent: questionContent,
-          replierId: profile.user.id
+          replierId: profile.user?.id as number,
+          recommendedUser: profile.recommendedUser as RecommendedUser
         })
         .then(res => router.replace(`/question/${res?.id}`));
     } else {

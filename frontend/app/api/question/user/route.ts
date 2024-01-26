@@ -3,6 +3,7 @@ import { ERRORS } from "@/lib/errors";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  console.log(req)
   try {
     const offset = req.nextUrl.searchParams.has("offset") ? Number(req.nextUrl.searchParams.get("offset")) : 0;
     const user = req.nextUrl.searchParams.get("user");

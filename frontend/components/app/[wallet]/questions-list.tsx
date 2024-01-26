@@ -20,6 +20,7 @@ interface Props {
 export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   const router = useBetterRouter();
   const questionsToUse = type === "answers" ? profile?.questions : profile?.questionsAsked;
+  console.log(questionsToUse)
   const hasQuestion: boolean = !!questionsToUse?.length;
   // const hasQuestion: boolean = false;
   if (!profile || profile.isLoading) {
@@ -130,7 +131,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   };
 
   const message = getMessage();
-  if (message) {
+  if (message && profile.questions?.length === 0) {
     return (
       <Flex y grow>
         <PageMessage title={message.title} icon={message.icon} text={message.text} />

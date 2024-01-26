@@ -24,9 +24,9 @@ export const useUserProfile = (wallet?: string) => {
     refetch: refetchUser,
     isLoading: isLoadingUser
   } = useGetUser(formattedWallet as `0x${string}` | undefined);
+
   const getQuestionsFromReplierQuery = useGetQuestionsFromUser(user?.id);
   const getQuestionsFromQuestionerQuery = useGetQuestionsFromUser(user?.id, "questions");
-
   const sortedHolders = useMemo(
     () => holders?.sort((a, b) => a.createdAt.valueOf() - b.createdAt.valueOf()),
     [holders]

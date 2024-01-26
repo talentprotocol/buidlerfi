@@ -10,7 +10,7 @@ import {
   getQuestionSA
 } from "@/backend/question/questionServerActions";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
-import { ReactionType } from "@prisma/client";
+import { ReactionType, RecommendedUser } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
 import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
@@ -45,8 +45,9 @@ export const useGetQuestionsFromUser = (userId?: number, side: "questions" | "re
 };
 
 export const usePostQuestion = () => {
-  return useMutationSA((options, params: { replierId: number; questionContent: string }) =>
-    createQuestionSA(params.questionContent, params.replierId, options)
+  return useMutationSA(
+    (options, params: { replierId: number; questionContent: string; recommendedUser: RecommendedUser }) =>
+      createQuestionSA(params.questionContent, params.replierId, params.recommendedUser, options)
   );
 };
 export const usePostOpenQuestion = () => {

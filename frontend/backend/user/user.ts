@@ -93,7 +93,7 @@ export const checkUsersExist = async (wallets: string[]) => {
 
 export const getUser = async (wallet: string) => {
   const address = wallet.toLowerCase();
-  const res = await prisma.user.findUnique({
+  let res = await prisma.user.findUnique({
     where: {
       wallet: address
     },
@@ -103,7 +103,18 @@ export const getUser = async (wallet: string) => {
     }
   });
 
-  if (!res) return { error: ERRORS.USER_NOT_FOUND };
+  if (!res) {
+    res = await prisma.user.findUnique({
+      where: {
+        socialWallet: address
+      },
+      include: {
+        socialProfiles: true,
+        tags: true
+      }
+    });
+    if (!res) return { error: ERRORS.USER_NOT_FOUND };
+  }
 
   return { data: res };
 };
