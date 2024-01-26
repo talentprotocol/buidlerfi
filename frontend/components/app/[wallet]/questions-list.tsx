@@ -95,9 +95,9 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           profile?.recommendedUser?.lens;
         if (profile?.recommendedUser?.farcaster) {
           return {
-            title: `this profile is on farcaster`,
+            title: `${profile.user} isn't on builder.fi yet`,
             icon: <KeyIcon />,
-            text: "ask the first question to " + profile?.recommendedUser?.farcaster,
+            text: "but you can show your interest in their knowledge asking a question or sending an invite",
             button: (
               <Button
                 onClick={() =>
