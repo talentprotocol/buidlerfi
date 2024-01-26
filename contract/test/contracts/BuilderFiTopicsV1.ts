@@ -284,6 +284,55 @@ describe("BuilderFi-topics", () => {
       expect(finalBalanceBuyer).to.eq(0);
     });
 
+    // Bonding curve prices simulation
+    it("Simulate buy price with the topics bonding curve for 400 keys", async () => {
+      await builderFi.connect(creator).createTopic(["test#6"]);
+    
+      let totalSpent = ethers.BigNumber.from("0");
+      for (let i = 0; i < 400; i++) {
+        const buyPrice = await builderFi.getBuyPriceAfterFee("test#6");
+        //console.log(`Price for key ${i + 1}:`, ethers.utils.formatEther(buyPrice), "ETH");
+    
+        await builderFi.connect(shareOwner).buyShares("test#6", shareBuyer.address, { value: buyPrice });
+        totalSpent = totalSpent.add(buyPrice);
+      }
+    
+      console.log("Total spent for 400 keys:", ethers.utils.formatEther(totalSpent), "ETH");
+    });
+
+    it("Simulate sell price with the topics bonding curve for 400 keys", async () => {
+      await builderFi.connect(creator).createTopic(["test#6"]);
+    
+      let totalSpent = ethers.BigNumber.from("0");
+      let totalReceived = ethers.BigNumber.from("0");
+    
+      // Buy 400 keys
+      for (let i = 0; i < 400; i++) {
+        const buyPrice = await builderFi.getBuyPriceAfterFee("test#6");
+        const buyPriceWithoutFees = await builderFi.getBuyPrice("test#6");
+        //console.log(`Price for key ${i + 1}:`, ethers.utils.formatEther(buyPrice), "ETH");
+        console.log(ethers.utils.formatEther(buyPriceWithoutFees), "ETH");
+
+        await builderFi.connect(shareOwner).buyShares("test#6", shareBuyer.address, { value: buyPrice });
+        totalSpent = totalSpent.add(buyPrice);
+      }
+    
+      console.log(ethers.utils.formatEther(totalSpent), "ETH");
+    
+      // Sell 400 keys
+      for (let i = 0; i < 400; i++) {
+        const sellPrice = await builderFi.getSellPriceAfterFee("test#6", 1);
+        const sellPriceWithoutFees = await builderFi.getSellPrice("test#6", 1);
+        //console.log(`Sell price for key ${400 - i}:`, ethers.utils.formatEther(sellPrice), "ETH");
+        console.log(ethers.utils.formatEther(sellPriceWithoutFees), "ETH");
+    
+        await builderFi.connect(shareBuyer).sellShares("test#6", shareBuyer.address);
+        totalReceived = totalReceived.add(sellPrice);
+      }
+    
+      console.log("Total received for 400 keys:", ethers.utils.formatEther(totalReceived), "ETH");
+    });
+    
     // Protocol fees tests
     it("Check protocol fees increase", async () => {
     });

@@ -16,6 +16,7 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   error CannotSellLastShare();
   error InsufficientPayment();
   error InsufficientShares();
+  error OnlyOwnerCanCreateTopics();
 
   // Address where protocol fees are sent
   address public protocolFeeDestination;
@@ -27,8 +28,12 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   // Flag to enable or disable trading
   bool public tradingEnabled;
 
-  // Contract address to receive the pool prize
-  address public poolPrize;
+  // Flag to enable or disable open topic creation
+  bool public openTopic;
+
+  // Contract address to receive the topics pool prize
+  // This address will redestribute the pool prize to the users contributing to the topics
+  address public poolPrizeReceiver;
 
   // Event emitted on trade execution
   event Trade(
@@ -97,6 +102,22 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     tradingEnabled = false;
   }
 
+  // Functions to enable or disable open topic creation
+  // This will be used in order to let the community create topics after the alpha stage
+
+  function enableOpenTopic() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    openTopic = true;
+  }
+  function disableOpenTopic() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    openTopic = false;
+  }
+
+  // Function to set the pool prize receiver
+
+  function setPoolPrizeReceiver(address _poolPrizeReceiver) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    poolPrizeReceiver = _poolPrizeReceiver;
+  }
+
   // Function to calculate the price based on supply and amount
   function getPrice(uint256 supply, uint256 amount) public pure returns (uint256) {
     uint256 sum1 = supply == 0 ? 0 : (supply - 1 )* (supply) * (2 * (supply - 1) + 1) / 6;
@@ -105,7 +126,8 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     0 : 
     (supply + amount - 1) * (supply + amount) * (2 * (supply + amount - 1) + 1) / 6;
     uint256 summation = sum2 - sum1;
-    return summation * 1 ether / 16000;
+    return summation * 1 ether / 159000;
+    //return summation * 1 ether / 16000;
   }
 
   // Functions to get buying and selling prices, considering fees
@@ -138,6 +160,14 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   }
   
   function createTopic(string[] memory topicDescriptions) onlyRole(DEFAULT_ADMIN_ROLE) public {
+    for (uint256 i = 0; i < topicDescriptions.length; i++) {
+      createTopic(topicDescriptions[i]);
+    }
+  }
+
+  function createOpenTopic(string[] memory topicDescriptions) public {
+    if(!openTopic) revert OnlyOwnerCanCreateTopics();
+
     for (uint256 i = 0; i < topicDescriptions.length; i++) {
       createTopic(topicDescriptions[i]);
     }
@@ -195,7 +225,7 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     );
 
     payout(protocolFeeDestination, protocolFee);
-    payout(poolPrize, builderFee);
+    payout(poolPrizeReceiver, builderFee);
   }
 
   /// Function to sell shares
@@ -240,7 +270,7 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
 
     payout(receiver, price - protocolFee - builderFee);
     payout(protocolFeeDestination, protocolFee);
-    payout(poolPrize, builderFee);
+    payout(poolPrizeReceiver, builderFee);
   }
 
   function payout(address payee, uint256 amount) internal {
