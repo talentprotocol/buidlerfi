@@ -54,7 +54,7 @@ export const ReplyCommentEntry: FC<Props> = ({ id, type, content, author, refetc
                 onClick={() => router.push(`/profile/${author?.wallet}`)}
                 level="title-sm"
               >
-                {author.displayName}
+                {author.displayName || shortAddress(author.wallet)}
               </Typography>
               <Typography level="body-sm"> • {getDifference(createdAt)}</Typography>
             </Flex>

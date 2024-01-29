@@ -20,7 +20,11 @@ export const getComments = async (privyUserId: string, questionId: number) => {
   const comments = await prisma.comment.findMany({
     where: { questionId },
     include: {
-      author: true,
+      author: {
+        include: {
+          keysOfSelf: true
+        }
+      },
       reactions: true
     }
   });
@@ -30,7 +34,10 @@ export const getComments = async (privyUserId: string, questionId: number) => {
     const myKeys = await getKeyRelationships(currentUser.wallet, "holder");
     const myKeysMap = myKeys.data.reduce((prev, curr) => ({ ...prev, [curr.ownerId]: true }), {});
     for (const comment of comments) {
-      if (!(comment.authorId in myKeysMap)) {
+      const hasAuthorLaunchedKeys = comment.author.keysOfSelf.some(
+        key => key.holderId === key.ownerId && key.amount > 0
+      );
+      if (hasAuthorLaunchedKeys && !(comment.authorId in myKeysMap)) {
         comment.content = "";
       }
     }
