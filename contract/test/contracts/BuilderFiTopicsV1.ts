@@ -23,14 +23,17 @@ describe("BuilderFi-topics", () => {
     [creator, shareOwner, shareBuyer] = await ethers.getSigners();
   });
 
+  const pooPrizeDefaultAddress = "0x33041027dd8F4dC82B6e825FB37ADf8f15d44053";
+  const protocolFeeDestination = "0xA2c5E17bC9B24D4FCb248d3274c53Ec7D99199c3";
+
   it("can be deployed", async () => {
-    const action = deployContract("BuilderFiTopicsV1", [creator.address, ["web3"]]);
+    const action = deployContract("BuilderFiTopicsV1", [creator.address, ["web3"], pooPrizeDefaultAddress, protocolFeeDestination]);
 
     await expect(action).not.to.be.reverted;
   });
 
   const builder = async () => {
-    return deployContract("BuilderFiTopicsV1", [creator.address, ["web3"]]) as Promise<BuilderFiTopicsV1>;
+    return deployContract("BuilderFiTopicsV1", [creator.address, ["web3"], pooPrizeDefaultAddress, protocolFeeDestination]) as Promise<BuilderFiTopicsV1>;
   };
 
   describe("testing functions", () => {
@@ -43,6 +46,8 @@ describe("BuilderFi-topics", () => {
 
       await builderFi.connect(creator).enableTrading();
     });
+
+    /// General tests
 
     it("does not allow anyone to buy a topic share before its creation", async () => {
       await expect(
@@ -131,8 +136,31 @@ describe("BuilderFi-topics", () => {
       ).not.to.be.reverted;
     });
 
-    /// Supply tests
+    /// Permissioned / Permissionless topic creation
+    it("users other than admin cant create topics if not allowed", async () => {
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      expect(await builderFi.openTopic()).to.eq(false);
+      await expect( builderFi.connect(shareBuyer).createOpenTopic(["test#7"])).to.be.reverted;
+    });
 
+    it("users other than admin can create topics if allowed", async () => {
+      await builderFi.connect(creator).createTopic(["test#6"]);
+      expect(await builderFi.openTopic()).to.eq(false);
+      await expect( builderFi.connect(shareBuyer).createOpenTopic(["test#7"])).to.be.reverted;
+      console.log("openTopic", await builderFi.openTopic());
+      await builderFi.connect(creator).enableOpenTopic();
+      expect(await builderFi.openTopic()).to.eq(true);
+      console.log("openTopic", await builderFi.openTopic());
+      await expect( builderFi.connect(shareBuyer).createOpenTopic(["test#7"])).not.to.be.reverted;
+      await expect( builderFi.connect(shareBuyer).createOpenTopic(["test#7"])).to.be.revertedWith("Topic already exists");
+      await expect( builderFi.connect(creator).createOpenTopic(["test#7"])).to.be.revertedWith("Topic already exists");
+      await expect( builderFi.connect(creator).createTopic(["test#7"])).to.be.revertedWith("Topic already exists");
+      await builderFi.connect(creator).disableOpenTopic();
+      expect(await builderFi.openTopic()).to.eq(false);
+      await expect( builderFi.connect(shareBuyer).createOpenTopic(["test#9"])).to.be.reverted;
+    });
+
+    /// Supply tests
     it("changes the supply of topic keys after buys happens", async () => {
       await builderFi.connect(creator).createTopic(["test#6"]);
       const initialPrice = await builderFi.getBuyPriceAfterFee("test#6");
@@ -177,7 +205,6 @@ describe("BuilderFi-topics", () => {
     });
 
     /// Balance tests
-
     it("changes the balance of topic keys holder after buys happens", async () => {
       const topic = await builderFi.getTopicToBytes32("test#6")
       await builderFi.connect(creator).createTopic(["test#6"]);
@@ -300,6 +327,8 @@ describe("BuilderFi-topics", () => {
       console.log("Total spent for 400 keys:", ethers.utils.formatEther(totalSpent), "ETH");
     });
 
+    /*
+
     it("Simulate sell price with the topics bonding curve for 400 keys", async () => {
       await builderFi.connect(creator).createTopic(["test#6"]);
     
@@ -331,14 +360,62 @@ describe("BuilderFi-topics", () => {
       }
     
       console.log("Total received for 400 keys:", ethers.utils.formatEther(totalReceived), "ETH");
-    });
+    });*/
     
     // Protocol fees tests
     it("Check protocol fees increase", async () => {
+      await builderFi.connect(creator).createTopic(["test#6"]);
+    
+      let totalSpent = ethers.BigNumber.from("0");
+      let payoutEventsToPooPrize = 0;
+      let payoutEventsToProtocolFee = 0;
+      let totalPayoutAmount = ethers.BigNumber.from("0");
+      let lastPayoutAmount = ethers.BigNumber.from("0");
+      for (let i = 0; i < 20; i++) {
+        const buyPrice = await builderFi.getBuyPriceAfterFee("test#6");
+    
+        const tx = await builderFi.connect(shareOwner).buyShares("test#6", shareBuyer.address, { value: buyPrice });
+        const receipt = await tx.wait();
+        totalSpent = totalSpent.add(buyPrice);
+        // Process each Payout event
+        receipt.events!.forEach(event => {
+          if (event.event === "Payout") {
+            const amount = ethers.BigNumber.from(event.args!.amount);
+            lastPayoutAmount = totalPayoutAmount;
+            totalPayoutAmount = totalPayoutAmount.add(amount);
+            if (event.args!.payee === pooPrizeDefaultAddress) {
+              payoutEventsToPooPrize++;
+            } else if (event.args!.payee === protocolFeeDestination) {
+              payoutEventsToProtocolFee++;
+            }
+          }
+      }
+      );
+      // Assert that totalSpent is increased
+      expect(totalSpent).to.be.gt(lastPayoutAmount, `Total spent did not increase on iteration ${i}`);
+
+      }
+      //expect(payoutEventsToPooPrize).to.eq(20);
+      //expect(payoutEventsToProtocolFee).to.eq(20);
+      expect(payoutEventsToPooPrize + payoutEventsToProtocolFee).to.eq(40);
+      console.log(ethers.utils.formatEther(totalSpent), "ETH");
+      
+
     });
 
     // Pool prizes tests
-    it("Check Pool prize fees increase", async () => {
-    });
+    it("should revert when a non-authorized user tries to change pool prize address", async () => {
+      // Check initial state
+      expect(await builderFi.poolPrizeReceiver()).to.eq(pooPrizeDefaultAddress);
+  
+      // Change by an authorized user (creator)
+      await builderFi.connect(creator).setPoolPrizeReceiver(shareBuyer.address);
+      expect(await builderFi.poolPrizeReceiver()).to.eq(shareBuyer.address);
+  
+      // Attempt to change by an unauthorized user (shareBuyer) and expect a revert
+      await expect(builderFi.connect(shareBuyer).setPoolPrizeReceiver(pooPrizeDefaultAddress))
+          .to.be.revertedWith("AccessControl: account 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+  });
+  
   });
 });

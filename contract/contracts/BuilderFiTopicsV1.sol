@@ -55,6 +55,16 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     uint256 blockTimestamp
   );
 
+  event Payout (
+    address payee,
+    uint256 amount
+  );
+
+  event PendingPayout (
+    address payee,
+    uint256 amount
+  );
+
   // Mapping to track pending payouts
   mapping(address => uint256) public pendingPayouts;
 
@@ -65,9 +75,11 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   mapping(bytes32 => uint256) public topicsKeysSupply;
 
   // Constructor to set the initial admin role and initial topics
-  constructor(address _owner, string[] memory topics) {
+  constructor(address _owner, string[] memory topics, address _poolPrizeReceiver, address _protocolFeeDestination) {
     _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     createTopic(topics);
+    poolPrizeReceiver = _poolPrizeReceiver;
+    protocolFeeDestination = _protocolFeeDestination;
   }
 
   // Admin management functions
@@ -275,11 +287,14 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
 
   function payout(address payee, uint256 amount) internal {
     (bool success, ) = payee.call{value: amount}("");
-    if (!success) {
+    if (success) {
+        emit Payout(payee, amount);
+    } else if (!success) {
         uint256 currentPending = pendingPayouts[payee];
         uint256 newPending = currentPending + amount;
         require(newPending >= currentPending, "Overflow detected");
         pendingPayouts[payee] = newPending;
+        emit PendingPayout(payee, newPending);
     }
   }
 
