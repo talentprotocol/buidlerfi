@@ -18,7 +18,7 @@ import { Key } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect } from "react";
 
-const tabs = ["Top", "New", "Your holdings", "Open Questions"];
+const tabs = ["New", "Top", "Your holdings", "Open Questions"];
 
 export default function Home() {
   const { holding } = useUserContext();
