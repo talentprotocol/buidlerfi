@@ -12,6 +12,10 @@ const { expect } = chai;
 const { parseUnits } = ethers.utils;
 const { deployContract } = ethers;
 
+//TODO: 
+//"Check protocol fees increase when buying topics shares
+//"Check protocol fees increase when selling topics shares
+
 describe("BuilderFi-topics", () => {
   let creator: SignerWithAddress;
   let shareOwner: SignerWithAddress;
@@ -23,17 +27,19 @@ describe("BuilderFi-topics", () => {
     [creator, shareOwner, shareBuyer] = await ethers.getSigners();
   });
 
-  const pooPrizeDefaultAddress = "0x33041027dd8F4dC82B6e825FB37ADf8f15d44053";
+  const poolPrizeReceiver = "0x33041027dd8F4dC82B6e825FB37ADf8f15d44053";
   const protocolFeeDestination = "0xA2c5E17bC9B24D4FCb248d3274c53Ec7D99199c3";
+  const protocolFeePercent = ethers.utils.parseUnits("0.04"); // 4%
+  const builderFeePercent = ethers.utils.parseUnits("0.05"); // 5%
 
   it("can be deployed", async () => {
-    const action = deployContract("BuilderFiTopicsV1", [creator.address, ["web3"], pooPrizeDefaultAddress, protocolFeeDestination]);
+    const action = deployContract("BuilderFiTopicsV1", [creator.address, ["web3"], poolPrizeReceiver, protocolFeeDestination, protocolFeePercent, builderFeePercent]);
 
     await expect(action).not.to.be.reverted;
   });
 
   const builder = async () => {
-    return deployContract("BuilderFiTopicsV1", [creator.address, ["web3"], pooPrizeDefaultAddress, protocolFeeDestination]) as Promise<BuilderFiTopicsV1>;
+    return deployContract("BuilderFiTopicsV1", [creator.address, ["web3"], poolPrizeReceiver, protocolFeeDestination, protocolFeePercent, builderFeePercent]) as Promise<BuilderFiTopicsV1>;
   };
 
   describe("testing functions", () => {
@@ -122,6 +128,27 @@ describe("BuilderFi-topics", () => {
         builderFi.connect(shareBuyer).buyShares("test#6", shareBuyer.address, { value: price.sub(1) })
       ).to.be.reverted;
     });
+
+    it("can't buy or sell a non existing topic share", async () => {
+      const enabling = await builderFi.connect(creator).enableTrading();
+
+      // Ensure the topic exists
+      await builderFi.connect(creator).createTopic(["test#6"]);
+
+      const price = await builderFi.getBuyPriceAfterFee("test#6");
+    
+      // Attempt to buy shares in the topic
+      await expect(
+        builderFi.connect(shareBuyer).buyShares("test#7", shareBuyer.address, { value: price })
+      ).to.be.revertedWith("OnlyOwnerCanCreateFirstShare");
+
+      // Attempt to sell shares in the topic
+      await expect(
+        builderFi.connect(shareBuyer).sellShares("test#7", shareBuyer.address, { value: price })
+      ).to.be.revertedWith("CannotSellLastShare");
+
+    });
+
 
     it("can buy an existing topic share for more than the amount expected", async () => {
       const enabling = await builderFi.connect(creator).enableTrading();
@@ -363,8 +390,14 @@ describe("BuilderFi-topics", () => {
     });*/
     
     // Protocol fees tests
-    it("Check protocol fees increase", async () => {
+    it("Check protocol fees increase when buying topics shares", async () => {
       await builderFi.connect(creator).createTopic(["test#6"]);
+      // Log the hardcoded addresses
+      const protocolFeeDestinationAddress = await builderFi.protocolFeeDestination();
+      console.log("Hardcoded protocolFeeDestination:", protocolFeeDestinationAddress);
+
+      const poolPrizeReceiverAddress = await builderFi.poolPrizeReceiver();
+      console.log("Hardcoded poolPrizeReceiver:", poolPrizeReceiverAddress);
     
       let totalSpent = ethers.BigNumber.from("0");
       let payoutEventsToPooPrize = 0;
@@ -380,10 +413,13 @@ describe("BuilderFi-topics", () => {
         // Process each Payout event
         receipt.events!.forEach(event => {
           if (event.event === "Payout") {
+            const normalizedPayee = ethers.utils.getAddress(event.args!.payee);
+            console.log("Payout event payee:", normalizedPayee);
+            //console.log("Payout event payee:", event.args!.payee);
             const amount = ethers.BigNumber.from(event.args!.amount);
             lastPayoutAmount = totalPayoutAmount;
             totalPayoutAmount = totalPayoutAmount.add(amount);
-            if (event.args!.payee === pooPrizeDefaultAddress) {
+            if (event.args!.payee === poolPrizeReceiver) {
               payoutEventsToPooPrize++;
             } else if (event.args!.payee === protocolFeeDestination) {
               payoutEventsToProtocolFee++;
@@ -399,23 +435,56 @@ describe("BuilderFi-topics", () => {
       //expect(payoutEventsToProtocolFee).to.eq(20);
       expect(payoutEventsToPooPrize + payoutEventsToProtocolFee).to.eq(40);
       console.log(ethers.utils.formatEther(totalSpent), "ETH");
-      
+      console.log(payoutEventsToPooPrize, "Payout events to pooPrize");
+      console.log(payoutEventsToProtocolFee, "Payout events to protocolFee");
 
+
+    });
+
+    it("Check protocol fees increase when selling topics shares", async () => {
+      //TODO
     });
 
     // Pool prizes tests
     it("should revert when a non-authorized user tries to change pool prize address", async () => {
       // Check initial state
-      expect(await builderFi.poolPrizeReceiver()).to.eq(pooPrizeDefaultAddress);
+      expect(await builderFi.poolPrizeReceiver()).to.eq(poolPrizeReceiver);
   
       // Change by an authorized user (creator)
       await builderFi.connect(creator).setPoolPrizeReceiver(shareBuyer.address);
       expect(await builderFi.poolPrizeReceiver()).to.eq(shareBuyer.address);
   
       // Attempt to change by an unauthorized user (shareBuyer) and expect a revert
-      await expect(builderFi.connect(shareBuyer).setPoolPrizeReceiver(pooPrizeDefaultAddress))
+      await expect(builderFi.connect(shareBuyer).setPoolPrizeReceiver(poolPrizeReceiver))
           .to.be.revertedWith("AccessControl: account 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
   });
+
+    // Migrate Liquidity to new contract
+
+    it("migrate liquidity to new contract address", async () => {
+      await builderFi.connect(creator).createTopic(["test#6"]);
+    
+      let totalSpent = ethers.BigNumber.from("0");
+    
+      // Buy 20 keys
+      for (let i = 0; i < 20; i++) {
+        const buyPrice = await builderFi.getBuyPriceAfterFee("test#6");
+
+        await builderFi.connect(shareOwner).buyShares("test#6", shareBuyer.address, { value: buyPrice });
+        totalSpent = totalSpent.add(buyPrice);
+      }
+
+      const balance = await ethers.provider.getBalance(builderFi.address);
+      console.log("Balance before migration:", ethers.utils.formatEther(balance), "ETH");
+      const newContractBalanceBefore = await ethers.provider.getBalance(shareOwner.address);
+      await builderFi.connect(creator).migrateLiquidity(shareOwner.address);
+      const balanceAfter = await ethers.provider.getBalance(builderFi.address);
+      const newContractBalanceAfter = await ethers.provider.getBalance(shareOwner.address);
+      expect(balanceAfter).to.eq(0);
+      console.log("Balance after migration:", ethers.utils.formatEther(balanceAfter), "ETH");
+      expect(newContractBalanceAfter.gt(newContractBalanceBefore)).to.be.true;
+
+    });
   
   });
 });

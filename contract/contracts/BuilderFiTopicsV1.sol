@@ -2,9 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-//TODO: REMOVE tradingEnabled CHECK ON SELL FUNCTION
-//TODO: MOVE FROM STRING TO BYTES FOR
-
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -21,6 +18,10 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   // Address where protocol fees are sent
   address public protocolFeeDestination;
 
+  // Contract address to receive the topics pool prize
+  // This address will redestribute the pool prize to the users contributing to the topics
+  address public poolPrizeReceiver;
+
   // Fee percentages
   uint256 public protocolFeePercent;
   uint256 public builderFeePercent;
@@ -28,13 +29,10 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   // Flag to enable or disable trading
   bool public tradingEnabled;
 
-  // Flag to enable or disable open topic creation
+  // Flag to enable or disable permissionless topic creation
   bool public openTopic;
 
-  // Contract address to receive the topics pool prize
-  // This address will redestribute the pool prize to the users contributing to the topics
-  address public poolPrizeReceiver;
-
+  
   // Event emitted on trade execution
   event Trade(
     address trader,
@@ -52,7 +50,7 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   event NewTopic (
     address owner,
     string description,
-    uint256 blockTimestamp
+    bytes32 topicHash
   );
 
   event Payout (
@@ -75,11 +73,13 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   mapping(bytes32 => uint256) public topicsKeysSupply;
 
   // Constructor to set the initial admin role and initial topics
-  constructor(address _owner, string[] memory topics, address _poolPrizeReceiver, address _protocolFeeDestination) {
+  constructor(address _owner, string[] memory topics, address _poolPrizeReceiver, address _protocolFeeDestination, uint256 _protocolFeePercent, uint256 _builderFeePercent) {
     _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     createTopic(topics);
     poolPrizeReceiver = _poolPrizeReceiver;
     protocolFeeDestination = _protocolFeeDestination;
+    protocolFeePercent = _protocolFeePercent;
+    builderFeePercent = _builderFeePercent;
   }
 
   // Admin management functions
@@ -89,6 +89,11 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
 
   function removeAdmin(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _revokeRole(DEFAULT_ADMIN_ROLE, _newAdmin);
+  }
+
+  // Function to set the pool prize receiver
+  function setPoolPrizeReceiver(address _poolPrizeReceiver) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    poolPrizeReceiver = _poolPrizeReceiver;
   }
 
   // Fee management functions
@@ -116,18 +121,11 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
 
   // Functions to enable or disable open topic creation
   // This will be used in order to let the community create topics after the alpha stage
-
   function enableOpenTopic() public onlyRole(DEFAULT_ADMIN_ROLE) {
     openTopic = true;
   }
   function disableOpenTopic() public onlyRole(DEFAULT_ADMIN_ROLE) {
     openTopic = false;
-  }
-
-  // Function to set the pool prize receiver
-
-  function setPoolPrizeReceiver(address _poolPrizeReceiver) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    poolPrizeReceiver = _poolPrizeReceiver;
   }
 
   // Function to calculate the price based on supply and amount
@@ -139,7 +137,6 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     (supply + amount - 1) * (supply + amount) * (2 * (supply + amount - 1) + 1) / 6;
     uint256 summation = sum2 - sum1;
     return summation * 1 ether / 159000;
-    //return summation * 1 ether / 16000;
   }
 
   // Functions to get buying and selling prices, considering fees
@@ -170,22 +167,25 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   function getTopicToBytes32(string memory topic) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(topic));
   }
-  
+
+  // Function to create topics. Only the admin can create topics
+
   function createTopic(string[] memory topicDescriptions) onlyRole(DEFAULT_ADMIN_ROLE) public {
     for (uint256 i = 0; i < topicDescriptions.length; i++) {
-      createTopic(topicDescriptions[i]);
+      _createTopic(topicDescriptions[i]);
     }
   }
 
+  // Function to create topics. Everyone can create topics
   function createOpenTopic(string[] memory topicDescriptions) public {
     if(!openTopic) revert OnlyOwnerCanCreateTopics();
 
     for (uint256 i = 0; i < topicDescriptions.length; i++) {
-      createTopic(topicDescriptions[i]);
+      _createTopic(topicDescriptions[i]);
     }
   }
 
-  function createTopic(string memory topicDescription) internal {
+  function _createTopic(string memory topicDescription) internal {
     /// Convert string to hash (bytes32)
     bytes32 topicHash = keccak256(abi.encodePacked(topicDescription));
     /// Check if topicDescription is not empty
@@ -198,7 +198,7 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
     emit NewTopic(
       msg.sender, 
       topicDescription, 
-      block.timestamp
+      topicHash
     );
   }
 
@@ -244,7 +244,6 @@ contract BuilderFiTopicsV1 is AccessControl, ReentrancyGuard {
   /// Includes checks for trading status, payment sufficiency, and first share purchase conditions
   /// @notice Can only buy one share at a time
   function sellShares(string memory topic, address _receiver) public payable nonReentrant {
-    //  TODO: this check should be removed to not create single point of centralization
     require(tradingEnabled == true, "Trading is not enabled");
     bytes32 topicHash = keccak256(abi.encodePacked(topic));
 
