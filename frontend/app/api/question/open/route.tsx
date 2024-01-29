@@ -2,6 +2,7 @@ import { getQuestions } from "@/backend/question/question";
 import { ERRORS } from "@/lib/errors";
 import { NextRequest, NextResponse } from "next/server";
 
+export const revalidate = 0;
 export async function GET(req: NextRequest) {
   try {
     const offset = req.nextUrl.searchParams.has("offset") ? Number(req.nextUrl.searchParams.get("offset")) : 0;
