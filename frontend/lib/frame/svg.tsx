@@ -53,7 +53,7 @@ export const generateImageSvg = async (question: QuestionWithInfo): Promise<stri
             gap: "2rem"
           }}
         >
-          <img src={`${BASE_URL}/bf-logoword-blue.png`} height={"12px"} />
+          <img src={`${BASE_URL}/assets/bf-logoword-blue.png`} height={"12px"} />
           <div
             style={{
               display: "flex",
@@ -68,7 +68,7 @@ export const generateImageSvg = async (question: QuestionWithInfo): Promise<stri
               username={question.questioner?.displayName as string}
               bio={question!.questioner?.bio as string}
             />
-            <img src={`${BASE_URL}/arrows.png`} style={{ width: "48px" }} />
+            <img src={`${BASE_URL}/assets/arrows.png`} style={{ width: "48px" }} />
             <Avatar
               imageUrl={question.replier?.avatarUrl as string}
               username={question.replier?.displayName as string}
