@@ -57,6 +57,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     </head></html>`);
   }
 
+  console.log(validatedFrame, validatedFrame.button?.index);
   if (validatedFrame.button?.index === 2) {
     // index 2 means the user clicked the "see more" button
     return new NextResponse(null, {
