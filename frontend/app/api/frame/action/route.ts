@@ -12,7 +12,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(0)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/upvote?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
     </head></html>`);
   }
   let accountAddress: string | undefined;
@@ -29,7 +29,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/upvote?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
     </head></html>`);
   }
   console.log("Message is valid");
@@ -39,7 +39,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/upvote?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
     </head></html>`);
   }
 
@@ -53,10 +53,17 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/upvote?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
     </head></html>`);
   }
 
+  if (validatedFrame.button?.index === 2) {
+    // index 2 means the user clicked the "see more" button
+    return new NextResponse(null, {
+      status: 302,
+      headers: { Location: `${BASE_URL}/question/${id}` }
+    });
+  }
   try {
     await upvoteQuestion(validatedFrame.action!.interactor.username!, parseInt(id));
   } catch (e) {
@@ -65,7 +72,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/upvote?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
     </head></html>`);
   }
 

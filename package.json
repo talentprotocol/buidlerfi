@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@coinbase/onchainkit": "^0.3.0"
+  }
+}
