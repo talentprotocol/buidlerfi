@@ -12,7 +12,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(0)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
     </head></html>`);
   }
   let accountAddress: string | undefined;
@@ -29,7 +29,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
     </head></html>`);
   }
   console.log("Message is valid");
@@ -39,7 +39,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
     </head></html>`);
   }
 
@@ -53,7 +53,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
     </head></html>`);
   }
 
@@ -72,14 +72,14 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
     <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/action?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
     </head></html>`);
   }
 
   return new NextResponse(`<!DOCTYPE html><html><head>
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${getQuestionImageUrl(id, true)}" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/redirect?id=${id}" />
+    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/redirect?id=${id}" />
     <meta property="fc:frame:button:1" content="read more on builder.fi 👀" />
     <meta property="fc:frame:button:1:action" content="post_redirect" />
   </head></html>`);

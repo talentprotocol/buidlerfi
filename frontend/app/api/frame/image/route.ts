@@ -12,7 +12,7 @@ export const GET = async (req: Request) => {
       <meta property="fc:frame" content="vNext" />
       <meta property="fc:frame:image" content="${ERROR_IMAGE_URL}" />
       <meta property="fc:frame:button:1" content="try again" />
-      <meta property="fc:frame:post_url" content="${BASE_URL}/api/upvote?id=${id}" />
+      <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/upvote?id=${id}" />
       </head></html>`);
   }
 
