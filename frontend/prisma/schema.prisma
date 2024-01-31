@@ -25,6 +25,7 @@ model User {
   hasFinishedOnboarding       Boolean   @default(false)
   lastRecommendationsSyncedAt DateTime?
   bio                         String?   @db.VarChar(500)
+  gated                       Boolean   @default(true)
 
   questions            Question[]                @relation("questioner")
   replies              Question[]                @relation("replier")
@@ -41,14 +42,15 @@ model User {
   notificationSettings UserNotificationSetting[]
   quests               UserQuest[]
 
-  id               Int                @id @default(autoincrement())
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id               Int                    @id @default(autoincrement())
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
   SigningChallenge SigningChallenge[]
-  recommendedTo    RecommendedUser[]  @relation("recommendationTarget")
-  recommendedUsers RecommendedUser[]  @relation("recommendationSource")
-  keysOfSelf       KeyRelationship[]  @relation("owner")
-  keysOwned        KeyRelationship[]  @relation("holder")
+  recommendedTo    RecommendedUser[]      @relation("recommendationTarget")
+  recommendedUsers RecommendedUser[]      @relation("recommendationSource")
+  keysOfSelf       KeyRelationship[]      @relation("owner")
+  keysOwned        KeyRelationship[]      @relation("holder")
+  topicKeysOwned   TopicKeyRelationship[] @relation("holder")
 }
 
 enum SocialProfileType {
@@ -101,7 +103,10 @@ model Question {
   reply           String?    @db.VarChar
   replier         User?      @relation("replier", fields: [replierId], references: [id])
   replierId       Int?
+  replyGated      Boolean?   @default(true)
   repliedOn       DateTime?
+  topic           Topic?     @relation("topic", fields: [topicId], references: [id])
+  topicId         Int?
   comments        Comment[]
   reactions       Reaction[]
   replyReactions  Reaction[] @relation("ReplyReaction")
@@ -119,6 +124,7 @@ model Comment {
   author     User       @relation(fields: [authorId], references: [id])
   authorId   Int
   reactions  Reaction[]
+  gated      Boolean    @default(true)
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -344,4 +350,26 @@ model KeyPricing {
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
+}
+
+model Topic {
+  name String @unique @db.VarChar(255)
+
+  id          Int                    @id @default(autoincrement())
+  createdAt   DateTime               @default(now())
+  topicOwners TopicKeyRelationship[] @relation("topic")
+  questions   Question[]             @relation("topic")
+}
+
+model TopicKeyRelationship {
+  holder   User  @relation(fields: [holderId], references: [id], name: "holder")
+  holderId Int
+  topic    Topic @relation(fields: [topicId], references: [id], name: "topic")
+  topicId  Int
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([holderId, topicId])
 }
