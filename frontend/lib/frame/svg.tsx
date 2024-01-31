@@ -5,10 +5,10 @@ import satori from "satori";
 import { BASE_URL } from "../constants";
 import Avatar from "./components/avatar";
 
-const regularFontPath = join(process.cwd(), "SpaceGrotesk-Regular.ttf");
+const regularFontPath = join(process.cwd(), "public/assets", "SpaceGrotesk-Regular.ttf");
 const regularFontData = fs.readFileSync(regularFontPath);
 
-const boldFontPath = join(process.cwd(), "SpaceGrotesk-SemiBold.ttf");
+const boldFontPath = join(process.cwd(), "public/assets", "SpaceGrotesk-SemiBold.ttf");
 const boldFontData = fs.readFileSync(boldFontPath);
 
 export interface Profile {
