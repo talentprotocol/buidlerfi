@@ -4,13 +4,11 @@ import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { FAQ_LINK } from "@/lib/constants";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
   ChatOutlined,
-  LiveHelpOutlined,
   Logout,
   PersonOutlineOutlined,
   Refresh,
@@ -93,11 +91,11 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       {
         type: "divider"
       },
-      {
-        text: "Faq",
-        icon: <LiveHelpOutlined />,
-        onClick: () => window.open(FAQ_LINK)
-      },
+      // {
+      //   text: "Faq",
+      //   icon: <LiveHelpOutlined />,
+      //   onClick: () => window.open(FAQ_LINK)
+      // },
       {
         text: "Feedback",
         icon: <ChatOutlined />,
