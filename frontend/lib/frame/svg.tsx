@@ -2,14 +2,15 @@ import { Question, Reaction, User } from "@prisma/client";
 import * as fs from "fs";
 import { join } from "path";
 import satori from "satori";
-import { BASE_URL } from "../constants";
 import Avatar from "./components/avatar";
-
 const regularFontPath = join(process.cwd(), "public/assets", "SpaceGrotesk-Regular.ttf");
 const regularFontData = fs.readFileSync(regularFontPath);
 
 const boldFontPath = join(process.cwd(), "public/assets", "SpaceGrotesk-SemiBold.ttf");
 const boldFontData = fs.readFileSync(boldFontPath);
+
+const imageArrows = fs.readFileSync(join(process.cwd(), "public/assets", "arrows.png"));
+const imageBFLogoBlue = fs.readFileSync(join(process.cwd(), "public/assets", "bf-logoword-blue.png"));
 
 export interface Profile {
   imageUrl: string;
@@ -53,7 +54,7 @@ export const generateImageSvg = async (question: QuestionWithInfo): Promise<stri
             gap: "2rem"
           }}
         >
-          <img src={`${BASE_URL}/assets/bf-logoword-blue.png`} height={"12px"} />
+          <img src={`data:image/png;base64,${imageBFLogoBlue.toString("base64")}`} height={"12px"} />
           <div
             style={{
               display: "flex",
@@ -68,7 +69,7 @@ export const generateImageSvg = async (question: QuestionWithInfo): Promise<stri
               username={question.questioner?.displayName as string}
               bio={question!.questioner?.bio as string}
             />
-            <img src={`${BASE_URL}/assets/arrows.png`} style={{ width: "48px" }} />
+            <img src={`data:image/png;base64,${imageArrows.toString("base64")}`} style={{ width: "48px" }} />
             <Avatar
               imageUrl={question.replier?.avatarUrl as string}
               username={question.replier?.displayName as string}

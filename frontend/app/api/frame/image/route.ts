@@ -18,9 +18,13 @@ export const GET = async (req: Request) => {
 
   console.log("Fetching question...", id);
 
-  const question = await getQuestion(parseInt(id), undefined, true);
+  const data = (await getQuestion(parseInt(id), undefined, true)) as unknown as {
+    data: { question: QuestionWithInfo };
+  };
 
   console.log("Question fetched!", id);
+
+  const question = data.data;
 
   const svg = await generateImageSvg(question as unknown as QuestionWithInfo);
 
