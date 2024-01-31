@@ -57,7 +57,12 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
   return { data: question };
 };
 
-export const createOpenQuestion = async (privyUserId: string, questionContent: string, tag?: string) => {
+export const createOpenQuestion = async (
+  privyUserId: string,
+  questionContent: string,
+  tag?: string,
+  topicId?: number
+) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
   }
@@ -76,6 +81,7 @@ export const createOpenQuestion = async (privyUserId: string, questionContent: s
         questionerId: questioner.id,
         replierId: null,
         questionContent: questionContent,
+        topicId,
         tags: tag
           ? {
               connect: {
