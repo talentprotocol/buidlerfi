@@ -23,7 +23,7 @@ export interface QuestionWithInfo extends Question {
   reactions?: Reaction[];
 }
 
-export const generateImageSvg = async (question: QuestionWithInfo): Promise<string> => {
+export const generateImageSvg = async (question: QuestionWithInfo, upvoted = false): Promise<string> => {
   return await satori(
     <div
       style={{
@@ -77,6 +77,29 @@ export const generateImageSvg = async (question: QuestionWithInfo): Promise<stri
             />
           </div>
         </div>
+        {upvoted && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "column",
+                backgroundColor: "#316CF0",
+                color: "#FFFFFF",
+                padding: "6px",
+                borderRadius: "4px"
+              }}
+            >
+              upvoted successfully!
+            </div>
+          </div>
+        )}
         <div
           style={{
             border: "2px solid white",

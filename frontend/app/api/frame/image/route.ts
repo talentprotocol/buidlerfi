@@ -7,6 +7,7 @@ import sharp from "sharp";
 export const GET = async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
+  const upvoted = searchParams.get("upvoted") === "true";
   if (!id) {
     return new NextResponse(`<!DOCTYPE html><html><head>
       <meta property="fc:frame" content="vNext" />
@@ -26,7 +27,7 @@ export const GET = async (req: Request) => {
 
   const question = data.data;
 
-  const svg = await generateImageSvg(question as unknown as QuestionWithInfo);
+  const svg = await generateImageSvg(question as unknown as QuestionWithInfo, upvoted);
 
   console.log("SVG generated!");
 
