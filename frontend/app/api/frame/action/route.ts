@@ -1,7 +1,7 @@
 import { BASE_URL } from "@/lib/constants";
 import { getQuestionImageUrl, upvoteQuestion } from "@/lib/frame/questions";
+import { getFarcasterIdentity } from "@/lib/frame/web3bio";
 import { FrameRequest, getFrameAccountAddress, getFrameMessage } from "@coinbase/onchainkit";
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { NextRequest, NextResponse } from "next/server";
 
 async function getResponse(req: NextRequest): Promise<NextResponse> {
@@ -41,20 +41,6 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   }
 
   console.log("Account address is", accountAddress);
-
-  const sdk = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
-  const validatedFrame = await sdk.validateFrameAction(body.trustedData!.messageBytes);
-  console.log("validated frame", validatedFrame);
-  if (!validatedFrame.valid) {
-    console.log("Frame is invalid", validatedFrame);
-    return new NextResponse(`<!DOCTYPE html><html><head>
-    <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
-    <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
-    </head></html>`);
-  }
-
   console.log("Frame is valid");
   console.log("button index", message?.buttonIndex);
   if (message?.buttonIndex === 2) {
@@ -66,7 +52,11 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    await upvoteQuestion(validatedFrame.action!.interactor.username!, parseInt(id));
+    const farcasterIdentity = await getFarcasterIdentity(accountAddress);
+    if (!farcasterIdentity) {
+      throw new Error("No farcaster identity");
+    }
+    await upvoteQuestion(farcasterIdentity.identity, parseInt(id));
   } catch (e) {
     console.error(e);
     return new NextResponse(`<!DOCTYPE html><html><head>
