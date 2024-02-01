@@ -25,6 +25,10 @@ export default async function middleware(req: NextRequest) {
       }
     }
 
+    if (req.nextUrl.pathname.includes("/api/frame/")) {
+      return NextResponse.next();
+    }
+
     const payload = authToken
       ? await jose.jwtVerify(authToken, verificationKey, {
           issuer: "privy.io",
