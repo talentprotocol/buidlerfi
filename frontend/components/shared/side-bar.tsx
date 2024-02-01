@@ -1,40 +1,25 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetContractData } from "@/hooks/useBuilderFiApi";
-import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
-  ChatOutlined,
-  Logout,
   PersonOutlineOutlined,
   Refresh,
   SettingsOutlined
 } from "@mui/icons-material";
-import {
-  Avatar,
-  Button,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  Skeleton,
-  Typography
-} from "@mui/joy";
+import { Avatar, Divider, Drawer, IconButton, List, ListItem, ListItemButton, Skeleton, Typography } from "@mui/joy";
 import { ListItemIcon, ListItemText } from "@mui/material";
 import { usePrivy } from "@privy-io/react-auth";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 import { PointsIcon } from "../icons/points";
-import { AddToHomePage } from "./add-to-home-page";
-import { BannerCard } from "./bannerCard";
 import { Flex } from "./flex";
+import { SidebarTopics } from "./side-bar-topics";
 import { WalletAddress } from "./wallet-address";
 
 interface Props {
@@ -42,17 +27,17 @@ interface Props {
   setOpen: (isOpen: boolean) => void;
 }
 
-interface Navigator extends globalThis.Navigator {
-  standalone?: boolean;
-}
+// interface Navigator extends globalThis.Navigator {
+//   standalone?: boolean;
+// }
 
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user, isLoading, refetch } = useUserContext();
-  const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
+  // const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
   const contractData = useGetContractData();
   const refreshData = useRefreshCurrentUser();
-  const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
-  const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
+  // const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
+  // const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
   const { data: balance } = useBalance({
     address
   });
@@ -90,22 +75,22 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       },
       {
         type: "divider"
-      },
+      }
       // {
       //   text: "Faq",
       //   icon: <LiveHelpOutlined />,
       //   onClick: () => window.open(FAQ_LINK)
       // },
-      {
-        text: "Feedback",
-        icon: <ChatOutlined />,
-        onClick: () => window.open("https://t.me/+7FGAfQx66Z8xOThk")
-      },
-      {
-        text: "Log out",
-        icon: <Logout />,
-        onClick: () => handleLogout()
-      }
+      // {
+      //   text: "Feedback",
+      //   icon: <ChatOutlined />,
+      //   onClick: () => window.open("https://t.me/+7FGAfQx66Z8xOThk")
+      // },
+      // {
+      //   text: "Log out",
+      //   icon: <Logout />,
+      //   onClick: () => handleLogout()
+      // }
     ],
     [address, handleLogout, user?.isAdmin]
   );
@@ -140,17 +125,17 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     }
   };
 
-  const isInstalled = useMemo(() => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    const { standalone } = navigator as Navigator;
-    return document.referrer.startsWith("android-app://") || standalone || isStandalone;
-  }, []);
+  // const isInstalled = useMemo(() => {
+  //   const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  //   const { standalone } = navigator as Navigator;
+  //   return document.referrer.startsWith("android-app://") || standalone || isStandalone;
+  // }, []);
 
-  const cardToDisplay = useMemo(() => {
-    if (!isInstalled && !hasIgnoredInstallApp) return "install";
-    else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
-    else return "none";
-  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isInstalled, user?.socialWallet]);
+  // const cardToDisplay = useMemo(() => {
+  //   if (!isInstalled && !hasIgnoredInstallApp) return "install";
+  //   else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
+  //   else return "none";
+  // }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isInstalled, user?.socialWallet]);
 
   if (!user) return <></>;
 
@@ -197,33 +182,38 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
           </Flex>
         </Flex>
       </Flex>
-      <List>
-        {navItems
-          .filter(item => !item.hidden)
-          .map(item =>
-            item.type === "divider" ? (
-              <Divider key={"divider"} sx={{ my: 1 }} />
-            ) : (
-              <ListItem key={item.text}>
-                <ListItemButton
-                  onClick={() => {
-                    if (item.path) {
-                      router.push(item.path);
-                      setOpen(false);
-                    } else if (item.onClick) {
-                      item.onClick();
-                    }
-                  }}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            )
-          )}
-      </List>
+      <Flex y>
+        <List>
+          {navItems
+            .filter(item => !item.hidden)
+            .map(item =>
+              item.type === "divider" ? (
+                <Divider key={"divider"} sx={{ my: 1 }} />
+              ) : (
+                <ListItem key={item.text}>
+                  <ListItemButton
+                    onClick={() => {
+                      if (item.path) {
+                        router.push(item.path);
+                        setOpen(false);
+                      }
+                      // else if (item.onClick) {
+                      //   item.onClick();
+                      // }
+                    }}
+                  >
+                    <ListItemIcon>{item.icon}</ListItemIcon>
+                    <ListItemText primary={item.text} />
+                  </ListItemButton>
+                </ListItem>
+              )
+            )}
+        </List>
+        <SidebarTopics />
+      </Flex>
+      <Flex y grow />
       <Flex xc y p={2} gap1>
-        <Flex>
+        {/* <Flex>
           {cardToDisplay === "install" && (
             <BannerCard
               onClose={() => setHasIgnoredInstallApp(true)}
@@ -244,7 +234,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
               </Button>
             </BannerCard>
           )}
-        </Flex>
+        </Flex> */}
 
         <Flex y xc yc>
           <Typography textColor={"neutral.600"} level="body-sm">
