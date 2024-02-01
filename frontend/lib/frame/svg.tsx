@@ -30,7 +30,7 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
         backgroundColor: "#F3F5F6",
         display: "flex",
         flexDirection: "column",
-        padding: "2rem",
+        padding: "3rem",
         alignItems: "center",
         width: "100%",
         height: "100%",
