@@ -24,5 +24,5 @@ export const getTopics = async (privyUserId: string) => {
     purchased: topicOwners.length > 0
   }));
 
-  return { data: res };
+  return { data: res.sort((a, b) => a.name.localeCompare(b.name)) };
 };

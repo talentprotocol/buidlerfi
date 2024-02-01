@@ -211,7 +211,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         </List>
         <SidebarTopics />
       </Flex>
-      <Flex y grow />
+      <Flex grow />
       <Flex xc y p={2} gap1>
         {/* <Flex>
           {cardToDisplay === "install" && (

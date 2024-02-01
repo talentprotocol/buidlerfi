@@ -6,22 +6,22 @@ import { FC } from "react";
 
 export const SidebarTopics: FC = () => {
   const { data: topics } = useGetTopics();
+  const purchasedTopics = topics?.filter(topic => topic.purchased);
+  const otherTopics = topics?.filter(topic => !topic.purchased);
 
   return (
-    <>
-      {/* <ListItemText primary={"All topics"} sx={{ fontWeight: "700" }} /> */}
-      <List
-        sx={{
-          width: "100%",
-          maxWidth: 360,
-          position: "relative",
-          overflow: "auto",
-          maxHeight: 250,
-          "& ul": { padding: 0 }
-        }}
-        subheader={<li />}
-      >
-        <li key={`topics-list`}>
+    <List
+      sx={{
+        width: "100%",
+        position: "relative",
+        overflow: "auto",
+        maxHeight: 350,
+        "& ul": { padding: 0 }
+      }}
+      subheader={<li />}
+    >
+      {purchasedTopics !== undefined && purchasedTopics.length > 0 && (
+        <li key={`purchased-topics-list`}>
           <ul
             style={{
               scrollbarColor: "transparent transparent"
@@ -29,8 +29,8 @@ export const SidebarTopics: FC = () => {
           >
             <ListSubheader
               sx={{ fontWeight: 700, backgroundColor: "#FBFCFE", color: "#32383E" }}
-            >{`Topics`}</ListSubheader>
-            {topics?.map(topic => (
+            >{`purchased topics`}</ListSubheader>
+            {purchasedTopics?.map(topic => (
               <ListItem key={`topic-${topic.id}`}>
                 <ListItemButton onClick={() => {}}>
                   <ListItemText primary={topic.name} />
@@ -39,16 +39,25 @@ export const SidebarTopics: FC = () => {
             ))}
           </ul>
         </li>
-      </List>
-      {/* <List>
-        {topics.map(topic => (
-          <ListItem key={topic.id}>
-            <ListItemButton onClick={() => {}}>
-              <ListItemText primary={topic.name} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List> */}
-    </>
+      )}
+      <li key={`topics-list`}>
+        <ul
+          style={{
+            scrollbarColor: "transparent transparent"
+          }}
+        >
+          <ListSubheader
+            sx={{ fontWeight: 700, backgroundColor: "#FBFCFE", color: "#32383E" }}
+          >{`topics`}</ListSubheader>
+          {otherTopics?.map(topic => (
+            <ListItem key={`topic-${topic.id}`}>
+              <ListItemButton onClick={() => {}}>
+                <ListItemText primary={topic.name} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </ul>
+      </li>
+    </List>
   );
 };
