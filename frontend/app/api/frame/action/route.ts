@@ -44,6 +44,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
 
   const sdk = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
   const validatedFrame = await sdk.validateFrameAction(body.trustedData!.messageBytes);
+  console.log("validated frame", validatedFrame);
   if (!validatedFrame.valid) {
     console.log("Frame is invalid", validatedFrame);
     return new NextResponse(`<!DOCTYPE html><html><head>
@@ -54,7 +55,8 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     </head></html>`);
   }
 
-  console.log(message?.buttonIndex);
+  console.log("Frame is valid");
+  console.log("button index", message?.buttonIndex);
   if (message?.buttonIndex === 2) {
     // index 2 means the user clicked the "see more" button
     return new NextResponse(null, {
