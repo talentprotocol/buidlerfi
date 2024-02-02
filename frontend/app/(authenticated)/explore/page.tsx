@@ -24,7 +24,7 @@ import { TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useState } from "react";
 
 export default function ExplorePage() {
-  const [selectedTab, setSelectedTab] = useState<TabsEnum>("Friends");
+  const [selectedTab, setSelectedTab] = useState<TabsEnum>("New");
   const [searchValue, setSearchValue] = useState("");
 
   const { user } = useUserContext();
@@ -67,9 +67,8 @@ export default function ExplorePage() {
                 <UnifiedUserItem
                   user={user}
                   holdersAndReplies={{
-                    numberOfReplies: user.numberOfReplies,
-                    numberOfHolders: user.numberOfHolders,
-                    numberOfQuestions: user.numberOfQuestions
+                    questionsCount: user.numberOfReplies,
+                    numberOfHolders: user.numberOfHolders
                   }}
                 />
               </div>
@@ -124,9 +123,8 @@ export default function ExplorePage() {
                 key={user.id}
                 user={user}
                 holdersAndReplies={{
-                  numberOfReplies: user.numberOfReplies,
-                  numberOfHolders: user.numberOfHolders,
-                  numberOfQuestions: user.numberOfQuestions
+                  questionsCount: user.numberOfReplies,
+                  numberOfHolders: user.numberOfHolders
                 }}
               />
             ))
@@ -141,11 +139,15 @@ export default function ExplorePage() {
               <div key={user.id}>
                 <UnifiedUserItem
                   user={user}
-                  joinedAndReplies={{
-                    createdAt: user.createdAt,
-                    numberOfReplies: user.numberOfReplies,
-                    numberOfQuestions: user.numberOfQuestions
-                  }}
+                  bio={user.bio || undefined}
+                  joinedAndReplies={
+                    user.bio
+                      ? undefined
+                      : {
+                          createdAt: user.createdAt,
+                          numberOfReplies: user.numberOfReplies
+                        }
+                  }
                 />
               </div>
             ))
@@ -162,8 +164,7 @@ export default function ExplorePage() {
                   user={user}
                   holdersAndReplies={{
                     numberOfHolders: user.numberOfHolders,
-                    numberOfReplies: user.questionsAnswered,
-                    numberOfQuestions: user.questionsAsked,
+                    questionsCount: user.questionsAsked,
                     label: "question"
                   }}
                 />
@@ -182,8 +183,7 @@ export default function ExplorePage() {
                   user={user}
                   holdersAndReplies={{
                     numberOfHolders: user.numberOfHolders,
-                    numberOfReplies: user.questionsAnswered,
-                    numberOfQuestions: user.questionsReceived
+                    questionsCount: user.questionsAnswered
                   }}
                 />
               </div>

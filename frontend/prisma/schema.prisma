@@ -99,12 +99,13 @@ model Question {
   questioner      User       @relation("questioner", fields: [questionerId], references: [id])
   questionerId    Int
   reply           String?    @db.VarChar
-  replier         User       @relation("replier", fields: [replierId], references: [id])
-  replierId       Int
+  replier         User?      @relation("replier", fields: [replierId], references: [id])
+  replierId       Int?
   repliedOn       DateTime?
   comments        Comment[]
   reactions       Reaction[]
   replyReactions  Reaction[] @relation("ReplyReaction")
+  tags            Tag[]
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -211,8 +212,9 @@ model SigningChallenge {
 }
 
 model Tag {
-  name  String @unique @db.VarChar(255)
-  users User[]
+  name      String     @unique @db.VarChar(255)
+  users     User[]
+  questions Question[]
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -226,6 +228,7 @@ enum NotificationType {
   QUESTION_UPVOTED
   QUESTION_DOWNVOTED
   REPLY_REACTION
+  NEW_OPEN_QUESTION
   KEYBUY
   KEYSELL
   USER_INVITED
@@ -332,4 +335,13 @@ model UserQuest {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model KeyPricing {
+  shares    Int
+  buyPrice  BigInt
+  sellPrice BigInt
+
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
 }

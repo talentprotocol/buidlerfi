@@ -3,41 +3,62 @@ import { MAX_COMMENT_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { ReactionType } from "@prisma/client";
-import { ownsKey } from "../keyRelationship/keyRelationship";
+import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 
 export const getComments = async (privyUserId: string, questionId: number) => {
+  const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
   const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
-  if (!question.repliedOn) {
-    return { data: [] };
-  }
-  const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
-  if (!hasKey) {
-    return { error: ERRORS.MUST_HOLD_KEY, data: [] };
+
+  //Not an open question
+  if (question.replierId) {
+    const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
+    if (!hasKey) {
+      return { error: ERRORS.MUST_HOLD_KEY, data: [] };
+    }
   }
 
   const comments = await prisma.comment.findMany({
     where: { questionId },
     include: {
-      author: true,
+      author: {
+        include: {
+          keysOfSelf: true
+        }
+      },
       reactions: true
     }
   });
+
+  //If it's an open-question, exclude content of comments for which the user doesn't hold a key
+  if (!question.replierId) {
+    const myKeys = await getKeyRelationships(currentUser.wallet, "holder");
+    const myKeysMap = myKeys.data.reduce((prev, curr) => ({ ...prev, [curr.ownerId]: true }), {});
+    for (const comment of comments) {
+      const hasAuthorLaunchedKeys = comment.author.keysOfSelf.some(
+        key => key.holderId === key.ownerId && key.amount > 0
+      );
+      if (hasAuthorLaunchedKeys && !(comment.authorId in myKeysMap)) {
+        comment.content = "";
+      }
+    }
+  }
 
   return { data: comments };
 };
 
 export const createComment = async (privyUserId: string, questionId: number, comment: string) => {
-  const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
-  if (!question.repliedOn) {
-    return { error: ERRORS.QUESTION_NOT_REPLIED };
-  }
-  const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
-  if (!hasKey) {
-    return { error: ERRORS.MUST_HOLD_KEY };
-  }
-
   if (comment.length < 5 || comment.length > MAX_COMMENT_LENGTH) {
     return { error: ERRORS.INVALID_LENGTH };
+  }
+
+  const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
+
+  //Not an open question
+  if (question.replierId) {
+    if (!question.repliedOn) return { error: ERRORS.QUESTION_NOT_REPLIED };
+
+    const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
+    if (!hasKey) return { error: ERRORS.MUST_HOLD_KEY };
   }
 
   const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
@@ -99,8 +120,10 @@ export const deleteComment = async (privyUserId: string, commentId: number) => {
 
 export const addReaction = async (privyUserId: string, commentId: number) => {
   const comment = await prisma.comment.findUniqueOrThrow({ where: { id: commentId }, include: { question: true } });
-  //Must hold key to the question on which the comment is posted
-  const hasKey = ownsKey({ userId: comment.question.replierId }, { privyUserId });
+  //Must hold key to the question on which the comment is posted if it's not an open question
+  const hasKey =
+    (!comment.question.replierId && ownsKey({ userId: comment.authorId }, { privyUserId })) ||
+    (comment.question.replierId && ownsKey({ userId: comment.question.replierId }, { privyUserId }));
   if (!hasKey) {
     return { error: ERRORS.MUST_HOLD_KEY };
   }
@@ -136,4 +159,17 @@ export const addReaction = async (privyUserId: string, commentId: number) => {
   });
 
   return { data: res };
+};
+
+export const getCommentsCount = async (questionId: number) => {
+  const commentsCount = await prisma.comment.count({ where: { questionId } });
+  return { data: commentsCount };
+};
+
+export const getReactions = async (commentId: number) => {
+  const reactions = await prisma.reaction.findMany({
+    where: { commentId }
+  });
+
+  return { data: reactions };
 };

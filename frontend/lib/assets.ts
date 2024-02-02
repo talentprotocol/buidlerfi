@@ -15,3 +15,5 @@ export const WEB3_SOCIALS_IMAGE = "/assets/web3-socials.svg";
 export const WELCOME_MODAL = "/assets/welcome-modal.svg";
 export const OG_BACKGROUND_IMAGE = "/assets/opengraph-image-bg.png";
 export const OG_BACKGROUND_IMAGE_FALLBACK = "/assets/opengraph-image-bg-fallback.png";
+export const BF_LOGOWORD_BLUE = "/assets/bf-logoword-blue.png";
+export const ARROWS = "/assets/arrows.png";

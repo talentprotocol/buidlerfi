@@ -1,5 +1,6 @@
 import { OpenDialog } from "@/contexts/DialogContainer";
 import { useUserContext } from "@/contexts/userContext";
+import { useGetCommentsCount } from "@/hooks/useCommentApi";
 import {
   useDeleteQuestion,
   useGetHotQuestions,
@@ -10,7 +11,7 @@ import { DeleteOutline, EditOutlined, FileUploadOutlined, MoreHoriz } from "@mui
 import { CircularProgress, Dropdown, ListItemDecorator, Menu, MenuButton, MenuItem } from "@mui/joy";
 import { FC, useState } from "react";
 import { toast } from "react-toastify";
-import { AskQuestionModal } from "./ask-question-modal";
+import { EditQuestionModal } from "./edit-question-modal";
 
 interface Props {
   question:
@@ -23,7 +24,10 @@ interface Props {
 export const QuestionContextMenu: FC<Props> = ({ question, refetch }) => {
   const { user } = useUserContext();
   const deleteQuestion = useDeleteQuestion();
-  const isEditable = question.questioner?.id === user?.id && !question.repliedOn;
+  const { data: repliesCount } = useGetCommentsCount(question.id, !question.replier);
+  const isEditable =
+    question.questioner?.id === user?.id &&
+    ((question.replier && !question.repliedOn) || (!question.replier && repliesCount === 0));
   const [isEditQuestion, setIsEditQuestion] = useState(false);
 
   const handleDelete = async () => {
@@ -38,8 +42,10 @@ export const QuestionContextMenu: FC<Props> = ({ question, refetch }) => {
   const handleShare = async () => {
     if (navigator.share) {
       navigator.share({
-        title: `${question.questioner.displayName} asked a question to ${question.replier.displayName}`,
-        text: `Get ${question.replier.displayName}’s keys on builder.fi to unlock their answer to this question !`,
+        title: question.replier
+          ? `${question.questioner.displayName} asked a question to ${question.replier.displayName}`
+          : `${question.questioner.displayName} asked an open question`,
+        text: `Share your insight about ${question.questioner.displayName}'s question on builder.fi!`,
         url: `${location.origin}/question/${question.id}`
       });
     } else {
@@ -51,15 +57,10 @@ export const QuestionContextMenu: FC<Props> = ({ question, refetch }) => {
   return (
     <>
       {isEditQuestion && (
-        <AskQuestionModal
-          ownerUser={{ displayName: question.replier.displayName, id: question.replier.id }}
-          questionToEdit={question.id}
-          refetch={refetch}
-          close={() => setIsEditQuestion(false)}
-        />
+        <EditQuestionModal questionToEdit={question.id} refetch={refetch} close={() => setIsEditQuestion(false)} />
       )}
       <Dropdown>
-        <MenuButton variant="plain">
+        <MenuButton sx={{ minHeight: "0px" }} variant="plain">
           <MoreHoriz />
         </MenuButton>
         <Menu>

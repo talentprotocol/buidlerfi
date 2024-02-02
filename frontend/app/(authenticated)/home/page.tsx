@@ -8,59 +8,69 @@ import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
+import {
+  useGetHotQuestions,
+  useGetKeyQuestions,
+  useGetNewQuestions,
+  useGetOpenQuestions
+} from "@/hooks/useQuestionsApi";
 import { Key } from "@mui/icons-material";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+
+const tabs = ["New", "Top", "Your holdings", "Open Questions"];
 
 export default function Home() {
   const { holding } = useUserContext();
   const router = useBetterRouter();
-  const [selectedTab, setSelectedTab] = useState("new");
+
+  const tab = router.searchParams.tab as (typeof tabs)[number] | undefined;
 
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();
   const keysQuestions = useGetKeyQuestions();
-
+  const openQuestions = useGetOpenQuestions();
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
-
   return (
     <Flex component={"main"} y grow>
       <InjectTopBar />
       {router.searchParams.welcome === "1" && <WelcomeModal />}
-      <Tabs defaultValue="new" value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)}>
-        <TabList tabFlex={1} className="grid w-full grid-cols-2">
-          <Tab value="new">New</Tab>
-          <Tab value="hot">Top</Tab>
-          <Tab value="keys">Keys</Tab>
+      <Tabs
+        sx={{ width: "min(100vw, 500px)" }}
+        value={tab || tabs[0]}
+        onChange={(_, newTab) => router.replace({ searchParams: { tab: newTab || undefined } })}
+      >
+        <TabList
+          sx={{
+            backgroundColor: theme => theme.palette.background.body,
+            top: "55px",
+            position: "sticky",
+            overflow: "auto",
+            scrollSnapType: "x mandatory",
+            "&::-webkit-scrollbar": { display: "none" }
+          }}
+        >
+          {tabs.map(tab => (
+            <Tab key={tab} sx={{ minWidth: "100px", scrollSnapAlign: "start", flex: "none" }} value={tab}>
+              {tab}
+            </Tab>
+          ))}
         </TabList>
-        <TabPanel value="new">
+        <TabPanel value="New">
           {newQuestions.isLoading && <LoadingPage />}
           {newQuestions.data?.map(question => (
-            <QuestionEntry
-              type="home"
-              key={question?.id}
-              question={question}
-              onClick={() => router.push(`/question/${question?.id}`)}
-              refetch={newQuestions?.refetch}
-            />
+            <QuestionEntry key={question?.id} question={question} refetch={newQuestions?.refetch} />
           ))}
           {<LoadMoreButton query={newQuestions} />}
         </TabPanel>
-        <TabPanel value="hot">
+        <TabPanel value="Top">
           {hotQuestions.isLoading && <LoadingPage />}
           {hotQuestions.data?.map(question => (
-            <QuestionEntry
-              type="home"
-              key={question?.id}
-              question={question}
-              onClick={() => router.push(`/question/${question?.id}`)}
-              refetch={hotQuestions?.refetch}
-            />
+            <QuestionEntry key={question?.id} question={question} refetch={hotQuestions?.refetch} />
           ))}
           {<LoadMoreButton query={hotQuestions} />}
         </TabPanel>
-        <TabPanel value="keys">
+        <TabPanel value="Your holdings">
           {keysQuestions.isLoading && <LoadingPage />}
           {keysQuestions.data?.length === 0 ? (
             <PageMessage
@@ -74,16 +84,21 @@ export default function Home() {
             />
           ) : (
             keysQuestions.data?.map(question => (
-              <QuestionEntry
-                type="home"
-                key={question?.id}
-                question={question}
-                onClick={() => router.push(`/question/${question?.id}`)}
-                refetch={keysQuestions?.refetch}
-              />
+              <QuestionEntry key={question?.id} question={question} refetch={keysQuestions?.refetch} />
             ))
           )}
           {<LoadMoreButton query={keysQuestions} />}
+        </TabPanel>
+        <TabPanel value="Open Questions">
+          {openQuestions.isLoading && <LoadingPage />}
+          {keysQuestions.data?.length === 0 ? (
+            <PageMessage icon={<Key />} title="No open questions asked" text="Be the first to ask an open question!" />
+          ) : (
+            openQuestions.data?.map(question => (
+              <QuestionEntry key={question?.id} question={question} refetch={openQuestions?.refetch} />
+            ))
+          )}
+          {<LoadMoreButton query={openQuestions} />}
         </TabPanel>
       </Tabs>
     </Flex>

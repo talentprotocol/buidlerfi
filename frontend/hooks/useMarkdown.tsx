@@ -39,7 +39,7 @@ export const useMarkdown = (text?: string | null) => {
   );
 
   return (
-    <Typography textColor="neutral.800" fontWeight={400} level="body-sm">
+    <Typography textColor="neutral.800" fontWeight={400} level="body-sm" sx={{ "&>span>p": { margin: 0 } }}>
       <span className="remove-text-transform" dangerouslySetInnerHTML={{ __html: formattedContent || "" }} />
     </Typography>
   );

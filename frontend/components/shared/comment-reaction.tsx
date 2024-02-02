@@ -1,5 +1,5 @@
 import { useUserContext } from "@/contexts/userContext";
-import { useAddCommentReaction, useGetComments } from "@/hooks/useCommentApi";
+import { useAddCommentReaction, useGetCommentReactions } from "@/hooks/useCommentApi";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import { IconButton, Typography, useTheme } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
@@ -9,18 +9,18 @@ import { Flex } from "./flex";
 interface Props {
   sx?: SxProps;
   commentId: number;
-  reactions: NonNullable<ReturnType<typeof useGetComments>["data"]>[number]["reactions"];
-  refetch: () => void;
+  isReadOnly?: boolean;
 }
 
-export const CommentReactions: FC<Props> = ({ commentId, sx, reactions, refetch }) => {
+export const CommentReactions: FC<Props> = ({ commentId, sx, isReadOnly }) => {
   const { user } = useUserContext();
   const theme = useTheme();
   const addCommentReaction = useAddCommentReaction();
+  const { data: reactions, refetch: refetchReactions } = useGetCommentReactions(commentId);
 
   const handleAddReaction = async () => {
     await addCommentReaction.mutateAsync(commentId);
-    refetch();
+    refetchReactions();
   };
 
   const hasLiked = useMemo(() => {
@@ -29,14 +29,21 @@ export const CommentReactions: FC<Props> = ({ commentId, sx, reactions, refetch 
 
   return (
     <Flex x yc ml={4} sx={sx}>
-      <IconButton variant="plain" onClick={handleAddReaction}>
-        {hasLiked ? (
-          <Favorite fontSize="small" htmlColor={theme.palette.primary[500]} />
-        ) : (
-          <FavoriteBorder fontSize="small" />
-        )}
-      </IconButton>
-      <Typography level="body-sm">{reactions.length}</Typography>
+      {isReadOnly ? (
+        <Flex m={1}>
+          <FavoriteBorder fontSize="small" htmlColor={theme.palette.neutral[600]} />
+        </Flex>
+      ) : (
+        <IconButton variant="plain" onClick={handleAddReaction}>
+          {hasLiked ? (
+            <Favorite fontSize="small" htmlColor={theme.palette.primary[500]} />
+          ) : (
+            <FavoriteBorder fontSize="small" htmlColor={theme.palette.neutral[600]} />
+          )}
+        </IconButton>
+      )}
+
+      <Typography level="body-sm">{reactions?.length || 0}</Typography>
     </Flex>
   );
 };

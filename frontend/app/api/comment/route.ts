@@ -2,6 +2,7 @@ import { getComments } from "@/backend/comment/comment";
 import { ERRORS } from "@/lib/errors";
 import { NextRequest, NextResponse } from "next/server";
 
+export const revalidate = 0;
 export async function GET(req: NextRequest) {
   try {
     const questionId = req.nextUrl.searchParams.has("questionId")

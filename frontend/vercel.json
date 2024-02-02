@@ -5,6 +5,27 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron/farcaster/ranking/answers",
+      "schedule": "0 18 1 * *"
+    },
+    {
+      "path": "/api/cron/farcaster/ranking/questions",
+      "schedule": "0 18 8 * *"
+    },
+    {
+      "path": "/api/cron/farcaster/ranking/key-values",
+      "schedule": "0 18 15 * *"
+    },
+    {
+      "path": "/api/cron/farcaster/ranking/holders",
+      "schedule": "0 18 22 * *"
+    },
+    {
+      "path": "/api/cron/farcaster/ranking/top-question",
+      "schedule": "0 18 * * 3"
+    },
+
+    {
       "path": "/api/cron/transaction",
       "schedule": "*/5 * * * *"
     }

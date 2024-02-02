@@ -43,7 +43,13 @@ export const PAGINATION_LIMIT = 20;
 export const USER_BIO_MAX_LENGTH = 160;
 export const MAX_COMMENT_LENGTH = 2000;
 
+// DATE CONSTANTS
+export const DAY_IN_MILLISECONDS = 86400000;
+export const WEEK_IN_MILLISECONDS = 604800000;
+
 // FARCASTER
+export const FARCASTER_BUILDERFI_CHANNEL_ID = "builderfi";
+
 export const NEW_BUILDERFI_QUESTION_CAST =
   "{questionAuthor} just asked {questionRecipient} a question on builder.fi!\n\n{link}";
 export const NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
@@ -73,6 +79,20 @@ export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NO_USER_ERROR =
 
 export const NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER =
   "We couldn't post your question because you don't hold any @{username} keys.\n\nGo to their profile to buy some: {link}";
+
+export const TOP_FARCASTER_USERS_BY_KEY_VALUE_CAST = "🔑 meet the top 10 farcaster users by key value in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_KEY_HOLDERS_CAST =
+  "👥 meet the top 10 farcaster users by number of key holders in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_NUMBER_QUESTIONS_CAST =
+  "📥 meet the top 10 farcaster users by questions received in builder.fi";
+
+export const TOP_FARCASTER_USERS_BY_NUMBER_ANSWERS_CAST =
+  "✔️ meet the top 10 farcaster users by questions answered in builder.fi";
+
+export const TOP_QUESTION_UPVOTE_BY_WEEK_CAST =
+  "🔝 this week’s most upvoted question in builder.fi\n\n{questioner} asked {replier}:\n{questionContent}\n\n{link}";
 
 export const BUILDERFI_FARCASTER_FID = 210833;
 
@@ -127,3 +147,12 @@ export const QUESTS = [
     isActive: true
   }
 ] as const;
+
+export const BASE_URL =
+  process.env.ENVIRONMENT === "localhost"
+    ? "http://localhost:3000"
+    : process.env.ENVIRONMENT === "development"
+    ? "https://dev.builder.fi"
+    : "https://app.builder.fi";
+
+export const ERROR_IMAGE_URL = `${BASE_URL}/assets/error.png`;
