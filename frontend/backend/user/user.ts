@@ -218,6 +218,7 @@ export interface UpdateUserArgs {
   tags?: string[];
   hasFinishedOnboarding?: boolean;
   bio?: string;
+  gated?: boolean;
 }
 
 export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArgs) => {
@@ -244,7 +245,8 @@ export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArg
             connect: updatedUser.tags.map(tag => ({ name: tag }))
           }
         : undefined,
-      bio: updatedUser.bio
+      bio: updatedUser.bio,
+      gated: updatedUser.gated || false
     }
   });
 

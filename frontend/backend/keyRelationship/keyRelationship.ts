@@ -128,6 +128,68 @@ export const getKeyRelationships = async (address: string, side: "owner" | "hold
   return { data: relationships };
 };
 
+export const getTopicKeyRelationships = async (address: string, topicId: number) => {
+  const relationships = await prisma.topicKeyRelationship.findMany({
+    where: {
+      holder: {
+        wallet: address.toLowerCase()
+      },
+      topicId,
+      amount: {
+        gt: 0
+      }
+    },
+    include: {
+      holder: {
+        select: {
+          socialProfiles: {
+            where: {
+              type: "FARCASTER"
+            }
+          },
+          wallet: true,
+          avatarUrl: true,
+          displayName: true,
+          id: true,
+          bio: true,
+          isActive: true,
+          isAdmin: true,
+          createdAt: true,
+          updatedAt: true,
+          privyUserId: true,
+          socialWallet: true,
+          hasFinishedOnboarding: true,
+          invitedById: true,
+          lastRecommendationsSyncedAt: true,
+          _count: {
+            select: {
+              keysOfSelf: {
+                where: {
+                  amount: {
+                    gt: 0
+                  }
+                }
+              },
+              replies: {
+                where: {
+                  repliedOn: {
+                    not: null
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+    },
+    orderBy: {
+      amount: "desc"
+    }
+  });
+
+  return { data: relationships };
+};
+
 //Can pass either userId, privyUserId or wallet for user
 export const ownsKey = async (
   ownerUser: { userId?: number; privyUserId?: string; wallet?: string },

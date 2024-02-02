@@ -34,13 +34,8 @@ export const createQuestionSA = (questionContent: string, replierId: number, opt
   return serverActionWrapper(data => createQuestion(data.privyUserId, questionContent, replierId), options);
 };
 
-export const createOpenQuestionSA = (
-  questionContent: string,
-  tag: string,
-  topicId: number | undefined,
-  options: ServerActionOptions
-) => {
-  return serverActionWrapper(data => createOpenQuestion(data.privyUserId, questionContent, tag, topicId), options);
+export const createOpenQuestionSA = (questionContent: string, topic: string, options: ServerActionOptions) => {
+  return serverActionWrapper(data => createOpenQuestion(data.privyUserId, questionContent, topic), options);
 };
 
 export const deleteQuestionSA = async (questionId: number, options: ServerActionOptions) => {

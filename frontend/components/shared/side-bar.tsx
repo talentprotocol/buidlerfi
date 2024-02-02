@@ -137,6 +137,11 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   //   else return "none";
   // }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isInstalled, user?.socialWallet]);
 
+  const navigate = (path: string) => {
+    router.push(path);
+    setOpen(false);
+  };
+
   if (!user) return <></>;
 
   return (
@@ -194,8 +199,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
                   <ListItemButton
                     onClick={() => {
                       if (item.path) {
-                        router.push(item.path);
-                        setOpen(false);
+                        navigate(item.path);
                       }
                       // else if (item.onClick) {
                       //   item.onClick();
@@ -209,7 +213,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
               )
             )}
         </List>
-        <SidebarTopics />
+        <SidebarTopics navigate={navigate} />
       </Flex>
       <Flex grow />
       <Flex xc y p={2} gap1>

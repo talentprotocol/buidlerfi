@@ -3,7 +3,7 @@ import { FullTextArea } from "@/components/shared/full-text-area";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateComment, useGetComments } from "@/hooks/useCommentApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { Button, Divider } from "@mui/joy";
+import { Button, Checkbox, Divider } from "@mui/joy";
 import { FC, useState } from "react";
 import { ReplyCommentEntry } from "./reply-comment-entry";
 import { TradeKeyModal } from "./trade-key-modal";
@@ -20,12 +20,14 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
   const { data: comments, refetch: refetchComment } = useGetComments(questionId);
   const { user: currentUser, refetch: refetchUserContext } = useUserContext();
   const [isBuyKeyModalOpen, setIsBuyKeyModalOpen] = useState(false);
+  const [gated, setGated] = useState(true);
 
   const handleCreateComment = async () => {
     await postComment
       .mutateAsync({
         questionId,
-        comment: newComment
+        comment: newComment,
+        gated
       })
       .then(() => {
         refetchComment();
@@ -66,24 +68,31 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
           }}
         />
       )}
-      <Flex x sx={{ minHeight: "100px" }} p={2}>
-        <FullTextArea
-          avatarUrl={currentUser?.avatarUrl ?? DEFAULT_PROFILE_PICTURE}
-          placeholder={`Answer this open question`}
-          onChange={e => setNewComment(e.target.value)}
-          value={newComment}
+      <Flex y p={2} gap1>
+        <Flex x sx={{ minHeight: "100px" }}>
+          <FullTextArea
+            avatarUrl={currentUser?.avatarUrl ?? DEFAULT_PROFILE_PICTURE}
+            placeholder={`Answer this open question`}
+            onChange={e => setNewComment(e.target.value)}
+            value={newComment}
+          />
+          <Button
+            color="primary"
+            sx={{ maxHeight: "20px", alignSelf: "flex-start" }}
+            disabled={newComment.length < 10}
+            loading={postComment.isLoading}
+            onClick={handleCreateComment}
+          >
+            Answer
+          </Button>
+        </Flex>
+        <Checkbox
+          label="Gate this response to your key holders only."
+          size="sm"
+          checked={gated}
+          onChange={e => setGated(e.target.checked)}
         />
-        <Button
-          color="primary"
-          sx={{ maxHeight: "20px", alignSelf: "flex-start" }}
-          disabled={newComment.length < 10}
-          loading={postComment.isLoading}
-          onClick={handleCreateComment}
-        >
-          Answer
-        </Button>
       </Flex>
-
       <Divider />
       <Flex y yc grow gap1>
         {comments?.map(comment => (

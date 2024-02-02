@@ -12,6 +12,7 @@ import theme from "@/theme";
 import { Avatar, AvatarGroup, Box, Chip, Typography } from "@mui/joy";
 import { FC, useMemo } from "react";
 import { QuestionContextMenu } from "./question-context-menu";
+import { useTopic } from "@/hooks/useTopicsAPI";
 
 const pluralize = (amount: number) => {
   return amount <= 1 ? "answer" : `answers`;
@@ -21,7 +22,8 @@ interface Props {
   question?:
     | NonNullable<ReturnType<typeof useGetQuestionsFromUser>["data"]>[number]
     | NonNullable<ReturnType<typeof useGetHotQuestions>["data"]>[number]
-    | NonNullable<ReturnType<typeof useGetKeyQuestions>["data"]>[number];
+    | NonNullable<ReturnType<typeof useGetKeyQuestions>["data"]>[number]
+    | NonNullable<ReturnType<typeof useTopic>["data"]>["questions"][number];
   refetch?: () => Promise<unknown>;
 }
 export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
@@ -104,9 +106,9 @@ export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
         }}
       >
         <Reactions sx={{ ml: 4 }} questionId={question.id} />
-        {question.tags.length > 0 ? (
+        {question.topic ? (
           <Chip variant="outlined" size="sm">
-            {question.tags[0].name}
+            {question.topic.name}
           </Chip>
         ) : (
           <Flex />

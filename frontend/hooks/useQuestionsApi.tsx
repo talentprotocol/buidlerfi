@@ -50,8 +50,8 @@ export const usePostQuestion = () => {
   );
 };
 export const usePostOpenQuestion = () => {
-  return useMutationSA((options, params: { questionContent: string; tag: string; topicId?: number }) =>
-    createOpenQuestionSA(params.questionContent, params.tag, params.topicId, options)
+  return useMutationSA((options, params: { questionContent: string; topic: string }) =>
+    createOpenQuestionSA(params.questionContent, params.topic, options)
   );
 };
 

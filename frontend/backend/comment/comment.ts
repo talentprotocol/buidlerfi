@@ -3,7 +3,7 @@ import { MAX_COMMENT_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { ReactionType } from "@prisma/client";
-import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
+import { getKeyRelationships, getTopicKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 
 export const getComments = async (privyUserId: string, questionId: number) => {
   const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
@@ -33,11 +33,17 @@ export const getComments = async (privyUserId: string, questionId: number) => {
   if (!question.replierId) {
     const myKeys = await getKeyRelationships(currentUser.wallet, "holder");
     const myKeysMap = myKeys.data.reduce((prev, curr) => ({ ...prev, [curr.ownerId]: true }), {});
+    let hasTopicKeys = question.topicId !== null;
+    if (hasTopicKeys) {
+      const topicKeys = await getTopicKeyRelationships(currentUser.wallet, question.topicId!);
+      hasTopicKeys = topicKeys.data.length > 0;
+    }
     for (const comment of comments) {
+      if (!comment.gated) continue;
       const hasAuthorLaunchedKeys = comment.author.keysOfSelf.some(
         key => key.holderId === key.ownerId && key.amount > 0
       );
-      if (hasAuthorLaunchedKeys && !(comment.authorId in myKeysMap)) {
+      if ((hasAuthorLaunchedKeys && !(comment.authorId in myKeysMap)) || !hasTopicKeys) {
         comment.content = "";
       }
     }
@@ -46,7 +52,7 @@ export const getComments = async (privyUserId: string, questionId: number) => {
   return { data: comments };
 };
 
-export const createComment = async (privyUserId: string, questionId: number, comment: string) => {
+export const createComment = async (privyUserId: string, questionId: number, comment: string, gated: boolean) => {
   if (comment.length < 5 || comment.length > MAX_COMMENT_LENGTH) {
     return { error: ERRORS.INVALID_LENGTH };
   }
@@ -67,7 +73,8 @@ export const createComment = async (privyUserId: string, questionId: number, com
     data: {
       content: comment,
       questionId,
-      authorId: currentUser.id
+      authorId: currentUser.id,
+      gated
     }
   });
 

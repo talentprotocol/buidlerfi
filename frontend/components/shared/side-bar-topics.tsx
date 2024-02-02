@@ -4,7 +4,11 @@ import { List, ListItem, ListItemText, ListSubheader } from "@mui/material";
 // import { Topic } from "@prisma/client";
 import { FC } from "react";
 
-export const SidebarTopics: FC = () => {
+interface Props {
+  navigate: (path: string) => void;
+}
+
+export const SidebarTopics: FC<Props> = ({ navigate }) => {
   const { data: topics } = useGetTopics();
   const purchasedTopics = topics?.filter(topic => topic.purchased);
   const otherTopics = topics?.filter(topic => !topic.purchased);
@@ -32,7 +36,7 @@ export const SidebarTopics: FC = () => {
             >{`purchased topics`}</ListSubheader>
             {purchasedTopics?.map(topic => (
               <ListItem key={`topic-${topic.id}`}>
-                <ListItemButton onClick={() => {}}>
+                <ListItemButton onClick={() => navigate(`/topic/${topic.id}`)}>
                   <ListItemText primary={topic.name} />
                 </ListItemButton>
               </ListItem>
@@ -51,7 +55,7 @@ export const SidebarTopics: FC = () => {
           >{`topics`}</ListSubheader>
           {otherTopics?.map(topic => (
             <ListItem key={`topic-${topic.id}`}>
-              <ListItemButton onClick={() => {}}>
+              <ListItemButton onClick={() => navigate(`/topic/${topic.id}`)}>
                 <ListItemText primary={topic.name} />
               </ListItemButton>
             </ListItem>

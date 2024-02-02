@@ -362,10 +362,11 @@ model Topic {
 }
 
 model TopicKeyRelationship {
-  holder   User  @relation(fields: [holderId], references: [id], name: "holder")
+  holder   User   @relation(fields: [holderId], references: [id], name: "holder")
   holderId Int
-  topic    Topic @relation(fields: [topicId], references: [id], name: "topic")
+  topic    Topic  @relation(fields: [topicId], references: [id], name: "topic")
   topicId  Int
+  amount   BigInt
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())

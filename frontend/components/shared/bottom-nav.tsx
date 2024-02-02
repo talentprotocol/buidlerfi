@@ -30,7 +30,7 @@ export function BottomNav() {
         label: <SearchIcon fontSize="xl" />
       },
       {
-        path: "/question",
+        path: pathname.includes("/topic") ? `/question?from=topic` : "/question",
         label: (
           <Button
             sx={{

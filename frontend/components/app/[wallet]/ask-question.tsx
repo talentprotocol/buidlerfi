@@ -1,29 +1,28 @@
-import { getTags } from "@/backend/tags/tags";
 import { Flex } from "@/components/shared/flex";
 import { FullTextArea } from "@/components/shared/full-text-area";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { usePostOpenQuestion, usePostQuestion } from "@/hooks/useQuestionsApi";
+import { useGetTopics } from "@/hooks/useTopicsAPI";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
 import { shortAddress } from "@/lib/utils";
 import { Button, Option, Select, Typography } from "@mui/joy";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export const AskQuestion = () => {
   const { user } = useUserContext();
   const router = useBetterRouter();
   const { wallet } = router.searchParams;
-  const [tag, setTag] = useState<string | null>(null);
+  const [topic, setTopic] = useState<string | null>(null);
   const profile = useUserProfile(wallet as `0x${string}`);
   const [questionContent, setQuestionContent] = useState("");
   const [showBadQuestionLabel, setShowBadQuestionLabel] = useState(false);
+  const isOpenQuestion = !wallet;
+  const { data: topics } = useGetTopics();
   const postQuestion = usePostQuestion();
   const postOpenQuestion = usePostOpenQuestion();
-  const isOpenQuestion = !wallet;
-  const { data: tags } = useQuery(["tags"], () => getTags(), { select: data => data.data });
 
   const sendQuestion = async () => {
     if (!questionContent.includes("?")) {
@@ -41,10 +40,11 @@ export const AskQuestion = () => {
         })
         .then(res => router.replace(`/question/${res?.id}`));
     } else {
+      // console.log(topic);
       await postOpenQuestion
         .mutateAsync({
           questionContent: questionContent,
-          tag: tag || ""
+          topic: topic || ""
         })
         .then(res => router.replace(`/question/${res?.id}`));
     }
@@ -74,14 +74,14 @@ export const AskQuestion = () => {
             <Select
               placeholder="Select a topic"
               size="sm"
-              value={tag}
+              value={topic}
               sx={{ minWidth: "150px" }}
-              onChange={(e, newVal) => setTag(newVal === "none" ? null : newVal)}
+              onChange={(e, newVal) => setTopic(newVal === "none" ? null : newVal)}
             >
               <Option value={"none"}>None</Option>
-              {(tags || []).map(tag => (
-                <Option key={tag.id} value={tag.name}>
-                  {tag.name}
+              {(topics || []).map(topic => (
+                <Option key={topic.id} value={topic.name}>
+                  {topic.name}
                 </Option>
               ))}
             </Select>

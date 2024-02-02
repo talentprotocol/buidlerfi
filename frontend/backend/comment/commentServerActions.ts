@@ -6,8 +6,13 @@ export const addReactionSA = async (commentId: number, options: ServerActionOpti
   return serverActionWrapper(data => addReaction(data.privyUserId, commentId), options);
 };
 
-export const createCommentSA = async (questionId: number, comment: string, options: ServerActionOptions) => {
-  return serverActionWrapper(data => createComment(data.privyUserId, questionId, comment), options);
+export const createCommentSA = async (
+  questionId: number,
+  comment: string,
+  gated: boolean,
+  options: ServerActionOptions
+) => {
+  return serverActionWrapper(data => createComment(data.privyUserId, questionId, comment, gated), options);
 };
 
 export const editCommentSA = async (commentId: number, comment: string, options: ServerActionOptions) => {

@@ -5,7 +5,7 @@ import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/l
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
-import { NotificationType, Prisma, ReactionType, SocialProfileType } from "@prisma/client";
+import { NotificationType, Prisma, ReactionType, SocialProfileType, Topic, User } from "@prisma/client";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
@@ -57,18 +57,18 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
   return { data: question };
 };
 
-export const createOpenQuestion = async (
-  privyUserId: string,
-  questionContent: string,
-  tag?: string,
-  topicId?: number
-) => {
+export const createOpenQuestion = async (privyUserId: string, questionContent: string, topic?: string) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
   }
 
-  if (tag) {
-    await prisma.tag.findUniqueOrThrow({ where: { name: tag } });
+  const hasTopic = topic && topic !== "";
+  let dbTopic: (Topic & { topicOwners: { holder: User; holderId: number }[] }) | undefined = undefined;
+  if (hasTopic) {
+    dbTopic = await prisma.topic.findUniqueOrThrow({
+      where: { name: topic },
+      include: { topicOwners: { include: { holder: true } } }
+    });
   }
 
   const questioner = await prisma.user.findUniqueOrThrow({
@@ -81,20 +81,13 @@ export const createOpenQuestion = async (
         questionerId: questioner.id,
         replierId: null,
         questionContent: questionContent,
-        topicId,
-        tags: tag
-          ? {
-              connect: {
-                name: tag
-              }
-            }
-          : undefined
+        topicId: dbTopic?.id
       }
     });
-    if (tag) {
-      const usersWithTag = await tx.user.findMany({ where: { tags: { some: { name: tag } } } });
-      for (const user of usersWithTag) {
-        await sendNotification(user.id, NotificationType.NEW_OPEN_QUESTION, questioner.id, question.id, tx);
+    if (hasTopic && dbTopic && dbTopic.topicOwners) {
+      for (const key of dbTopic?.topicOwners) {
+        if (key.holder.privyUserId === privyUserId) continue;
+        await sendNotification(key.holderId, NotificationType.NEW_OPEN_QUESTION, questioner.id, question.id, tx);
       }
     }
 
@@ -126,7 +119,8 @@ type getHotQuestionResponse = Prisma.QuestionGetPayload<{
         wallet: true;
       };
     };
-    tags: { select: { name: true } };
+    topic: { select: { name: true } };
+    // tags: { select: { name: true } };
   };
 }>;
 
@@ -199,7 +193,8 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
         avatarUrl: row.replierAvatarUrl,
         wallet: row.questionerWallet
       },
-      tags: row.tags?.split(",").map((tag: string) => ({ name: tag })) || []
+      topic: row.topic
+      // tags: row.tags?.split(",").map((tag: string) => ({ name: tag })) || []
     };
     return question;
   });
@@ -254,7 +249,7 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
     include: {
       questioner: true,
       replier: true,
-      tags: true
+      topic: true
     },
     take: PAGINATION_LIMIT,
     orderBy: args.orderBy,
