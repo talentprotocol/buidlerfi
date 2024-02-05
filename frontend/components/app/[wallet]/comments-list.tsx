@@ -88,7 +88,7 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
           </Button>
         </Flex>
         <Flex x yc>
-          <Switch onChange={e => setGated(e.target.checked)} checked={gated} />
+          <Switch onChange={e => setGated(e.target.checked)} checked={gated} defaultChecked />
           <Typography level="body-xs">gate this answer to your key holders only</Typography>
         </Flex>
       </Flex>

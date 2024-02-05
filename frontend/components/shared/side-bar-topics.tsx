@@ -45,22 +45,24 @@ export const SidebarTopics: FC<Props> = ({ navigate }) => {
         </li>
       )}
       <li key={`topics-list`}>
-        <ul
+        <ListSubheader
+          sx={{ fontWeight: 700, backgroundColor: "#FBFCFE", color: "#32383E", fontSize: "20px" }}
+        >{`topics`}</ListSubheader>
+        <div
           style={{
-            scrollbarColor: "transparent transparent"
+            overflowY: "scroll"
           }}
         >
-          <ListSubheader
-            sx={{ fontWeight: 700, backgroundColor: "#FBFCFE", color: "#32383E" }}
-          >{`topics`}</ListSubheader>
-          {otherTopics?.map(topic => (
-            <ListItem key={`topic-${topic.id}`}>
-              <ListItemButton onClick={() => navigate(`/topic/${topic.id}`)}>
-                <ListItemText primary={topic.name} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </ul>
+          <ul>
+            {otherTopics?.map(topic => (
+              <ListItem key={`topic-${topic.id}`}>
+                <ListItemButton onClick={() => navigate(`/topic/${topic.id}`)}>
+                  <ListItemText primary={topic.name} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </ul>
+        </div>
       </li>
     </List>
   );
