@@ -6,13 +6,13 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetCommentsCount } from "@/hooks/useCommentApi";
 import { useMarkdown } from "@/hooks/useMarkdown";
 import { useGetHotQuestions, useGetKeyQuestions, useGetQuestionsFromUser } from "@/hooks/useQuestionsApi";
+import { useTopic } from "@/hooks/useTopicsAPI";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference } from "@/lib/utils";
 import theme from "@/theme";
 import { Avatar, AvatarGroup, Box, Chip, Typography } from "@mui/joy";
 import { FC, useMemo } from "react";
 import { QuestionContextMenu } from "./question-context-menu";
-import { useTopic } from "@/hooks/useTopicsAPI";
 
 const pluralize = (amount: number) => {
   return amount <= 1 ? "answer" : `answers`;
@@ -99,6 +99,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
         xsb
         grow
         pointer
+        justifyContent={"space-between"}
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
@@ -106,28 +107,30 @@ export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
         }}
       >
         <Reactions sx={{ ml: 4 }} questionId={question.id} />
-        {question.topic ? (
-          <Chip variant="outlined" size="sm">
-            {question.topic.name}
-          </Chip>
-        ) : (
-          <Flex />
-        )}
-        {isAwaitingAnswer && (
-          <Chip size="sm" color="neutral" variant="outlined">
-            Awaiting Answer
-          </Chip>
-        )}
-        {question.replier && question.repliedOn && (
-          <Chip size="sm" color="primary" variant="outlined">
-            Answered
-          </Chip>
-        )}
-        {!question.replier && numberOfReplies !== undefined && numberOfReplies > 0 && (
-          <Chip size="sm" color="primary" variant="outlined">
-            {numberOfReplies} {pluralize(numberOfReplies)}
-          </Chip>
-        )}
+        <Flex x yc gap1>
+          {question.topic ? (
+            <Chip variant="outlined" size="sm">
+              {question.topic.name}
+            </Chip>
+          ) : (
+            <Flex />
+          )}
+          {isAwaitingAnswer && (
+            <Chip size="sm" color="neutral" variant="outlined">
+              Awaiting Answer
+            </Chip>
+          )}
+          {question.replier && question.repliedOn && (
+            <Chip size="sm" color="primary" variant="outlined">
+              Answered
+            </Chip>
+          )}
+          {!question.replier && numberOfReplies !== undefined && numberOfReplies > 0 && (
+            <Chip size="sm" color="primary" variant="outlined">
+              {numberOfReplies} {pluralize(numberOfReplies)}
+            </Chip>
+          )}
+        </Flex>
       </Flex>
     </Flex>
   );
