@@ -59,21 +59,23 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
             style={{
               display: "flex",
               flexDirection: "row",
-              justifyContent: "space-between",
+              justifyContent: "center",
               alignItems: "center",
-              gap: "1.5rem"
+              gap: "2rem"
             }}
           >
-            <Avatar
-              imageUrl={question.questioner?.avatarUrl as string}
-              username={question.questioner?.displayName as string}
-              bio={question!.questioner?.bio as string}
-            />
-            <img src={`data:image/png;base64,${imageArrows.toString("base64")}`} style={{ width: "48px" }} />
             <Avatar
               imageUrl={question.replier?.avatarUrl as string}
               username={question.replier?.displayName as string}
               bio={question.replier?.bio as string}
+            />
+            <div style={{ display: "flex" }}>
+              <img src={`data:image/png;base64,${imageArrows.toString("base64")}`} style={{ width: "36px" }} />
+            </div>
+            <Avatar
+              imageUrl={question.questioner?.avatarUrl as string}
+              username={question.questioner?.displayName as string}
+              bio={question!.questioner?.bio as string}
             />
           </div>
         </div>
@@ -123,7 +125,7 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
     </div>,
     {
       width: 600,
-      height: 400,
+      height: 315,
       fonts: [
         {
           data: regularFontData,

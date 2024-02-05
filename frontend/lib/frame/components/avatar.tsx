@@ -3,7 +3,7 @@ import React from "react";
 interface AvatarProps {
   imageUrl: string;
   username: string;
-  bio: string;
+  bio?: string;
 }
 
 const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
@@ -13,7 +13,8 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
         display: "flex",
         alignItems: "center",
         flexDirection: "row",
-        color: "#316CF0"
+        color: "#316CF0",
+        width: "150px" // Set the width to the value you want
       }}
     >
       <img
@@ -35,17 +36,18 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
         }}
       >
         <span style={{ marginTop: "4px", fontSize: "16px", fontFamily: "SpaceGrotesk-SemiBold" }}>{username}</span>
-        <span
-          style={{
-            marginTop: "4px",
-            fontSize: "12px",
-            whiteSpace: "pre-wrap",
-            width: "160px", // Set the width to the value you want
-            overflowWrap: "break-word"
-          }}
-        >
-          {bio?.substring(0, 50)}...
-        </span>
+        {bio && (
+          <span
+            style={{
+              marginTop: "4px",
+              fontSize: "12px",
+              whiteSpace: "pre-wrap",
+              overflowWrap: "break-word"
+            }}
+          >
+            {bio?.substring(0, 50)}...
+          </span>
+        )}
       </div>
     </div>
   );
