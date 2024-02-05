@@ -3,7 +3,8 @@ import { FullTextArea } from "@/components/shared/full-text-area";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateComment, useGetComments } from "@/hooks/useCommentApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
-import { Button, Checkbox, Divider } from "@mui/joy";
+import { Button, Divider, Typography } from "@mui/joy";
+import { Switch } from "@mui/material";
 import { FC, useState } from "react";
 import { ReplyCommentEntry } from "./reply-comment-entry";
 import { TradeKeyModal } from "./trade-key-modal";
@@ -86,12 +87,10 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
             Answer
           </Button>
         </Flex>
-        <Checkbox
-          label="Gate this response to your key holders only."
-          size="sm"
-          checked={gated}
-          onChange={e => setGated(e.target.checked)}
-        />
+        <Flex x yc>
+          <Switch onChange={e => setGated(e.target.checked)} checked={gated} />
+          <Typography level="body-xs">gate this answer to your key holders only</Typography>
+        </Flex>
       </Flex>
       <Divider />
       <Flex y yc grow gap1>
