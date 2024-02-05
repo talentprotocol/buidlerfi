@@ -1,8 +1,9 @@
-import { Question, Reaction, User } from "@prisma/client";
+import { Question, Reaction, Tag, User } from "@prisma/client";
 import * as fs from "fs";
 import { join } from "path";
 import satori from "satori";
 import Avatar from "./components/avatar";
+
 const regularFontPath = join(process.cwd(), "public/assets", "SpaceGrotesk-Regular.ttf");
 const regularFontData = fs.readFileSync(regularFontPath);
 
@@ -18,6 +19,7 @@ export interface Profile {
 }
 
 export interface QuestionWithInfo extends Question {
+  tags?: Tag[];
   questioner?: User;
   replier?: User;
   reactions?: Reaction[];
@@ -30,7 +32,7 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
         backgroundColor: "#F3F5F6",
         display: "flex",
         flexDirection: "column",
-        padding: "3rem",
+        padding: "2rem",
         alignItems: "center",
         width: "100%",
         height: "100%",
@@ -58,25 +60,54 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
           <div
             style={{
               display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
               alignItems: "center",
-              gap: "2rem"
+              justifyContent: "space-between",
+              width: "100%"
             }}
           >
-            <Avatar
-              imageUrl={question.replier?.avatarUrl as string}
-              username={question.replier?.displayName as string}
-              bio={question.replier?.bio as string}
-            />
-            <div style={{ display: "flex" }}>
-              <img src={`data:image/png;base64,${imageArrows.toString("base64")}`} style={{ width: "36px" }} />
+            <div
+              style={{
+                display: "flex",
+                maxWidth: `${question.replierId != null ? "45%" : "100%"}`,
+                justifyContent: "center"
+              }}
+            >
+              <Avatar
+                imageUrl={question.questioner?.avatarUrl as string}
+                username={question.questioner?.displayName as string}
+                bio={question!.questioner?.bio as string}
+              />
             </div>
-            <Avatar
-              imageUrl={question.questioner?.avatarUrl as string}
-              username={question.questioner?.displayName as string}
-              bio={question!.questioner?.bio as string}
-            />
+            {question.replierId != null ? (
+              <div
+                style={{
+                  width: `${question.replierId != null ? "55%" : "0%"}`,
+                  alignItems: "center",
+                  display: `${question.replierId != null ? "flex" : "none"}`
+                }}
+              >
+                <img
+                  src={`data:image/png;base64,${imageArrows.toString("base64")}`}
+                  style={{ display: "flex", width: "15%", alignItems: "center" }}
+                />
+
+                <div
+                  style={{
+                    display: "flex",
+                    maxWidth: "85%",
+                    justifyContent: "center",
+                    marginLeft: "auto",
+                    marginRight: "auto"
+                  }}
+                >
+                  <Avatar
+                    imageUrl={question.replier?.avatarUrl as string}
+                    username={question.replier?.displayName as string}
+                    bio={question.replier?.bio as string}
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
         {upvoted && (
@@ -102,6 +133,32 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
             </div>
           </div>
         )}
+        {question.replierId == null && question.tags != null ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              verticalAlign: "center",
+              fontSize: "20px"
+            }}
+          >
+            asked an open question about{" "}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                lineHeight: "1rem",
+                padding: "0.35rem 0.55rem", // paddingY paddingX
+                border: "1px solid #0b0d0e40",
+                borderRadius: "7999px",
+                marginLeft: "0.5rem"
+              }}
+            >
+              {question.tags[0].name.toLowerCase()}
+            </div>
+          </div>
+        ) : null}
         <div
           style={{
             border: "2px solid white",

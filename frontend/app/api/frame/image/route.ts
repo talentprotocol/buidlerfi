@@ -19,7 +19,7 @@ export const GET = async (req: Request) => {
 
   console.log("Fetching question...", id);
 
-  const data = (await getQuestion(parseInt(id), undefined, true)) as unknown as {
+  const data = (await getQuestion(parseInt(id), undefined, true, true)) as unknown as {
     data: { question: QuestionWithInfo };
   };
 

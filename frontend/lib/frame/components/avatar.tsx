@@ -11,10 +11,12 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
     <div
       style={{
         display: "flex",
-        alignItems: "center",
         flexDirection: "row",
+        alignItems: "center",
+        gap: "0.5rem",
         color: "#316CF0",
-        width: "150px" // Set the width to the value you want
+        padding: "0.5rem",
+        width: "100%"
       }}
     >
       <img
@@ -32,11 +34,12 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
-          marginLeft: "1rem"
+          flexWrap: "wrap",
+          width: "80%"
         }}
       >
         <span style={{ marginTop: "4px", fontSize: "16px", fontFamily: "SpaceGrotesk-SemiBold" }}>{username}</span>
-        {bio && (
+        {bio ? (
           <span
             style={{
               marginTop: "4px",
@@ -45,9 +48,9 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
               overflowWrap: "break-word"
             }}
           >
-            {bio?.substring(0, 50)}...
+            {bio.length > 52 ? `${bio?.substring(0, 52)}...` : bio}
           </span>
-        )}
+        ) : null}
       </div>
     </div>
   );

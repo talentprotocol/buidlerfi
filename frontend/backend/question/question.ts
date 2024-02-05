@@ -259,7 +259,12 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
 }
 
 //We allow privyUserId to be undefiend for public endpoint
-export const getQuestion = async (questionId: number, privyUserId?: string, includeSocialProfiles: boolean = false) => {
+export const getQuestion = async (
+  questionId: number,
+  privyUserId?: string,
+  includeSocialProfiles: boolean = false,
+  includeTags: boolean = false
+) => {
   const question = await prisma.question.findUniqueOrThrow({
     where: {
       id: questionId
@@ -271,6 +276,9 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
           comments: true
         }
       },
+      ...(includeTags && {
+        tags: true
+      }),
       questioner: {
         ...(includeSocialProfiles && {
           include: {
