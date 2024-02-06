@@ -82,6 +82,8 @@ model Question {
   replierId       Int?
   repliedOn       DateTime?
   id              Int        @id @default(autoincrement())
+  //Questions replies are gated by default
+  isGated         Boolean    @default(true)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   comments        Comment[]
@@ -93,6 +95,8 @@ model Question {
 }
 
 model Comment {
+  //Comments are not gated by default
+  isGated    Boolean    @default(false)
   content    String     @db.VarChar
   questionId Int
   authorId   Int
