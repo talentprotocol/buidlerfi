@@ -1,19 +1,39 @@
-import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { WELCOME_MODAL } from "@/lib/assets";
+import { useUserContext } from "@/contexts/userContext";
+import { useUpdateUser } from "@/hooks/useUserApi";
+import { formatError } from "@/lib/utils";
 import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
+import { FC } from "react";
+import { toast } from "react-toastify";
 import { Flex } from "../shared/flex";
 
-export const WelcomeModal = () => {
-  const router = useBetterRouter();
-  const handleCloseModal = () => {
-    router.replace({ searchParams: { welcome: undefined } });
+interface Props {
+  close: () => void;
+  openModal: boolean;
+}
+
+export const WelcomeModal: FC<Props> = ({ openModal, close }) => {
+  const updateUser = useUpdateUser();
+  const { user: currentUser, refetch } = useUserContext();
+  const handleFinishOnboarding = async () => {
+    if (!currentUser?.hasFinishedOnboarding) {
+      await updateUser
+        .mutateAsync({ hasFinishedOnboarding: true })
+        .then(async () => {
+          toast.success("You are ready to go!");
+          close();
+          await Promise.allSettled([refetch()]);
+        })
+        .catch(e => toast.error(formatError(e)));
+    }
   };
   return (
-    <Modal open={true} onClose={handleCloseModal}>
+    <Modal
+      open={openModal}
+      onClose={reason => {
+        if (reason === "backdropClick" || reason === "escapeKeyDown") close();
+      }}
+    >
       <ModalDialog sx={{ width: "min(100vw, 500px)", padding: 0, overflowY: "auto" }}>
-        <Flex sx={{ backgroundColor: "primary.50" }}>
-          <img src={WELCOME_MODAL} width="100%" />
-        </Flex>
         <Flex y p={2} gap={1}>
           <Typography level="h3">{"you're in! now what?"}</Typography>
           <Typography level="body-lg" textColor={"neutral.600"}>
@@ -23,7 +43,7 @@ export const WelcomeModal = () => {
             3. Ask them a question. <br />
             4. Sell the key at anytime.
           </Typography>
-          <Button fullWidth size="lg" sx={{ mt: 2 }} onClick={handleCloseModal}>
+          <Button fullWidth size="lg" sx={{ mt: 2 }} onClick={handleFinishOnboarding} loading={updateUser.isLoading}>
             Let&apos;s do this
           </Button>
         </Flex>

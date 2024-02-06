@@ -3,6 +3,7 @@ import { ServerActionOptions, serverActionWrapper } from "@/lib/serverActionWrap
 import { ReactionType } from "@prisma/client";
 import {
   addReaction,
+  answerQuestion,
   createOpenQuestion,
   createQuestion,
   deleteQuestion,
@@ -56,4 +57,13 @@ export const getHotQuestionsSA = (options: ServerActionOptions) => {
 
 export const getReactionsSA = async (questionId: number, type: "like" | "upvote", options: ServerActionOptions) => {
   return serverActionWrapper(() => getReactions(questionId, type), options);
+};
+
+export const answerQuestionSA = async (
+  questionId: number,
+  answer: string,
+  isGated: boolean | undefined,
+  options: ServerActionOptions
+) => {
+  return serverActionWrapper(data => answerQuestion(data.privyUserId, questionId, answer, isGated), options);
 };

@@ -2,6 +2,7 @@
 import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { ArrowBackOutlined } from "@mui/icons-material";
 import { Avatar, IconButton, Typography } from "@mui/joy";
 import { usePathname } from "next/navigation";
@@ -52,8 +53,9 @@ export const BackButton = () => {
 };
 
 export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, fullItem, title, withBack }) => {
+  const router = useBetterRouter();
   const anchor = useRef<HTMLDivElement>(null);
-  const { user } = useUserContext();
+  const { user, isAuthenticatedAndActive } = useUserContext();
   const { topBarRef } = useLayoutContext();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
@@ -61,7 +63,7 @@ export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, 
   if (!topBarRef?.current) return <></>;
 
   if (fullItem) return createPortal(<>{fullItem}</>, topBarRef.current);
-  else if (startItem || endItem || centerItem) {
+  else if (startItem || centerItem) {
     return createPortal(
       <>
         <Flex x xs yc basis="100%">
@@ -97,9 +99,9 @@ export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, 
             size="md"
             ref={anchor}
             alt={user?.displayName?.[0]}
-            src={user?.avatarUrl || undefined}
+            src={isAuthenticatedAndActive ? user?.avatarUrl || undefined : LOGO_BLUE_BACK}
             sx={{ position: "relative", cursor: "pointer" }}
-            onClick={() => setIsSidebarOpen(true)}
+            onClick={() => (!isAuthenticatedAndActive ? router.push("/home") : setIsSidebarOpen(true))}
           />
         )}
       </Flex>
@@ -110,8 +112,8 @@ export const InjectTopBar: FC<InjectProps> = ({ startItem, endItem, centerItem, 
         </Typography>
       </Flex>
 
-      <Flex basis="100%" y xe px={1}>
-        {/* <ToggleOnOutlined /> */}
+      <Flex basis="100%" y xe>
+        {endItem}
       </Flex>
     </>
   );

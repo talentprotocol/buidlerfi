@@ -65,7 +65,7 @@ export const useUserProfile = (wallet?: string) => {
     refetch: refetchAll,
     user,
     recommendedUser,
-    isOwnProfile: currentUser?.wallet?.toLowerCase() === formattedWallet,
+    isOwnProfile: !!currentUser?.wallet && currentUser.wallet.toLowerCase() === formattedWallet,
     getQuestionsFromReplierQuery,
     getQuestionsFromQuestionerQuery,
     hasLaunchedKeys: !!holdings?.find(key => key.holderId === key.ownerId)

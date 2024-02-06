@@ -10,7 +10,7 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useSearch } from "@/hooks/useUserApi";
+import { useGetTopUsers, useSearch } from "@/hooks/useUserApi";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { PersonSearchOutlined } from "@mui/icons-material";
 import { Avatar, Input, Typography, useTheme } from "@mui/joy";
@@ -18,14 +18,14 @@ import { useState } from "react";
 
 export default function QuestionPage() {
   const theme = useTheme();
-  const { user, holding, isLoading } = useUserContext();
+  const { isLoading } = useUserContext();
+  const topUsers = useGetTopUsers();
   const [searchValue, setSearchValue] = useState("");
   const router = useBetterRouter();
-  const searchUsers = useSearch(searchValue, true);
+  const searchUsers = useSearch(searchValue, false);
   if (router.searchParams.ask) {
     return <AskQuestion />;
   }
-
   return (
     <Flex y grow component="main">
       <InjectTopBar withBack title="Ask a question" />
@@ -58,20 +58,15 @@ export default function QuestionPage() {
           {isLoading ? (
             <LoadingPage />
           ) : (
-            holding
-              ?.filter(holding => holding.ownerId !== user?.id)
-              .map(holding => (
-                <UnifiedUserItem
-                  key={holding.id}
-                  user={holding.owner}
-                  holdersAndReplies={{
-                    numberOfHolders: holding.owner?._count?.keysOfSelf,
-                    questionsCount: holding.owner?._count?.replies
-                  }}
-                  onClick={() => router.push({ searchParams: { ask: true, wallet: holding.owner.wallet } })}
-                />
-              ))
+            topUsers?.data?.map(topUser => (
+              <UnifiedUserItem
+                key={topUser.id}
+                user={topUser}
+                onClick={() => router.push({ searchParams: { ask: true, wallet: topUser.wallet } })}
+              />
+            ))
           )}
+          <LoadMoreButton query={topUsers} />
         </Flex>
       )}
       {searchValue && (

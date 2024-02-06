@@ -52,7 +52,7 @@ export const useBetterRouter = () => {
       if (url.pathname.startsWith("./")) {
         url.pathname = pathname + url.pathname.substring(1);
       }
-      if (Object.entries(url.searchParams!).length === 0) return url.pathname;
+      if (Object.entries(url.searchParams || {}).length === 0) return url.pathname;
       else return `${url.pathname}?${convertParamsToString(url.searchParams!)}`;
     },
     [pathname, searchParams]
@@ -69,6 +69,7 @@ export const useBetterRouter = () => {
   const push = useCallback(
     (url: CustomUrl | string, options?: BetterRouterOptions) => {
       const formattedUrl = formatUrl(url, options);
+      console.log(formattedUrl);
       nextRouter.push(formattedUrl, { scroll: false });
     },
     [formatUrl, nextRouter]
