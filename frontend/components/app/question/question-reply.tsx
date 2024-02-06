@@ -68,19 +68,21 @@ export const QuestionReply: FC<Props> = ({
             value={reply}
           />
           {hasLaunchedKeys && (
-            <Button
-              sx={{ minWidth: "70px" }}
-              size="sm"
-              variant="outlined"
-              onClick={() => setIsGateAnswer(!isGateAnswer)}
-              color={isGateAnswer ? "danger" : "success"}
-            >
-              {isGateAnswer ? "Gated" : "Open"}
-            </Button>
+            <>
+              <Button
+                sx={{ minWidth: "70px" }}
+                size="sm"
+                variant="outlined"
+                onClick={() => setIsGateAnswer(!isGateAnswer)}
+                color={isGateAnswer ? "danger" : "success"}
+              >
+                {isGateAnswer ? "Gated" : "Open"}
+              </Button>
+              <IconButton sx={{ ml: 0.5 }} size="sm" onClick={() => setIsInfoModalOpen(true)}>
+                <HelpOutline fontSize="small" htmlColor={theme.palette.neutral[600]} />
+              </IconButton>
+            </>
           )}
-          <IconButton sx={{ ml: 0.5 }} size="sm" onClick={() => setIsInfoModalOpen(true)}>
-            <HelpOutline fontSize="small" htmlColor={theme.palette.neutral[600]} />
-          </IconButton>
         </Flex>
       )}
 

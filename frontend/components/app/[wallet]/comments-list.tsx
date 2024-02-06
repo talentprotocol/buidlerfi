@@ -102,19 +102,21 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
             </Button>
             <Flex>
               {hasLaunchedKeys && (
-                <Button
-                  sx={{ minWidth: "70px" }}
-                  size="sm"
-                  variant="outlined"
-                  onClick={() => setIsGateAnswer(prev => !prev)}
-                  color={isGateAnswer ? "danger" : "success"}
-                >
-                  {isGateAnswer ? "Gated" : "Open"}
-                </Button>
+                <>
+                  <Button
+                    sx={{ minWidth: "70px" }}
+                    size="sm"
+                    variant="outlined"
+                    onClick={() => setIsGateAnswer(prev => !prev)}
+                    color={isGateAnswer ? "danger" : "success"}
+                  >
+                    {isGateAnswer ? "Gated" : "Open"}
+                  </Button>
+                  <IconButton sx={{ ml: 0.5 }} size="sm" onClick={() => setIsInfoModalOpen(true)}>
+                    <HelpOutline fontSize="small" htmlColor={theme.palette.neutral[600]} />
+                  </IconButton>
+                </>
               )}
-              <IconButton sx={{ ml: 0.5 }} size="sm" onClick={() => setIsInfoModalOpen(true)}>
-                <HelpOutline fontSize="small" htmlColor={theme.palette.neutral[600]} />
-              </IconButton>
             </Flex>
           </Flex>
         </Flex>
