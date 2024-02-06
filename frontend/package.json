@@ -48,7 +48,7 @@
     "tailwindcss-animate": "^1.0.7",
     "viem": "^1.10.8",
     "wagmi": "^1.4.1",
-    "@coinbase/onchainkit": "^0.3.0",
+    "@coinbase/onchainkit": "^0.5.0",
     "satori": "0.10.11",
     "sharp": "0.32.6",
     "utf-8-validate": "^6.0.3",

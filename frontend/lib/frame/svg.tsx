@@ -56,7 +56,27 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
             gap: "2rem"
           }}
         >
-          <img src={`data:image/png;base64,${imageBFLogoBlue.toString("base64")}`} height={"12px"} />
+          <div
+            style={{
+              padding: "1rem",
+              borderRadius: "10px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%"
+            }}
+          >
+            <span
+              style={{
+                color: "#316CF0",
+                fontSize: "30px"
+              }}
+            >
+              {question.questionContent.length > 240
+                ? `${question.questionContent.substring(0, 240)}...`
+                : question.questionContent}
+            </span>
+          </div>
           <div
             style={{
               display: "flex",
@@ -68,13 +88,14 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
             <div
               style={{
                 display: "flex",
-                maxWidth: `${question.replierId != null ? "45%" : "100%"}`,
+                width: `${question.replierId != null ? "45%" : "100%"}`,
                 justifyContent: "center"
               }}
             >
               <Avatar
                 imageUrl={question.questioner?.avatarUrl as string}
                 username={question.questioner?.displayName as string}
+                userAddress={question.questioner?.wallet as string}
                 bio={question!.questioner?.bio as string}
               />
             </div>
@@ -103,11 +124,15 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
                   <Avatar
                     imageUrl={question.replier?.avatarUrl as string}
                     username={question.replier?.displayName as string}
+                    userAddress={question.replier?.wallet as string}
                     bio={question.replier?.bio as string}
                   />
                 </div>
               </div>
             ) : null}
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", width: "100%" }}>
+            <img src={`data:image/png;base64,${imageBFLogoBlue.toString("base64")}`} height={"16px"} />
           </div>
         </div>
         {upvoted && (
@@ -133,51 +158,32 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
             </div>
           </div>
         )}
-        {question.replierId == null && question.tags != null ? (
+        {question.replierId == null && question.tags && question.tags?.length > 0 ? (
           <div
             style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               verticalAlign: "center",
-              fontSize: "20px"
+              fontSize: "18px"
             }}
           >
-            asked an open question about{" "}
+            asked an open question about
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                lineHeight: "1rem",
+                lineHeight: "0.8rem",
                 padding: "0.35rem 0.55rem", // paddingY paddingX
                 border: "1px solid #0b0d0e40",
                 borderRadius: "7999px",
-                marginLeft: "0.5rem"
+                marginLeft: "0.4rem"
               }}
             >
               {question.tags[0].name.toLowerCase()}
             </div>
           </div>
         ) : null}
-        <div
-          style={{
-            border: "2px solid white",
-            padding: "1rem",
-            borderRadius: "10px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center"
-          }}
-        >
-          <span
-            style={{
-              color: "#316CF0",
-              fontSize: "24px"
-            }}
-          >
-            {question.questionContent}
-          </span>
-        </div>
       </div>
     </div>,
     {
