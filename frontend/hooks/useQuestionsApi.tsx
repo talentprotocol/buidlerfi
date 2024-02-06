@@ -9,19 +9,26 @@ import {
   deleteReplySA,
   editQuestionSA
 } from "@/backend/question/questionServerActions";
+import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { ReactionType } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
 import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
 import { useMutationSA } from "./useMutationSA";
 
-export function useGetQuestion(id: number) {
+export function useGetQuestion(
+  id: number,
+  queryOptions?: SimpleUseQueryOptions<Awaited<ReturnType<typeof getQuestion>>["data"]>
+) {
   const axios = useAxios();
-  return useQuery(["useGetQuestion", id], async () =>
-    axios
-      .get<Awaited<ReturnType<typeof getQuestion>>>(`/api/question/${id}`)
-      .then(res => res.data)
-      .then(res => res.data)
+  return useQuery(
+    ["useGetQuestion", id],
+    async () =>
+      axios
+        .get<Awaited<ReturnType<typeof getQuestion>>>(`/api/question/${id}`)
+        .then(res => res.data)
+        .then(res => res.data),
+    queryOptions
   );
 }
 
