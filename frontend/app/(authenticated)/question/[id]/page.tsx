@@ -1,6 +1,7 @@
 import QuestionPage from "@/components/app/question/question-page";
 import { BASE_URL } from "@/lib/constants";
 import prisma from "@/lib/prisma";
+import { FrameButton, FrameButtonsType, getFrameFlattened } from "frames.js";
 import { Metadata } from "next";
 
 type Props = {
@@ -11,17 +12,22 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = params.id;
   const question = await prisma.question.findUnique({ where: { id: parseInt(id) } });
-  const fcMetadata: Record<string, string> = {
-    "fc:frame": "vNext",
-    "fc:frame:post_url": `${BASE_URL}/api/frame/action?id=${id}`,
-    "fc:frame:image": `${BASE_URL}/api/frame/image?id=${id}`,
-    "fc:frame:button:1": "upvote ⬆️"
-  };
-
+  const buttons: FrameButtonsType = [
+    {
+      label: "upvote ⬆️",
+      action: "post"
+    } as FrameButton
+  ];
   if (question?.replierId == null) {
-    fcMetadata["fc:frame:input:text"] = "your answer here";
-    fcMetadata["fc:frame:button:2"] = "reply ✍️";
+    buttons.push({ label: "reply ✍️", action: "post" });
   }
+  const fcMetadata: Record<string, string> = getFrameFlattened({
+    version: "vNext",
+    buttons,
+    image: `${BASE_URL}/api/frame/image?id=${id}`,
+    inputText: question?.replierId == null ? "your answer here" : undefined,
+    postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+  });
 
   return {
     title: `${question?.questionContent.substring(0, 50)}`,

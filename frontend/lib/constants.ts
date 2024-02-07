@@ -51,18 +51,18 @@ export const WEEK_IN_MILLISECONDS = 604800000;
 export const FARCASTER_BUILDERFI_CHANNEL_ID = "builderfi";
 
 export const NEW_BUILDERFI_QUESTION_CAST =
-  "{questionAuthor} just asked {questionRecipient} a question on builder.fi!\n\n{link}";
+  "{questionAuthor} just asked {questionRecipient} a question on builder.fi!";
 export const NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
 
 export const NEW_BUILDERFI_ANSWER_CAST =
-  "{replyAuthor} just answered {questionAuthor} question on builder.fi!\n\n{link}";
+  "{replyAuthor} just answered {questionAuthor} question on builder.fi!";
 export const NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH = "0x311091ebeef4e0ba4cbbeb5c7d7f46019a747c06";
 
-export const NEW_BUILDERFI_USER_CAST = "{user} just launched their keys on builder.fi!\n\n{link}";
+export const NEW_BUILDERFI_USER_CAST = "{user} just launched their keys on builder.fi!";
 
 export const NEW_BUILDERFI_BUY_TRADE_CAST =
-  "{holder} just bought {owner} keys on builder.fi for {price} ETH!\n\n{link}";
-export const NEW_BUILDERFI_SELL_TRADE_CAST = "{holder} just sold {owner} keys on builder.fi for {price} ETH!\n\n{link}";
+  "{holder} just bought {owner} keys on builder.fi for {price} ETH!";
+export const NEW_BUILDERFI_SELL_TRADE_CAST = "{holder} just sold {owner} keys on builder.fi for {price} ETH!";
 
 export const NEW_BUILDERFI_USER_PARENT_CAST_HASH = "0x203126fea3987996b1032f72ed70d28c9f5663c5";
 export const NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH = "0xded82314b7ada765c08fe1ce2fbf157edadaa598";
@@ -92,7 +92,7 @@ export const TOP_FARCASTER_USERS_BY_NUMBER_ANSWERS_CAST =
   "✔️ meet the top 10 farcaster users by questions answered in builder.fi";
 
 export const TOP_QUESTION_UPVOTE_BY_WEEK_CAST =
-  "🔝 this week’s most upvoted question in builder.fi\n\n{questioner} asked {replier}:\n{questionContent}\n\n{link}";
+  "🔝 this week’s most upvoted question in builder.fi\n\n{questioner} asked {replier}:\n{questionContent}";
 
 export const BUILDERFI_FARCASTER_FID = 210833;
 
@@ -150,7 +150,7 @@ export const QUESTS = [
 
 export const BASE_URL =
   process.env.ENVIRONMENT === "localhost"
-    ? "http://localhost:3000"
+    ? "http://localhost:3001"
     : process.env.ENVIRONMENT === "development"
     ? "https://dev.builder.fi"
     : "https://app.builder.fi";

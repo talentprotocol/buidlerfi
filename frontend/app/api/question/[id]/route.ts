@@ -51,11 +51,7 @@ export async function PUT(req: Request, { params }: { params: { id: number } }) 
         const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
         // if one of the two has farcaster, publish the cast
         console.log("CASTING NEW ANSWER");
-        await publishNewAnswerCast(
-          replierName,
-          questionerName,
-          `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
-        );
+        await publishNewAnswerCast(replierName, questionerName, `https://app.builder.fi/question/${question.id}`);
       }
     }
 

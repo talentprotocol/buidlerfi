@@ -50,7 +50,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
       await publishNewQuestionCast(
         questionerName,
         replierName,
-        `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
+        `https://app.builder.fi/question/${question.id}`
       );
     }
   }

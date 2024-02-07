@@ -4,8 +4,8 @@ import { ReactionType, SocialProfileType } from "@prisma/client";
 import { BASE_URL } from "../constants";
 import prisma from "../prisma";
 
-export const getQuestionImageUrl = (questionId: string | number, upvoted?: boolean) =>
-  `${BASE_URL}/api/frame/image?id=${questionId}${upvoted ? "&upvoted=true" : ""}`;
+export const getQuestionImageUrl = (questionId: string | number, upvoted?: boolean, replied?: boolean) =>
+  `${BASE_URL}/api/frame/image?id=${questionId}${upvoted ? "&upvoted=true" : ""}${replied ? "&replied=true" : ""}`;
 
 const getSocialProfile = async (username: string) => {
   const socialProfiles = await prisma.socialProfile.findFirst({
