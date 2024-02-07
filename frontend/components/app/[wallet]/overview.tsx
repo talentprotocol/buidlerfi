@@ -18,7 +18,6 @@ import Link from "next/link";
 import { FC, useMemo } from "react";
 
 interface Props {
-  setBuyModalState: (state: "closed" | "buy" | "sell") => void;
   profile: ReturnType<typeof useUserProfile>;
 }
 
@@ -46,14 +45,12 @@ export const socialInfo = {
 };
 export const socialsOrder = Object.keys(socialInfo);
 
-export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
-  const { user: currentUser } = useUserContext();
-
+export const Overview: FC<Props> = ({ profile }) => {
+  const { user: currentUser, isAuthenticatedAndActive } = useUserContext();
   const router = useBetterRouter();
 
   const { buyPrice, supply } = useGetBuilderInfo(profile.user?.wallet);
   const refreshData = useRefreshCurrentUser();
-
   const keysPlural = () => {
     if (profile.ownedKeysCount != 1) {
       return "keys";
@@ -152,16 +149,15 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
                 <Button
                   variant="outlined"
                   color="neutral"
-                  onClick={() => setBuyModalState("sell")}
+                  onClick={() => router.replace({ searchParams: { tradeModal: "sell" } })}
                   disabled={(supply || 0) <= BigInt(1)}
                 >
                   Sell
                 </Button>
               )}
-
-              {profile.hasLaunchedKeys && profile.user && (
+              {isAuthenticatedAndActive && profile.hasLaunchedKeys && profile.user && (
                 <Button
-                  onClick={() => setBuyModalState("buy")}
+                  onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}
                   disabled={supply === BigInt(0) && !profile.isOwnProfile}
                 >
                   {profile.isOwnProfile && profile.holders?.length === 0 ? "Create keys" : "Buy"}

@@ -159,3 +159,25 @@ export const ownsKey = async (
 
   return !!key;
 };
+
+export const hasLaunchedKeys = async (user: { userId?: number; privyUserId?: string; wallet?: string }) => {
+  const key = await prisma.keyRelationship.findFirst({
+    where: {
+      owner: {
+        id: user.userId,
+        privyUserId: user.privyUserId,
+        wallet: user.wallet?.toLowerCase()
+      },
+      holder: {
+        id: user.userId,
+        privyUserId: user.privyUserId,
+        wallet: user.wallet?.toLowerCase()
+      },
+      amount: {
+        gt: 0
+      }
+    }
+  });
+
+  return !!key;
+};

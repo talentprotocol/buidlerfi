@@ -5,7 +5,19 @@ const SPKI = `-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0yFanm3yTbCe4Z4KM9yi/IGZf+ugrj+rn82e/guPcFlyLiudyubOWqFFmL/bVdxDY5LFhJdvBwfDYKR8LwcmPg==
 -----END PUBLIC KEY-----`;
 
-const allowAnonymous = ["/api/question/public"];
+const allowAnonymous = [
+  "/api/question/public",
+  "/api/question/new",
+  "/api/question/hot",
+  "/api/question/open",
+  "/api/question/user",
+  "/api/user/0x",
+  "/api/user/holders",
+  "/api/keyrelationship",
+  "/api/reaction",
+  "/api/user/stats",
+  "/api/comment"
+];
 
 export default async function middleware(req: NextRequest) {
   if (!req.nextUrl.pathname.includes("/api/")) return NextResponse.next();

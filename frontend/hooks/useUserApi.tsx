@@ -6,6 +6,7 @@ import {
   getTopUsersByKeysOwned,
   getTopUsersByQuestionsAsked,
   getUser,
+  getUserStats,
   search
 } from "@/backend/user/user";
 import {
@@ -14,13 +15,13 @@ import {
   generateChallengeSA,
   getRecommendedUserSA,
   getRecommendedUsersSA,
-  getUserStatsSA,
   linkNewWalletSA,
   refreshCurrentUserProfileSA,
+  setUserSettingSA,
   updateUserSA
 } from "@/backend/user/userServerActions";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserSettingKeyEnum } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
 import { useDebounce } from "./useDebounce";
@@ -35,8 +36,8 @@ export type GetCurrentUserResponse = Prisma.UserGetPayload<{
 export type GetUserResponse = Prisma.UserGetPayload<{ include: { socialProfiles: true } }>;
 
 export const useCreateUser = () => {
-  return useMutationSA(async (options, inviteCode: string) => {
-    return createUserSA(inviteCode, options);
+  return useMutationSA(async options => {
+    return createUserSA(options);
   });
 };
 
@@ -126,8 +127,19 @@ export const useSearch = (searchValue: string, includeOwnedKeysOnly = false, que
   );
 };
 
-export const useGetUserStats = (userId?: number) => {
-  return useQuerySA(["useGetUserStats", userId], async options => getUserStatsSA(userId!, options), {
-    enabled: !!userId
-  });
+export const useGetUserStats = (id?: number) => {
+  const axios = useAxios();
+  return useQuery(
+    ["useGetUserStats", id],
+    async () => axios.get<Awaited<ReturnType<typeof getUserStats>>>(`/api/user/stats/${id}`).then(res => res.data.data),
+    {
+      enabled: !!id
+    }
+  );
+};
+
+export const useSetUserSetting = () => {
+  return useMutationSA((options, setting: { key: UserSettingKeyEnum; value: string }) =>
+    setUserSettingSA(setting.key, setting.value, options)
+  );
 };

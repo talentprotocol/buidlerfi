@@ -7,10 +7,10 @@ import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
 import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
-import { Prisma, SocialProfileType } from "@prisma/client";
+import { Prisma, SocialProfileType, UserSettingKeyEnum } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
-import { sendNotification } from "../notification/notification";
+// import { sendNotification } from "../notification/notification";
 import { syncFarcasterFollowings } from "../socialProfile/farcasterFollowing";
 import { updateRecommendations } from "../socialProfile/recommendation";
 import { updateUserSocialProfiles } from "../socialProfile/socialProfile";
@@ -50,6 +50,7 @@ export const getCurrentUser = async (privyUserId: string) => {
       privyUserId: privyUserId
     },
     include: {
+      settings: true,
       inviteCodes: {
         where: {
           isActive: true
@@ -119,8 +120,8 @@ export const getUser = async (wallet: string) => {
   return { data: res };
 };
 
-export const createUser = async (privyUserId: string, inviteCode: string) => {
-  inviteCode = inviteCode.trim();
+export const createUser = async (privyUserId: string) => {
+  console.log({ privyUserId });
 
   const privyUser = await privyClient.getUser(privyUserId);
   if (!privyUser) {
@@ -136,42 +137,26 @@ export const createUser = async (privyUserId: string, inviteCode: string) => {
     account => account.type === "wallet" && account.walletClientType === "privy" && account.connectorType === "embedded"
   ) as Wallet;
 
+  const socialWallet = privyUser.linkedAccounts.find(
+    account => account.type === "wallet" && account.connectorType === "injected"
+  ) as Wallet;
+
+  const socialAddress = socialWallet ? socialWallet.address.toLowerCase() : undefined;
+
   if (!embeddedWallet) {
     return { error: ERRORS.WALLET_MISSING };
   }
 
   const address = embeddedWallet.address.toLowerCase();
 
-  const existingCode = await prisma.inviteCode.findUnique({ where: { code: inviteCode } });
-  if (!existingCode || existingCode.isActive === false) {
-    return { error: ERRORS.INVALID_INVITE_CODE };
-  }
-
-  if (existingCode.used >= existingCode.maxUses) {
-    return { error: ERRORS.CODE_ALREADY_USED };
-  }
-
-  const newUser = await prisma.$transaction(async tx => {
-    const newUser = await tx.user.create({
-      data: {
-        privyUserId: privyUser.id,
-        invitedById: existingCode.id,
-        wallet: address,
-        isActive: true
-      }
-    });
-
-    await tx.inviteCode.update({
-      where: { id: existingCode.id },
-      data: {
-        used: existingCode.used + 1
-      }
-    });
-
-    return newUser;
+  const newUser = await prisma.user.create({
+    data: {
+      privyUserId: privyUser.id,
+      wallet: address,
+      socialWallet: socialAddress,
+      isActive: true
+    }
   });
-
-  await sendNotification(existingCode.userId, "USER_INVITED", newUser.id, newUser.id);
 
   return { data: newUser };
 };
@@ -263,6 +248,11 @@ export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArg
 };
 
 export const generateChallenge = async (privyUserId: string, publicKey: string) => {
+  const existingUser = await prisma.user.findUnique({ where: { socialWallet: publicKey.toLowerCase() } });
+  if (existingUser) {
+    return { error: ERRORS.SOCIAL_WALLET_ALREADY_LINKED };
+  }
+
   const user = await prisma.user.findUniqueOrThrow({
     where: {
       privyUserId
@@ -822,12 +812,41 @@ export const getUserStats = async (id: number) => {
     where: {
       id: id
     },
-    include: {
-      replies: true,
-      keysOfSelf: {
-        where: {
-          amount: {
-            gt: 0
+    select: {
+      _count: {
+        select: {
+          questions: {
+            where: {
+              replierId: null
+            }
+          },
+          comments: {
+            where: {
+              question: {
+                replierId: null
+              }
+            }
+          },
+          replies: {
+            where: {
+              repliedOn: {
+                not: null
+              }
+            }
+          },
+          keysOfSelf: {
+            where: {
+              amount: {
+                gt: 0
+              }
+            }
+          },
+          keysOwned: {
+            where: {
+              amount: {
+                gt: 0
+              }
+            }
           }
         }
       }
@@ -836,8 +855,38 @@ export const getUserStats = async (id: number) => {
 
   return {
     data: {
-      numberOfHolders: user.keysOfSelf.length,
-      questionsCount: user.replies.filter(reply => !!reply.repliedOn).length
+      numberOfHolders: user._count.keysOfSelf,
+      numberOfHolding: user._count.keysOwned,
+      answersCount: user._count.replies,
+      openQuestionsReplied: user._count.comments,
+      openQuestionsAsked: user._count.questions
     }
   };
+};
+
+export const setUserSetting = async (privyUserId: string, key: UserSettingKeyEnum, value: string) => {
+  const currentUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      privyUserId
+    }
+  });
+
+  const res = await prisma.userSetting.upsert({
+    where: {
+      userId_key: {
+        userId: currentUser.id,
+        key
+      }
+    },
+    update: {
+      value
+    },
+    create: {
+      userId: currentUser.id,
+      key,
+      value
+    }
+  });
+
+  return { data: res };
 };

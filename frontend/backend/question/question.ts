@@ -1,7 +1,7 @@
 "use server";
 
-import { getFarcasterProfileName, publishNewQuestionCast } from "@/lib/api/backend/farcaster";
-import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/lib/constants";
+import { getFarcasterProfileName, publishNewAnswerCast, publishNewQuestionCast } from "@/lib/api/backend/farcaster";
+import { MAX_COMMENT_LENGTH, MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
@@ -33,7 +33,7 @@ export const createQuestion = async (
     include: { socialProfiles: true, keysOwned: true }
   });
 
-  let replier: (User & { keysOfSelf?: KeyRelationship[], socialProfiles: SocialProfile[] }) | null;
+  let replier: (User & { keysOfSelf?: KeyRelationship[]; socialProfiles: SocialProfile[] }) | null;
   if (!replierId && recommendedUser) {
     replier = await prisma.user.findUnique({
       where: { socialWallet: recommendedUser.wallet.toLowerCase() },
@@ -342,16 +342,17 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
     }
   });
 
-  //We need to check privyUserId explicitely also because if it's undefined, it's going to return the system user
-  if (!privyUserId) return { data: exclude(question, ["reply"]) };
+  //If not gated, or is an open-question, return immediately
+  //If user has not launched keys, gated will always be false, so we don't need to check if key is launched
+  if (!question.isGated || !question.replierId) return { data: question };
 
-  const hasKey = !question.replierId || (await ownsKey({ userId: question.replierId }, { privyUserId }));
-  const hasLaunchedKey =
-    question.replierId && (await ownsKey({ userId: question.replierId }, { userId: question.replierId }));
-  if (hasKey || !hasLaunchedKey) return { data: question };
-  else return { data: exclude(question, ["reply"]) };
+  if (!privyUserId) {
+    return { data: exclude(question, ["reply"]) };
+  }
+
+  const hasKey = await ownsKey({ userId: question.replierId }, { privyUserId });
+  return { data: hasKey ? question : exclude(question, ["reply"]) };
 };
-
 export async function getMostUpvotedQuestion(startDate: Date = new Date(new Date().getTime() - WEEK_IN_MILLISECONDS)) {
   const mostUpvotedQuestions = await prisma.reaction.groupBy({
     where: {
@@ -563,6 +564,67 @@ export const deleteReply = async (privyUserId: string, questionId: number) => {
 
     return res;
   });
+
+  return { data: res };
+};
+
+export const answerQuestion = async (
+  privyUserId: string,
+  questionId: number,
+  answerContent: string,
+  isGated: boolean | undefined
+) => {
+  const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
+
+  if (answerContent.length < 5 || answerContent.length > MAX_COMMENT_LENGTH) return { error: ERRORS.INVALID_LENGTH };
+
+  const currentUser = await prisma.user.findUniqueOrThrow({
+    where: { privyUserId },
+    include: { socialProfiles: true, keysOfSelf: { where: { amount: { gt: 0 } } } }
+  });
+
+  const hasLaunchedKeys = !!currentUser.keysOfSelf.find(h => h.holderId === h.ownerId);
+
+  if (question.replierId !== currentUser?.id) return { error: ERRORS.UNAUTHORIZED };
+
+  const res = await prisma.$transaction(async tx => {
+    const question = await tx.question.update({
+      where: { id: questionId },
+      data: {
+        reply: answerContent,
+        repliedOn: new Date(),
+        //Cannot gate if keys not launched
+        isGated: hasLaunchedKeys ? isGated : false
+      }
+    });
+    await sendNotification(question.questionerId, "REPLIED_YOUR_QUESTION", currentUser.id, question.id, tx);
+    return question;
+  });
+
+  console.log("Farcaster enabled -> ", process.env.ENABLE_FARCASTER);
+  if (process.env.ENABLE_FARCASTER === "true") {
+    const questioner = await prisma.user.findUnique({
+      where: { id: question.questionerId },
+      include: { socialProfiles: true }
+    });
+    const questionerFarcaster = questioner?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
+    const replierFarcaster = currentUser?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
+
+    console.log("FOUND questioner -> ", !!questionerFarcaster);
+    console.log("FOUND replier -> ", !!replierFarcaster);
+
+    if (questionerFarcaster || replierFarcaster) {
+      const replierName = getFarcasterProfileName(currentUser!, replierFarcaster);
+      const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
+      // if one of the two has farcaster, publish the cast
+      console.log("CASTING NEW ANSWER");
+      await publishNewAnswerCast(
+        replierName,
+        questionerName,
+        `https://app.builder.fi/profile/${currentUser.wallet}?question=${question.id}`
+      );
+    }
+  }
 
   return { data: res };
 };

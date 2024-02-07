@@ -1,6 +1,5 @@
 "use client";
 import { ExploreTopBar, TabsEnum } from "@/components/app/explore/exploreTopBar";
-import { WelcomeModal } from "@/components/app/welcome-modal";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
@@ -9,7 +8,6 @@ import { RecommendedUserItem } from "@/components/shared/recommended-user-item";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
-import { useBetterRouter } from "@/hooks/useBetterRouter";
 import {
   useGetNewUsers,
   useGetTopUsers,
@@ -34,8 +32,6 @@ export default function ExplorePage() {
   const topUsersByAnswers = useGetTopUsersByAnswersGiven();
   const topUsersByKeys = useGetTopUsersByKeysOwned();
 
-  const router = useBetterRouter();
-
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 
   const { isLoading: isLoadingRecommendedUsers, data: recommendedUsers } = useRecommendedUsers(
@@ -56,7 +52,6 @@ export default function ExplorePage() {
           />
         }
       />
-      {router.searchParams.welcome === "1" && <WelcomeModal />}
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
         <TabPanel value="Holders">
           {topUsers.isLoading ? (

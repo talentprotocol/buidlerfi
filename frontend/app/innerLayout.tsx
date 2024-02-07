@@ -56,7 +56,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
       <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
         <CssVarsProvider theme={theme}>
           <QueryClientProvider client={queryClient}>
-            <LayoutContextProvider>{mounted && <InnerProviders>{children}</InnerProviders>}</LayoutContextProvider>
+            {mounted && <InnerProviders>{children}</InnerProviders>}
           </QueryClientProvider>
           <ToastContainer />
           <DialogContainer />
@@ -75,32 +75,35 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <Flex y grow sx={{ position: "relative" }} ref={rootContainerRef}>
-      <PrivyProvider
-        appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
-        config={{
-          loginMethods: ["google", "email", "github", "apple", "twitter"],
-          supportedChains: [supportedChain],
-          embeddedWallets: {
-            createOnLogin: "users-without-wallets"
-          },
-          defaultChain: supportedChain,
-          appearance: {
-            theme: "light",
-            accentColor: "#0B6EF9"
-          },
-          fiatOnRamp: {
-            useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"
-          }
-        }}
-      >
-        <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
-          <GlobalContextProvider>
-            <UserProvider>
-              <AuthRoute>{children}</AuthRoute>
-            </UserProvider>
-          </GlobalContextProvider>
-        </PrivyWagmiConnector>
-      </PrivyProvider>
+      <LayoutContextProvider>
+        <PrivyProvider
+          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
+          config={{
+            loginMethods: ["email", "google", "apple", "wallet"],
+            supportedChains: [supportedChain],
+            embeddedWallets: {
+              createOnLogin: "all-users"
+            },
+            defaultChain: supportedChain,
+            appearance: {
+              theme: "light",
+              accentColor: "#0B6EF9",
+              showWalletLoginFirst: true
+            },
+            fiatOnRamp: {
+              useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"
+            }
+          }}
+        >
+          <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
+            <GlobalContextProvider>
+              <UserProvider>
+                <AuthRoute>{children}</AuthRoute>
+              </UserProvider>
+            </GlobalContextProvider>
+          </PrivyWagmiConnector>
+        </PrivyProvider>
+      </LayoutContextProvider>
     </Flex>
   );
 };

@@ -1,6 +1,5 @@
 "use client";
 import { QuestionEntry } from "@/components/app/[wallet]/question-entry";
-import { WelcomeModal } from "@/components/app/welcome-modal";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
@@ -14,18 +13,27 @@ import {
   useGetNewQuestions,
   useGetOpenQuestions
 } from "@/hooks/useQuestionsApi";
+import { useCreateUser } from "@/hooks/useUserApi";
 import { Key } from "@mui/icons-material";
-import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { useLogin } from "@privy-io/react-auth";
 import { useEffect } from "react";
 
 const tabs = ["New", "Top", "Your holdings", "Open Questions"];
 
 export default function Home() {
-  const { holding } = useUserContext();
+  const { holding, isAuthenticatedAndActive, refetch } = useUserContext();
   const router = useBetterRouter();
-
+  const createUser = useCreateUser();
+  const { login } = useLogin({
+    async onComplete(user) {
+      if (user) {
+        await createUser.mutateAsync();
+        await refetch();
+      }
+    }
+  });
   const tab = router.searchParams.tab as (typeof tabs)[number] | undefined;
-
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();
   const keysQuestions = useGetKeyQuestions();
@@ -33,8 +41,15 @@ export default function Home() {
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
   return (
     <Flex component={"main"} y grow>
-      <InjectTopBar />
-      {router.searchParams.welcome === "1" && <WelcomeModal />}
+      <InjectTopBar
+        endItem={
+          !isAuthenticatedAndActive && (
+            <Button variant="plain" size="sm" onClick={() => login()}>
+              Sign In
+            </Button>
+          )
+        }
+      />
       <Tabs
         sx={{ width: "min(100vw, 500px)" }}
         value={tab || tabs[0]}
@@ -51,7 +66,12 @@ export default function Home() {
           }}
         >
           {tabs.map(tab => (
-            <Tab key={tab} sx={{ minWidth: "100px", scrollSnapAlign: "start", flex: "none" }} value={tab}>
+            <Tab
+              key={tab}
+              sx={{ minWidth: "100px", scrollSnapAlign: "start", flex: "none" }}
+              value={tab}
+              disabled={tab === "Your holdings" && !isAuthenticatedAndActive}
+            >
               {tab}
             </Tab>
           ))}

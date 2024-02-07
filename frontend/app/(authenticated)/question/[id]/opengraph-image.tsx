@@ -23,7 +23,7 @@ const baseUrl =
 export const contentType = "image/png";
 // Image generation
 export default async function Image({ params }: { params: { id: string } }) {
-  const question = (await fetch(`${baseUrl}/api/question/public/${params.id}`)
+  const question = (await fetch(`${baseUrl}/api/question/${params.id}`)
     .then(res => res.json())
     .catch(err => {
       console.error(err);

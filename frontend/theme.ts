@@ -112,6 +112,15 @@ const theme = extendTheme({
           }
         })
       }
+    },
+    JoyChip: {
+      styleOverrides: {
+        root: {
+          ".MuiChip-label": {
+            zIndex: 0
+          }
+        }
+      }
     }
   }
 });

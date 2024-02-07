@@ -1,12 +1,10 @@
 "use client";
-import { WelcomeModal } from "@/components/app/welcome-modal";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { TransactionEntry } from "@/components/shared/transaction-entry";
-import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetFriendsTransactions, useGetTransactions } from "@/hooks/useTransaction";
 import { sortIntoPeriods } from "@/lib/utils";
 import { HistoryOutlined } from "@mui/icons-material";
@@ -14,7 +12,6 @@ import { Tab, TabList, TabPanel, Tabs, Typography } from "@mui/joy";
 import { useState } from "react";
 
 export default function KeysPage() {
-  const router = useBetterRouter();
   const [selectedTab, setSelectedTab] = useState("you");
 
   const myTransactions = useGetTransactions("both");
@@ -40,7 +37,6 @@ export default function KeysPage() {
   return (
     <Flex component={"main"} y grow>
       <InjectTopBar />
-      {router.searchParams.welcome === "1" && <WelcomeModal />}
       <Tabs defaultValue="you" value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)}>
         <TabList tabFlex={1} sx={{ position: "sticky", top: "55px", width: "100%", maxWidth: "500px" }}>
           <Tab value="you">You</Tab>

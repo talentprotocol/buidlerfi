@@ -1,26 +1,35 @@
-import { getHotQuestions, getQuestions, getReactions } from "@/backend/question/question";
+import { getHotQuestions, getQuestion, getQuestions, getReactions } from "@/backend/question/question";
 import {
   addReactionSA,
+  answerQuestionSA,
   createOpenQuestionSA,
   createQuestionSA,
   deleteQuestionSA,
   deleteReactionSA,
   deleteReplySA,
-  editQuestionSA,
-  getQuestionSA
+  editQuestionSA
 } from "@/backend/question/questionServerActions";
 import { SimpleUseQueryOptions } from "@/models/helpers.model";
 import { ReactionType, RecommendedUser } from "@prisma/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
 import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
 import { useMutationSA } from "./useMutationSA";
-import { useQuerySA } from "./useQuerySA";
 
-export function useGetQuestion(id: number, queryOptions?: SimpleUseQueryOptions) {
-  return useQuerySA(["useGetQuestion", id], options => getQuestionSA(id!, options), {
-    ...queryOptions
-  });
+export function useGetQuestion(
+  id: number,
+  queryOptions?: SimpleUseQueryOptions<Awaited<ReturnType<typeof getQuestion>>["data"]>
+) {
+  const axios = useAxios();
+  return useQuery(
+    ["useGetQuestion", id],
+    async () =>
+      axios
+        .get<Awaited<ReturnType<typeof getQuestion>>>(`/api/question/${id}`)
+        .then(res => res.data)
+        .then(res => res.data),
+    queryOptions
+  );
 }
 
 export function useGetOpenQuestions() {
@@ -59,13 +68,13 @@ export const usePostOpenQuestion = () => {
 interface PutQuestionParams {
   id: number;
   answerContent: string;
+  isGated: boolean | undefined;
 }
 
 export const usePutQuestion = () => {
-  const axios = useAxios();
-  return useMutation((params: PutQuestionParams) => {
-    return axios.put(`/api/question/${params.id}`, params);
-  });
+  return useMutationSA((options, params: PutQuestionParams) =>
+    answerQuestionSA(params.id, params.answerContent, params.isGated, options)
+  );
 };
 
 export const useAddReaction = () => {
