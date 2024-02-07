@@ -150,7 +150,7 @@ export const QUESTS = [
 
 export const BASE_URL =
   process.env.ENVIRONMENT === "localhost"
-    ? "http://localhost:3001"
+    ? "http://localhost:3000"
     : process.env.ENVIRONMENT === "development"
     ? "https://dev.builder.fi"
     : "https://app.builder.fi";
