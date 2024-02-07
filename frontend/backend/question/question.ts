@@ -5,11 +5,25 @@ import { MAX_COMMENT_LENGTH, MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILL
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
-import { NotificationType, Prisma, ReactionType, SocialProfileType } from "@prisma/client";
+import {
+  KeyRelationship,
+  NotificationType,
+  Prisma,
+  ReactionType,
+  RecommendedUser,
+  SocialProfile,
+  SocialProfileType,
+  User
+} from "@prisma/client";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
-export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
+export const createQuestion = async (
+  privyUserId: string,
+  questionContent: string,
+  replierId?: number,
+  recommendedUser?: RecommendedUser
+) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
   }
@@ -18,19 +32,57 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     where: { privyUserId },
     include: { socialProfiles: true, keysOwned: true }
   });
-  const replier = await prisma.user.findUniqueOrThrow({ where: { id: replierId }, include: { socialProfiles: true } });
+
+  let replier: (User & { keysOfSelf?: KeyRelationship[]; socialProfiles: SocialProfile[] }) | null;
+  if (!replierId && recommendedUser) {
+    replier = await prisma.user.findUnique({
+      where: { socialWallet: recommendedUser.wallet.toLowerCase() },
+      include: { socialProfiles: true, keysOfSelf: true }
+    });
+    if (!replier) {
+      replier = await prisma.user.create({
+        data: {
+          displayName:
+            recommendedUser.talentProtocol || recommendedUser.ens || recommendedUser.farcaster || recommendedUser.lens,
+          avatarUrl: recommendedUser.avatarUrl,
+          socialWallet: recommendedUser.wallet.toLowerCase(),
+          wallet: "",
+          socialProfiles: {
+            create: {
+              type: SocialProfileType.FARCASTER,
+              profileName: recommendedUser.farcaster!,
+              profileImage: recommendedUser.avatarUrl
+            }
+          }
+        },
+        include: {
+          socialProfiles: true
+        }
+      });
+    }
+  } else {
+    replier = await prisma.user.findUniqueOrThrow({
+      where: { id: replierId },
+      include: { socialProfiles: true, keysOfSelf: true }
+    });
+  }
+
+  if (!replier) {
+    return { error: ERRORS.USER_NOT_FOUND };
+  }
+
+  if (replier.keysOfSelf && replier.keysOfSelf.length > 0) {
+    const key = questioner.keysOwned.find(key => key.ownerId === replierId);
+    if (!key || key.amount === BigInt(0)) {
+      return { error: ERRORS.MUST_HOLD_KEY };
+    }
+  }
 
   const question = await prisma.$transaction(async tx => {
     const question = await tx.question.create({
-      data: {
-        questionerId: questioner.id,
-        replierId: replier.id,
-        questionContent: questionContent,
-        //Gated status will be changed by replier
-        isGated: true
-      }
+      data: { questionerId: questioner.id, replierId: replier!.id, questionContent: questionContent }
     });
-    await sendNotification(replier.id, "ASKED_QUESTION", questioner.id, question.id, tx);
+    await sendNotification(replier!.id, "ASKED_QUESTION", questioner.id, question.id, tx);
 
     return question;
   });
@@ -291,6 +343,7 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
   });
 
   //If not gated, or is an open-question, return immediately
+  //If user has not launched keys, gated will always be false, so we don't need to check if key is launched
   if (!question.isGated || !question.replierId) return { data: question };
 
   if (!privyUserId) {
@@ -298,7 +351,6 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
   }
 
   const hasKey = await ownsKey({ userId: question.replierId }, { privyUserId });
-  console.log({ hasKey });
   return { data: hasKey ? question : exclude(question, ["reply"]) };
 };
 export async function getMostUpvotedQuestion(startDate: Date = new Date(new Date().getTime() - WEEK_IN_MILLISECONDS)) {

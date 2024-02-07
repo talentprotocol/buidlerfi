@@ -86,16 +86,21 @@ export const QuestionReply: FC<Props> = ({
         </Flex>
       )}
 
-      {question.replier && question.repliedOn && question.reply && profile.user && (
-        <ReplyCommentEntry
-          type="reply"
-          id={question.id}
-          author={profile.user}
-          content={question.reply}
-          createdAt={question.repliedOn}
-          refetch={refetch}
-        />
-      )}
+      {question.replier &&
+        question.repliedOn &&
+        //We only need to check if reply exists. Backend will take care of removing it
+        //If we don't have the keys. This allows to have a single source of truth
+        question.reply &&
+        profile.user && (
+          <ReplyCommentEntry
+            type="reply"
+            id={question.id}
+            author={profile.user}
+            content={question.reply}
+            createdAt={question.repliedOn}
+            refetch={refetch}
+          />
+        )}
     </>
   );
 };

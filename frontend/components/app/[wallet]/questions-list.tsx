@@ -1,17 +1,13 @@
 "use client";
 import { KeyIcon } from "@/components/icons/key";
-import { ParachuteIcon } from "@/components/icons/parachute";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { NEW_BUILDERFI_INVITE_CAST } from "@/lib/constants";
-import { encodeQueryData } from "@/lib/utils";
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Button } from "@mui/joy";
-import Link from "next/link";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
 
@@ -24,6 +20,7 @@ interface Props {
 export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
   const router = useBetterRouter();
   const questionsToUse = type === "answers" ? profile?.questions : profile?.questionsAsked;
+  console.log(questionsToUse)
   const hasQuestion: boolean = !!questionsToUse?.length;
   // const hasQuestion: boolean = false;
   if (!profile || profile.isLoading) {
@@ -64,10 +61,34 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
             title: "you have a key",
             icon: <KeyIcon />,
             text: "ask the first question to " + profile?.user?.displayName,
-            button: <Button onClick={() => router.push({ searchParams: { ask: true } })}>Ask question</Button>
+            button: (
+              <Button
+                onClick={() =>
+                  router.replace({ pathname: "/question", searchParams: { ask: true, wallet: profile.user?.wallet } })
+                }
+              >
+                Ask question
+              </Button>
+            )
           };
         }
       } else {
+        if (profile?.user) {
+          return {
+            title: "this profile is public",
+            icon: <KeyIcon />,
+            text: "ask the first question to " + profile?.user?.displayName,
+            button: (
+              <Button
+                onClick={() =>
+                  router.replace({ pathname: "/question", searchParams: { ask: true, wallet: profile.user?.wallet } })
+                }
+              >
+                Ask question
+              </Button>
+            )
+          };
+        }
         const profileName =
           profile?.recommendedUser?.talentProtocol ||
           profile?.recommendedUser?.farcaster ||
@@ -75,18 +96,20 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           profile?.recommendedUser?.lens;
         if (profile?.recommendedUser?.farcaster) {
           return {
-            title: `${profileName} is not builder.fi`,
-            icon: <ParachuteIcon />,
-            text: `invite ${profileName} to join and earn points`,
+            title: `${profile.recommendedUser.farcaster} isn't on builder.fi yet`,
+            icon: <KeyIcon />,
+            text: "but you can show your interest in their knowledge asking a question or sending an invite",
             button: (
-              <Link
-                href={`https://warpcast.com/~/compose?${encodeQueryData({
-                  text: NEW_BUILDERFI_INVITE_CAST.replace("{username}", profile?.recommendedUser?.farcaster)
-                })}`}
-                target="_blank"
+              <Button
+                onClick={() =>
+                  router.replace({
+                    pathname: "/question",
+                    searchParams: { ask: true, wallet: profile.recommendedUser?.wallet }
+                  })
+                }
               >
-                <Button>invite</Button>
-              </Link>
+                Ask question
+              </Button>
             )
           };
         } else {
@@ -98,25 +121,17 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
         }
       }
     } else {
-      if (!profile?.hasLaunchedKeys) {
-        return {
-          title: "Unlock Q&A",
-          icon: <KeyIcon />,
-          text: "Create your keys to allow others to ask you direct questions",
-          button: <Button onClick={() => onBuyKeyClick()}>Create keys</Button>
-        };
-      } else {
-        return {
-          title: "no answers to show",
-          icon: <AccessTimeOutlined />,
-          text: "You haven't received any questions yet"
-        };
-      }
+      return {
+        title: "no answers to show",
+        icon: <AccessTimeOutlined />,
+        text: "You haven't received any questions yet",
+        button: <Button onClick={() => onBuyKeyClick()}>Create keys to make your answers private</Button>
+      };
     }
   };
 
   const message = getMessage();
-  if (message) {
+  if (message && profile.questions?.length === 0) {
     return (
       <Flex y grow>
         <PageMessage title={message.title} icon={message.icon} text={message.text} />
