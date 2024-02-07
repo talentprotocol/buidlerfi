@@ -10,6 +10,7 @@ const regularFontData = fs.readFileSync(regularFontPath);
 const boldFontPath = join(process.cwd(), "public/assets", "SpaceGrotesk-SemiBold.ttf");
 const boldFontData = fs.readFileSync(boldFontPath);
 
+const imageQuestionMark = fs.readFileSync(join(process.cwd(), "public/assets", "question-mark.png"));
 const imageArrows = fs.readFileSync(join(process.cwd(), "public/assets", "arrows.png"));
 const imageBFLogoBlue = fs.readFileSync(join(process.cwd(), "public/assets", "bf-logoword-blue.png"));
 
@@ -44,7 +45,6 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-around", // This will space your main divs evenly
-          gap: "1rem",
           height: "100%" // Make sure your div takes up the full height for 'space-between' to have effect
         }}
       >
@@ -52,30 +52,79 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
           style={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-start",
-            gap: "2rem"
+            justifyContent: "space-between",
+            gap: "0.5rem",
+            height: "100%"
           }}
         >
           <div
             style={{
-              padding: "1rem",
-              borderRadius: "10px",
               display: "flex",
-              flexDirection: "column",
+              justifyContent: "flex-end",
               alignItems: "center",
               width: "100%"
             }}
           >
+            <img src={`data:image/png;base64,${imageBFLogoBlue.toString("base64")}`} height={"16px"} />
+          </div>
+          <div
+            style={{
+              borderRadius: "10px",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              width: "100%"
+            }}
+          >
+            <img
+              src={`data:image/png;base64,${imageQuestionMark.toString("base64")}`}
+              style={{ width: "7%", alignItems: "center" }}
+            />
             <span
               style={{
+                width: "85%",
                 color: "#316CF0",
-                fontSize: "30px"
+                fontSize: "24px",
+                marginLeft: "20px"
               }}
             >
-              {question.questionContent.length > 240
-                ? `${question.questionContent.substring(0, 240)}...`
+              {question.questionContent.length > 130
+                ? `${question.questionContent.substring(0, 130)}...`
                 : question.questionContent}
             </span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
+            {question.replierId == null && question.tags && question.tags?.length > 0 ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  verticalAlign: "center",
+                  fontSize: "16px",
+                  width: "100%"
+                }}
+              >
+                asked an open question about
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    lineHeight: "0.8rem",
+                    padding: "0.35rem 0.55rem", // paddingY paddingX
+                    border: "1px solid #0b0d0e40",
+                    borderRadius: "7999px",
+                    marginLeft: "0.4rem"
+                  }}
+                >
+                  {question.tags[0]
+                    ? question.tags[0].name.length > 20
+                      ? `${question.tags[0].name.toLowerCase().substring(0, 20)}...`
+                      : `${question.tags[0].name.toLowerCase()}`
+                    : "general"}
+                </div>
+              </div>
+            ) : null}
           </div>
           <div
             style={{
@@ -131,59 +180,32 @@ export const generateImageSvg = async (question: QuestionWithInfo, upvoted = fal
               </div>
             ) : null}
           </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", width: "100%" }}>
-            <img src={`data:image/png;base64,${imageBFLogoBlue.toString("base64")}`} height={"16px"} />
-          </div>
+          {upvoted && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                marginBottom: "1rem"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  backgroundColor: "#316CF0",
+                  color: "#FFFFFF",
+                  padding: "6px",
+                  borderRadius: "4px"
+                }}
+              >
+                upvoted successfully!
+              </div>
+            </div>
+          )}
         </div>
-        {upvoted && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                flexDirection: "column",
-                backgroundColor: "#316CF0",
-                color: "#FFFFFF",
-                padding: "6px",
-                borderRadius: "4px"
-              }}
-            >
-              upvoted successfully!
-            </div>
-          </div>
-        )}
-        {question.replierId == null && question.tags && question.tags?.length > 0 ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              verticalAlign: "center",
-              fontSize: "18px"
-            }}
-          >
-            asked an open question about
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                lineHeight: "0.8rem",
-                padding: "0.35rem 0.55rem", // paddingY paddingX
-                border: "1px solid #0b0d0e40",
-                borderRadius: "7999px",
-                marginLeft: "0.4rem"
-              }}
-            >
-              {question.tags[0].name.toLowerCase()}
-            </div>
-          </div>
-        ) : null}
       </div>
     </div>,
     {
