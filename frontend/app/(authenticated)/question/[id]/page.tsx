@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       action: "post"
     } as FrameButton
   ];
+  // if replier id is null, question is open, so everyone can reply
   if (question?.replierId == null) {
     buttons.push({ label: "reply ✍️", action: "post" });
   }
