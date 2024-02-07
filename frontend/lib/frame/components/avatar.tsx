@@ -1,28 +1,35 @@
+import * as fs from "fs";
+import { join } from "path";
 import React from "react";
 
 interface AvatarProps {
   imageUrl: string;
   username: string;
+  userAddress: string;
   bio?: string;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
+const imageDefaultProfile = fs.readFileSync(join(process.cwd(), "public/assets", "default-profile.png"));
+
+const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, userAddress, bio }) => {
   return (
     <div
       style={{
         display: "flex",
-        alignItems: "center",
         flexDirection: "row",
+        alignItems: "center",
+        gap: "0.5rem",
         color: "#316CF0",
-        width: "150px" // Set the width to the value you want
+        padding: "0.4rem",
+        width: "100%"
       }}
     >
       <img
-        src={imageUrl}
+        src={imageUrl !== null ? imageUrl : `data:image/png;base64,${imageDefaultProfile.toString("base64")}`}
         alt={username}
         style={{
-          width: "48px",
-          height: "48px",
+          width: "52px",
+          height: "52px",
           borderRadius: "50%",
           objectFit: "cover"
         }}
@@ -32,22 +39,25 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, bio }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
-          marginLeft: "1rem"
+          flexWrap: "wrap",
+          width: "80%"
         }}
       >
-        <span style={{ marginTop: "4px", fontSize: "16px", fontFamily: "SpaceGrotesk-SemiBold" }}>{username}</span>
-        {bio && (
+        <span style={{ marginTop: "4px", fontSize: "20px", fontFamily: "SpaceGrotesk-SemiBold" }}>
+          {username ? username : `${userAddress?.substring(0, 4)}...${userAddress?.substring(userAddress.length - 4)}`}
+        </span>
+        {bio ? (
           <span
             style={{
               marginTop: "4px",
-              fontSize: "12px",
+              fontSize: "13px",
               whiteSpace: "pre-wrap",
               overflowWrap: "break-word"
             }}
           >
-            {bio?.substring(0, 50)}...
+            {bio.length > 50 ? `${bio?.substring(0, 50)}...` : bio}
           </span>
-        )}
+        ) : null}
       </div>
     </div>
   );
