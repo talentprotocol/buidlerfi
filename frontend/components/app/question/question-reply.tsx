@@ -21,14 +21,14 @@ interface Props {
 export const QuestionReply: FC<Props> = ({ question, profile, refetch, reply, setReply }) => {
   return (
     <>
-      {!profile.hasKeys && question?.repliedOn && <UnlockAnswer {...{ profile, refetch }} />}
+      {!profile.hasKeys && profile.hasLaunchedKeys && question?.repliedOn && <UnlockAnswer {...{ profile, refetch }} />}
 
       {!question.repliedOn && !profile.isOwnProfile && (
         <PageMessage
           title="Waiting for answer ..."
           icon={<UserAvatar size="sm" user={profile.user} />}
           text={
-            profile.hasKeys
+            profile.hasKeys || !profile.hasLaunchedKeys
               ? `You will get notified when ${profile.user?.displayName} answers`
               : `Buy a key, and get notified when ${profile.user?.displayName} answers`
           }
@@ -46,16 +46,20 @@ export const QuestionReply: FC<Props> = ({ question, profile, refetch, reply, se
         </Flex>
       )}
 
-      {question.replier && question.repliedOn && question.reply && profile.hasKeys && profile.user && (
-        <ReplyCommentEntry
-          type="reply"
-          id={question.id}
-          author={profile.user}
-          content={question.reply}
-          createdAt={question.repliedOn}
-          refetch={refetch}
-        />
-      )}
+      {question.replier &&
+        question.repliedOn &&
+        question.reply &&
+        (profile.hasKeys || !profile.hasLaunchedKeys) &&
+        profile.user && (
+          <ReplyCommentEntry
+            type="reply"
+            id={question.id}
+            author={profile.user}
+            content={question.reply}
+            createdAt={question.repliedOn}
+            refetch={refetch}
+          />
+        )}
     </>
   );
 };

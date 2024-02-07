@@ -39,7 +39,7 @@ export const QuestionContent: FC<Props> = ({ question, refetch, profile }) => {
       <Flex x yc xsb>
         <Flex x yc gap3>
           <Reactions questionId={question.id} />
-          {question.repliedOn && profile.hasKeys && (
+          {question.repliedOn && (profile.hasKeys || !profile.hasLaunchedKeys) && (
             <AddCommentButton questionId={question?.id} count={question._count.comments} />
           )}
         </Flex>

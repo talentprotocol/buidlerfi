@@ -1,6 +1,6 @@
 "use server";
 import { ServerActionOptions, serverActionWrapper } from "@/lib/serverActionWrapper";
-import { ReactionType } from "@prisma/client";
+import { ReactionType, RecommendedUser } from "@prisma/client";
 import {
   addReaction,
   createOpenQuestion,
@@ -30,8 +30,16 @@ export const deleteReactionSA = async (
   return serverActionWrapper(data => deleteReaction(data.privyUserId, questionId, reactionType), options);
 };
 
-export const createQuestionSA = (questionContent: string, replierId: number, options: ServerActionOptions) => {
-  return serverActionWrapper(data => createQuestion(data.privyUserId, questionContent, replierId), options);
+export const createQuestionSA = (
+  questionContent: string,
+  replierId: number,
+  recommendedUser: RecommendedUser,
+  options: ServerActionOptions
+) => {
+  return serverActionWrapper(
+    data => createQuestion(data.privyUserId, questionContent, replierId, recommendedUser),
+    options
+  );
 };
 
 export const createOpenQuestionSA = (questionContent: string, tag: string, options: ServerActionOptions) => {
