@@ -50,7 +50,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
       await publishNewQuestionCast(
         questionerName,
         replierName,
-        `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
+        `https://app.builder.fi/question/${question.id}`
       );
     }
   }
@@ -259,7 +259,12 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
 }
 
 //We allow privyUserId to be undefiend for public endpoint
-export const getQuestion = async (questionId: number, privyUserId?: string, includeSocialProfiles: boolean = false) => {
+export const getQuestion = async (
+  questionId: number,
+  privyUserId?: string,
+  includeSocialProfiles: boolean = false,
+  includeTags: boolean = false
+) => {
   const question = await prisma.question.findUniqueOrThrow({
     where: {
       id: questionId
@@ -271,6 +276,9 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
           comments: true
         }
       },
+      ...(includeTags && {
+        tags: true
+      }),
       questioner: {
         ...(includeSocialProfiles && {
           include: {

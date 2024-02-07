@@ -23,7 +23,7 @@ import { shortAddress } from "@/lib/utils";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { SocialProfile, User } from "@prisma/client";
 
-export const publishCast = async (text: string, channelId?: string) => {
+export const publishCast = async (text: string, channelId?: string, embedUrl?: string) => {
   if (!process.env.FARCASTER_API_KEY || !process.env.FARCASTER_SIGNER_UUID) {
     throw new Error("FARCASTER_API_KEY and FARCASTER_SIGNER_UUID must be set in the environment");
   }
@@ -33,14 +33,17 @@ export const publishCast = async (text: string, channelId?: string) => {
   const signerUuid = process.env.FARCASTER_SIGNER_UUID as string;
   const client = new NeynarAPIClient(process.env.FARCASTER_API_KEY as string);
 
-  const publishedCast = await client.publishCast(signerUuid, text, { channelId });
+  const publishedCast = await client.publishCast(signerUuid, text, {
+    channelId,
+    embeds: embedUrl ? [{ url: embedUrl }] : []
+  });
 
   console.log(`New cast hash: ${publishedCast.hash}`);
 
   return publishedCast.hash;
 };
 
-export const replyToCast = async (existingCastHash: string, reply: string) => {
+export const replyToCast = async (existingCastHash: string, reply: string, embedUrl?: string) => {
   if (!process.env.FARCASTER_API_KEY || !process.env.FARCASTER_SIGNER_UUID) {
     throw new Error("FARCASTER_API_KEY and FARCASTER_SIGNER_UUID must be set in the environment");
   }
@@ -50,7 +53,10 @@ export const replyToCast = async (existingCastHash: string, reply: string) => {
   const signerUuid = process.env.FARCASTER_SIGNER_UUID as string;
   const client = new NeynarAPIClient(process.env.FARCASTER_API_KEY as string);
 
-  const publishedCast = await client.publishCast(signerUuid, reply, { replyTo: existingCastHash });
+  const publishedCast = await client.publishCast(signerUuid, reply, {
+    replyTo: existingCastHash,
+    embeds: embedUrl ? [{ url: embedUrl }] : []
+  });
 
   console.log(`Reply hash:${publishedCast.hash}`);
 
@@ -58,38 +64,38 @@ export const replyToCast = async (existingCastHash: string, reply: string) => {
 };
 
 export const publishNewQuestionCast = async (questionAuthor: string, questionRecipient: string, link: string) => {
-  const text = NEW_BUILDERFI_QUESTION_CAST.replace("{questionAuthor}", questionAuthor)
-    .replace("{questionRecipient}", questionRecipient)
-    .replace("{link}", link);
-  return replyToCast(NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH, text);
+  const text = NEW_BUILDERFI_QUESTION_CAST.replace("{questionAuthor}", questionAuthor).replace(
+    "{questionRecipient}",
+    questionRecipient
+  );
+  return replyToCast(NEW_BUILDERFI_QUESTION_PARENT_CAST_HASH, text, link);
 };
 
 export const publishNewAnswerCast = async (replyAuthor: string, questionAuthor: string, link: string) => {
-  const text = NEW_BUILDERFI_ANSWER_CAST.replace("{replyAuthor}", replyAuthor)
-    .replace("{questionAuthor}", questionAuthor)
-    .replace("{link}", link);
-  return replyToCast(NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH, text);
+  const text = NEW_BUILDERFI_ANSWER_CAST.replace("{replyAuthor}", replyAuthor).replace(
+    "{questionAuthor}",
+    questionAuthor
+  );
+  return replyToCast(NEW_BUILDERFI_ANSWER_PARENT_CAST_HASH, text, link);
 };
 
 export const publishNewUserKeysCast = async (user: string, link: string) => {
-  const text = NEW_BUILDERFI_USER_CAST.replace("{user}", user).replace("{link}", link);
-  return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text);
+  const text = NEW_BUILDERFI_USER_CAST.replace("{user}", user);
+  return replyToCast(NEW_BUILDERFI_USER_PARENT_CAST_HASH, text, link);
 };
 
 export const publishBuyTradeUserKeysCast = async (holder: string, owner: string, price: string, link: string) => {
   const text = NEW_BUILDERFI_BUY_TRADE_CAST.replace("{holder}", holder)
     .replace("{owner}", owner)
-    .replace("{link}", link)
     .replace("{price}", price);
-  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
+  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text, link);
 };
 
 export const publishSellTradeUserKeysCast = async (holder: string, owner: string, price: string, link: string) => {
   const text = NEW_BUILDERFI_SELL_TRADE_CAST.replace("{holder}", holder)
     .replace("{owner}", owner)
-    .replace("{link}", link)
     .replace("{price}", price);
-  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
+  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text, link);
 };
 
 export const publishTopFarcasterKeyValueCast = async (data: { username: string; price: string }[]) => {
@@ -116,15 +122,14 @@ export const publishQuestionsOfTheWeekCast = async (
 ) => {
   const text = TOP_QUESTION_UPVOTE_BY_WEEK_CAST.replace("{questionContent}", content)
     .replace("{questioner}", questioner)
-    .replace("{replier}", replier)
-    .replace("{link}", link);
+    .replace("{replier}", replier);
   console.log(text);
-  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text);
+  return replyToCast(NEW_BUILDERFI_KEY_TRADE_PARENT_CAST_HASH, text, link);
 };
 
 export const replyToNewQuestionCastSuccess = async (castHash: string, link: string) => {
-  const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST.replace("{link}", link)}`;
-  return replyToCast(castHash, text);
+  const text = NEW_BUILDERFI_QUESTION_REPLY_CAST;
+  return replyToCast(castHash, text, link);
 };
 
 export const replyToNewQuestionErrorNoAuthor = async (castHash: string, username: string) => {
@@ -138,11 +143,8 @@ export const replyToNewQuestionErrorNoUser = async (castHash: string, username: 
 };
 
 export const replyToNewQuestionErrorNotKeyHolder = async (castHash: string, username: string, link: string) => {
-  const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER.replace("{username}", username).replace(
-    "{link}",
-    link
-  )}`;
-  return replyToCast(castHash, text);
+  const text = `${NEW_BUILDERFI_QUESTION_REPLY_CAST_NOT_KEY_HOLDER.replace("{username}", username)}`;
+  return replyToCast(castHash, text, link);
 };
 
 export const getCastUrl = (castHash: string) => `https://warpcast.com/~/conversations/${castHash}`;
