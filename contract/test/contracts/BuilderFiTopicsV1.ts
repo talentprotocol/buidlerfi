@@ -12,10 +12,6 @@ const { expect } = chai;
 const { parseUnits } = ethers.utils;
 const { deployContract } = ethers;
 
-//TODO: 
-//"Check protocol fees increase when buying topics shares
-//"Check protocol fees increase when selling topics shares
-
 describe("BuilderFi-topics", () => {
   let creator: SignerWithAddress;
   let shareOwner: SignerWithAddress;

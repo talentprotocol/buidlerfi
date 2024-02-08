@@ -1,7 +1,7 @@
 import { useStoreTransactionAction } from "@/hooks/useTransaction";
-import { BUILDERFI_CONTRACT } from "@/lib/constants";
+import { BUILDERFI_CONTRACT, BUILDERFI_TOPICS_CONTRACT } from "@/lib/constants";
 import { formatError } from "@/lib/utils";
-import { Topic } from "@prisma/client";
+//import { Topic } from "@prisma/client";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 import { useContractRead, useContractWrite } from "wagmi";
@@ -91,11 +91,11 @@ export const useGetBuilderInfo = (address?: string) => {
   };
 };
 
-export const useGetTopicInfo = (topic: Topic) => {
+export const useGetTopicInfo = (topicName: string) => {
   const { data: buyPriceAfterFee, refetch: refetchBuyPriceAfterFee } = useContractRead({
-    ...BUILDERFI_CONTRACT,
+    ...BUILDERFI_TOPICS_CONTRACT,
     functionName: "getBuyPriceAfterFee",
-    args: [topic.name]
+    args: [topicName],
   });
 
   const {
@@ -103,10 +103,9 @@ export const useGetTopicInfo = (topic: Topic) => {
     isLoading: isLoadingBuyPrice,
     refetch: refetchBuyPrice
   } = useContractRead({
-    ...BUILDERFI_CONTRACT,
+    ...BUILDERFI_TOPICS_CONTRACT,
     functionName: "getBuyPrice",
-    args: [address as `0x${string}`],
-    enabled: !!address
+    args: [topicName],
   });
 
   const {
@@ -114,10 +113,9 @@ export const useGetTopicInfo = (topic: Topic) => {
     refetch: refetchSellprice,
     isLoading: isLoadingSellPrice
   } = useContractRead({
-    ...BUILDERFI_CONTRACT,
+    ...BUILDERFI_TOPICS_CONTRACT,
     functionName: "getSellPrice",
-    args: [address as `0x${string}`, BigInt(1)],
-    enabled: !!address
+    args: [topicName, BigInt(1)],
   });
 
   const {
@@ -125,10 +123,9 @@ export const useGetTopicInfo = (topic: Topic) => {
     refetch: refetchSellpriceAfterFee,
     isLoading: isLoadingSellPriceAfterFee
   } = useContractRead({
-    ...BUILDERFI_CONTRACT,
+    ...BUILDERFI_TOPICS_CONTRACT,
     functionName: "getSellPriceAfterFee",
-    args: [address as `0x${string}`, BigInt(1)],
-    enabled: !!address
+    args: [topicName , BigInt(1)],
   });
 
   const {
@@ -136,19 +133,18 @@ export const useGetTopicInfo = (topic: Topic) => {
     refetch: refetchTotalSupply,
     isLoading: isLoadingSupply
   } = useContractRead({
-    ...BUILDERFI_CONTRACT,
-    functionName: "builderKeysSupply",
-    args: [address as `0x${string}`],
-    enabled: !!address
+    ...BUILDERFI_TOPICS_CONTRACT,
+    functionName: "topicsKeysSupply",
+    args: [`0x${toBytes(topicName)}`],
   });
 
   const { data: protocolFee } = useContractRead({
-    ...BUILDERFI_CONTRACT,
+    ...BUILDERFI_TOPICS_CONTRACT,
     functionName: "protocolFeePercent"
   });
 
   const { data: builderFee } = useContractRead({
-    ...BUILDERFI_CONTRACT,
+    ...BUILDERFI_TOPICS_CONTRACT,
     functionName: "builderFeePercent"
   });
 
@@ -225,4 +221,54 @@ export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorF
   });
 
   return { isLoading: isLoading || processTransaction.isLoading, executeTx: writeAsync };
+};
+
+export const useTradeTopicKey = (side: "buy" | "sell", successFn?: () => void, errorFn?: () => void) => {
+  const toastId = useRef<string | number | undefined>(undefined);
+
+  const processTransaction = useStoreTransactionAction();
+
+  const { writeAsync, isLoading } = useContractWrite({
+    ...BUILDERFI_TOPICS_CONTRACT,
+    functionName: TRADE_DATA[side].functionName,
+    onSuccess: async data => {
+      toastId.current = toast("Transaction submitted!", { isLoading: true });
+      await processTransaction
+        .mutateAsync(data.hash)
+        .then(() => {
+          toast.update(toastId.current!, {
+            render: TRADE_DATA[side].successMsg,
+            isLoading: false,
+            type: "success",
+            autoClose: 3000
+          });
+          if (successFn) successFn();
+        })
+        .catch(err => {
+          toast.update(toastId.current!, {
+            render: "There was an error processing your transaction: " + formatError(err),
+            isLoading: false,
+            type: "error",
+            autoClose: 3000
+          });
+        });
+    },
+    onError: (err: any) => {
+      if (err?.shortMessage !== "User rejected the request.") {
+        toast.error("There was an error processing your transaction: " + formatError(err));
+      }
+      errorFn && errorFn();
+    }
+  });
+
+  return { isLoading: isLoading || processTransaction.isLoading, executeTx: writeAsync };
+};
+
+const toBytes = (text: string): number[] => {
+  const buffer = Buffer.from(text, 'utf8');
+  const result = Array(buffer.length);
+  for (let i = 0; i < buffer.length; ++i) {
+      result[i] = buffer[i];
+  }
+  return result;
 };

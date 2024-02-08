@@ -4,22 +4,23 @@ import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetTopicInfo } from "@/hooks/useBuilderFiContract";
-import { useTopic } from "@/hooks/useTopicsAPI";
+//import { useTopic } from "@/hooks/useTopicsAPI";
 import { formatEth } from "@/lib/utils";
 import { Button, Skeleton, Typography } from "@mui/joy";
 import { FC } from "react";
 
 interface Props {
   setBuyModalState: (state: "closed" | "buy" | "sell") => void;
-  topic: ReturnType<typeof useTopic>;
+  topicName: string;
+  topicId: string;
 }
 
-export const TopicOverview: FC<Props> = ({ setBuyModalState, topic }) => {
+export const TopicOverview: FC<Props> = ({ setBuyModalState, topc }) => {
   const { user: currentUser } = useUserContext();
 
   const router = useBetterRouter();
 
-  const { buyPrice, supply } = useGetTopicInfo(topic!.data!.id.toString());
+  const { buyPrice, supply } = useGetTopicInfo(topicName);
 
   const userTopicHoldings =
     currentUser?.topicKeysOwned!.filter(t => t.topicId.toString() === topic.data?.id.toString())?.length || 0;

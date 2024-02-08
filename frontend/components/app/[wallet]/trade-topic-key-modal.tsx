@@ -1,10 +1,11 @@
 import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
-import { useGetTopicInfo, useTradeKey } from "@/hooks/useBuilderFiContract";
+import { useGetTopicInfo, useTradeTopicKey } from "@/hooks/useBuilderFiContract";
+import { useTopic } from "@/hooks/useTopicsAPI";
 import { formatToDisplayString } from "@/lib/utils";
 import { Close } from "@mui/icons-material";
 import { Button, DialogTitle, IconButton, Modal, ModalDialog, Tooltip, Typography } from "@mui/joy";
-import { Topic } from "@prisma/client";
+import { User } from "@prisma/client";
 import { FC, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { parseEther } from "viem";
@@ -16,18 +17,20 @@ interface Props {
   topicKeysHoldingCount?: number;
   side: "buy" | "sell";
   isFirstKey: boolean;
-  topic: Topic;
+  topic: ReturnType<typeof useTopic>;
+  keyOwner: User;
 }
 
-export const TradeTopicKeyModal: FC<Props> = ({ hasKeys, close, topicKeysHoldingCount, isFirstKey, side, topic }) => {
+export const TradeTopicKeyModal: FC<Props> = ({ hasKeys, close, topicKeysHoldingCount, isFirstKey, side, topic, keyOwner }) => {
   const { address } = useUserContext();
   const { data: balance } = useBalance({
     address
   });
-  const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
+  const tx = useTradeTopicKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
   const { refetch, buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } =
-    useGetTopicInfo(topic.id.toString());
+    useGetTopicInfo(topic!.data!.name.toString());
 
   const closeOrShowSuccessPurchase = () => {
     if (hasKeys) {
@@ -48,7 +51,7 @@ export const TradeTopicKeyModal: FC<Props> = ({ hasKeys, close, topicKeysHolding
 
   const handleBuy = async (recalculatePrice = false) => {
     if (isFirstKey) {
-      tx.executeTx({ args: [keyOwner.wallet as `0x${string}`], value: buyPriceAfterFee });
+      tx.executeTx({ args: [topic!.data!.name.toString(), keyOwner.wallet as `0x${string}`], value: buyPriceAfterFee });
       return;
     }
 
@@ -60,7 +63,7 @@ export const TradeTopicKeyModal: FC<Props> = ({ hasKeys, close, topicKeysHolding
       buyPrice = newBuyPrice.data || buyPriceAfterFee;
     }
 
-    if (buyPrice > balance.value) {
+    if (balance.value && buyPrice > balance.value) {
       toast.error(
         `Insufficient balance. You have: ${formatToDisplayString(
           balance.value,
@@ -70,11 +73,11 @@ export const TradeTopicKeyModal: FC<Props> = ({ hasKeys, close, topicKeysHolding
       return;
     }
 
-    tx.executeTx({ args: [keyOwner.wallet as `0x${string}`], value: buyPrice });
+    tx.executeTx({ args: [topic!.data!.name.toString(), keyOwner.wallet as `0x${string}`], value: buyPrice });
   };
 
   const handleSell = () => {
-    tx.executeTx({ args: [keyOwner.wallet as `0x${string}`] });
+    tx.executeTx({ args: [topic!.data!.name.toString(), keyOwner.wallet as `0x${string}`] });
   };
 
   const hasEnoughBalance = useMemo(() => {
@@ -124,7 +127,7 @@ export const TradeTopicKeyModal: FC<Props> = ({ hasKeys, close, topicKeysHolding
         {showSuccessMessage ? (
           <Flex y gap1>
             <Typography level="body-lg" textColor="neutral.600">
-              Congrats, you bought your first {topic.name} key!
+              Congrats, you bought your first {topic!.data!.name.toString()} key!
             </Typography>
             <Typography level="body-lg" textColor="neutral.600">
               The next step is asking a question about it.
