@@ -1,6 +1,7 @@
 import QuestionPage from "@/components/app/question/question-page";
 import { BASE_URL } from "@/lib/constants";
 import prisma from "@/lib/prisma";
+import { shortAddress } from "@/lib/utils";
 import { FrameButton, FrameButtonsType, getFrameFlattened } from "frames.js";
 import { Metadata } from "next";
 
@@ -11,7 +12,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = params.id;
-  const question = await prisma.question.findUnique({ where: { id: parseInt(id) } });
+  const question = await prisma.question.findUnique({ where: { id: parseInt(id) }, include: { questioner: true, replier: true } });
   const buttons: FrameButtonsType = [
     {
       label: "upvote ⬆️",
@@ -30,11 +31,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     postUrl: `${BASE_URL}/api/frame/action?id=${id}`
   });
 
+  const title = (() => {
+    if (!question) return "This question doesn't exist or was deleted";
+    const questioner = question.questioner.displayName || shortAddress(question.questioner.wallet);
+    if (question.replier) {
+      if (question.replierId === question.questionerId) return `${questioner} asked himself a question`;
+      else
+        return `${questioner} asked ${
+          question.replier.displayName || shortAddress(question.replier.wallet)
+        } a question`;
+    } else {
+      return `${questioner} asked an open question`;
+    }
+  })();
+
+  const description = question ? question.questionContent : undefined;
+
   return {
-    title: `${question?.questionContent.substring(0, 50)}`,
+    title: title,
+    description: description,
     openGraph: {
-      title: `${question?.questionContent.substring(0, 50)}`,
-      images: [`${BASE_URL}/api/image?id=${id}`]
+      title: title,
+      //By passing undefined, we send the default image
+      images: question ? [`${BASE_URL}/api/frame/image?id=${id}`] : undefined,
+      description: description
     },
     other: {
       ...fcMetadata

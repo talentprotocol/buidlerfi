@@ -55,7 +55,7 @@ export const QuestionReply: FC<Props> = ({
         <PageMessage
           title="Waiting for answer ..."
           icon={<UserAvatar size="sm" user={profile.user} />}
-          text={`Wating for ${profile.user?.displayName} to answer`}
+          text={`Wating for ${profile.user?.displayName || shortAddress(profile.user?.wallet)} to answer`}
         />
       )}
 

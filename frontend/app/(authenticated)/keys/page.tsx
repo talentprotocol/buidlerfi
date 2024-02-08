@@ -12,7 +12,7 @@ import { Tab, TabList, TabPanel, Tabs, Typography } from "@mui/joy";
 import { useState } from "react";
 
 export default function KeysPage() {
-  const [selectedTab, setSelectedTab] = useState("you");
+  const [selectedTab, setSelectedTab] = useState("global");
 
   const myTransactions = useGetTransactions("both");
   const sortedTransactions = sortIntoPeriods(
@@ -39,9 +39,9 @@ export default function KeysPage() {
       <InjectTopBar />
       <Tabs defaultValue="you" value={selectedTab} onChange={(_, val) => val && setSelectedTab(val as string)}>
         <TabList tabFlex={1} sx={{ position: "sticky", top: "55px", width: "100%", maxWidth: "500px" }}>
-          <Tab value="you">You</Tab>
           <Tab value="global">Global</Tab>
-          <Tab value="friends">Friends</Tab>
+          <Tab value="you">You</Tab>
+          {/* <Tab value="friends">Friends</Tab> */}
         </TabList>
         <TabPanel value="you">
           {myTransactions.isLoading ? (

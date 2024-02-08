@@ -3,6 +3,7 @@ import { AuthRoute } from "@/components/app/auth-route";
 import { Flex } from "@/components/shared/flex";
 import { DialogContainer } from "@/contexts/DialogContainer";
 import { GlobalContextProvider } from "@/contexts/globalContext";
+import { HistoryContextProvider } from "@/contexts/historyContext";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
 import theme from "@/theme";
@@ -79,7 +80,7 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
         <PrivyProvider
           appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
           config={{
-            loginMethods: ["email", "google", "apple", "wallet"],
+            loginMethods: ["email", "google", "apple", "farcaster", "wallet"],
             supportedChains: [supportedChain],
             embeddedWallets: {
               createOnLogin: "all-users"
@@ -88,7 +89,7 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
             appearance: {
               theme: "light",
               accentColor: "#0B6EF9",
-              showWalletLoginFirst: true
+              showWalletLoginFirst: false
             },
             fiatOnRamp: {
               useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"
@@ -96,11 +97,13 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
           }}
         >
           <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
-            <GlobalContextProvider>
-              <UserProvider>
-                <AuthRoute>{children}</AuthRoute>
-              </UserProvider>
-            </GlobalContextProvider>
+            <HistoryContextProvider>
+              <GlobalContextProvider>
+                <UserProvider>
+                  <AuthRoute>{children}</AuthRoute>
+                </UserProvider>
+              </GlobalContextProvider>
+            </HistoryContextProvider>
           </PrivyWagmiConnector>
         </PrivyProvider>
       </LayoutContextProvider>

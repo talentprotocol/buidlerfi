@@ -86,7 +86,7 @@ export const NotificationEntry: FC<Props> = ({ notification }) => {
           <Typography fontWeight={notification.isRead ? 400 : 600} level="title-sm">
             {notification.sourceUser
               ? notification.sourceUser.displayName || shortAddress(notification.sourceUser.wallet)
-              : "A user"}
+              : "Someone just"}
           </Typography>
           <Typography level="body-sm">{content}</Typography>
         </Flex>

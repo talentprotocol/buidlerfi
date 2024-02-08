@@ -45,8 +45,9 @@ interface InjectProps {
 
 export const BackButton = () => {
   const router = useBetterRouter();
+
   return (
-    <IconButton onClick={() => router.replace("/home")}>
+    <IconButton onClick={() => router.back()}>
       <ArrowBackOutlined />
     </IconButton>
   );

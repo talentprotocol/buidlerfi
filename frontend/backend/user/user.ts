@@ -158,6 +158,14 @@ export const createUser = async (privyUserId: string) => {
     }
   });
 
+  if (socialAddress) {
+    try {
+      await updateUserSocialProfiles(newUser.id, socialAddress, newUser.bio || undefined);
+    } catch (err) {
+      console.error("Error while updating social profiles: ", err);
+    }
+  }
+
   return { data: newUser };
 };
 
@@ -201,7 +209,7 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
   });
 
   try {
-    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase(), user.bio!);
+    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase(), user.bio || undefined);
     updateRecommendations(challenge.publicKey.toLowerCase());
   } catch (err) {
     console.error("Error while updating social profiles: ", err);
@@ -886,6 +894,99 @@ export const setUserSetting = async (privyUserId: string, key: UserSettingKeyEnu
       key,
       value
     }
+  });
+
+  return { data: res };
+};
+
+//users we can ask questions to
+export const getQuestionableUsers = async (privyUserId: string, search?: string, offset = 0) => {
+  const formattedSearch = search ? search.toLowerCase().trim() : undefined;
+  const validUsersCondition = [
+    {
+      keysOfSelf: {
+        some: {
+          holder: {
+            privyUserId
+          },
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    },
+    { keysOfSelf: { none: {} } }
+  ];
+
+  //users we hold a key of
+  const res = await prisma.user.findMany({
+    where: {
+      hasFinishedOnboarding: true,
+      isActive: true,
+      displayName: { not: null },
+      AND: formattedSearch
+        ? [
+            { OR: validUsersCondition },
+            {
+              OR: [
+                {
+                  displayName: { contains: formattedSearch, mode: "insensitive" }
+                },
+                {
+                  socialProfiles: {
+                    some: {
+                      profileName: {
+                        contains: formattedSearch,
+                        mode: "insensitive"
+                      }
+                    }
+                  }
+                },
+                {
+                  wallet: {
+                    contains: formattedSearch,
+                    mode: "insensitive"
+                  }
+                },
+                {
+                  socialWallet: {
+                    contains: formattedSearch,
+                    mode: "insensitive"
+                  }
+                }
+              ]
+            }
+          ]
+        : [{ OR: validUsersCondition }]
+    },
+    select: {
+      id: true,
+      displayName: true,
+      avatarUrl: true,
+      wallet: true,
+      bio: true,
+      _count: {
+        select: {
+          keysOfSelf: {
+            where: {
+              holder: {
+                privyUserId
+              },
+              amount: {
+                gt: 0
+              }
+            }
+          }
+        }
+      }
+    },
+    orderBy: {
+      keysOfSelf: {
+        _count: "desc"
+      }
+    },
+    take: PAGINATION_LIMIT,
+    skip: offset
   });
 
   return { data: res };
