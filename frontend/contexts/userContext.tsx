@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/backend/user/user";
 import { useAxios } from "@/hooks/useAxios";
-import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
+import { useGetKeyRelationships, useGetTopicKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useGetNotifications } from "@/hooks/useNotificationApi";
 import { usePrevious } from "@/hooks/usePrevious";
 import { User as PrivyUser, usePrivy, useWallets } from "@privy-io/react-auth";
@@ -38,6 +38,7 @@ interface UserContextType {
   fetchNotificationNextPage: () => Promise<unknown>;
   holding: ReturnType<typeof useGetKeyRelationships>["data"];
   holders: ReturnType<typeof useGetKeyRelationships>["data"];
+  topicHoldings: ReturnType<typeof useGetTopicKeyRelationships>["data"];
   hasLaunchedKeys: boolean;
 }
 const userContext = createContext<UserContextType>({
@@ -54,6 +55,7 @@ const userContext = createContext<UserContextType>({
   fetchNotificationNextPage: () => Promise.resolve(),
   holding: [],
   holders: [],
+  topicHoldings: [],
   hasLaunchedKeys: false
 });
 
@@ -77,6 +79,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const { data: holding } = useGetKeyRelationships(user.data?.wallet, "holder");
   const { data: holders } = useGetKeyRelationships(user.data?.wallet, "owner");
+  const { data: topicHoldings } = useGetTopicKeyRelationships(user.data?.wallet);
 
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
@@ -120,7 +123,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       fetchNotificationNextPage,
       holding,
       holders,
-      hasLaunchedKeys: !!holders?.find(h => h.holderId === h.ownerId)
+      hasLaunchedKeys: !!holders?.find(h => h.holderId === h.ownerId),
+      topicHoldings
     }),
     [
       user.data,
@@ -138,7 +142,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       refetchNotifications,
       fetchNotificationNextPage,
       holding,
-      holders
+      holders,
+      topicHoldings
     ]
   );
 

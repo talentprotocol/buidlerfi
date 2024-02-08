@@ -67,6 +67,7 @@ export const getTopic = async (privyUserId: string, topicId: string) => {
     name: topic.name,
     createdAt: topic.createdAt,
     hasKey,
+    topicOwners: topic.topicOwners,
     questions: topic.questions.map(question => ({
       ...question,
       comments: question.comments.map(comment => ({

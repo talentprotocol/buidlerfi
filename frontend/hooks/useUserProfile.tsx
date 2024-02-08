@@ -2,7 +2,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useGetQuestionsFromUser } from "@/hooks/useQuestionsApi";
 import { useGetRecommendedUser, useGetUser } from "@/hooks/useUserApi";
 import { useCallback, useMemo } from "react";
-import { useGetKeyRelationships } from "./useKeyRelationshipApi";
+import { useGetKeyRelationships, useGetTopicKeyRelationships } from "./useKeyRelationshipApi";
 
 export const useUserProfile = (wallet?: string) => {
   const formattedWallet = useMemo(() => wallet?.toLowerCase(), [wallet]);
@@ -14,6 +14,12 @@ export const useUserProfile = (wallet?: string) => {
     refetch: refetchHoldings,
     isLoading: isLoadingHoldings
   } = useGetKeyRelationships(formattedWallet, "holder");
+
+  const {
+    data: topicHoldings,
+    refetch: refetchTopicHoldings,
+    isLoading: isLoadingTopicHoldings
+  } = useGetTopicKeyRelationships(formattedWallet);
 
   const { isLoading: isLoadingRecommendedUser, data: recommendedUser } = useGetRecommendedUser(
     formattedWallet as `0x${string}` | undefined
@@ -44,9 +50,17 @@ export const useUserProfile = (wallet?: string) => {
       getQuestionsFromReplierQuery.refetch(),
       refetchHoldings(),
       getQuestionsFromQuestionerQuery.refetch(),
-      refetchUser()
+      refetchUser(),
+      refetchTopicHoldings()
     ]);
-  }, [refetch, getQuestionsFromReplierQuery, refetchHoldings, getQuestionsFromQuestionerQuery, refetchUser]);
+  }, [
+    refetch,
+    getQuestionsFromReplierQuery,
+    refetchHoldings,
+    getQuestionsFromQuestionerQuery,
+    refetchUser,
+    refetchTopicHoldings
+  ]);
 
   return {
     holders: sortedHolders,
@@ -59,7 +73,8 @@ export const useUserProfile = (wallet?: string) => {
       (user?.id && getQuestionsFromReplierQuery.isLoading) ||
       isLoadingRecommendedUser ||
       isLoadingHoldings ||
-      isLoadingUser,
+      isLoadingUser ||
+      isLoadingTopicHoldings,
     questions: getQuestionsFromReplierQuery.data,
     questionsAsked: getQuestionsFromQuestionerQuery.data,
     refetch: refetchAll,
@@ -68,6 +83,7 @@ export const useUserProfile = (wallet?: string) => {
     isOwnProfile: currentUser?.wallet?.toLowerCase() === formattedWallet,
     getQuestionsFromReplierQuery,
     getQuestionsFromQuestionerQuery,
-    hasLaunchedKeys: !!holdings?.find(key => key.holderId === key.ownerId)
+    hasLaunchedKeys: !!holdings?.find(key => key.holderId === key.ownerId),
+    topicHoldings
   };
 };

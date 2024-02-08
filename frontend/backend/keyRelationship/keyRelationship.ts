@@ -128,13 +128,13 @@ export const getKeyRelationships = async (address: string, side: "owner" | "hold
   return { data: relationships };
 };
 
-export const getTopicKeyRelationships = async (address: string, topicId: number) => {
+export const getTopicKeyRelationships = async (address: string, topicId?: number) => {
   const relationships = await prisma.topicKeyRelationship.findMany({
     where: {
       holder: {
         wallet: address.toLowerCase()
       },
-      topicId,
+      ...(topicId && { topicId }),
       amount: {
         gt: 0
       }

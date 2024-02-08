@@ -72,7 +72,8 @@ export const getCurrentUser = async (privyUserId: string) => {
           hidden: false
         }
       },
-      tags: true
+      tags: true,
+      topicKeysOwned: true
     }
   });
 
