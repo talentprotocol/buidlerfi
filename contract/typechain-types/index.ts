@@ -16,5 +16,7 @@ export type { IERC165 } from "./@openzeppelin/contracts/utils/introspection/IERC
 export { IERC165__factory } from "./factories/@openzeppelin/contracts/utils/introspection/IERC165__factory";
 export type { BuilderFiAlphaV1 } from "./contracts/BuilderFiAlphaV1";
 export { BuilderFiAlphaV1__factory } from "./factories/contracts/BuilderFiAlphaV1__factory";
+export type { BuilderFiTopicsV1 } from "./contracts/BuilderFiTopicsV1";
+export { BuilderFiTopicsV1__factory } from "./factories/contracts/BuilderFiTopicsV1__factory";
 export type { BuilderFiV1 } from "./contracts/BuilderFiV1";
 export { BuilderFiV1__factory } from "./factories/contracts/BuilderFiV1__factory";
