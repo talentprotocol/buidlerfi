@@ -50,18 +50,10 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
           <Tab value="questions">{profile.questionsAsked?.length} Questions</Tab>
         </TabList>
         <TabPanel value="answers" sx={{ p: 0 }}>
-          <QuestionsList
-            profile={profile}
-            type="answers"
-            onBuyKeyClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}
-          />
+          <QuestionsList profile={profile} type="answers" />
         </TabPanel>
         <TabPanel value="questions" sx={{ p: 0 }}>
-          <QuestionsList
-            profile={profile}
-            type="questions"
-            onBuyKeyClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}
-          />
+          <QuestionsList profile={profile} type="questions" />
         </TabPanel>
       </Tabs>
     </Flex>

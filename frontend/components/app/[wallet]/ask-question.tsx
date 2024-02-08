@@ -59,7 +59,7 @@ export const AskQuestion = () => {
         title="Ask a question"
         endItem={
           <Button
-            loading={postQuestion.isLoading}
+            loading={postQuestion.isLoading || postOpenQuestion.isLoading}
             disabled={questionContent.length < MIN_QUESTION_LENGTH || questionContent.length > MAX_QUESTION_LENGTH}
             onClick={sendQuestion}
           >

@@ -3,6 +3,7 @@ import { AuthRoute } from "@/components/app/auth-route";
 import { Flex } from "@/components/shared/flex";
 import { DialogContainer } from "@/contexts/DialogContainer";
 import { GlobalContextProvider } from "@/contexts/globalContext";
+import { HistoryContextProvider } from "@/contexts/historyContext";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
 import theme from "@/theme";
@@ -53,15 +54,17 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
         border: theme => "1px solid " + theme.palette.neutral[300]
       }}
     >
-      <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
-        <CssVarsProvider theme={theme}>
-          <QueryClientProvider client={queryClient}>
-            {mounted && <InnerProviders>{children}</InnerProviders>}
-          </QueryClientProvider>
-          <ToastContainer />
-          <DialogContainer />
-        </CssVarsProvider>
-      </MaterialCssVarsProvider>
+      <HistoryContextProvider>
+        <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
+          <CssVarsProvider theme={theme}>
+            <QueryClientProvider client={queryClient}>
+              {mounted && <InnerProviders>{children}</InnerProviders>}
+            </QueryClientProvider>
+            <ToastContainer />
+            <DialogContainer />
+          </CssVarsProvider>
+        </MaterialCssVarsProvider>
+      </HistoryContextProvider>
     </Flex>
   );
 }
@@ -88,7 +91,7 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
             appearance: {
               theme: "light",
               accentColor: "#0B6EF9",
-              showWalletLoginFirst: true
+              showWalletLoginFirst: false
             },
             fiatOnRamp: {
               useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"

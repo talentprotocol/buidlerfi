@@ -6,21 +6,20 @@ import { LoadingPage } from "@/components/shared/loadingPage";
 import { PageMessage } from "@/components/shared/page-message";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { shortAddress } from "@/lib/utils";
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Button } from "@mui/joy";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
 
 interface Props {
-  onBuyKeyClick: () => void;
   type: "answers" | "questions";
   profile?: ReturnType<typeof useUserProfile>;
 }
 
-export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
+export const QuestionsList: FC<Props> = ({ type, profile }) => {
   const router = useBetterRouter();
   const questionsToUse = type === "answers" ? profile?.questions : profile?.questionsAsked;
-  console.log(questionsToUse)
   const hasQuestion: boolean = !!questionsToUse?.length;
   // const hasQuestion: boolean = false;
   if (!profile || profile.isLoading) {
@@ -77,7 +76,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
           return {
             title: "this profile is public",
             icon: <KeyIcon />,
-            text: "ask the first question to " + profile?.user?.displayName,
+            text: "ask the first question to " + profile?.user?.displayName || shortAddress(profile.user.wallet),
             button: (
               <Button
                 onClick={() =>
@@ -124,8 +123,7 @@ export const QuestionsList: FC<Props> = ({ onBuyKeyClick, type, profile }) => {
       return {
         title: "no answers to show",
         icon: <AccessTimeOutlined />,
-        text: "You haven't received any questions yet",
-        button: <Button onClick={() => onBuyKeyClick()}>Create keys to make your answers private</Button>
+        text: "You haven't received any questions yet"
       };
     }
   };

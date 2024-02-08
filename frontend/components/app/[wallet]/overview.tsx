@@ -134,6 +134,18 @@ export const Overview: FC<Props> = ({ profile }) => {
           <Flex x xsb mb={-1}>
             <Avatar size="lg" sx={{ height: "80px", width: "80px" }} src={avatarUrl} alt={name}></Avatar>
             <Flex x ys gap1>
+              {(profile.hasKeys || !profile.hasLaunchedKeys) && (
+                <Button
+                  onClick={() =>
+                    router.push({
+                      pathname: "/question",
+                      searchParams: { ask: true, wallet: profile.user?.wallet.toLowerCase() }
+                    })
+                  }
+                >
+                  Ask
+                </Button>
+              )}
               {profile.isOwnProfile && (
                 <Button
                   sx={{ width: "36px", height: "36px" }}
@@ -155,13 +167,12 @@ export const Overview: FC<Props> = ({ profile }) => {
                   Sell
                 </Button>
               )}
-              {isAuthenticatedAndActive && profile.hasLaunchedKeys && profile.user && (
-                <Button
-                  onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}
-                  disabled={supply === BigInt(0) && !profile.isOwnProfile}
-                >
-                  {profile.isOwnProfile && profile.holders?.length === 0 ? "Create keys" : "Buy"}
-                </Button>
+              {isAuthenticatedAndActive && profile.user && profile.hasLaunchedKeys && (
+                <Button onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>Buy</Button>
+              )}
+
+              {isAuthenticatedAndActive && profile.user && profile.isOwnProfile && !profile.hasLaunchedKeys && (
+                <Button onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>Create keys</Button>
               )}
               {!profile.user && farcasterProfile && (
                 <Link

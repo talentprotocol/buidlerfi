@@ -37,17 +37,17 @@ export const OnboardingTasks = () => {
       },
       {
         description: "answer 1 open question",
-        redirect: { pathname: "/home", searchParams: { tab: "Open Questions" } },
+        redirect: { pathname: "/home", searchParams: { tab: "New" } },
         verify: () => userStats && userStats.openQuestionsReplied > 0
       },
       {
-        description: "create your own key to gate your answers (gasless, no need to top up)",
+        description: "create your own key to gate your answers",
         redirect: { pathname: `/profile/${user?.wallet}`, searchParams: { tradeModal: "buy" } },
         //Other users can't buy the key if user has not created it. If count is 0, user hasn't launched keys
         verify: () => userStats && userStats.numberOfHolders > 0
       },
       {
-        description: "top up and buy another person's key",
+        description: "buy another person's key",
         redirect: { pathname: `/wallet`, searchParams: { fundModal: "deposit" } },
         //If user has bought his key, count will be 1. If he has bought another person's key, count will be 2
         verify: () => userStats && userStats.numberOfHolding > 1

@@ -15,6 +15,7 @@ import {
   SocialProfileType,
   User
 } from "@prisma/client";
+import { differenceInMinutes } from "date-fns";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
@@ -24,6 +25,21 @@ export const createQuestion = async (
   replierId?: number,
   recommendedUser?: RecommendedUser
 ) => {
+  const lastQuestion = await prisma.question.findFirst({
+    where: {
+      questioner: {
+        privyUserId
+      }
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+
+  if (lastQuestion && differenceInMinutes(new Date(), lastQuestion.createdAt) < 1) {
+    return { error: ERRORS.QUESTION_TOO_SOON };
+  }
+
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
   }
@@ -113,6 +129,22 @@ export const createQuestion = async (
 export const createOpenQuestion = async (privyUserId: string, questionContent: string, tag?: string) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
+  }
+
+  const lastQuestion = await prisma.question.findFirst({
+    where: {
+      questioner: {
+        privyUserId
+      }
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+
+  if (lastQuestion) console.log(differenceInMinutes(new Date(), lastQuestion.createdAt));
+  if (lastQuestion && differenceInMinutes(new Date(), lastQuestion.createdAt) < 1) {
+    return { error: ERRORS.QUESTION_TOO_SOON };
   }
 
   if (tag) {

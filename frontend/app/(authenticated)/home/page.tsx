@@ -7,19 +7,14 @@ import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import {
-  useGetHotQuestions,
-  useGetKeyQuestions,
-  useGetNewQuestions,
-  useGetOpenQuestions
-} from "@/hooks/useQuestionsApi";
+import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
 import { useCreateUser } from "@/hooks/useUserApi";
 import { Key } from "@mui/icons-material";
 import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useLogin } from "@privy-io/react-auth";
 import { useEffect } from "react";
 
-const tabs = ["New", "Top", "Your holdings", "Open Questions"];
+const tabs = ["New", "Top", "Your holdings"];
 
 export default function Home() {
   const { holding, isAuthenticatedAndActive, refetch } = useUserContext();
@@ -37,7 +32,7 @@ export default function Home() {
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();
   const keysQuestions = useGetKeyQuestions();
-  const openQuestions = useGetOpenQuestions();
+
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
   return (
     <Flex component={"main"} y grow>
@@ -60,15 +55,17 @@ export default function Home() {
             backgroundColor: theme => theme.palette.background.body,
             top: "55px",
             position: "sticky",
-            overflow: "auto",
-            scrollSnapType: "x mandatory",
-            "&::-webkit-scrollbar": { display: "none" }
+            display: "flex",
+            justifyContent: "stretch"
+            // overflow: "auto",
+            // scrollSnapType: "x mandatory",
+            // "&::-webkit-scrollbar": { display: "none" }
           }}
         >
           {tabs.map(tab => (
             <Tab
               key={tab}
-              sx={{ minWidth: "100px", scrollSnapAlign: "start", flex: "none" }}
+              sx={{ flexGrow: 1 }}
               value={tab}
               disabled={tab === "Your holdings" && !isAuthenticatedAndActive}
             >
@@ -108,17 +105,6 @@ export default function Home() {
             ))
           )}
           {<LoadMoreButton query={keysQuestions} />}
-        </TabPanel>
-        <TabPanel value="Open Questions">
-          {openQuestions.isLoading && <LoadingPage />}
-          {keysQuestions.data?.length === 0 ? (
-            <PageMessage icon={<Key />} title="No open questions asked" text="Be the first to ask an open question!" />
-          ) : (
-            openQuestions.data?.map(question => (
-              <QuestionEntry key={question?.id} question={question} refetch={openQuestions?.refetch} />
-            ))
-          )}
-          {<LoadMoreButton query={openQuestions} />}
         </TabPanel>
       </Tabs>
     </Flex>

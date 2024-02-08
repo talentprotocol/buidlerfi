@@ -79,7 +79,12 @@ export const TagsModal: FC = () => {
               fullWidth
               onClick={handleSelectTags}
               loading={isLoading}
-              disabled={selectedTags.length === 0 || selectedTags.length > 3}
+              disabled={
+                selectedTags.length === 0 ||
+                selectedTags.length > 3 ||
+                bio.length > USER_BIO_MAX_LENGTH ||
+                bio.length < 10
+              }
             >
               Continue
             </Button>

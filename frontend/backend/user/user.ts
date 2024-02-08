@@ -158,6 +158,14 @@ export const createUser = async (privyUserId: string) => {
     }
   });
 
+  if (socialAddress) {
+    try {
+      await updateUserSocialProfiles(newUser.id, socialAddress, newUser.bio || undefined);
+    } catch (err) {
+      console.error("Error while updating social profiles: ", err);
+    }
+  }
+
   return { data: newUser };
 };
 
@@ -201,7 +209,7 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
   });
 
   try {
-    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase(), user.bio!);
+    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase(), user.bio || undefined);
     updateRecommendations(challenge.publicKey.toLowerCase());
   } catch (err) {
     console.error("Error while updating social profiles: ", err);

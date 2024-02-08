@@ -6,11 +6,7 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0yFanm3yTbCe4Z4KM9yi/IGZf+ugrj+rn82e/guPcFly
 -----END PUBLIC KEY-----`;
 
 const allowAnonymous = [
-  "/api/question/public",
-  "/api/question/new",
-  "/api/question/hot",
-  "/api/question/open",
-  "/api/question/user",
+  "/api/question",
   "/api/user/0x",
   "/api/user/holders",
   "/api/keyrelationship",
