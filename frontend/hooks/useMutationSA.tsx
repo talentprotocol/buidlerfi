@@ -23,7 +23,7 @@ export function useMutationSA<TResponse, TArgs = void>(
     {
       enabled: options?.enabled,
       onSuccess: (data: TResponse) => (options?.onSuccess ? options.onSuccess(data) : Promise<void>),
-      onError: (err: unknown) => toast.error(formatError(err)),
+      onError: options?.showError ? (err: unknown) => toast.error(formatError(err)) : undefined,
       refetchOnMount: options?.refetchOnMount,
       cacheTime: options?.cacheTime,
       staleTime: options?.staleTime

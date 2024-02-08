@@ -5,24 +5,23 @@ import { SearchIcon } from "@/components/icons/search";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
-import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetTopUsers, useSearch } from "@/hooks/useUserApi";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useGetQuestionableUsers } from "@/hooks/useUserApi";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
-import { PersonSearchOutlined } from "@mui/icons-material";
 import { Avatar, Input, Typography, useTheme } from "@mui/joy";
 import { useState } from "react";
 
 export default function QuestionPage() {
   const theme = useTheme();
   const { isLoading } = useUserContext();
-  const topUsers = useGetTopUsers();
   const [searchValue, setSearchValue] = useState("");
   const router = useBetterRouter();
-  const searchUsers = useSearch(searchValue, false);
+  const debouncedValue = useDebounce(searchValue, 500);
+  const questionableUsers = useGetQuestionableUsers(debouncedValue);
   if (router.searchParams.ask) {
     return <AskQuestion />;
   }
@@ -40,61 +39,36 @@ export default function QuestionPage() {
         />
       </Flex>
 
-      {!searchValue && (
-        <Flex y grow>
-          <Flex
-            x
-            px={2}
-            py={1}
-            gap2
-            sx={{ cursor: "pointer", ":hover": { bgcolor: theme.palette.neutral[100] } }}
-            onClick={() => router.push({ searchParams: { ask: true } })}
-          >
-            <Avatar size="sm" src={LOGO_BLUE_BACK} alt="logo" />
-            <Typography level="title-sm" sx={{ alignSelf: "center" }}>
-              Ask an Open Question
-            </Typography>
-          </Flex>
-          {isLoading ? (
-            <LoadingPage />
-          ) : (
-            topUsers?.data?.map(topUser => (
-              <UnifiedUserItem
-                key={topUser.id}
-                user={topUser}
-                onClick={() => router.push({ searchParams: { ask: true, wallet: topUser.wallet } })}
-              />
-            ))
-          )}
-          <LoadMoreButton query={topUsers} />
-        </Flex>
-      )}
-      {searchValue && (
-        <Flex y grow>
-          {searchUsers.isLoading ? (
-            <LoadingPage />
-          ) : searchUsers.data?.length === 0 ? (
-            <PageMessage
-              icon={<PersonSearchOutlined />}
-              title={`No results for "${searchValue}"`}
-              text="Try searching for users by their username or explore the home screen."
-            />
-          ) : (
-            searchUsers.data?.map(user => (
+      <Flex y grow>
+        {isLoading || questionableUsers.isLoading ? (
+          <LoadingPage />
+        ) : (
+          <>
+            <Flex
+              x
+              px={2}
+              py={1}
+              gap2
+              sx={{ cursor: "pointer", ":hover": { bgcolor: theme.palette.neutral[100] } }}
+              onClick={() => router.push({ searchParams: { ask: true } })}
+            >
+              <Avatar size="sm" src={LOGO_BLUE_BACK} alt="logo" />
+              <Typography level="title-sm" sx={{ alignSelf: "center" }}>
+                Ask an Open Question
+              </Typography>
+            </Flex>
+            {questionableUsers?.data?.map(user => (
               <UnifiedUserItem
                 key={user.id}
                 user={user}
-                holdersAndReplies={{
-                  numberOfHolders: user.numberOfHolders,
-                  questionsCount: user.numberOfQuestions
-                }}
                 onClick={() => router.push({ searchParams: { ask: true, wallet: user.wallet } })}
+                bio={user.bio || " "}
               />
-            ))
-          )}
-          <LoadMoreButton query={searchUsers} />
-        </Flex>
-      )}
+            ))}
+          </>
+        )}
+        <LoadMoreButton query={questionableUsers} />
+      </Flex>
     </Flex>
   );
 }

@@ -1,6 +1,7 @@
 import {
   UpdateUserArgs,
   getNewUsers,
+  getQuestionableUsers,
   getTopUsers,
   getTopUsersByAnswersGiven,
   getTopUsersByKeysOwned,
@@ -36,9 +37,12 @@ export type GetCurrentUserResponse = Prisma.UserGetPayload<{
 export type GetUserResponse = Prisma.UserGetPayload<{ include: { socialProfiles: true } }>;
 
 export const useCreateUser = () => {
-  return useMutationSA(async options => {
-    return createUserSA(options);
-  });
+  return useMutationSA(
+    async options => {
+      return createUserSA(options);
+    },
+    { showError: false }
+  );
 };
 
 export const useGetUser = (address?: string, reactQueryOptions?: { enabled?: boolean }) => {
@@ -141,5 +145,14 @@ export const useGetUserStats = (id?: number) => {
 export const useSetUserSetting = () => {
   return useMutationSA((options, setting: { key: UserSettingKeyEnum; value: string }) =>
     setUserSettingSA(setting.key, setting.value, options)
+  );
+};
+
+export const useGetQuestionableUsers = (search?: string) => {
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getQuestionableUsers>>>(
+    ["useGetQuestionableUser", search || ""],
+    `/api/user/questionable/`,
+    {},
+    { search }
   );
 };

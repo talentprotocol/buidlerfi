@@ -44,11 +44,12 @@ export default async function middleware(req: NextRequest) {
         })
       : undefined;
 
-    if (req.nextUrl.pathname.includes("/api/") && !allowAnonymous.find(path => req.nextUrl.pathname.startsWith(path))) {
-      if (!payload?.payload.sub) throw new Error("No sub in payload");
+    if (req.nextUrl.pathname.includes("/api/")) {
+      const allowed = allowAnonymous.some(path => req.nextUrl.pathname.startsWith(path));
+      if (!payload?.payload.sub && !allowed) throw new Error("No sub in payload");
 
       const response = NextResponse.next();
-      response.headers.set("privyUserId", payload.payload.sub);
+      response.headers.set("privyUserId", payload?.payload?.sub || "");
       return response;
     }
   } catch (error) {

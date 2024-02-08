@@ -2,20 +2,6 @@
 
 import prisma from "@/lib/prisma";
 
-// interface KeyRelationshipResponse
-//   extends Prisma.KeyRelationshipGetPayload<{
-//     include: {
-//       holder: {
-//         include: {
-//           socialProfiles: true;
-//         };
-//       };
-//       owner: true;
-//     };
-//   }> {
-//   holdersCount: number;
-// }
-
 export const getKeyRelationships = async (address: string, side: "owner" | "holder") => {
   const relationships = await prisma.keyRelationship.findMany({
     where:

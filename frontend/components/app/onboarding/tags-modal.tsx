@@ -19,7 +19,7 @@ export const TagsModal: FC = () => {
   const handleSelectTags = async () => {
     setIsLoading(true);
     await updateUser
-      .mutateAsync({ tags: selectedTags, bio: bio })
+      .mutateAsync({ tags: selectedTags, bio: bio, hasFinishedOnboarding: true })
       .then(() => refetch())
       .finally(() => setIsLoading(false));
   };
