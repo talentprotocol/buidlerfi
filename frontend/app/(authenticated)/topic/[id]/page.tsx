@@ -27,7 +27,7 @@ export default function TopicPage({ params }: { params: { id: string } }) {
       <InjectTopBar withBack title={topic?.data?.name || undefined} endItem={<Button>test</Button>} />
       {buyModalState !== "closed" && profile.user && (
         <TradeTopicKeyModal
-          topic={topic!.data!}
+          topic={topic}
           topicKeysHoldingCount={
             profile.topicHoldings?.filter(t => t.topicId.toString() === topic.data?.id.toString()).length || 0
           }

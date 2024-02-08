@@ -31,7 +31,7 @@ export const CreateEditCommentModal: FC<Props> = ({ close, refetch, id, type, is
       if (isEdit) {
         await editComment.mutateAsync({ commentId: id, comment: content });
       } else {
-        await postComment.mutateAsync({ questionId: id, comment: content });
+        await postComment.mutateAsync({ questionId: id, comment: content, gated: false });
       }
     }
 
