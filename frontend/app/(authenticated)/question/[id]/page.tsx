@@ -2,6 +2,7 @@ import QuestionPage from "@/components/app/question/question-page";
 import { BASE_URL } from "@/lib/constants";
 import prisma from "@/lib/prisma";
 import { shortAddress } from "@/lib/utils";
+import { FrameButton, FrameButtonsType, getFrameFlattened } from "frames.js";
 import { Metadata } from "next";
 
 type Props = {
@@ -11,19 +12,24 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = params.id;
-  const question = await prisma.question.findUnique({
-    where: { id: parseInt(id) },
-    include: { questioner: true, replier: true }
+  const question = await prisma.question.findUnique({ where: { id: parseInt(id) }, include: { questioner: true, replier: true } });
+  const buttons: FrameButtonsType = [
+    {
+      label: "upvote ⬆️",
+      action: "post"
+    } as FrameButton
+  ];
+  // if replier id is null, question is open, so everyone can reply
+  if (question?.replierId == null) {
+    buttons.push({ label: "reply ✍️", action: "post" });
+  }
+  const fcMetadata: Record<string, string> = getFrameFlattened({
+    version: "vNext",
+    buttons,
+    image: `${BASE_URL}/api/frame/image?id=${id}`,
+    inputText: question?.replierId == null ? "your answer here" : undefined,
+    postUrl: `${BASE_URL}/api/frame/action?id=${id}`
   });
-
-  const fcMetadata: Record<string, string> = {
-    "fc:frame": "vNext",
-    "fc:frame:post_url": `${BASE_URL}/api/frame/action?id=${id}`,
-    "fc:frame:image": `${BASE_URL}/api/frame/image?id=${id}`,
-    "fc:frame:button:1": "upvote ⬆️",
-    "fc:frame:button:2": "see more on builder.fi 👀",
-    "fc:frame:button:2:action": `post_redirect`
-  };
 
   const title = (() => {
     if (!question) return "This question doesn't exist or was deleted";

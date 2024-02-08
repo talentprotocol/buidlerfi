@@ -33,6 +33,7 @@
     "axios": "^1.5.1",
     "bufferutil": "^4.0.8",
     "date-fns": "^2.30.0",
+    "frames.js": "^0.2.0",
     "idb-keyval": "^6.2.1",
     "jose": "^5.0.1",
     "lodash": "^4.17.21",
