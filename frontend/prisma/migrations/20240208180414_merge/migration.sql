@@ -14,7 +14,6 @@ ALTER TABLE "_QuestionToTag" DROP CONSTRAINT "_QuestionToTag_B_fkey";
 
 -- AlterTable
 ALTER TABLE "Comment" DROP COLUMN "isGated",
-ADD COLUMN     "gated" BOOLEAN NOT NULL DEFAULT true;
 
 -- AlterTable
 ALTER TABLE "Question" DROP COLUMN "isGated",
