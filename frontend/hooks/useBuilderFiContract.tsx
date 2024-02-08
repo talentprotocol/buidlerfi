@@ -190,7 +190,7 @@ export const useTradeKey = (side: "buy" | "sell", successFn?: () => void, errorF
   const { writeAsync, isLoading } = useContractWrite({
     ...BUILDERFI_CONTRACT,
     functionName: TRADE_DATA[side].functionName,
-    onSuccess: async data => {
+    onSuccess: async (data: any) => {
       toastId.current = toast("Transaction submitted!", { isLoading: true });
       await processTransaction
         .mutateAsync(data.hash)

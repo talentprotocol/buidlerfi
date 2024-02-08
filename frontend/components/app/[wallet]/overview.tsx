@@ -8,15 +8,16 @@ import { useGetBuilderInfo } from "@/hooks/useBuilderFiContract";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
-import { formatEth, shortAddress } from "@/lib/utils";
+import { NEW_BUILDERFI_INVITE_CAST } from "@/lib/constants";
+import { encodeQueryData, formatEth, shortAddress } from "@/lib/utils";
 import { EditOutlined } from "@mui/icons-material";
 import { Avatar, Button, Chip, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
 import { SocialProfile, SocialProfileType } from "@prisma/client";
 import Image from "next/image";
+import Link from "next/link";
 import { FC, useMemo } from "react";
 
 interface Props {
-  setBuyModalState: (state: "closed" | "buy" | "sell") => void;
   profile: ReturnType<typeof useUserProfile>;
 }
 
@@ -44,14 +45,12 @@ export const socialInfo = {
 };
 export const socialsOrder = Object.keys(socialInfo);
 
-export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
-  const { user: currentUser } = useUserContext();
-
+export const Overview: FC<Props> = ({ profile }) => {
+  const { user: currentUser, isAuthenticatedAndActive } = useUserContext();
   const router = useBetterRouter();
 
   const { buyPrice, supply } = useGetBuilderInfo(profile.user?.wallet);
   const refreshData = useRefreshCurrentUser();
-
   const keysPlural = () => {
     if (profile.ownedKeysCount != 1) {
       return "keys";
@@ -74,7 +73,7 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
   const name = useMemo(() => profile.user?.displayName || recommendedName(), [profile.user, profile.recommendedUser]);
 
   const isCurrentUserProfilePage = currentUser?.wallet.toLowerCase() === profile.user?.wallet.toLowerCase();
-  
+
   const allSocials = useMemo(() => {
     if (profile.user?.socialProfiles?.length) {
       return profile.user?.socialProfiles;
@@ -126,6 +125,8 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
       .map(profile => profile);
   }, [currentUser?.socialProfiles, profile.holders, profile.user]);
 
+  const farcasterProfile = allSocials.find(socialProfile => socialProfile.type === SocialProfileType.FARCASTER);
+
   return (
     <>
       <Flex y gap2 p={2}>
@@ -133,6 +134,18 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
           <Flex x xsb mb={-1}>
             <Avatar size="lg" sx={{ height: "80px", width: "80px" }} src={avatarUrl} alt={name}></Avatar>
             <Flex x ys gap1>
+              {(profile.hasKeys || !profile.hasLaunchedKeys) && (
+                <Button
+                  onClick={() =>
+                    router.push({
+                      pathname: "/question",
+                      searchParams: { ask: true, wallet: profile.user?.wallet.toLowerCase() }
+                    })
+                  }
+                >
+                  Ask
+                </Button>
+              )}
               {profile.isOwnProfile && (
                 <Button
                   sx={{ width: "36px", height: "36px" }}
@@ -148,16 +161,29 @@ export const Overview: FC<Props> = ({ setBuyModalState, profile }) => {
                 <Button
                   variant="outlined"
                   color="neutral"
-                  onClick={() => setBuyModalState("sell")}
+                  onClick={() => router.replace({ searchParams: { tradeModal: "sell" } })}
                   disabled={(supply || 0) <= BigInt(1)}
                 >
                   Sell
                 </Button>
               )}
+              {isAuthenticatedAndActive && profile.user && profile.hasLaunchedKeys && (
+                <Button onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>Buy</Button>
+              )}
 
-              <Button onClick={() => setBuyModalState("buy")} disabled={supply === BigInt(0) && !profile.isOwnProfile}>
-                {profile.isOwnProfile && profile.holders?.length === 0 ? "Create keys" : "Buy"}
-              </Button>
+              {isAuthenticatedAndActive && profile.user && profile.isOwnProfile && !profile.hasLaunchedKeys && (
+                <Button onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>Create keys</Button>
+              )}
+              {!profile.user && farcasterProfile && (
+                <Link
+                  href={`https://warpcast.com/~/compose?${encodeQueryData({
+                    text: NEW_BUILDERFI_INVITE_CAST.replace("{username}", farcasterProfile.profileName)
+                  })}`}
+                  target="_blank"
+                >
+                  <Button>invite</Button>
+                </Link>
+              )}
             </Flex>
           </Flex>
           <Flex x yc gap1>

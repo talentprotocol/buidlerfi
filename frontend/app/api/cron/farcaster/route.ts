@@ -189,6 +189,6 @@ const prepareQuestion = async (
   });
   await replyToNewQuestionCastSuccess(
     questionCastHash,
-    `https://app.builder.fi/profile/${questionRecipient.user.wallet}?question=${newQuestion.id}`
+    `https://app.builder.fi/question/${newQuestion.id}`
   );
 };

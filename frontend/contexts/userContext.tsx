@@ -3,6 +3,7 @@ import { useAxios } from "@/hooks/useAxios";
 import { useGetKeyRelationships, useGetTopicKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useGetNotifications } from "@/hooks/useNotificationApi";
 import { usePrevious } from "@/hooks/usePrevious";
+import { UserSettingKeyEnum } from "@prisma/client";
 import { User as PrivyUser, usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useQuery } from "@tanstack/react-query";
@@ -40,6 +41,7 @@ interface UserContextType {
   holders: ReturnType<typeof useGetKeyRelationships>["data"];
   topicHoldings: ReturnType<typeof useGetTopicKeyRelationships>["data"];
   hasLaunchedKeys: boolean;
+  userSettings?: Record<UserSettingKeyEnum, string>;
 }
 const userContext = createContext<UserContextType>({
   user: undefined,
@@ -124,7 +126,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       holding,
       holders,
       hasLaunchedKeys: !!holders?.find(h => h.holderId === h.ownerId),
-      topicHoldings
+      topicHoldings,
+      userSettings: user.data?.settings.reduce(
+        (prev, curr) => ({ ...prev, [curr.key]: curr.value }),
+        {} as Record<UserSettingKeyEnum, string>
+      )
     }),
     [
       user.data,

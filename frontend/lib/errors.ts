@@ -26,5 +26,7 @@ export const ERRORS = {
   BIO_LENGTH_INVALID: "Bio too long. Maximum 160 characters",
   INVALID_LENGTH: "Invalid length",
   QUESTION_NOT_REPLIED: "Question has not been replied to yet",
-  MUST_LAUNCH_KEY: "You must have launched your key to perform this action"
+  MUST_LAUNCH_KEY: "You must have launched your key to perform this action",
+  SOCIAL_WALLET_ALREADY_LINKED: "This wallet is already linked to a different user",
+  QUESTION_TOO_SOON: "Wait a minute before asking a question again"
 } as const;

@@ -1,8 +1,9 @@
+import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetContractData } from "@/hooks/useBuilderFiApi";
+import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
-import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
@@ -11,13 +12,25 @@ import {
   Refresh,
   SettingsOutlined
 } from "@mui/icons-material";
-import { Avatar, Divider, Drawer, IconButton, List, ListItem, ListItemButton, Skeleton, Typography } from "@mui/joy";
+import {
+  Avatar,
+  Button,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  Skeleton,
+  Typography
+} from "@mui/joy";
 import { ListItemIcon, ListItemText } from "@mui/material";
 import { usePrivy } from "@privy-io/react-auth";
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 import { PointsIcon } from "../icons/points";
+import { BannerCard } from "./bannerCard";
 import { Flex } from "./flex";
 import { SidebarTopics } from "./side-bar-topics";
 import { WalletAddress } from "./wallet-address";
@@ -27,17 +40,13 @@ interface Props {
   setOpen: (isOpen: boolean) => void;
 }
 
-// interface Navigator extends globalThis.Navigator {
-//   standalone?: boolean;
-// }
-
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user, isLoading, refetch } = useUserContext();
-  // const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
+  const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
   const contractData = useGetContractData();
   const refreshData = useRefreshCurrentUser();
-  // const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
-  // const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
+  const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
+  const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
   const { data: balance } = useBalance({
     address
   });
@@ -45,7 +54,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
 
   const { logout } = usePrivy();
   const handleLogout = useCallback(async () => {
-    await logout().then(() => router.push("/signup"));
+    await logout().then(() => router.push("/home"));
   }, [logout, router]);
 
   const navItems = useMemo(
@@ -125,33 +134,24 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     }
   };
 
-  // const isInstalled = useMemo(() => {
-  //   const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-  //   const { standalone } = navigator as Navigator;
-  //   return document.referrer.startsWith("android-app://") || standalone || isStandalone;
-  // }, []);
-
-  // const cardToDisplay = useMemo(() => {
-  //   if (!isInstalled && !hasIgnoredInstallApp) return "install";
-  //   else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
-  //   else return "none";
-  // }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isInstalled, user?.socialWallet]);
-
   const navigate = (path: string) => {
     router.push(path);
     setOpen(false);
   };
+  const { isPwaInstalled } = useLayoutContext();
+
+  const cardToDisplay = useMemo(() => {
+    if (!isPwaInstalled && !hasIgnoredInstallApp) return "install";
+    else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
+    else return "none";
+  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isPwaInstalled, user?.socialWallet]);
 
   if (!user) return <></>;
 
   return (
     <Drawer open={isOpen} onClose={() => setOpen(false)}>
       <Flex y gap2 p={2}>
-        <Avatar
-          src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
-          onClick={() => setOpen(false)}
-          sx={{ position: "relative" }}
-        />
+        <Avatar src={user?.avatarUrl || undefined} onClick={() => setOpen(false)} sx={{ position: "relative" }} />
         <Flex y>
           <Flex x yc>
             {user.displayName ? (
@@ -201,9 +201,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
                       if (item.path) {
                         navigate(item.path);
                       }
-                      // else if (item.onClick) {
-                      //   item.onClick();
-                      // }
                     }}
                   >
                     <ListItemIcon>{item.icon}</ListItemIcon>
@@ -217,14 +214,14 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       </Flex>
       <Flex grow />
       <Flex xc y p={2} gap1>
-        {/* <Flex>
+        <Flex>
           {cardToDisplay === "install" && (
             <BannerCard
               onClose={() => setHasIgnoredInstallApp(true)}
               title="Enhance Your Experience"
               body="Install the app for a seamless, personalized experience."
             >
-              <AddToHomePage />
+              <Button onClick={() => router.replace({ searchParams: { installmodal: true } })}>Install App</Button>
             </BannerCard>
           )}
           {cardToDisplay === "connect" && (
@@ -238,7 +235,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
               </Button>
             </BannerCard>
           )}
-        </Flex> */}
+        </Flex>
 
         <Flex y xc yc>
           <Typography textColor={"neutral.600"} level="body-sm">

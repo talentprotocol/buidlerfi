@@ -1,6 +1,5 @@
 "use client";
 import { QuestionEntry } from "@/components/app/[wallet]/question-entry";
-import { WelcomeModal } from "@/components/app/welcome-modal";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
@@ -8,33 +7,44 @@ import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import {
-  useGetHotQuestions,
-  useGetKeyQuestions,
-  useGetNewQuestions,
-  useGetOpenQuestions
-} from "@/hooks/useQuestionsApi";
+import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
+import { useCreateUser } from "@/hooks/useUserApi";
 import { Key } from "@mui/icons-material";
-import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { useLogin } from "@privy-io/react-auth";
 import { useEffect } from "react";
 
-const tabs = ["New", "Top", "Your holdings", "Open Questions"];
+const tabs = ["New", "Top", "Your holdings"];
 
 export default function Home() {
-  const { holding } = useUserContext();
+  const { holding, isAuthenticatedAndActive, refetch } = useUserContext();
   const router = useBetterRouter();
-
+  const createUser = useCreateUser();
+  const { login } = useLogin({
+    async onComplete(user) {
+      if (user) {
+        await createUser.mutateAsync();
+        await refetch();
+      }
+    }
+  });
   const tab = router.searchParams.tab as (typeof tabs)[number] | undefined;
-
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();
   const keysQuestions = useGetKeyQuestions();
-  const openQuestions = useGetOpenQuestions();
+
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
   return (
     <Flex component={"main"} y grow>
-      <InjectTopBar />
-      {router.searchParams.welcome === "1" && <WelcomeModal />}
+      <InjectTopBar
+        endItem={
+          !isAuthenticatedAndActive && (
+            <Button variant="plain" size="sm" onClick={() => login()}>
+              Sign In
+            </Button>
+          )
+        }
+      />
       <Tabs
         sx={{ width: "min(100vw, 500px)" }}
         value={tab || tabs[0]}
@@ -45,13 +55,20 @@ export default function Home() {
             backgroundColor: theme => theme.palette.background.body,
             top: "55px",
             position: "sticky",
-            overflow: "auto",
-            scrollSnapType: "x mandatory",
-            "&::-webkit-scrollbar": { display: "none" }
+            display: "flex",
+            justifyContent: "stretch"
+            // overflow: "auto",
+            // scrollSnapType: "x mandatory",
+            // "&::-webkit-scrollbar": { display: "none" }
           }}
         >
           {tabs.map(tab => (
-            <Tab key={tab} sx={{ minWidth: "100px", scrollSnapAlign: "start", flex: "none" }} value={tab}>
+            <Tab
+              key={tab}
+              sx={{ flexGrow: 1 }}
+              value={tab}
+              disabled={tab === "Your holdings" && !isAuthenticatedAndActive}
+            >
               {tab}
             </Tab>
           ))}
@@ -88,17 +105,6 @@ export default function Home() {
             ))
           )}
           {<LoadMoreButton query={keysQuestions} />}
-        </TabPanel>
-        <TabPanel value="Open Questions">
-          {openQuestions.isLoading && <LoadingPage />}
-          {keysQuestions.data?.length === 0 ? (
-            <PageMessage icon={<Key />} title="No open questions asked" text="Be the first to ask an open question!" />
-          ) : (
-            openQuestions.data?.map(question => (
-              <QuestionEntry key={question?.id} question={question} refetch={openQuestions?.refetch} />
-            ))
-          )}
-          {<LoadMoreButton query={openQuestions} />}
         </TabPanel>
       </Tabs>
     </Flex>

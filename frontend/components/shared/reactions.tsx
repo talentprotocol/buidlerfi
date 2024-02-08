@@ -70,6 +70,7 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
           size="sm"
           onClick={e => handleAddReaction(e, "UPVOTE")}
           color={myVote === "UPVOTE" ? "primary" : undefined}
+          disabled={!user?.privyUserId}
         >
           <ArrowUpward fontSize="small" />
         </IconButton>
@@ -84,6 +85,7 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
           size="sm"
           onClick={e => handleAddReaction(e, "DOWNVOTE")}
           color={myVote === "DOWNVOTE" ? "danger" : undefined}
+          disabled={!user?.privyUserId}
         >
           <ArrowDownward fontSize="small" />
         </IconButton>

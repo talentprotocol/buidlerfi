@@ -1,15 +1,46 @@
 "use server";
 
-import { getFarcasterProfileName, publishNewQuestionCast } from "@/lib/api/backend/farcaster";
-import { MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/lib/constants";
+import { getFarcasterProfileName, publishNewAnswerCast, publishNewQuestionCast } from "@/lib/api/backend/farcaster";
+import { MAX_COMMENT_LENGTH, MIN_QUESTION_LENGTH, PAGINATION_LIMIT, WEEK_IN_MILLISECONDS } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import { exclude } from "@/lib/exclude";
 import prisma from "@/lib/prisma";
-import { NotificationType, Prisma, ReactionType, SocialProfileType, Topic, User } from "@prisma/client";
+import {
+  KeyRelationship,
+  NotificationType,
+  Prisma,
+  ReactionType,
+  RecommendedUser,
+  SocialProfile,
+  SocialProfileType,
+  Topic,
+  User
+} from "@prisma/client";
+import { differenceInMinutes } from "date-fns";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
-export const createQuestion = async (privyUserId: string, questionContent: string, replierId: number) => {
+export const createQuestion = async (
+  privyUserId: string,
+  questionContent: string,
+  replierId?: number,
+  recommendedUser?: RecommendedUser
+) => {
+  const lastQuestion = await prisma.question.findFirst({
+    where: {
+      questioner: {
+        privyUserId
+      }
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+
+  if (lastQuestion && differenceInMinutes(new Date(), lastQuestion.createdAt) < 1) {
+    return { error: ERRORS.QUESTION_TOO_SOON };
+  }
+
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
   }
@@ -18,18 +49,57 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
     where: { privyUserId },
     include: { socialProfiles: true, keysOwned: true }
   });
-  const replier = await prisma.user.findUniqueOrThrow({ where: { id: replierId }, include: { socialProfiles: true } });
 
-  const key = questioner.keysOwned.find(key => key.ownerId === replierId);
-  if (!key || key.amount === BigInt(0)) {
-    return { error: ERRORS.MUST_HOLD_KEY };
+  let replier: (User & { keysOfSelf?: KeyRelationship[]; socialProfiles: SocialProfile[] }) | null;
+  if (!replierId && recommendedUser) {
+    replier = await prisma.user.findUnique({
+      where: { socialWallet: recommendedUser.wallet.toLowerCase() },
+      include: { socialProfiles: true, keysOfSelf: true }
+    });
+    if (!replier) {
+      replier = await prisma.user.create({
+        data: {
+          displayName:
+            recommendedUser.talentProtocol || recommendedUser.ens || recommendedUser.farcaster || recommendedUser.lens,
+          avatarUrl: recommendedUser.avatarUrl,
+          socialWallet: recommendedUser.wallet.toLowerCase(),
+          wallet: "",
+          socialProfiles: {
+            create: {
+              type: SocialProfileType.FARCASTER,
+              profileName: recommendedUser.farcaster!,
+              profileImage: recommendedUser.avatarUrl
+            }
+          }
+        },
+        include: {
+          socialProfiles: true
+        }
+      });
+    }
+  } else {
+    replier = await prisma.user.findUniqueOrThrow({
+      where: { id: replierId },
+      include: { socialProfiles: true, keysOfSelf: true }
+    });
+  }
+
+  if (!replier) {
+    return { error: ERRORS.USER_NOT_FOUND };
+  }
+
+  if (replier.keysOfSelf && replier.keysOfSelf.length > 0) {
+    const key = questioner.keysOwned.find(key => key.ownerId === replierId);
+    if (!key || key.amount === BigInt(0)) {
+      return { error: ERRORS.MUST_HOLD_KEY };
+    }
   }
 
   const question = await prisma.$transaction(async tx => {
     const question = await tx.question.create({
-      data: { questionerId: questioner.id, replierId: replier.id, questionContent: questionContent }
+      data: { questionerId: questioner.id, replierId: replier!.id, questionContent: questionContent }
     });
-    await sendNotification(replier.id, "ASKED_QUESTION", questioner.id, question.id, tx);
+    await sendNotification(replier!.id, "ASKED_QUESTION", questioner.id, question.id, tx);
 
     return question;
   });
@@ -47,11 +117,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
       const questionerName = getFarcasterProfileName(questioner, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW QUESTION");
-      await publishNewQuestionCast(
-        questionerName,
-        replierName,
-        `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
-      );
+      await publishNewQuestionCast(questionerName, replierName, `https://app.builder.fi/question/${question.id}`);
     }
   }
   return { data: question };
@@ -60,6 +126,22 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
 export const createOpenQuestion = async (privyUserId: string, questionContent: string, topic?: string) => {
   if (questionContent.length > 280 || questionContent.length < MIN_QUESTION_LENGTH) {
     return { error: ERRORS.QUESTION_LENGTH_INVALID };
+  }
+
+  const lastQuestion = await prisma.question.findFirst({
+    where: {
+      questioner: {
+        privyUserId
+      }
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+
+  if (lastQuestion) console.log(differenceInMinutes(new Date(), lastQuestion.createdAt));
+  if (lastQuestion && differenceInMinutes(new Date(), lastQuestion.createdAt) < 1) {
+    return { error: ERRORS.QUESTION_TOO_SOON };
   }
 
   const hasTopic = topic && topic !== "";
@@ -260,7 +342,12 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
 }
 
 //We allow privyUserId to be undefiend for public endpoint
-export const getQuestion = async (questionId: number, privyUserId?: string, includeSocialProfiles: boolean = false) => {
+export const getQuestion = async (
+  questionId: number,
+  privyUserId?: string,
+  includeSocialProfiles: boolean = false,
+  includeTags: boolean = false
+) => {
   const question = await prisma.question.findUniqueOrThrow({
     where: {
       id: questionId
@@ -272,6 +359,9 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
           comments: true
         }
       },
+      ...(includeTags && {
+        tags: true
+      }),
       questioner: {
         ...(includeSocialProfiles && {
           include: {
@@ -290,15 +380,17 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
     }
   });
 
-  //We need to check privyUserId explicitely also because if it's undefined, it's going to return the system user
-  if (!privyUserId) return { data: exclude(question, ["reply"]) };
+  //If not gated, or is an open-question, return immediately
+  //If user has not launched keys, gated will always be false, so we don't need to check if key is launched
+  if (!question.isGated || !question.replierId) return { data: question };
 
-  const hasKey = !question.replierId || (await ownsKey({ userId: question.replierId }, { privyUserId }));
+  if (!privyUserId) {
+    return { data: exclude(question, ["reply"]) };
+  }
 
-  if (hasKey) return { data: question };
-  else return { data: exclude(question, ["reply"]) };
+  const hasKey = await ownsKey({ userId: question.replierId }, { privyUserId });
+  return { data: hasKey ? question : exclude(question, ["reply"]) };
 };
-
 export async function getMostUpvotedQuestion(startDate: Date = new Date(new Date().getTime() - WEEK_IN_MILLISECONDS)) {
   const mostUpvotedQuestions = await prisma.reaction.groupBy({
     where: {
@@ -345,10 +437,29 @@ export const deleteQuestion = async (privyUserId: string, questionId: number) =>
     return { error: ERRORS.UNAUTHORIZED };
   }
 
-  const res = await prisma.question.delete({
-    where: {
-      id: questionId
-    }
+  const res = await prisma.$transaction(async tx => {
+    const res = await tx.question.delete({
+      where: {
+        id: questionId
+      }
+    });
+
+    //When a question is deleted, delete all notifications associated to that question
+    await tx.notification.deleteMany({
+      where: {
+        OR: [
+          { type: NotificationType.ASKED_QUESTION },
+          { type: NotificationType.REPLIED_YOUR_QUESTION },
+          { type: NotificationType.QUESTION_DOWNVOTED },
+          { type: NotificationType.QUESTION_UPVOTED },
+          { type: NotificationType.REPLY_REACTION },
+          { type: NotificationType.NEW_OPEN_QUESTION }
+        ],
+        referenceId: questionId
+      }
+    });
+
+    return res;
   });
 
   return { data: res };
@@ -510,6 +621,63 @@ export const deleteReply = async (privyUserId: string, questionId: number) => {
 
     return res;
   });
+
+  return { data: res };
+};
+
+export const answerQuestion = async (
+  privyUserId: string,
+  questionId: number,
+  answerContent: string,
+  isGated: boolean | undefined
+) => {
+  const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
+
+  if (answerContent.length < 5 || answerContent.length > MAX_COMMENT_LENGTH) return { error: ERRORS.INVALID_LENGTH };
+
+  const currentUser = await prisma.user.findUniqueOrThrow({
+    where: { privyUserId },
+    include: { socialProfiles: true, keysOfSelf: { where: { amount: { gt: 0 } } } }
+  });
+
+  const hasLaunchedKeys = !!currentUser.keysOfSelf.find(h => h.holderId === h.ownerId);
+
+  if (question.replierId !== currentUser?.id) return { error: ERRORS.UNAUTHORIZED };
+
+  const res = await prisma.$transaction(async tx => {
+    const question = await tx.question.update({
+      where: { id: questionId },
+      data: {
+        reply: answerContent,
+        repliedOn: new Date(),
+        //Cannot gate if keys not launched
+        isGated: hasLaunchedKeys ? isGated : false
+      }
+    });
+    await sendNotification(question.questionerId, "REPLIED_YOUR_QUESTION", currentUser.id, question.id, tx);
+    return question;
+  });
+
+  console.log("Farcaster enabled -> ", process.env.ENABLE_FARCASTER);
+  if (process.env.ENABLE_FARCASTER === "true") {
+    const questioner = await prisma.user.findUnique({
+      where: { id: question.questionerId },
+      include: { socialProfiles: true }
+    });
+    const questionerFarcaster = questioner?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
+    const replierFarcaster = currentUser?.socialProfiles.find(sp => sp.type === SocialProfileType.FARCASTER);
+
+    console.log("FOUND questioner -> ", !!questionerFarcaster);
+    console.log("FOUND replier -> ", !!replierFarcaster);
+
+    if (questionerFarcaster || replierFarcaster) {
+      const replierName = getFarcasterProfileName(currentUser!, replierFarcaster);
+      const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
+      // if one of the two has farcaster, publish the cast
+      console.log("CASTING NEW ANSWER");
+      await publishNewAnswerCast(replierName, questionerName, `https://app.builder.fi/question/${question.id}`);
+    }
+  }
 
   return { data: res };
 };

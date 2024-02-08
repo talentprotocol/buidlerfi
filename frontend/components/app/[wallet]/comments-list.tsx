@@ -1,5 +1,6 @@
 import { Flex } from "@/components/shared/flex";
 import { FullTextArea } from "@/components/shared/full-text-area";
+import { LoadingPage } from "@/components/shared/loadingPage";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateComment, useGetComments } from "@/hooks/useCommentApi";
 import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
@@ -17,7 +18,7 @@ interface Props {
 export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
   const [newComment, setNewComment] = useState("");
   const postComment = useCreateComment();
-  const { data: comments, refetch: refetchComment } = useGetComments(questionId);
+  const { data: comments, refetch: refetchComment, isLoading } = useGetComments(questionId);
   const { user: currentUser, refetch: refetchUserContext } = useUserContext();
   const [isBuyKeyModalOpen, setIsBuyKeyModalOpen] = useState(false);
   const [gated, setGated] = useState(true);
@@ -37,24 +38,28 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
 
   if (!isOpenQuestion) {
     return (
-      <Flex y>
-        {comments?.map(comment => (
-          <ReplyCommentEntry
-            key={comment.id}
-            id={comment.id}
-            type="comment"
-            content={comment.content}
-            author={comment.author}
-            createdAt={comment.createdAt}
-            refetch={refetchComment}
-          />
-        ))}
+      <Flex y grow>
+        {isLoading ? (
+          <LoadingPage />
+        ) : (
+          comments?.map(comment => (
+            <ReplyCommentEntry
+              key={comment.id}
+              id={comment.id}
+              type="comment"
+              content={comment.content}
+              author={comment.author}
+              createdAt={comment.createdAt}
+              refetch={refetchComment}
+            />
+          ))
+        )}
       </Flex>
     );
   }
 
   return (
-    <Flex y>
+    <Flex y grow>
       {currentUser && isBuyKeyModalOpen && (
         <TradeKeyModal
           keyOwner={currentUser}
@@ -107,6 +112,24 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
             refetch={refetchComment}
           />
         ))}
+      </Flex>
+      <Divider />
+      <Flex y gap1 grow>
+        {isLoading ? (
+          <LoadingPage />
+        ) : (
+          comments?.map(comment => (
+            <ReplyCommentEntry
+              key={comment.id}
+              id={comment.id}
+              type="comment"
+              content={comment.content}
+              author={comment.author}
+              createdAt={comment.createdAt}
+              refetch={refetchComment}
+            />
+          ))
+        )}
       </Flex>
     </Flex>
   );

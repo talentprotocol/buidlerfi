@@ -26,9 +26,7 @@ export const EditQuestionModal: FC<Props> = ({ close, refetch, questionToEdit })
     onSuccess: (data: unknown) => {
       const questionData = data as { questionContent: string };
       setQuestionContent(questionData.questionContent);
-    },
-    cacheTime: 0,
-    staleTime: 0
+    }
   });
 
   const sendQuestion = async () => {

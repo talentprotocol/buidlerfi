@@ -30,9 +30,9 @@ export const useUserProfile = (wallet?: string) => {
     refetch: refetchUser,
     isLoading: isLoadingUser
   } = useGetUser(formattedWallet as `0x${string}` | undefined);
+
   const getQuestionsFromReplierQuery = useGetQuestionsFromUser(user?.id);
   const getQuestionsFromQuestionerQuery = useGetQuestionsFromUser(user?.id, "questions");
-
   const sortedHolders = useMemo(
     () => holders?.sort((a, b) => a.createdAt.valueOf() - b.createdAt.valueOf()),
     [holders]
@@ -80,7 +80,7 @@ export const useUserProfile = (wallet?: string) => {
     refetch: refetchAll,
     user,
     recommendedUser,
-    isOwnProfile: currentUser?.wallet?.toLowerCase() === formattedWallet,
+    isOwnProfile: !!currentUser?.wallet && currentUser.wallet.toLowerCase() === formattedWallet,
     getQuestionsFromReplierQuery,
     getQuestionsFromQuestionerQuery,
     hasLaunchedKeys: !!holdings?.find(key => key.holderId === key.ownerId),

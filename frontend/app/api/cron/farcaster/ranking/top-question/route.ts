@@ -36,7 +36,7 @@ export const GET = async () => {
       question.questionContent, // Extract the 'data' property from questionContent
       questionerName, // Pass the 'wallet' property of questioner as the argument
       replierName,
-      `https://app.builder.fi/profile/${question.replier.wallet}?question=${questionId}`
+      `https://app.builder.fi/question/${questionId}`
     );
     return Response.json({ message: "Done: Top upvoted question of the week" });
   } catch (error) {

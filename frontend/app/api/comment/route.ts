@@ -9,8 +9,8 @@ export async function GET(req: NextRequest) {
       ? Number(req.nextUrl.searchParams.get("questionId"))
       : undefined;
     const privyUserId = req.headers.get("privyUserId");
-    if (!privyUserId || !questionId) return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
-    const res = await getComments(privyUserId, questionId);
+    if (!questionId) return NextResponse.json({ error: ERRORS.INVALID_REQUEST }, { status: 400 });
+    const res = await getComments(questionId, privyUserId || undefined);
     return NextResponse.json(res);
   } catch (err) {
     console.error(err);

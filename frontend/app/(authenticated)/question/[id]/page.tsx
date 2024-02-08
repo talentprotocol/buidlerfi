@@ -1,60 +1,68 @@
-"use client";
-
-import { CommentsList } from "@/components/app/[wallet]/comments-list";
-import { QuestionContent } from "@/components/app/question/question-content";
-import { QuestionReply } from "@/components/app/question/question-reply";
-import { Flex } from "@/components/shared/flex";
-import { InjectTopBar } from "@/components/shared/top-bar";
-import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import QuestionPage from "@/components/app/question/question-page";
+import { BASE_URL } from "@/lib/constants";
+import prisma from "@/lib/prisma";
 import { shortAddress } from "@/lib/utils";
-import { Button, Divider } from "@mui/joy";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { FrameButton, FrameButtonsType, getFrameFlattened } from "frames.js";
+import { Metadata } from "next";
 
-export default function QuestionPage() {
-  const { id: questionId } = useParams();
-  const { data: question, refetch } = useGetQuestion(Number(questionId), {
-    cacheTime: 0,
-    staleTime: 0
+type Props = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const id = params.id;
+  const question = await prisma.question.findUnique({ where: { id: parseInt(id) }, include: { questioner: true, replier: true } });
+  const buttons: FrameButtonsType = [
+    {
+      label: "upvote ⬆️",
+      action: "post"
+    } as FrameButton
+  ];
+  // if replier id is null, question is open, so everyone can reply
+  if (question?.replierId == null) {
+    buttons.push({ label: "reply ✍️", action: "post" });
+  }
+  const fcMetadata: Record<string, string> = getFrameFlattened({
+    version: "vNext",
+    buttons,
+    image: `${BASE_URL}/api/frame/image?id=${id}`,
+    inputText: question?.replierId == null ? "your answer here" : undefined,
+    postUrl: `${BASE_URL}/api/frame/action?id=${id}`
   });
-  const profile = useUserProfile(question?.replier?.wallet as `0x${string}`);
-  const putQuestion = usePutQuestion();
-  const [reply, setReply] = useState("");
 
-  const replyQuestion = async () => {
-    if (!question) return;
-    await putQuestion.mutateAsync({
-      id: question.id,
-      answerContent: reply
-    });
-    setReply("");
-    refetch();
+  const title = (() => {
+    if (!question) return "This question doesn't exist or was deleted";
+    const questioner = question.questioner.displayName || shortAddress(question.questioner.wallet);
+    if (question.replier) {
+      if (question.replierId === question.questionerId) return `${questioner} asked himself a question`;
+      else
+        return `${questioner} asked ${
+          question.replier.displayName || shortAddress(question.replier.wallet)
+        } a question`;
+    } else {
+      return `${questioner} asked an open question`;
+    }
+  })();
+
+  const description = question ? question.questionContent : undefined;
+
+  return {
+    title: title,
+    description: description,
+    openGraph: {
+      title: title,
+      //By passing undefined, we send the default image
+      images: question ? [`${BASE_URL}/api/frame/image?id=${id}`] : undefined,
+      description: description
+    },
+    other: {
+      ...fcMetadata
+    },
+    metadataBase: new URL(BASE_URL || "")
   };
+}
 
-  const isOpenQuestion = !question?.replierId;
-  if (!question) return <></>;
-  return (
-    <Flex y grow>
-      <InjectTopBar
-        title={profile.user?.displayName || shortAddress(profile.user?.wallet)}
-        withBack
-        endItem={
-          profile.isOwnProfile && !question.repliedOn ? (
-            <Button loading={putQuestion.isLoading} disabled={reply.length < 10} onClick={replyQuestion}>
-              Answer
-            </Button>
-          ) : undefined
-        }
-      />
-      <QuestionContent {...{ question, profile, refetch }} />
-      <Divider />
-      <Flex y grow>
-        {question.replierId && <QuestionReply {...{ question, profile, reply, setReply, refetch }} />}
-        {(isOpenQuestion || (!isOpenQuestion && question.repliedOn)) && (
-          <CommentsList isOpenQuestion={isOpenQuestion} questionId={question.id} refetch={() => refetch()} />
-        )}
-      </Flex>
-    </Flex>
-  );
+export default function Question() {
+  return <QuestionPage />;
 }

@@ -2,20 +2,6 @@
 
 import prisma from "@/lib/prisma";
 
-// interface KeyRelationshipResponse
-//   extends Prisma.KeyRelationshipGetPayload<{
-//     include: {
-//       holder: {
-//         include: {
-//           socialProfiles: true;
-//         };
-//       };
-//       owner: true;
-//     };
-//   }> {
-//   holdersCount: number;
-// }
-
 export const getKeyRelationships = async (address: string, side: "owner" | "holder") => {
   const relationships = await prisma.keyRelationship.findMany({
     where:
@@ -214,6 +200,28 @@ export const ownsKey = async (
         id: holderUser.userId,
         privyUserId: holderUser.privyUserId,
         wallet: holderUser.wallet?.toLowerCase()
+      },
+      amount: {
+        gt: 0
+      }
+    }
+  });
+
+  return !!key;
+};
+
+export const hasLaunchedKeys = async (user: { userId?: number; privyUserId?: string; wallet?: string }) => {
+  const key = await prisma.keyRelationship.findFirst({
+    where: {
+      owner: {
+        id: user.userId,
+        privyUserId: user.privyUserId,
+        wallet: user.wallet?.toLowerCase()
+      },
+      holder: {
+        id: user.userId,
+        privyUserId: user.privyUserId,
+        wallet: user.wallet?.toLowerCase()
       },
       amount: {
         gt: 0

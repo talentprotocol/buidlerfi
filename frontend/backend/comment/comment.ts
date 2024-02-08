@@ -5,13 +5,13 @@ import prisma from "@/lib/prisma";
 import { ReactionType } from "@prisma/client";
 import { getKeyRelationships, getTopicKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 
-export const getComments = async (privyUserId: string, questionId: number) => {
-  const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
+export const getComments = async (questionId: number, privyUserId?: string) => {
+  const currentUser = privyUserId ? await prisma.user.findUnique({ where: { privyUserId } }) : undefined;
   const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
 
-  //Not an open question
-  if (question.replierId) {
-    const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
+  //Not an open question. If question is gated, comments are also gated
+  if (question.replierId && question.gated) {
+    const hasKey = await ownsKey({ userId: question.replierId }, { privyUserId });
     if (!hasKey) {
       return { error: ERRORS.MUST_HOLD_KEY, data: [] };
     }
@@ -20,18 +20,15 @@ export const getComments = async (privyUserId: string, questionId: number) => {
   const comments = await prisma.comment.findMany({
     where: { questionId },
     include: {
-      author: {
-        include: {
-          keysOfSelf: true
-        }
-      },
+      author: true,
       reactions: true
     }
   });
 
   //If it's an open-question, exclude content of comments for which the user doesn't hold a key
   if (!question.replierId) {
-    const myKeys = await getKeyRelationships(currentUser.wallet, "holder");
+    //If no current user, it means anonymous access
+    const myKeys = currentUser ? await getKeyRelationships(currentUser.wallet, "holder") : { data: [] };
     const myKeysMap = myKeys.data.reduce((prev, curr) => ({ ...prev, [curr.ownerId]: true }), {});
     let hasTopicKeys = question.topicId !== null;
     if (hasTopicKeys) {

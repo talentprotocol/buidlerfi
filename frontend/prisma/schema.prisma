@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,56 +5,44 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {
-  //wallet that will be used for transactions
-  wallet                      String    @unique @db.VarChar(50)
-  //Wallet that will be used to fetch social info of the user
-  socialWallet                String?   @unique @db.VarChar(50)
-  privyUserId                 String?   @unique
-  //Each social platform can have it's own avatar and name. One will be chosen as the main one
-  displayName                 String?   @db.VarChar(255)
-  avatarUrl                   String?   @db.VarChar(500)
-  isActive                    Boolean   @default(false)
-  isAdmin                     Boolean   @default(false)
-  hasFinishedOnboarding       Boolean   @default(false)
+  wallet                      String                    @unique @db.VarChar(50)
+  socialWallet                String?                   @unique @db.VarChar(50)
+  privyUserId                 String?                   @unique
+  displayName                 String?                   @db.VarChar(255)
+  avatarUrl                   String?                   @db.VarChar(500)
+  isActive                    Boolean                   @default(false)
+  isAdmin                     Boolean                   @default(false)
+  hasFinishedOnboarding       Boolean                   @default(false)
+  invitedById                 Int?
+  id                          Int                       @id @default(autoincrement())
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
   lastRecommendationsSyncedAt DateTime?
-  bio                         String?   @db.VarChar(500)
-  gated                       Boolean   @default(true)
-
-  questions            Question[]                @relation("questioner")
-  replies              Question[]                @relation("replier")
-  inviteCodes          InviteCode[]
-  comments             Comment[]
-  invitedBy            InviteCode?               @relation("invitation", fields: [invitedById], references: [id])
-  invitedById          Int?
-  points               Point[]
-  reactions            Reaction[]
-  socialProfiles       SocialProfile[]
-  tags                 Tag[]
-  notifications        Notification[]            @relation("targetUser")
-  sourceNotifications  Notification[]
-  notificationSettings UserNotificationSetting[]
-  quests               UserQuest[]
-
-  id               Int                    @id @default(autoincrement())
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  SigningChallenge SigningChallenge[]
-  recommendedTo    RecommendedUser[]      @relation("recommendationTarget")
-  recommendedUsers RecommendedUser[]      @relation("recommendationSource")
-  keysOfSelf       KeyRelationship[]      @relation("owner")
-  keysOwned        KeyRelationship[]      @relation("holder")
-  topicKeysOwned   TopicKeyRelationship[] @relation("holder")
-}
-
-enum SocialProfileType {
-  FARCASTER
-  LENS
-  TALENT_PROTOCOL
-  ENS
+  bio                         String?                   @db.VarChar(500)
+  comments                    Comment[]
+  inviteCodes                 InviteCode[]
+  keysOwned                   KeyRelationship[]         @relation("holder")
+  keysOfSelf                  KeyRelationship[]         @relation("owner")
+  sourceNotifications         Notification[]
+  notifications               Notification[]            @relation("targetUser")
+  points                      Point[]
+  questions                   Question[]                @relation("questioner")
+  replies                     Question[]                @relation("replier")
+  reactions                   Reaction[]
+  recommendedUsers            RecommendedUser[]         @relation("recommendationSource")
+  recommendedTo               RecommendedUser[]         @relation("recommendationTarget")
+  SigningChallenge            SigningChallenge?
+  socialProfiles              SocialProfile[]
+  invitedBy                   InviteCode?               @relation("invitation", fields: [invitedById], references: [id])
+  notificationSettings        UserNotificationSetting[]
+  quests                      UserQuest[]
+  tags                        Tag[]                     @relation("TagToUser")
+  settings                    UserSetting[]
+  TopicKeyRelationship        TopicKeyRelationship[]    @relation("holder")
 }
 
 model SocialProfile {
@@ -84,14 +69,13 @@ model SocialProfile {
 }
 
 model SocialProfileFollowing {
-  profile     SocialProfile @relation(name: "followings", fields: [profileId], references: [id])
   profileId   Int
-  following   SocialProfile @relation(name: "followedBy", fields: [followingId], references: [id])
   followingId Int
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int           @id @default(autoincrement())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  following   SocialProfile @relation("followedBy", fields: [followingId], references: [id])
+  profile     SocialProfile @relation("followings", fields: [profileId], references: [id])
 
   @@unique([profileId, followingId])
 }
@@ -110,11 +94,12 @@ model Question {
   comments        Comment[]
   reactions       Reaction[]
   replyReactions  Reaction[] @relation("ReplyReaction")
-  tags            Tag[]
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Tag       Tag?     @relation(fields: [tagId], references: [id])
+  tagId     Int?
 }
 
 model Comment {
@@ -131,26 +116,19 @@ model Comment {
   updatedAt DateTime @updatedAt
 }
 
-enum ReactionType {
-  UPVOTE
-  DOWNVOTE
-  LIKE
-}
-
 model Reaction {
   reactionType ReactionType
-  user         User         @relation(fields: [userId], references: [id])
   userId       Int
-  question     Question?    @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   Int?
-  reply        Question?    @relation(fields: [replyId], references: [id], name: "ReplyReaction", onDelete: Cascade)
+  id           Int          @id @default(autoincrement())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   replyId      Int?
-  comment      Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
   commentId    Int?
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  comment      Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  question     Question?    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  reply        Question?    @relation("ReplyReaction", fields: [replyId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, questionId])
   @@unique([userId, replyId])
@@ -158,73 +136,193 @@ model Reaction {
 }
 
 model InviteCode {
-  code        String  @unique @db.VarChar(50)
-  user        User    @relation(fields: [userId], references: [id])
+  code        String   @unique @db.VarChar(50)
   userId      Int
-  invitations User[]  @relation("invitation")
   maxUses     Int
   used        Int
-  isActive    Boolean @default(false)
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive    Boolean  @default(false)
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  invitations User[]   @relation("invitation")
 }
 
 model Point {
-  description String  @db.VarChar(500)
-  user        User    @relation(fields: [userId], references: [id])
+  description String   @db.VarChar(500)
   userId      Int
   points      Int
   hidden      Boolean
-  claimed     Boolean @default(false)
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  claimed     Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model RecommendedUser {
-  id    Int  @id @default(autoincrement())
-  for   User @relation(fields: [forId], references: [id], name: "recommendationSource")
-  forId Int
-
-  user           User?   @relation(fields: [userId], references: [id], name: "recommendationTarget")
-  userId         Int?
-  wallet         String
-  avatarUrl      String?
-  ens            String?
-  farcaster      String?
-  lens           String?
-  talentProtocol String?
-
   recommendationScore Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  avatarUrl           String?
+  forId               Int
+  userId              Int?
+  wallet              String
+  ens                 String?
+  farcaster           String?
+  lens                String?
+  talentProtocol      String?
+  for                 User     @relation("recommendationSource", fields: [forId], references: [id])
+  user                User?    @relation("recommendationTarget", fields: [userId], references: [id])
 
   @@unique([forId, wallet])
 }
 
 model SigningChallenge {
   message   String
-  user      User   @relation(fields: [userId], references: [id])
-  userId    Int    @unique
+  userId    Int      @unique
   publicKey String
-
   id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Tag {
+  name       String     @unique @db.VarChar(255)
+  id         Int        @id @default(autoincrement())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  users      User[]     @relation("TagToUser")
+  questionId Int?
+  Question   Question[]
+}
+
+model Notification {
+  targetUserId Int
+  sourceUserId Int?
+  description  String?
+  isRead       Boolean          @default(false)
+  readAt       DateTime?
+  type         NotificationType
+  referenceId  Int?
+  id           Int              @id @default(autoincrement())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  sourceUser   User?            @relation(fields: [sourceUserId], references: [id])
+  targetUser   User             @relation("targetUser", fields: [targetUserId], references: [id])
+}
+
+model UserNotificationSetting {
+  userId           Int
+  notificationType NotificationType
+  isDisabled       Boolean          @default(false)
+  id               Int              @id @default(autoincrement())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  user             User             @relation(fields: [userId], references: [id])
+
+  @@unique([userId, notificationType])
+}
+
+model Trade {
+  id            Int      @id @default(autoincrement())
+  holderAddress String
+  ownerAddress  String
+  amount        BigInt
+  ethCost       BigInt?
+  protocolFee   BigInt?
+  ownerFee      BigInt?
+  block         BigInt
+  chainId       Int
+  hash          String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  timestamp     BigInt?
+  processed     Boolean  @default(false)
+}
+
+model KeyRelationship {
+  id        Int      @id @default(autoincrement())
+  holderId  Int
+  ownerId   Int
+  amount    BigInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  holder    User     @relation("holder", fields: [holderId], references: [id])
+  owner     User     @relation("owner", fields: [ownerId], references: [id])
+
+  @@unique([holderId, ownerId])
+}
+
+model SystemSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Tag {
-  name      String     @unique @db.VarChar(255)
-  users     User[]
-  questions Question[]
+model Quest {
+  description String
+  points      Int
+  isActive    Boolean     @default(false)
+  path        String?
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  users       UserQuest[]
+}
+
+model UserQuest {
+  userId      Int
+  questId     Int
+  completedAt DateTime?
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  quest       Quest     @relation(fields: [questId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model KeyPricing {
+  shares    Int
+  buyPrice  BigInt
+  sellPrice BigInt
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
+
+enum UserSettingKeyEnum {
+  ONBOARDING_HAS_EXPORTED_WALLET
+  ONBOARDING_TASKLIST_DO_NOT_SHOW_AGAIN
+}
+
+model UserSetting {
+  user   User               @relation(fields: [userId], references: [id])
+  userId Int
+  key    UserSettingKeyEnum
+  value  String
 
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, key])
+}
+
+enum SocialProfileType {
+  FARCASTER
+  LENS
+  TALENT_PROTOCOL
+  ENS
+}
+
+enum ReactionType {
+  UPVOTE
+  DOWNVOTE
+  LIKE
 }
 
 enum NotificationType {
@@ -234,7 +332,6 @@ enum NotificationType {
   QUESTION_UPVOTED
   QUESTION_DOWNVOTED
   REPLY_REACTION
-  NEW_OPEN_QUESTION
   KEYBUY
   KEYSELL
   USER_INVITED
@@ -242,114 +339,7 @@ enum NotificationType {
   POINTS_DROP
   NEW_INVITE_CODE
   SYSTEM
-}
-
-model Notification {
-  targetUser   User    @relation(fields: [targetUserId], references: [id], name: "targetUser")
-  targetUserId Int
-  sourceUser   User?   @relation(fields: [sourceUserId], references: [id])
-  sourceUserId Int?
-  description  String?
-
-  isRead Boolean          @default(false)
-  readAt DateTime?
-  type   NotificationType
-
-  referenceId Int?
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UserNotificationSetting {
-  user             User             @relation(fields: [userId], references: [id])
-  userId           Int
-  notificationType NotificationType
-  isDisabled       Boolean          @default(false)
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, notificationType])
-}
-
-model Trade {
-  holderAddress String
-  ownerAddress  String
-  amount        BigInt
-  ethCost       BigInt?
-  protocolFee   BigInt?
-  ownerFee      BigInt?
-  block         BigInt
-  chainId       Int
-  hash          String  @unique
-  timestamp     BigInt?
-
-  //Whether or not the keyRelationship has been updated to reflect the trade
-  //It will be false if the holder or the owner is not in the DB
-  //This it to allow for the trade to be processed later if a user registers
-  processed Boolean @default(false)
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model KeyRelationship {
-  holder   User   @relation(fields: [holderId], references: [id], name: "holder")
-  holderId Int
-  owner    User   @relation(fields: [ownerId], references: [id], name: "owner")
-  ownerId  Int
-  amount   BigInt
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([holderId, ownerId])
-}
-
-model SystemSetting {
-  key   String @unique
-  value String
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Quest {
-  description String
-  points      Int
-  isActive    Boolean     @default(false)
-  users       UserQuest[]
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UserQuest {
-  user        User      @relation(fields: [userId], references: [id])
-  userId      Int
-  quest       Quest     @relation(fields: [questId], references: [id])
-  questId     Int
-  completedAt DateTime?
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model KeyPricing {
-  shares    Int
-  buyPrice  BigInt
-  sellPrice BigInt
-
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
+  NEW_OPEN_QUESTION
 }
 
 model Topic {
