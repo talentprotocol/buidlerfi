@@ -82,7 +82,7 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
         <PrivyProvider
           appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
           config={{
-            loginMethods: ["email", "google", "apple", "wallet"],
+            loginMethods: ["email", "google", "apple", "farcaster", "wallet"],
             supportedChains: [supportedChain],
             embeddedWallets: {
               createOnLogin: "all-users"

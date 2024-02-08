@@ -431,10 +431,29 @@ export const deleteQuestion = async (privyUserId: string, questionId: number) =>
     return { error: ERRORS.UNAUTHORIZED };
   }
 
-  const res = await prisma.question.delete({
-    where: {
-      id: questionId
-    }
+  const res = await prisma.$transaction(async tx => {
+    const res = await tx.question.delete({
+      where: {
+        id: questionId
+      }
+    });
+
+    //When a question is deleted, delete all notifications associated to that question
+    await tx.notification.deleteMany({
+      where: {
+        OR: [
+          { type: NotificationType.ASKED_QUESTION },
+          { type: NotificationType.REPLIED_YOUR_QUESTION },
+          { type: NotificationType.QUESTION_DOWNVOTED },
+          { type: NotificationType.QUESTION_UPVOTED },
+          { type: NotificationType.REPLY_REACTION },
+          { type: NotificationType.NEW_OPEN_QUESTION }
+        ],
+        referenceId: questionId
+      }
+    });
+
+    return res;
   });
 
   return { data: res };
