@@ -54,17 +54,15 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
         border: theme => "1px solid " + theme.palette.neutral[300]
       }}
     >
-      <HistoryContextProvider>
-        <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
-          <CssVarsProvider theme={theme}>
-            <QueryClientProvider client={queryClient}>
-              {mounted && <InnerProviders>{children}</InnerProviders>}
-            </QueryClientProvider>
-            <ToastContainer />
-            <DialogContainer />
-          </CssVarsProvider>
-        </MaterialCssVarsProvider>
-      </HistoryContextProvider>
+      <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
+        <CssVarsProvider theme={theme}>
+          <QueryClientProvider client={queryClient}>
+            {mounted && <InnerProviders>{children}</InnerProviders>}
+          </QueryClientProvider>
+          <ToastContainer />
+          <DialogContainer />
+        </CssVarsProvider>
+      </MaterialCssVarsProvider>
     </Flex>
   );
 }
@@ -99,11 +97,13 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
           }}
         >
           <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
-            <GlobalContextProvider>
-              <UserProvider>
-                <AuthRoute>{children}</AuthRoute>
-              </UserProvider>
-            </GlobalContextProvider>
+            <HistoryContextProvider>
+              <GlobalContextProvider>
+                <UserProvider>
+                  <AuthRoute>{children}</AuthRoute>
+                </UserProvider>
+              </GlobalContextProvider>
+            </HistoryContextProvider>
           </PrivyWagmiConnector>
         </PrivyProvider>
       </LayoutContextProvider>

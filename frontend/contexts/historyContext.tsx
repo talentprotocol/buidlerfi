@@ -1,3 +1,5 @@
+"use client";
+
 import { usePathname, useSearchParams } from "next/navigation";
 import { MutableRefObject, ReactNode, createContext, useContext, useEffect, useRef } from "react";
 

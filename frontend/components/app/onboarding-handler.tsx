@@ -1,3 +1,5 @@
+"use client";
+
 import { useUserContext } from "@/contexts/userContext";
 import { useSetUserSetting } from "@/hooks/useUserApi";
 import { UserSettingKeyEnum } from "@prisma/client";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { usePathname } from "next/navigation";

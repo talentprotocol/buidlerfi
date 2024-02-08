@@ -1,3 +1,5 @@
+"use client";
+
 import { useHistoryContext } from "@/contexts/historyContext";
 import { convertParamsToString } from "@/lib/utils";
 import { isBoolean, isNumber } from "lodash";
