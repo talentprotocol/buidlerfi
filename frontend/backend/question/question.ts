@@ -100,11 +100,7 @@ export const createQuestion = async (
       const questionerName = getFarcasterProfileName(questioner, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW QUESTION");
-      await publishNewQuestionCast(
-        questionerName,
-        replierName,
-        `https://app.builder.fi/profile/${replier.wallet}?question=${question.id}`
-      );
+      await publishNewQuestionCast(questionerName, replierName, `https://app.builder.fi/question/${question.id}`);
     }
   }
   return { data: question };
@@ -312,7 +308,12 @@ export async function getQuestions(args: getQuestionsArgs, offset: number) {
 }
 
 //We allow privyUserId to be undefiend for public endpoint
-export const getQuestion = async (questionId: number, privyUserId?: string, includeSocialProfiles: boolean = false) => {
+export const getQuestion = async (
+  questionId: number,
+  privyUserId?: string,
+  includeSocialProfiles: boolean = false,
+  includeTags: boolean = false
+) => {
   const question = await prisma.question.findUniqueOrThrow({
     where: {
       id: questionId
@@ -324,6 +325,9 @@ export const getQuestion = async (questionId: number, privyUserId?: string, incl
           comments: true
         }
       },
+      ...(includeTags && {
+        tags: true
+      }),
       questioner: {
         ...(includeSocialProfiles && {
           include: {
@@ -618,11 +622,7 @@ export const answerQuestion = async (
       const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW ANSWER");
-      await publishNewAnswerCast(
-        replierName,
-        questionerName,
-        `https://app.builder.fi/profile/${currentUser.wallet}?question=${question.id}`
-      );
+      await publishNewAnswerCast(replierName, questionerName, `https://app.builder.fi/question/${question.id}`);
     }
   }
 
