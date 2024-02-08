@@ -70,8 +70,8 @@ export const getReactionsSA = async (questionId: number, type: "like" | "upvote"
 export const answerQuestionSA = async (
   questionId: number,
   answer: string,
-  isGated: boolean | undefined,
+  gated: boolean | undefined,
   options: ServerActionOptions
 ) => {
-  return serverActionWrapper(data => answerQuestion(data.privyUserId, questionId, answer, isGated), options);
+  return serverActionWrapper(data => answerQuestion(data.privyUserId, questionId, answer, gated), options);
 };

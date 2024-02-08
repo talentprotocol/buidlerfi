@@ -202,7 +202,6 @@ type getHotQuestionResponse = Prisma.QuestionGetPayload<{
       };
     };
     topic: { select: { name: true } };
-    // tags: { select: { name: true } };
   };
 }>;
 
@@ -223,8 +222,7 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
       replier."wallet" AS "replierWallet",
       COALESCE(SUM(CASE WHEN r."reactionType" = 'UPVOTE' THEN 1 ELSE 0 END), 0) 
       - COALESCE(SUM(CASE WHEN r."reactionType" = 'DOWNVOTE' THEN 1 ELSE 0 END), 0) 
-      AS net_upvotes,
-      STRING_AGG(t.name, ', ') AS tags
+      AS net_upvotes
     FROM
       "Question" AS q
   	LEFT JOIN
@@ -233,10 +231,6 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
       "User" AS "questioner" ON q."questionerId" = questioner.id
     LEFT JOIN
       "Reaction" AS r ON q.id = r."questionId"
-    LEFT JOIN
-    "_QuestionToTag" AS qt ON q.id = qt."A"
-    LEFT JOIN
-      "Tag" AS t ON qt."B" = t.id
     WHERE
         (${filters.questionerId || 0} != 0 AND q."questionerId" = ${filters.questionerId})
       OR
@@ -276,7 +270,6 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
         wallet: row.questionerWallet
       },
       topic: row.topic
-      // tags: row.tags?.split(",").map((tag: string) => ({ name: tag })) || []
     };
     return question;
   });
@@ -300,8 +293,7 @@ export async function getKeysQuestions(privyUserId: string, offset: number) {
     },
     include: {
       questioner: true,
-      replier: true,
-      tags: true
+      replier: true
     },
     take: PAGINATION_LIMIT,
     skip: offset
@@ -382,7 +374,7 @@ export const getQuestion = async (
 
   //If not gated, or is an open-question, return immediately
   //If user has not launched keys, gated will always be false, so we don't need to check if key is launched
-  if (!question.isGated || !question.replierId) return { data: question };
+  if (!question.gated || !question.replierId) return { data: question };
 
   if (!privyUserId) {
     return { data: exclude(question, ["reply"]) };
@@ -629,7 +621,7 @@ export const answerQuestion = async (
   privyUserId: string,
   questionId: number,
   answerContent: string,
-  isGated: boolean | undefined
+  gated: boolean | undefined
 ) => {
   const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
 
@@ -651,7 +643,7 @@ export const answerQuestion = async (
         reply: answerContent,
         repliedOn: new Date(),
         //Cannot gate if keys not launched
-        isGated: hasLaunchedKeys ? isGated : false
+        gated: hasLaunchedKeys ? gated : false
       }
     });
     await sendNotification(question.questionerId, "REPLIED_YOUR_QUESTION", currentUser.id, question.id, tx);

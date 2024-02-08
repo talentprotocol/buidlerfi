@@ -45,6 +45,8 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
 };
 
 export const getCurrentUser = async (privyUserId: string) => {
+  if (!privyUserId) return { error: ERRORS.UNAUTHORIZED };
+
   const res = await prisma.user.findUniqueOrThrow({
     where: {
       privyUserId: privyUserId
@@ -73,8 +75,7 @@ export const getCurrentUser = async (privyUserId: string) => {
           hidden: false
         }
       },
-      tags: true,
-      topicKeysOwned: true
+      tags: true
     }
   });
 
@@ -122,8 +123,6 @@ export const getUser = async (wallet: string) => {
 };
 
 export const createUser = async (privyUserId: string) => {
-  console.log({ privyUserId });
-
   const privyUser = await privyClient.getUser(privyUserId);
   if (!privyUser) {
     return { error: ERRORS.UNAUTHORIZED };

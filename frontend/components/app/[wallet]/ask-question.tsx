@@ -42,7 +42,6 @@ export const AskQuestion = () => {
         })
         .then(res => router.replace(`/question/${res?.id}`));
     } else {
-      // console.log(topic);
       await postOpenQuestion
         .mutateAsync({
           questionContent: questionContent,

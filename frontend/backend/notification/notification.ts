@@ -6,6 +6,10 @@ import { NotificationType, Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const getNotifications = async (privyUserId: string, offset: number) => {
+  if (!privyUserId) {
+    return { data: [] };
+  }
+
   const currentUser = await prisma.user.findUniqueOrThrow({
     where: {
       privyUserId: privyUserId

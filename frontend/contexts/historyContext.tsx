@@ -39,7 +39,6 @@ export const HistoryContextProvider = ({ children }: { children: ReactNode }) =>
     const url = Number(searchParams.size) > 0 ? `${pathname}?${searchParams}` : pathname;
     if (!ignoreNextNavigation.current) updateHistory({ push: url });
     else ignoreNextNavigation.current = false;
-    console.log("history", history.current);
   }, [history, pathname, searchParams]);
 
   return (

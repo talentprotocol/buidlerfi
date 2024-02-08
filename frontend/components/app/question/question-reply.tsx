@@ -40,14 +40,14 @@ export const QuestionReply: FC<Props> = ({
   return (
     <>
       {isInfoModalOpen && <GateAnswerHelpModal close={() => setIsInfoModalOpen(false)} />}
-      {!isAuthenticatedAndActive && question.isGated && question.repliedOn && (
+      {!isAuthenticatedAndActive && question.gated && question.repliedOn && (
         <PageMessage
           title="This answer is gated"
           icon={<UserAvatar size="sm" user={profile.user} />}
           text={`You must hold ${profile.user?.displayName}'s key to access his gated answers`}
         />
       )}
-      {question.isGated && !question.reply && question?.repliedOn && isAuthenticatedAndActive && (
+      {question.gated && !question.reply && question?.repliedOn && isAuthenticatedAndActive && (
         <UnlockAnswer {...{ profile, refetch }} />
       )}
 

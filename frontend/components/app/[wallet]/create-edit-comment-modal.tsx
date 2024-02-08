@@ -26,7 +26,7 @@ export const CreateEditCommentModal: FC<Props> = ({ close, refetch, id, type, is
 
   const handleSubmit = async () => {
     if (type === "reply") {
-      await updateQuestion.mutateAsync({ answerContent: content, id: id, isGated: undefined });
+      await updateQuestion.mutateAsync({ answerContent: content, id: id, gated: undefined });
     } else {
       if (isEdit) {
         await editComment.mutateAsync({ commentId: id, comment: content });

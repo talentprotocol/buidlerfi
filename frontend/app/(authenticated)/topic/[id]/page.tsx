@@ -18,7 +18,6 @@ export default function TopicPage({ params }: { params: { id: string } }) {
   const profile = useUserProfile(currentUser?.wallet);
   const topic = useTopic(params.id);
   const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
-  console.log(topic);
 
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 

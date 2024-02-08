@@ -25,7 +25,7 @@ export default function QuestionPage() {
     await putQuestion.mutateAsync({
       id: question.id,
       answerContent: reply,
-      isGated: isGateAnswer
+      gated: isGateAnswer
     });
     setReply("");
     refetch();

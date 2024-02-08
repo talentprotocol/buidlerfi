@@ -68,12 +68,12 @@ export const usePostOpenQuestion = () => {
 interface PutQuestionParams {
   id: number;
   answerContent: string;
-  isGated: boolean | undefined;
+  gated: boolean | undefined;
 }
 
 export const usePutQuestion = () => {
   return useMutationSA((options, params: PutQuestionParams) =>
-    answerQuestionSA(params.id, params.answerContent, params.isGated, options)
+    answerQuestionSA(params.id, params.answerContent, params.gated, options)
   );
 };
 
