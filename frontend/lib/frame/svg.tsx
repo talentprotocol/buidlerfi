@@ -80,81 +80,64 @@ export const generateImageSvg = async (
             height: "100%"
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%"
-            }}
-          >
+          {!isOpenQuestion ? (
             <div
               style={{
                 display: "flex",
                 width: "100%",
+                alignItems: "center",
                 justifyContent: "center"
               }}
             >
               <Avatar
                 imageUrl={
-                  isOpenQuestion || isAwaitingAnswer
+                  isAwaitingAnswer
                     ? (question.questioner?.avatarUrl as string)
                     : (question.replier?.avatarUrl as string)
                 }
                 username={
-                  isOpenQuestion || isAwaitingAnswer
+                  isAwaitingAnswer
                     ? (question.questioner?.displayName as string)
                     : (question.replier?.displayName as string)
                 }
                 userAddress={
-                  isOpenQuestion || isAwaitingAnswer
-                    ? (question.questioner?.wallet as string)
-                    : (question.replier?.wallet as string)
+                  isAwaitingAnswer ? (question.questioner?.wallet as string) : (question.replier?.wallet as string)
                 }
                 isOpenQuestion={isOpenQuestion}
                 tag={questionTag as string}
               />
-              {!isOpenQuestion ? (
-                <div
-                  style={{
-                    alignItems: "center",
-                    display: "flex"
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "20px",
-                      fontFamily: "SpaceGrotesk-SemiBold",
-                      color: "#316CF0"
-                    }}
-                  >
-                    {isAwaitingAnswer ? "asked" : "answered"}
-                  </span>
-                  <Avatar
-                    imageUrl={
-                      isAwaitingAnswer
-                        ? (question.replier?.avatarUrl as string)
-                        : (question.questioner?.avatarUrl as string)
-                    }
-                    username={
-                      isAwaitingAnswer
-                        ? (question.replier?.displayName as string)
-                        : (question.questioner?.displayName as string)
-                    }
-                    userAddress={
-                      isAwaitingAnswer ? (question.replier?.wallet as string) : (question.questioner?.wallet as string)
-                    }
-                    isOpenQuestion={isOpenQuestion}
-                    tag={questionTag as string}
-                  />
-                </div>
-              ) : null}
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontFamily: "SpaceGrotesk-SemiBold",
+                  color: "#316CF0"
+                }}
+              >
+                {isAwaitingAnswer ? "asked" : "answered"}
+              </span>
+              <Avatar
+                imageUrl={
+                  isAwaitingAnswer
+                    ? (question.replier?.avatarUrl as string)
+                    : (question.questioner?.avatarUrl as string)
+                }
+                username={
+                  isAwaitingAnswer
+                    ? (question.replier?.displayName as string)
+                    : (question.questioner?.displayName as string)
+                }
+                userAddress={
+                  isAwaitingAnswer ? (question.replier?.wallet as string) : (question.questioner?.wallet as string)
+                }
+                isOpenQuestion={isOpenQuestion}
+                tag={questionTag as string}
+              />
             </div>
-          </div>
+          ) : null}
           <div
             style={{
-              minHeight: "40%",
               width: "100%",
+              minHeight: "55vh",
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
@@ -181,6 +164,24 @@ export const generateImageSvg = async (
                 : question.questionContent}
             </span>
           </div>
+          {isOpenQuestion ? (
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              <Avatar
+                imageUrl={question.questioner?.avatarUrl as string}
+                username={question.questioner?.displayName as string}
+                userAddress={question.questioner?.wallet as string}
+                isOpenQuestion={isOpenQuestion}
+                tag={questionTag as string}
+              />
+            </div>
+          ) : null}
           <div
             style={{
               display: "flex",
@@ -198,9 +199,17 @@ export const generateImageSvg = async (
                 minHeight: "1.2rem"
               }}
             >
-              {upvoted || downvoted || replied ? (
-                <span style={{ backgroundColor: "#316CF0", color: "#FFFFFF", padding: "6px", borderRadius: "4px" }}>
-                  {upvoted ? "upvoted" : downvoted ? "downvoted" : "replied"} successfully!
+              {!upvoted || downvoted || replied ? (
+                <span
+                  style={{
+                    backgroundColor: "#316CF0",
+                    color: "#FFFFFF",
+                    padding: "6px",
+                    borderRadius: "4px",
+                    marginTop: "1rem"
+                  }}
+                >
+                  {!upvoted ? "upvoted" : downvoted ? "downvoted" : "replied"} successfully!
                 </span>
               ) : null}
             </div>
