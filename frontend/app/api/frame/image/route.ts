@@ -9,7 +9,10 @@ export const GET = async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
   const upvoted = searchParams.get("upvoted") === "true";
+  const downvoted = searchParams.get("downvoted") === "true";
   const replied = searchParams.get("replied") === "true";
+  const userNotSignedUp = searchParams.get("userNotSignedUp") === "true";
+
   if (!id) {
     return new NextResponse(
       getFrameHtml({
@@ -31,7 +34,13 @@ export const GET = async (req: Request) => {
 
   const question = data.data;
 
-  const svg = await generateImageSvg(question as unknown as QuestionWithInfo, upvoted, replied);
+  const svg = await generateImageSvg(
+    question as unknown as QuestionWithInfo,
+    upvoted,
+    downvoted,
+    replied,
+    userNotSignedUp
+  );
 
   console.log("SVG generated!");
 

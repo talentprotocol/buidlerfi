@@ -11,7 +11,6 @@ const boldFontPath = join(process.cwd(), "public/assets", "SpaceGrotesk-SemiBold
 const boldFontData = fs.readFileSync(boldFontPath);
 
 const imageQuestionMark = fs.readFileSync(join(process.cwd(), "public/assets", "question-mark.png"));
-const imageArrows = fs.readFileSync(join(process.cwd(), "public/assets", "arrows.png"));
 const imageBFLogoBlue = fs.readFileSync(join(process.cwd(), "public/assets", "bf-logoword-blue.png"));
 
 export interface Profile {
@@ -20,6 +19,9 @@ export interface Profile {
 }
 
 export interface QuestionWithInfo extends Question {
+  _count: {
+    comments: number;
+  };
   tags?: Tag[];
   questioner?: User;
   replier?: User;
@@ -29,21 +31,39 @@ export interface QuestionWithInfo extends Question {
 export const generateImageSvg = async (
   question: QuestionWithInfo,
   upvoted = false,
-  replied = false
+  downvoted = false,
+  replied = false,
+  userNotSignedUp = false
 ): Promise<string> => {
+  const numberOfReplies = question._count.comments ? question._count.comments : 0;
+  const isAwaitingAnswer = (question?.replier && !question.repliedOn) || (!question?.replier && numberOfReplies === 0);
+  const isOpenQuestion = !question?.replier?.id;
+  const questionTag = question.tags && question.tags?.length > 0 ? question.tags[0].name.toLowerCase() : "";
+
   return await satori(
     <div
       style={{
         backgroundColor: "#F3F5F6",
         display: "flex",
         flexDirection: "column",
-        padding: "2rem",
+        padding: "1.5rem",
         alignItems: "center",
         width: "100%",
         height: "100%",
         justifyContent: "center"
       }}
     >
+      <div
+        style={{
+          display: "flex",
+          position: "absolute",
+          top: "1rem",
+          right: "1rem",
+          alignItems: "center"
+        }}
+      >
+        <img src={`data:image/png;base64,${imageBFLogoBlue.toString("base64")}`} height={"16px"} />
+      </div>
       <div
         style={{
           display: "flex",
@@ -56,80 +76,10 @@ export const generateImageSvg = async (
           style={{
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
-            gap: "0.5rem",
+            justifyContent: "space-around",
             height: "100%"
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              width: "100%"
-            }}
-          >
-            <img src={`data:image/png;base64,${imageBFLogoBlue.toString("base64")}`} height={"16px"} />
-          </div>
-          <div
-            style={{
-              borderRadius: "10px",
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              width: "100%"
-            }}
-          >
-            <img
-              src={`data:image/png;base64,${imageQuestionMark.toString("base64")}`}
-              style={{ width: "7%", alignItems: "center" }}
-            />
-            <span
-              style={{
-                width: "85%",
-                color: "#316CF0",
-                fontSize: "24px",
-                marginLeft: "20px"
-              }}
-            >
-              {question.questionContent.length > 130
-                ? `${question.questionContent.substring(0, 130)}...`
-                : question.questionContent}
-            </span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
-            {question.replierId == null && question.tags && question.tags?.length > 0 ? (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  verticalAlign: "center",
-                  fontSize: "16px",
-                  width: "100%"
-                }}
-              >
-                asked an open question about
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    lineHeight: "0.8rem",
-                    padding: "0.35rem 0.55rem", // paddingY paddingX
-                    border: "1px solid #0b0d0e40",
-                    borderRadius: "7999px",
-                    marginLeft: "0.4rem"
-                  }}
-                >
-                  {question.tags[0]
-                    ? question.tags[0].name.length > 20
-                      ? `${question.tags[0].name.toLowerCase().substring(0, 20)}...`
-                      : `${question.tags[0].name.toLowerCase()}`
-                    : "general"}
-                </div>
-              </div>
-            ) : null}
-          </div>
           <div
             style={{
               display: "flex",
@@ -141,75 +91,138 @@ export const generateImageSvg = async (
             <div
               style={{
                 display: "flex",
-                width: `${question.replierId != null ? "45%" : "100%"}`,
+                width: "100%",
                 justifyContent: "center"
               }}
             >
               <Avatar
-                imageUrl={question.questioner?.avatarUrl as string}
-                username={question.questioner?.displayName as string}
-                userAddress={question.questioner?.wallet as string}
-                bio={question!.questioner?.bio as string}
+                imageUrl={
+                  isOpenQuestion || isAwaitingAnswer
+                    ? (question.questioner?.avatarUrl as string)
+                    : (question.replier?.avatarUrl as string)
+                }
+                username={
+                  isOpenQuestion || isAwaitingAnswer
+                    ? (question.questioner?.displayName as string)
+                    : (question.replier?.displayName as string)
+                }
+                userAddress={
+                  isOpenQuestion || isAwaitingAnswer
+                    ? (question.questioner?.wallet as string)
+                    : (question.replier?.wallet as string)
+                }
+                isOpenQuestion={isOpenQuestion}
+                tag={questionTag as string}
               />
-            </div>
-            {question.replierId != null ? (
-              <div
-                style={{
-                  width: `${question.replierId != null ? "55%" : "0%"}`,
-                  alignItems: "center",
-                  display: `${question.replierId != null ? "flex" : "none"}`
-                }}
-              >
-                <img
-                  src={`data:image/png;base64,${imageArrows.toString("base64")}`}
-                  style={{ display: "flex", width: "15%", alignItems: "center" }}
-                />
-
+              {!isOpenQuestion ? (
                 <div
                   style={{
-                    display: "flex",
-                    maxWidth: "85%",
-                    justifyContent: "center",
-                    marginLeft: "auto",
-                    marginRight: "auto"
+                    alignItems: "center",
+                    display: "flex"
                   }}
                 >
+                  <span
+                    style={{
+                      fontSize: "20px",
+                      fontFamily: "SpaceGrotesk-SemiBold",
+                      color: "#316CF0"
+                    }}
+                  >
+                    {isAwaitingAnswer ? "asked" : "answered"}
+                  </span>
                   <Avatar
-                    imageUrl={question.replier?.avatarUrl as string}
-                    username={question.replier?.displayName as string}
-                    userAddress={question.replier?.wallet as string}
-                    bio={question.replier?.bio as string}
+                    imageUrl={
+                      isAwaitingAnswer
+                        ? (question.replier?.avatarUrl as string)
+                        : (question.questioner?.avatarUrl as string)
+                    }
+                    username={
+                      isAwaitingAnswer
+                        ? (question.replier?.displayName as string)
+                        : (question.questioner?.displayName as string)
+                    }
+                    userAddress={
+                      isAwaitingAnswer ? (question.replier?.wallet as string) : (question.questioner?.wallet as string)
+                    }
+                    isOpenQuestion={isOpenQuestion}
+                    tag={questionTag as string}
                   />
                 </div>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
-          {(upvoted || replied) && (
+          <div
+            style={{
+              minHeight: "40%",
+              width: "100%",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              filter: `${userNotSignedUp ? "blur(3px)" : "none"}`
+            }}
+          >
+            <img
+              src={`data:image/png;base64,${imageQuestionMark.toString("base64")}`}
+              style={{ width: "7%", alignItems: "center" }}
+            />
+            <span
+              style={{
+                width: "85%",
+                color: "#316CF0",
+                fontSize: "24px",
+                marginLeft: "20px",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              {question.questionContent.length > 130
+                ? `${question.questionContent.substring(0, 130)}...`
+                : question.questionContent}
+            </span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              marginBottom: "1rem"
+            }}
+          >
             <div
               style={{
                 display: "flex",
-                justifyContent: "center",
                 alignItems: "center",
-                width: "100%",
-                marginBottom: "1rem"
+                flexDirection: "column",
+                minHeight: "1.2rem"
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  flexDirection: "column",
-                  backgroundColor: "#316CF0",
-                  color: "#FFFFFF",
-                  padding: "6px",
-                  borderRadius: "4px"
-                }}
-              >
-                {upvoted ? "upvoted" : "replied"} successfully!
-              </div>
+              {upvoted || downvoted || replied ? (
+                <span style={{ backgroundColor: "#316CF0", color: "#FFFFFF", padding: "6px", borderRadius: "4px" }}>
+                  {upvoted ? "upvoted" : downvoted ? "downvoted" : "replied"} successfully!
+                </span>
+              ) : null}
             </div>
-          )}
+          </div>
         </div>
+        {userNotSignedUp ? (
+          <div
+            style={{
+              display: "flex",
+              position: "absolute",
+              top: "40%",
+              left: "0px",
+              width: "100%",
+              padding: "4px",
+              fontSize: "15px",
+              minHeight: "40vh",
+              backgroundColor: "rgba(243,245,246,0.7)"
+            }}
+          >
+            <h2>your farcaster account is not on builder.fi yet, sign up and connnect your social wallet!</h2>
+          </div>
+        ) : null}
       </div>
     </div>,
     {
