@@ -18,6 +18,7 @@ export const GET = async () => {
     }));
 
     console.log("Publishing cast");
+    console.log(data)
 
     // publish cast on Farcaster
     await publishTopFarcasterAnswersCast(data);

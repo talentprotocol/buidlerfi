@@ -424,13 +424,18 @@ export const getTopUsersByQuestionsAskedInTimeInterval = async (
     }
   });
 
-  const res = users.map(user => {
+  const res = topUserIds.map(userId => {
+    // Find the user in the detailed users list by ID
+    const user = users.find(user => user.id === userId);
+    if (!user) return null; // or handle the missing user appropriately
+
+    // Continue with your existing logic here
     const questionsAsked = user.questions.length;
     const questionsAnswered = user.questions.filter(question => !!question.repliedOn).length;
     const numberOfHolders = user.keysOfSelf.length;
     const strippedUser = exclude(user, ["keysOfSelf", "questions"]);
     return { ...strippedUser, questionsAsked, questionsAnswered, numberOfHolders };
-  });
+  }).filter(user => user !== null); // Filter out any nulls from missing users
 
   return { data: res };
 };
