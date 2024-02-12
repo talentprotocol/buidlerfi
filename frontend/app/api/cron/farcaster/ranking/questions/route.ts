@@ -9,7 +9,6 @@ export const GET = async () => {
     // Call the function and await the response
     console.log("Fetching top 10 Farcaster users by number of questions");
     const response = await getTopUsersByQuestionsAskedInTimeInterval();
-    console.log(response)
 
     // Extract the data from the response
     console.log("Parsing data");
@@ -23,7 +22,7 @@ export const GET = async () => {
     console.log("Publishing cast");
     console.log(data)
     await publishTopFarcasterQuestionsCast(data);
-    return Response.json({ data, message: "Done: Top 10 Farcaster users with the most questions" });
+    return Response.json({ message: "Done: Top 10 Farcaster users with the most questions" });
   } catch (error) {
     console.error(error);
     return Response.json({ error: ERRORS.SOMETHING_WENT_WRONG }, { status: 500 });
