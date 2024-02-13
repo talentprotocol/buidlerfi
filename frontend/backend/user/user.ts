@@ -653,20 +653,31 @@ type TopUser = Prisma.$UserPayload["scalars"] & {
   numberOfHolders: number;
   numberOfQuestions: number;
   numberOfReplies: number;
+  followerCount: number;
 };
 
 export const getTopUsers = async (offset: number) => {
   const users = (await prisma.$queryRaw`
-    SELECT "User".*, 
-    CAST(COUNT(DISTINCT CASE WHEN "KeyRelationship".amount > 0 then "KeyRelationship".id END) AS INTEGER) as "numberOfHolders",
-    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "numberOfQuestions",
-    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "numberOfReplies"
-    FROM "User"
-    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
-    LEFT JOIN "Question" ON "User".id = "Question"."replierId"
-    WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
-    GROUP BY "User".id
-    ORDER BY "numberOfHolders" DESC
+    SELECT * FROM (
+      SELECT "User".*, 
+      CAST(COUNT(DISTINCT CASE WHEN "KeyRelationship".amount > 0 THEN "KeyRelationship".id END) AS INTEGER) AS "numberOfHolders",
+      CAST(COUNT(DISTINCT "Question".id) AS INTEGER) AS "numberOfQuestions",
+      CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) AS "numberOfReplies",
+      CAST("SocialProfile"."followerCount" as INTEGER) AS "followerCount"
+      FROM "User"
+      LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
+      LEFT JOIN "Question" ON "User".id = "Question"."replierId"
+      LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId" and "SocialProfile"."type" = 'FARCASTER'
+      WHERE "User"."isActive" = true 
+      AND "User"."hasFinishedOnboarding" = true 
+      AND "User"."displayName" IS NOT NULL
+      GROUP BY "User".id, "SocialProfile"."followerCount"
+    ) AS subquery
+    ORDER BY 
+        CASE 
+            WHEN "followerCount" >= 3000 THEN "followerCount"
+			ELSE "numberOfHolders"
+    END DESC
     LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
   `) as TopUser[];
 

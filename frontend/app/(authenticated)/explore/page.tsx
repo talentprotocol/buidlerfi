@@ -11,9 +11,9 @@ import { useUserContext } from "@/contexts/userContext";
 import {
   useGetNewUsers,
   useGetTopUsers,
-  useGetTopUsersByAnswersGiven,
-  useGetTopUsersByKeysOwned,
-  useGetTopUsersByQuestionsAsked,
+  // useGetTopUsersByAnswersGiven,
+  // useGetTopUsersByKeysOwned,
+  // useGetTopUsersByQuestionsAsked,
   useRecommendedUsers,
   useSearch
 } from "@/hooks/useUserApi";
@@ -22,15 +22,15 @@ import { TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useState } from "react";
 
 export default function ExplorePage() {
-  const [selectedTab, setSelectedTab] = useState<TabsEnum>("New");
+  const [selectedTab, setSelectedTab] = useState<TabsEnum>("Top");
   const [searchValue, setSearchValue] = useState("");
 
   const { user } = useUserContext();
   const topUsers = useGetTopUsers();
   const newUsers = useGetNewUsers();
-  const topUsersByQuestions = useGetTopUsersByQuestionsAsked();
-  const topUsersByAnswers = useGetTopUsersByAnswersGiven();
-  const topUsersByKeys = useGetTopUsersByKeysOwned();
+  // const topUsersByQuestions = useGetTopUsersByQuestionsAsked();
+  // const topUsersByAnswers = useGetTopUsersByAnswersGiven();
+  // const topUsersByKeys = useGetTopUsersByKeysOwned();
 
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 
@@ -39,6 +39,8 @@ export default function ExplorePage() {
   );
 
   const searchUsers = useSearch(searchValue);
+
+  console.log(topUsers);
 
   return (
     <Flex component={"main"} y grow>
@@ -53,7 +55,7 @@ export default function ExplorePage() {
         }
       />
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
-        <TabPanel value="Holders">
+        <TabPanel value="Top">
           {topUsers.isLoading ? (
             <LoadingPage />
           ) : (
@@ -61,10 +63,15 @@ export default function ExplorePage() {
               <div key={user.id}>
                 <UnifiedUserItem
                   user={user}
-                  holdersAndReplies={{
-                    questionsCount: user.numberOfReplies,
-                    numberOfHolders: user.numberOfHolders
-                  }}
+                  bio={user.bio || undefined}
+                  holdersAndReplies={
+                    user.bio
+                      ? undefined
+                      : {
+                          questionsCount: user.numberOfReplies,
+                          numberOfHolders: user.numberOfHolders
+                        }
+                  }
                 />
               </div>
             ))
@@ -148,61 +155,6 @@ export default function ExplorePage() {
             ))
           )}
           <LoadMoreButton query={newUsers} />
-        </TabPanel>
-        <TabPanel value="Questions">
-          {topUsersByQuestions.isLoading ? (
-            <LoadingPage />
-          ) : (
-            topUsersByQuestions.data?.map(user => (
-              <div key={user.id}>
-                <UnifiedUserItem
-                  user={user}
-                  holdersAndReplies={{
-                    numberOfHolders: user.numberOfHolders,
-                    questionsCount: user.questionsAsked,
-                    label: "question"
-                  }}
-                />
-              </div>
-            ))
-          )}
-          <LoadMoreButton query={topUsersByQuestions} />
-        </TabPanel>
-        <TabPanel value="Answers">
-          {topUsersByAnswers.isLoading ? (
-            <LoadingPage />
-          ) : (
-            topUsersByAnswers.data?.map(user => (
-              <div key={user.id}>
-                <UnifiedUserItem
-                  user={user}
-                  holdersAndReplies={{
-                    numberOfHolders: user.numberOfHolders,
-                    questionsCount: user.questionsAnswered
-                  }}
-                />
-              </div>
-            ))
-          )}
-          <LoadMoreButton query={topUsersByAnswers} />
-        </TabPanel>
-        <TabPanel value="Keys">
-          {topUsersByKeys.isLoading ? (
-            <LoadingPage />
-          ) : (
-            topUsersByKeys.data?.map(user => (
-              <div key={user.id}>
-                <UnifiedUserItem
-                  user={user}
-                  holdersAndKeys={{
-                    numberOfHolders: user.numberOfHolders || 0,
-                    ownedKeys: user.ownedKeys
-                  }}
-                />
-              </div>
-            ))
-          )}
-          <LoadMoreButton query={topUsersByKeys} />
         </TabPanel>
       </Tabs>
     </Flex>
