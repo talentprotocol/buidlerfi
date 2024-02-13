@@ -55,8 +55,7 @@ export default function Home() {
             backgroundColor: theme => theme.palette.background.body,
             top: "55px",
             position: "sticky",
-            display: "flex",
-            justifyContent: "stretch"
+            display: "flex"
             // overflow: "auto",
             // scrollSnapType: "x mandatory",
             // "&::-webkit-scrollbar": { display: "none" }
@@ -65,9 +64,9 @@ export default function Home() {
           {tabs.map(tab => (
             <Tab
               key={tab}
-              sx={{ flexGrow: 1 }}
               value={tab}
               disabled={tab === "Your holdings" && !isAuthenticatedAndActive}
+              sx={{ width: "33.3%" }}
             >
               {tab}
             </Tab>

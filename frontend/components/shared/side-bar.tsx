@@ -1,7 +1,6 @@
 import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { FAQ_LINK } from "@/lib/constants";
@@ -9,7 +8,6 @@ import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
-  ChatOutlined,
   LiveHelpOutlined,
   Logout,
   PersonOutlineOutlined,
@@ -44,9 +42,8 @@ interface Props {
 }
 
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
-  const { address, user, isLoading, refetch } = useUserContext();
+  const { address, user, isLoading, refetch, privyUser } = useUserContext();
   const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
-  const contractData = useGetContractData();
   const refreshData = useRefreshCurrentUser();
   const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
   const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
@@ -94,11 +91,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         onClick: () => window.open(FAQ_LINK)
       },
       {
-        text: "Feedback",
-        icon: <ChatOutlined />,
-        onClick: () => window.open("https://t.me/+7FGAfQx66Z8xOThk")
-      },
-      {
         text: "Log out",
         icon: <Logout />,
         onClick: () => handleLogout()
@@ -107,43 +99,13 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     [address, handleLogout, user?.isAdmin]
   );
 
-  const batchNumber = () => {
-    const numberOfBuilders = BigInt(contractData.data?.totalNumberOfBuilders || 0);
-    if (numberOfBuilders < 100n) {
-      return 1;
-    } else if (numberOfBuilders < 200n) {
-      return 2;
-    } else if (numberOfBuilders < 500n) {
-      return 3;
-    } else if (numberOfBuilders < 1000n) {
-      return 4;
-    }
-    {
-      return "5+";
-    }
-  };
-  const batchCount = () => {
-    const number = batchNumber();
-    if (number === 1) {
-      return "100";
-    } else if (number === 2) {
-      return "200";
-    } else if (number === 3) {
-      return "500";
-    } else if (number === 4) {
-      return "1,000";
-    } else {
-      return "10,000";
-    }
-  };
-
   const { isPwaInstalled } = useLayoutContext();
 
   const cardToDisplay = useMemo(() => {
     if (!isPwaInstalled && !hasIgnoredInstallApp) return "install";
-    else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
+    else if (!user?.socialWallet && !hasIgnoredConnectWallet && !privyUser?.farcaster) return "connect";
     else return "none";
-  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isPwaInstalled, user?.socialWallet]);
+  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isPwaInstalled, privyUser?.farcaster, user?.socialWallet]);
 
   if (!user) return <></>;
 
@@ -233,13 +195,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
               </Button>
             </BannerCard>
           )}
-        </Flex>
-
-        <Flex y xc yc>
-          <Typography textColor={"neutral.600"} level="body-sm">
-            <strong>Batch 0{batchNumber()}</strong> {contractData.data?.totalNumberOfBuilders}/{batchCount()} keys
-            launched
-          </Typography>
         </Flex>
       </Flex>
     </Drawer>

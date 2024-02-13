@@ -134,18 +134,6 @@ export const Overview: FC<Props> = ({ profile }) => {
           <Flex x xsb mb={-1}>
             <Avatar size="lg" sx={{ height: "80px", width: "80px" }} src={avatarUrl} alt={name}></Avatar>
             <Flex x ys gap1>
-              {(profile.hasKeys || !profile.hasLaunchedKeys) && (
-                <Button
-                  onClick={() =>
-                    router.push({
-                      pathname: "/question",
-                      searchParams: { ask: true, wallet: profile.user?.wallet.toLowerCase() }
-                    })
-                  }
-                >
-                  Ask
-                </Button>
-              )}
               {profile.isOwnProfile && (
                 <Button
                   sx={{ width: "36px", height: "36px" }}
@@ -157,10 +145,24 @@ export const Overview: FC<Props> = ({ profile }) => {
                   <EditOutlined />
                 </Button>
               )}
-              {profile.hasKeys && (
+              {(profile.hasKeys || !profile.hasLaunchedKeys) && !profile.isOwnProfile && (
                 <Button
                   variant="outlined"
                   color="neutral"
+                  onClick={() =>
+                    router.push({
+                      pathname: "/question",
+                      searchParams: { ask: true, wallet: profile.user?.wallet.toLowerCase() }
+                    })
+                  }
+                >
+                  Ask
+                </Button>
+              )}
+              {profile.hasKeys && (
+                <Button
+                  variant="outlined"
+                  color="danger"
                   onClick={() => router.replace({ searchParams: { tradeModal: "sell" } })}
                   disabled={(supply || 0) <= BigInt(1)}
                 >

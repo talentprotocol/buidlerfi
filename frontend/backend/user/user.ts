@@ -19,7 +19,7 @@ export const refreshAllUsersProfile = async () => {
   const users = await prisma.user.findMany();
   for (const user of users.filter(user => user.socialWallet)) {
     try {
-      await updateUserSocialProfiles(user.id, user.socialWallet!, user.bio!);
+      await updateUserSocialProfiles(user.id);
     } catch (err) {
       console.error("Error while updating social profiles for user: ", user.wallet, err);
     }
@@ -36,11 +36,12 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
   });
 
   if (!user) return { error: ERRORS.USER_NOT_FOUND };
-  if (!user.socialWallet) return { error: ERRORS.NO_SOCIAL_PROFILE_FOUND };
 
-  const res = await updateUserSocialProfiles(user.id, user.socialWallet, user.bio!);
+  const res = await updateUserSocialProfiles(user.id);
   await syncFarcasterFollowings(user.id);
-  updateRecommendations(user.socialWallet.toLowerCase());
+  if (user.socialWallet) {
+    await updateRecommendations(user.socialWallet.toLowerCase());
+  }
   return { data: res };
 };
 
@@ -76,6 +77,11 @@ export const getCurrentUser = async (privyUserId: string) => {
       tags: true
     }
   });
+
+  if (res.privyUserId) {
+    const privyUser = await privyClient.getUser(res.privyUserId);
+    console.log(privyUser);
+  }
 
   return { data: res };
 };
@@ -121,8 +127,6 @@ export const getUser = async (wallet: string) => {
 };
 
 export const createUser = async (privyUserId: string) => {
-  console.log({ privyUserId });
-
   const privyUser = await privyClient.getUser(privyUserId);
   if (!privyUser) {
     return { error: ERRORS.UNAUTHORIZED };
@@ -137,17 +141,17 @@ export const createUser = async (privyUserId: string) => {
     account => account.type === "wallet" && account.walletClientType === "privy" && account.connectorType === "embedded"
   ) as Wallet;
 
-  const socialWallet = privyUser.linkedAccounts.find(
-    account => account.type === "wallet" && account.connectorType === "injected"
-  ) as Wallet;
-
-  const socialAddress = socialWallet ? socialWallet.address.toLowerCase() : undefined;
-
   if (!embeddedWallet) {
     return { error: ERRORS.WALLET_MISSING };
   }
-
   const address = embeddedWallet.address.toLowerCase();
+
+  //If logged in with a wallet
+  const wallet = privyUser.linkedAccounts.find(
+    account => account.type === "wallet" && account.connectorType === "injected"
+  ) as Wallet | undefined;
+
+  const socialAddress = wallet?.address.toLowerCase();
 
   const newUser = await prisma.user.create({
     data: {
@@ -158,12 +162,10 @@ export const createUser = async (privyUserId: string) => {
     }
   });
 
-  if (socialAddress) {
-    try {
-      await updateUserSocialProfiles(newUser.id, socialAddress, newUser.bio || undefined);
-    } catch (err) {
-      console.error("Error while updating social profiles: ", err);
-    }
+  try {
+    await updateUserSocialProfiles(newUser.id);
+  } catch (err) {
+    console.error("Error while updating social profiles: ", err);
   }
 
   return { data: newUser };
@@ -209,8 +211,8 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
   });
 
   try {
-    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase(), user.bio || undefined);
-    updateRecommendations(challenge.publicKey.toLowerCase());
+    await updateUserSocialProfiles(user.id);
+    await updateRecommendations(challenge.publicKey.toLowerCase());
   } catch (err) {
     console.error("Error while updating social profiles: ", err);
   }
