@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function EditProfilePage() {
-  const { user: currentUser, refetch } = useUserContext();
+  const { user: currentUser, refetch, privyUser } = useUserContext();
 
   const profile = useUserProfile(currentUser?.wallet);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -70,10 +70,10 @@ export default function EditProfilePage() {
   const { linkWallet } = useLinkExternalWallet();
   const refreshData = useRefreshCurrentUser();
   const handleLinkOrRefreshWallet = async () => {
-    if (currentUser?.socialWallet) {
+    if (currentUser?.socialWallet || privyUser?.farcaster) {
       await refreshData.mutateAsync();
       await refetch();
-      setBio(currentUser.bio || "");
+      setBio(currentUser?.bio || "");
       toast.success("Profile info imported from your web3 social profiles");
     } else {
       linkWallet(refetch);

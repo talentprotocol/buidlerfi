@@ -12,7 +12,10 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = params.id;
-  const question = await prisma.question.findUnique({ where: { id: parseInt(id) }, include: { questioner: true, replier: true } });
+  const question = await prisma.question.findUnique({
+    where: { id: parseInt(id) },
+    include: { questioner: true, replier: true }
+  });
   const buttons: FrameButtonsType = [
     {
       label: "upvote ⬆️",
