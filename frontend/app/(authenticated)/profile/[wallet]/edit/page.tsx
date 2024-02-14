@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function EditProfilePage() {
-  const { user: currentUser, refetch, privyUser } = useUserContext();
+  const { user: currentUser, refetch } = useUserContext();
 
   const profile = useUserProfile(currentUser?.wallet);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -70,7 +70,7 @@ export default function EditProfilePage() {
   const { linkWallet } = useLinkExternalWallet();
   const refreshData = useRefreshCurrentUser();
   const handleLinkOrRefreshWallet = async () => {
-    if (currentUser?.socialWallet || privyUser?.farcaster) {
+    if (currentUser?.socialWallet) {
       await refreshData.mutateAsync();
       await refetch();
       setBio(currentUser?.bio || "");

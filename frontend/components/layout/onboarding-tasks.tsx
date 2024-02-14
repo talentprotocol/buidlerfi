@@ -41,7 +41,7 @@ export const OnboardingTasks = () => {
         verify: () => userStats && userStats.openQuestionsReplied > 0
       },
       {
-        description: "create your own key to gate your answers",
+        description: "create your key to be able to gate your answers",
         redirect: { pathname: `/profile/${user?.wallet}`, searchParams: { tradeModal: "buy" } },
         //Other users can't buy the key if user has not created it. If count is 0, user hasn't launched keys
         verify: () => userStats && userStats.numberOfHolders > 0

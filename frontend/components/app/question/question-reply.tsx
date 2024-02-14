@@ -8,8 +8,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useGetQuestion } from "@/hooks/useQuestionsApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { shortAddress } from "@/lib/utils";
-import { HelpOutline } from "@mui/icons-material";
-import { Button, IconButton, useTheme } from "@mui/joy";
+import { Checkbox } from "@mui/joy";
 import { FC, useState } from "react";
 import { ReplyCommentEntry } from "../[wallet]/reply-comment-entry";
 import { GateAnswerHelpModal } from "./gate-answer-help-modal";
@@ -34,7 +33,6 @@ export const QuestionReply: FC<Props> = ({
   setIsGateAnswer
 }) => {
   const { isAuthenticatedAndActive, hasLaunchedKeys } = useUserContext();
-  const theme = useTheme();
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   return (
@@ -60,7 +58,7 @@ export const QuestionReply: FC<Props> = ({
       )}
 
       {profile.isOwnProfile && !question.repliedOn && (
-        <Flex p={2} ys>
+        <Flex y p={2}>
           <FullTextArea
             placeholder={`Answer ${question.questioner.displayName || shortAddress(question.questioner.wallet)} ...`}
             avatarUrl={question?.replier?.avatarUrl || undefined}
@@ -68,20 +66,12 @@ export const QuestionReply: FC<Props> = ({
             value={reply}
           />
           {hasLaunchedKeys && (
-            <>
-              <Button
-                sx={{ minWidth: "70px" }}
-                size="sm"
-                variant="outlined"
-                onClick={() => setIsGateAnswer(!isGateAnswer)}
-                color={isGateAnswer ? "danger" : "success"}
-              >
-                {isGateAnswer ? "Gated" : "Open"}
-              </Button>
-              <IconButton sx={{ ml: 0.5 }} size="sm" onClick={() => setIsInfoModalOpen(true)}>
-                <HelpOutline fontSize="small" htmlColor={theme.palette.neutral[600]} />
-              </IconButton>
-            </>
+            <Checkbox
+              label="Gate this response to your key holders only."
+              size="sm"
+              checked={isGateAnswer}
+              onChange={e => setIsGateAnswer(e.target.checked)}
+            />
           )}
         </Flex>
       )}

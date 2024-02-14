@@ -8,7 +8,6 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
-import { useCreateUser } from "@/hooks/useUserApi";
 import { Key } from "@mui/icons-material";
 import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useLogin } from "@privy-io/react-auth";
@@ -17,17 +16,9 @@ import { useEffect } from "react";
 const tabs = ["New", "Top", "Your holdings"];
 
 export default function Home() {
-  const { holding, isAuthenticatedAndActive, refetch } = useUserContext();
+  const { holding, isAuthenticatedAndActive } = useUserContext();
   const router = useBetterRouter();
-  const createUser = useCreateUser();
-  const { login } = useLogin({
-    async onComplete(user) {
-      if (user) {
-        await createUser.mutateAsync();
-        await refetch();
-      }
-    }
-  });
+  const { login } = useLogin();
   const tab = router.searchParams.tab as (typeof tabs)[number] | undefined;
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();

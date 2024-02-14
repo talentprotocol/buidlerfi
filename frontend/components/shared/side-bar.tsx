@@ -42,7 +42,7 @@ interface Props {
 }
 
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
-  const { address, user, isLoading, refetch, privyUser } = useUserContext();
+  const { address, user, isLoading, refetch } = useUserContext();
   const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
   const refreshData = useRefreshCurrentUser();
   const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
@@ -103,9 +103,9 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
 
   const cardToDisplay = useMemo(() => {
     if (!isPwaInstalled && !hasIgnoredInstallApp) return "install";
-    else if (!user?.socialWallet && !hasIgnoredConnectWallet && !privyUser?.farcaster) return "connect";
+    else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
     else return "none";
-  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isPwaInstalled, privyUser?.farcaster, user?.socialWallet]);
+  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isPwaInstalled, user?.socialWallet]);
 
   if (!user) return <></>;
 

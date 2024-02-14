@@ -1,5 +1,5 @@
 "use client";
-import { ExploreTopBar, TabsEnum } from "@/components/app/explore/exploreTopBar";
+import { ExploreTopBar } from "@/components/app/explore/exploreTopBar";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
@@ -8,18 +8,13 @@ import { RecommendedUserItem } from "@/components/shared/recommended-user-item";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
-import {
-  useGetNewUsers,
-  useGetTopUsers,
-  // useGetTopUsersByAnswersGiven,
-  // useGetTopUsersByKeysOwned,
-  // useGetTopUsersByQuestionsAsked,
-  useRecommendedUsers,
-  useSearch
-} from "@/hooks/useUserApi";
+import { useGetNewUsers, useGetTopUsers, useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
 import { PersonSearchOutlined, SupervisorAccountOutlined } from "@mui/icons-material";
-import { TabPanel, Tabs } from "@mui/joy";
+import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useState } from "react";
+
+const ExploreTabs = ["Top", "New", "Friends"] as const;
+export type TabsEnum = (typeof ExploreTabs)[number];
 
 export default function ExplorePage() {
   const [selectedTab, setSelectedTab] = useState<TabsEnum>("Top");
@@ -28,9 +23,6 @@ export default function ExplorePage() {
   const { user } = useUserContext();
   const topUsers = useGetTopUsers();
   const newUsers = useGetNewUsers();
-  // const topUsersByQuestions = useGetTopUsersByQuestionsAsked();
-  // const topUsersByAnswers = useGetTopUsersByAnswersGiven();
-  // const topUsersByKeys = useGetTopUsersByKeysOwned();
 
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 
@@ -40,21 +32,24 @@ export default function ExplorePage() {
 
   const searchUsers = useSearch(searchValue);
 
-  console.log(topUsers);
-
   return (
     <Flex component={"main"} y grow>
-      <InjectTopBar
-        fullItem={
-          <ExploreTopBar
-            searchValue={searchValue}
-            setSearchValue={setSearchValue}
-            setSelectedTab={setSelectedTab}
-            selectedTab={selectedTab}
-          />
-        }
-      />
+      <InjectTopBar fullItem={<ExploreTopBar searchValue={searchValue} setSearchValue={setSearchValue} />} />
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
+        <TabList
+          sx={{
+            backgroundColor: theme => theme.palette.background.body,
+            top: "55px",
+            position: "sticky",
+            display: "flex"
+          }}
+        >
+          {ExploreTabs.map(tab => (
+            <Tab key={tab} value={tab} sx={{ width: "33.3%" }}>
+              {tab}
+            </Tab>
+          ))}
+        </TabList>
         <TabPanel value="Top">
           {topUsers.isLoading ? (
             <LoadingPage />

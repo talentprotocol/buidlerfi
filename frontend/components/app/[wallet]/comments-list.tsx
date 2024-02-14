@@ -3,8 +3,7 @@ import { FullTextArea } from "@/components/shared/full-text-area";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateComment, useGetComments } from "@/hooks/useCommentApi";
-import { HelpOutline } from "@mui/icons-material";
-import { Button, Divider, IconButton, useTheme } from "@mui/joy";
+import { Button, Checkbox, Divider } from "@mui/joy";
 import { FC, useState } from "react";
 import { GateAnswerHelpModal } from "../question/gate-answer-help-modal";
 import { ReplyCommentEntry } from "./reply-comment-entry";
@@ -18,7 +17,6 @@ interface Props {
 
 export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
   const [newComment, setNewComment] = useState("");
-  const theme = useTheme();
   const postComment = useCreateComment();
   const { data: comments, refetch: refetchComment, isLoading } = useGetComments(questionId);
   const {
@@ -83,42 +81,34 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
         />
       )}
       {isAuthenticatedAndActive && (
-        <Flex x sx={{ minHeight: "100px" }} p={2}>
-          <FullTextArea
-            avatarUrl={currentUser?.avatarUrl || undefined}
-            placeholder={`Answer this open question`}
-            onChange={e => setNewComment(e.target.value)}
-            value={newComment}
-          />
-          <Flex y gap={1}>
-            <Button
-              color="primary"
-              sx={{ maxHeight: "20px", alignSelf: "flex-start" }}
-              disabled={newComment.length < 10}
-              loading={postComment.isLoading}
-              onClick={handleCreateComment}
-            >
-              Answer
-            </Button>
-            <Flex>
-              {hasLaunchedKeys && (
-                <>
-                  <Button
-                    sx={{ minWidth: "70px" }}
-                    size="sm"
-                    variant="outlined"
-                    onClick={() => setIsGateAnswer(prev => !prev)}
-                    color={isGateAnswer ? "danger" : "success"}
-                  >
-                    {isGateAnswer ? "Gated" : "Open"}
-                  </Button>
-                  <IconButton sx={{ ml: 0.5 }} size="sm" onClick={() => setIsInfoModalOpen(true)}>
-                    <HelpOutline fontSize="small" htmlColor={theme.palette.neutral[600]} />
-                  </IconButton>
-                </>
-              )}
+        <Flex y p={2}>
+          <Flex x sx={{ minHeight: "100px" }}>
+            <FullTextArea
+              avatarUrl={currentUser?.avatarUrl || undefined}
+              placeholder={`Answer this open question`}
+              onChange={e => setNewComment(e.target.value)}
+              value={newComment}
+            />
+            <Flex y gap={1}>
+              <Button
+                color="primary"
+                sx={{ maxHeight: "20px", alignSelf: "flex-start" }}
+                disabled={newComment.length < 10}
+                loading={postComment.isLoading}
+                onClick={handleCreateComment}
+              >
+                Answer
+              </Button>
             </Flex>
           </Flex>
+          {hasLaunchedKeys && (
+            <Checkbox
+              label="Gate this response to your key holders only."
+              size="sm"
+              checked={isGateAnswer}
+              onChange={e => setIsGateAnswer(e.target.checked)}
+            />
+          )}
         </Flex>
       )}
       <Divider />
