@@ -28,17 +28,37 @@ export interface QuestionWithInfo extends Question {
   reactions?: Reaction[];
 }
 
+const getUsername = (fullUsername: string, fullAddress: string): string => {
+  const username = fullUsername
+    ? fullUsername.length > 15
+      ? `@${fullUsername.substring(0, 15)}...`
+      : `@${fullUsername}`
+    : `${fullAddress?.substring(0, 4)}...${fullAddress?.substring(fullAddress.length - 4)}`;
+  return username;
+};
+
 export const generateImageSvg = async (
   question: QuestionWithInfo,
   upvoted = false,
   downvoted = false,
   replied = false,
-  userNotSignedUp = false
+  userNotSignedUp = false,
+  isReply = false,
+  ownKeys = false
 ): Promise<string> => {
-  const numberOfReplies = question._count.comments ? question._count.comments : 0;
-  const isAwaitingAnswer = (question?.replier && !question.repliedOn) || (!question?.replier && numberOfReplies === 0);
   const isOpenQuestion = !question?.replier?.id;
-  const questionTag = question.tags && question.tags?.length > 0 ? question.tags[0].name.toLowerCase() : "";
+  const questionTag =
+    question.tags && question.tags?.length > 0
+      ? question.tags[0].name.length > 20
+        ? `${question.tags[0].name.toLowerCase().substring(0, 20)}...`
+        : question.tags[0].name.toLowerCase()
+      : "";
+
+  const questionerUsername = getUsername(
+    question.questioner?.displayName as string,
+    question.questioner?.wallet as string
+  );
+  const replierUsername = getUsername(question.replier?.displayName as string, question.replier?.wallet as string);
 
   return await satori(
     <div
@@ -84,6 +104,7 @@ export const generateImageSvg = async (
             <div
               style={{
                 display: "flex",
+                gap: "0.5rem",
                 width: "100%",
                 alignItems: "center",
                 justifyContent: "center"
@@ -91,18 +112,9 @@ export const generateImageSvg = async (
             >
               <Avatar
                 imageUrl={
-                  isAwaitingAnswer
-                    ? (question.questioner?.avatarUrl as string)
-                    : (question.replier?.avatarUrl as string)
+                  !isReply ? (question.questioner?.avatarUrl as string) : (question.replier?.avatarUrl as string)
                 }
-                username={
-                  isAwaitingAnswer
-                    ? (question.questioner?.displayName as string)
-                    : (question.replier?.displayName as string)
-                }
-                userAddress={
-                  isAwaitingAnswer ? (question.questioner?.wallet as string) : (question.replier?.wallet as string)
-                }
+                username={!isReply ? questionerUsername : replierUsername}
                 isOpenQuestion={isOpenQuestion}
                 tag={questionTag as string}
               />
@@ -113,22 +125,13 @@ export const generateImageSvg = async (
                   color: "#316CF0"
                 }}
               >
-                {isAwaitingAnswer ? "asked" : "answered"}
+                {!isReply ? "asked" : "answered"}
               </span>
               <Avatar
                 imageUrl={
-                  isAwaitingAnswer
-                    ? (question.replier?.avatarUrl as string)
-                    : (question.questioner?.avatarUrl as string)
+                  !isReply ? (question.replier?.avatarUrl as string) : (question.questioner?.avatarUrl as string)
                 }
-                username={
-                  isAwaitingAnswer
-                    ? (question.replier?.displayName as string)
-                    : (question.questioner?.displayName as string)
-                }
-                userAddress={
-                  isAwaitingAnswer ? (question.replier?.wallet as string) : (question.questioner?.wallet as string)
-                }
+                username={!isReply ? replierUsername : questionerUsername}
                 isOpenQuestion={isOpenQuestion}
                 tag={questionTag as string}
               />
@@ -142,7 +145,7 @@ export const generateImageSvg = async (
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              filter: `${userNotSignedUp ? "blur(3px)" : "none"}`
+              filter: `${userNotSignedUp || (!isOpenQuestion && isReply && !ownKeys) ? "blur(3px)" : "none"}`
             }}
           >
             <img
@@ -170,13 +173,12 @@ export const generateImageSvg = async (
                 display: "flex",
                 width: "100%",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "flex-start"
               }}
             >
               <Avatar
                 imageUrl={question.questioner?.avatarUrl as string}
-                username={question.questioner?.displayName as string}
-                userAddress={question.questioner?.wallet as string}
+                username={questionerUsername}
                 isOpenQuestion={isOpenQuestion}
                 tag={questionTag as string}
               />
@@ -185,34 +187,25 @@ export const generateImageSvg = async (
           <div
             style={{
               display: "flex",
-              justifyContent: "center",
               alignItems: "center",
+              justifyContent: "center",
               width: "100%",
-              marginBottom: "1rem"
+              marginBottom: "1.2rem"
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                flexDirection: "column",
-                minHeight: "1.2rem"
-              }}
-            >
-              {!upvoted || downvoted || replied ? (
-                <span
-                  style={{
-                    backgroundColor: "#316CF0",
-                    color: "#FFFFFF",
-                    padding: "6px",
-                    borderRadius: "4px",
-                    marginTop: "1rem"
-                  }}
-                >
-                  {!upvoted ? "upvoted" : downvoted ? "downvoted" : "replied"} successfully!
-                </span>
-              ) : null}
-            </div>
+            {upvoted || downvoted || replied ? (
+              <span
+                style={{
+                  backgroundColor: "#316CF0",
+                  color: "#FFFFFF",
+                  padding: "6px 10px", // paddingY paddingX
+                  borderRadius: "4px",
+                  marginTop: "1rem"
+                }}
+              >
+                {upvoted ? "upvoted" : downvoted ? "downvoted" : "replied"} successfully!
+              </span>
+            ) : null}
           </div>
         </div>
         {userNotSignedUp ? (
@@ -220,9 +213,9 @@ export const generateImageSvg = async (
             style={{
               display: "flex",
               position: "absolute",
-              top: "40%",
+              top: `${isOpenQuestion ? "15%" : "45%"}`,
               left: "0px",
-              width: "100%",
+              width: "80%",
               padding: "4px",
               fontSize: "15px",
               minHeight: "40vh",
@@ -230,6 +223,27 @@ export const generateImageSvg = async (
             }}
           >
             <h2>your farcaster account is not on builder.fi yet, sign up and connnect your social wallet!</h2>
+          </div>
+        ) : null}
+        {!isOpenQuestion && isReply && !ownKeys ? (
+          <div
+            style={{
+              display: "flex",
+              position: "absolute",
+              top: `${isOpenQuestion ? "15%" : "45%"}`,
+              left: "0px",
+              width: "100%",
+              padding: "4px",
+              fontSize: "15px",
+              minHeight: "40vh",
+              justifyContent: "center",
+              textAlign: "center",
+              backgroundColor: "rgba(243,245,246,0.7)"
+            }}
+          >
+            <h2 style={{ width: "85%" }}>
+              {replierUsername}&rsquo;s answer is gated. reveal it buying {replierUsername}&rsquo;s key
+            </h2>
           </div>
         ) : null}
       </div>

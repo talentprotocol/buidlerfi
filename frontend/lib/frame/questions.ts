@@ -10,11 +10,13 @@ export const getQuestionImageUrl = (
   upvoted?: boolean,
   downvoted?: boolean,
   replied?: boolean,
-  userNotSignedUp?: boolean
+  userNotSignedUp?: boolean,
+  isReply?: boolean,
+  ownKeys?: boolean
 ) =>
   `${BASE_URL}/api/frame/image?id=${questionId}${upvoted ? "&upvoted=true" : ""}${downvoted ? "&downvoted=true" : ""}${
     replied ? "&replied=true" : ""
-  }${userNotSignedUp ? "&userNotSignedUp=true" : ""}`;
+  }${userNotSignedUp ? "&userNotSignedUp=true" : ""}${isReply ? "&isReply=true" : ""}${ownKeys ? "&ownKeys=true" : ""}`;
 
 const getSocialProfile = async (username: string) => {
   const socialProfiles = await prisma.socialProfile.findFirst({

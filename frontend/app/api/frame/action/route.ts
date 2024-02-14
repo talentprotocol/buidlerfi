@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from "next/server";
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
+  const isReply = searchParams.get("isReply") === "true" ?? false;
+
   if (!id) {
     return new NextResponse(`<!DOCTYPE html><html><head>
     <meta property="fc:frame" content="vNext" />
@@ -46,6 +48,21 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
 
   console.log("Account address is", accountAddress);
   console.log("button index", frameMessage.buttonIndex);
+
+  // check if user has keys for the answer
+  if (isReply) {
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, false, true, false),
+        buttons: [
+          { label: "buy user keys 🔑", action: "post_redirect" },
+          { label: "i own user keys 👀", action: "post" }
+        ],
+        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
+      })
+    );
+  }
 
   // check if user is not on builder.fi
   const { error, data } = await getUser(accountAddress);

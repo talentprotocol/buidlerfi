@@ -5,14 +5,13 @@ import React from "react";
 interface AvatarProps {
   imageUrl: string;
   username: string;
-  userAddress: string;
   isOpenQuestion?: boolean;
   tag?: string;
 }
 
 const imageDefaultProfile = fs.readFileSync(join(process.cwd(), "public/assets", "default-profile.png"));
 
-const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, userAddress, isOpenQuestion, tag }) => {
+const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, isOpenQuestion, tag }) => {
   return (
     <div
       style={{
@@ -26,23 +25,20 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, userAddress, isOpen
     >
       <img
         src={imageUrl !== null ? imageUrl : `data:image/png;base64,${imageDefaultProfile.toString("base64")}`}
-        alt={username}
+        alt={`${username} profile photo`}
         style={{
           width: "64px",
           height: "64px",
           borderRadius: "50%",
+          border: "1px solid #316CF0",
           objectFit: "cover"
         }}
       />
       <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem", textAlign: "center" }}>
-        <span style={{ fontSize: "16px", fontFamily: "SpaceGrotesk-SemiBold" }}>
-          {username
-            ? `@${username}`
-            : `${userAddress?.substring(0, 4)}...${userAddress?.substring(userAddress.length - 4)}`}
-        </span>
+        <span style={{ fontSize: "16px", fontFamily: "SpaceGrotesk-SemiBold" }}>{username}</span>
         {isOpenQuestion ? (
           <span style={{ fontSize: "16px", fontFamily: "SpaceGrotesk-Regular" }}>
-            asked an open question {!!tag && tag != "" ? " about" : ""}
+            asked an open question {!!tag && tag != "" ? " about " : ""}
             {!!tag && tag != "" ? (
               <span
                 style={{
@@ -56,8 +52,7 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username, userAddress, isOpen
                   marginLeft: "0.4rem"
                 }}
               >
-                {" "}
-                {tag.length > 20 ? `${tag.substring(0, 20)}...` : tag}
+                {tag}
               </span>
             ) : null}
           </span>

@@ -12,6 +12,8 @@ export const GET = async (req: Request) => {
   const downvoted = searchParams.get("downvoted") === "true";
   const replied = searchParams.get("replied") === "true";
   const userNotSignedUp = searchParams.get("userNotSignedUp") === "true";
+  const isReply = searchParams.get("isReply") === "true";
+  const ownKeys = searchParams.get("ownKeys") === "true";
 
   if (!id) {
     return new NextResponse(
@@ -39,7 +41,9 @@ export const GET = async (req: Request) => {
     upvoted,
     downvoted,
     replied,
-    userNotSignedUp
+    userNotSignedUp,
+    isReply,
+    ownKeys
   );
 
   console.log("SVG generated!");
