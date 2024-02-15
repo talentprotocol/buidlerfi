@@ -1,5 +1,6 @@
+import { getUser } from "@/backend/user/user";
 import { BASE_URL } from "@/lib/constants";
-import { commentQuestion, getQuestionImageUrl, upvoteQuestion } from "@/lib/frame/questions";
+import { commentQuestion, downvoteQuestion, getQuestionImageUrl, upvoteQuestion } from "@/lib/frame/questions";
 import prisma from "@/lib/prisma";
 import { SocialProfileType } from "@prisma/client";
 import { FrameActionPayload, getFrameHtml, getFrameMessage, validateFrameMessage } from "frames.js";
@@ -8,6 +9,8 @@ import { NextRequest, NextResponse } from "next/server";
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
+  const isReply = searchParams.get("isReply") === "true" ?? false;
+
   if (!id) {
     return new NextResponse(
       getFrameHtml({
@@ -45,8 +48,37 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     throw new Error("No farcaster identity");
   }
 
-  // index 2 means the user clicked the "reply" to the open question
-  if (frameMessage.buttonIndex === 2) {
+  // check if user has keys for the answer
+  if (isReply) {
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, false, true, false),
+        buttons: [
+          { label: "buy user keys 🔑", action: "post_redirect" },
+          { label: "i own user keys 👀", action: "post" }
+        ],
+        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
+      })
+    );
+  }
+
+  // check if user is not on builder.fi
+  const { error, data } = await getUser(accountAddress);
+  console.log("user data :", data, error);
+  if (!!error || !data) {
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, true),
+        buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
+        postUrl: `${BASE_URL}`
+      })
+    );
+  }
+
+  // index 3 means the user clicked the "reply" to the open question
+  if (frameMessage.buttonIndex === 3) {
     try {
       let text: string | undefined = "";
       if (frameMessage.inputText) {
@@ -55,7 +87,13 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
       if (!text || text == "") {
         throw new Error("No text");
       }
-      
+      const farcasterProfile = await prisma.socialProfile.findFirst({
+        where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
+        include: { user: true }
+      });
+      if (!farcasterProfile) {
+        throw new Error("No farcaster identity");
+      }
       await commentQuestion(farcasterProfile.profileName, parseInt(id), text);
       return new NextResponse(
         getFrameHtml({
@@ -79,7 +117,14 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   }
   // index 1 means the user clicked the "upvote" to the open question
   try {
-    await upvoteQuestion(farcasterProfile.profileName, parseInt(id));
+    const farcasterProfile = await prisma.socialProfile.findFirst({
+      where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
+      include: { user: true }
+    });
+    if (!farcasterProfile) {
+      throw new Error("No farcaster identity");
+    }
+    await upvoteQuestion(farcasterProfile.identity, parseInt(id));
     return new NextResponse(
       getFrameHtml({
         version: "vNext",

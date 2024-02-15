@@ -9,25 +9,40 @@ type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const id = params.id;
+  const isReply = searchParams.isReply === "true";
   const question = await prisma.question.findUnique({ where: { id: parseInt(id) } });
-  const buttons: FrameButtonsType = [
+
+  let buttons: FrameButtonsType = [
     {
       label: "upvote ⬆️",
       action: "post"
+    } as FrameButton,
+    {
+      label: "downvote ⬇️",
+      action: "post"
     } as FrameButton
   ];
+
   // if replier id is null, question is open, so everyone can reply
   if (question?.replierId == null) {
     buttons.push({ label: "reply ✍️", action: "post" });
   }
+
+  if (isReply) {
+    buttons = [
+      { label: "buy user keys 🔑", action: "post_redirect" },
+      { label: "i own user keys 👀", action: "post" }
+    ];
+  }
+
   const fcMetadata: Record<string, string> = getFrameFlattened({
     version: "vNext",
     buttons,
-    image: `${BASE_URL}/api/frame/image?id=${id}`,
+    image: `${BASE_URL}/api/frame/image?id=${id}${isReply ? "&isReply=true" : ""}`,
     inputText: question?.replierId == null ? "your answer here" : undefined,
-    postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+    postUrl: `${BASE_URL}/api/frame/action?id=${id}${isReply ? "&isReply=true" : ""}`
   });
 
   return {
