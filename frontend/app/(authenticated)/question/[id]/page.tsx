@@ -17,23 +17,17 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   let buttons: FrameButtonsType;
   if (isReply) {
     buttons = [
-      { label: "buy user keys 🔑", action: "post_redirect" },
-      { label: "i own user keys 👀", action: "post" }
+      { label: "buy user keys 🔑", action: "post_redirect" } as FrameButton,
+      { label: "i own user keys 👀", action: "post" } as FrameButton
     ];
   } else {
     buttons = [
-      {
-        label: "upvote ⬆️",
-        action: "post"
-      } as FrameButton,
-      {
-        label: "downvote ⬇️",
-        action: "post"
-      } as FrameButton
+      { label: "upvote ⬆️", action: "post" } as FrameButton,
+      { label: "downvote ⬇️", action: "post" } as FrameButton
     ];
     // if replier is not set, question is open, then user can reply
     if (question?.replierId == null) {
-      buttons.push({ label: "reply ✍️", action: "post" });
+      buttons.push({ label: "reply ✍️", action: "post" } as FrameButton);
     }
   }
 
