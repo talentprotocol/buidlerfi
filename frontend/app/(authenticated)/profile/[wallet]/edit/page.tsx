@@ -12,7 +12,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { USER_BIO_MAX_LENGTH } from "@/lib/constants";
 import { formatError, shortAddress } from "@/lib/utils";
 import { RefreshOutlined } from "@mui/icons-material";
-import { Avatar, Button, Card, Chip, Link as JoyLink, Textarea, Typography } from "@mui/joy";
+import { Avatar, Button, Card, Chip, Link as JoyLink, Switch, Textarea, Typography } from "@mui/joy";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -25,6 +25,7 @@ export default function EditProfilePage() {
   const [bio, setBio] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsready] = useState(false);
+  const [isGated, setIsGated] = useState<boolean>(profile.user?.isGated || true);
 
   useEffect(() => {
     if (currentUser && !isReady) {
@@ -40,7 +41,7 @@ export default function EditProfilePage() {
   const handleSaveProfile = async () => {
     setIsLoading(true);
     await updateUser
-      .mutateAsync({ tags: selectedTags, bio: bio })
+      .mutateAsync({ tags: selectedTags, bio: bio, isGated })
       .then(async () => {
         toast.success("Profile updated");
         await Promise.allSettled([profile.refetch(), refetch()]);
@@ -167,6 +168,12 @@ export default function EditProfilePage() {
         <Typography color={selectedTags.length > 3 ? "danger" : undefined} level="helper">
           {selectedTags.length}/3
         </Typography>
+      </Flex>
+      <Flex y gap1>
+        <Flex x gap2>
+          <Switch checked={isGated} onChange={e => setIsGated(e.target.checked)} />
+          <Typography>Disallow users to ask you questions without your key</Typography>
+        </Flex>
       </Flex>
     </Flex>
   );
