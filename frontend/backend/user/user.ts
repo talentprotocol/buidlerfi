@@ -225,6 +225,7 @@ export interface UpdateUserArgs {
   tags?: string[];
   hasFinishedOnboarding?: boolean;
   bio?: string;
+  isGated?: boolean;
 }
 
 export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArgs) => {
@@ -251,7 +252,8 @@ export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArg
             connect: updatedUser.tags.map(tag => ({ name: tag }))
           }
         : undefined,
-      bio: updatedUser.bio
+      bio: updatedUser.bio,
+      isGated: updatedUser.isGated || false
     }
   });
 
@@ -660,7 +662,7 @@ type TopUser = Prisma.$UserPayload["scalars"] & {
 export const getTopUsers = async (offset: number) => {
   const users = (await prisma.$queryRaw`
     SELECT * FROM (
-      SELECT "User".*, 
+      SELECT "User".*,
       CAST(COUNT(DISTINCT CASE WHEN "KeyRelationship".amount > 0 THEN "KeyRelationship".id END) AS INTEGER) AS "numberOfHolders",
       CAST(COUNT(DISTINCT "Question".id) AS INTEGER) AS "numberOfQuestions",
       CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) AS "numberOfReplies",
@@ -669,13 +671,13 @@ export const getTopUsers = async (offset: number) => {
       LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
       LEFT JOIN "Question" ON "User".id = "Question"."replierId"
       LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId" and "SocialProfile"."type" = 'FARCASTER'
-      WHERE "User"."isActive" = true 
-      AND "User"."hasFinishedOnboarding" = true 
+      WHERE "User"."isActive" = true
+      AND "User"."hasFinishedOnboarding" = true
       AND "User"."displayName" IS NOT NULL
       GROUP BY "User".id, "SocialProfile"."followerCount"
     ) AS subquery
-    ORDER BY 
-        CASE 
+    ORDER BY
+        CASE
             WHEN "followerCount" >= 3000 THEN "followerCount"
 			ELSE "numberOfHolders"
     END DESC
@@ -799,7 +801,7 @@ export const search = async (
     LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId"
     LEFT JOIN "Question" ON "User".id = "Question"."replierId"
     WHERE "User"."isActive" = true
-      AND "User"."hasFinishedOnboarding" = true 
+      AND "User"."hasFinishedOnboarding" = true
       AND (
         "User"."wallet" ILIKE '%' || ${searchValue} || '%'
         OR "User"."socialWallet" ILIKE '%' || ${searchValue} || '%'
@@ -811,7 +813,7 @@ export const search = async (
         )
       )
       AND (
-        NOT ${includeOwnedKeysOnly} 
+        NOT ${includeOwnedKeysOnly}
         OR EXISTS (
           SELECT 1
           FROM "KeyRelationship"

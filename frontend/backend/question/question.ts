@@ -89,7 +89,7 @@ export const createQuestion = async (
 
   if (replier.keysOfSelf && replier.keysOfSelf.length > 0) {
     const key = questioner.keysOwned.find(key => key.ownerId === replierId);
-    if (!key || key.amount === BigInt(0)) {
+    if (replier.isGated && (!key || key.amount === BigInt(0))) {
       return { error: ERRORS.MUST_HOLD_KEY };
     }
   }
@@ -220,8 +220,8 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
       replier."displayName" AS "replierDisplayName",
       replier."avatarUrl" AS "replierAvatarUrl",
       replier."wallet" AS "replierWallet",
-      COALESCE(SUM(CASE WHEN r."reactionType" = 'UPVOTE' THEN 1 ELSE 0 END), 0) 
-      - COALESCE(SUM(CASE WHEN r."reactionType" = 'DOWNVOTE' THEN 1 ELSE 0 END), 0) 
+      COALESCE(SUM(CASE WHEN r."reactionType" = 'UPVOTE' THEN 1 ELSE 0 END), 0)
+      - COALESCE(SUM(CASE WHEN r."reactionType" = 'DOWNVOTE' THEN 1 ELSE 0 END), 0)
       AS net_upvotes,
       STRING_AGG(t.name, ', ') AS tags
     FROM

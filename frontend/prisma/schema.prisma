@@ -23,6 +23,7 @@ model User {
   updatedAt                   DateTime                  @updatedAt
   lastRecommendationsSyncedAt DateTime?
   bio                         String?                   @db.VarChar(500)
+  isGated                     Boolean                   @default(true)
   comments                    Comment[]
   inviteCodes                 InviteCode[]
   keysOwned                   KeyRelationship[]         @relation("holder")
