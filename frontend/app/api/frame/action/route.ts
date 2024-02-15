@@ -1,4 +1,3 @@
-import { getUser } from "@/backend/user/user";
 import { BASE_URL } from "@/lib/constants";
 import { commentQuestion, downvoteQuestion, getQuestionImageUrl, upvoteQuestion } from "@/lib/frame/questions";
 import prisma from "@/lib/prisma";
@@ -34,39 +33,20 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
 
   // Step 4. Determine the experience based on the validity of the message
   if (!isValid) {
+    console;
     return new NextResponse(null, { status: 400 });
   }
 
   console.log("Account address is", accountAddress);
   console.log("button index", frameMessage.buttonIndex);
 
+  // check if user is on builder.fi with his fc account
   const farcasterProfile = await prisma.socialProfile.findFirst({
     where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
     include: { user: true }
   });
   if (!farcasterProfile) {
-    throw new Error("No farcaster identity");
-  }
-
-  // check if user has keys for the answer
-  if (isReply) {
-    return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: getQuestionImageUrl(id, false, false, false, false, true, false),
-        buttons: [
-          { label: "buy user keys 🔑", action: "post_redirect" },
-          { label: "i own user keys 👀", action: "post" }
-        ],
-        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
-      })
-    );
-  }
-
-  // check if user is not on builder.fi
-  const { error, data } = await getUser(accountAddress);
-  console.log("user data :", data, error);
-  if (!!error || !data) {
+    console.log("User is not on builder.fi with his fc account");
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
@@ -77,24 +57,34 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // index 3 means the user clicked the "reply" to the open question
-  if (frameMessage.buttonIndex === 3) {
-    try {
-      let text: string | undefined = "";
-      if (frameMessage.inputText) {
-        text = frameMessage.inputText;
-      }
-      if (!text || text == "") {
-        throw new Error("No text");
-      }
-      const farcasterProfile = await prisma.socialProfile.findFirst({
-        where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
-        include: { user: true }
-      });
-      if (!farcasterProfile) {
-        throw new Error("No farcaster identity");
-      }
-      await commentQuestion(farcasterProfile.profileName, parseInt(id), text);
+  // check if frame wants to show the reply
+  if (isReply) {
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, false, true, false),
+        buttons: [
+          { label: "buy user keys 🔑", action: "post_redirect" },
+          { label: "i own user keys 👀", action: "post" }
+        ],
+        postUrl: `${BASE_URL}/api/frame/reply?id=${id}`
+      })
+    );
+  }
+
+  try {
+    if (frameMessage.buttonIndex === 1) {
+      await upvoteQuestion(farcasterProfile.profileName, parseInt(id));
+      return new NextResponse(
+        getFrameHtml({
+          version: "vNext",
+          image: getQuestionImageUrl(id, true),
+          buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
+          postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
+        })
+      );
+    } else if (frameMessage.buttonIndex === 2) {
+      await downvoteQuestion(farcasterProfile.profileName, parseInt(id));
       return new NextResponse(
         getFrameHtml({
           version: "vNext",
@@ -103,36 +93,26 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
           postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
         })
       );
-    } catch (e) {
-      console.error(e);
+    } else if (frameMessage.buttonIndex === 3) {
+      let text: string | undefined = "";
+      if (frameMessage.inputText) {
+        text = frameMessage.inputText;
+      }
+      if (!text || text == "") {
+        throw new Error("No text");
+      }
+      await commentQuestion(farcasterProfile.profileName, parseInt(id), text);
       return new NextResponse(
         getFrameHtml({
           version: "vNext",
-          image: getQuestionImageUrl(id),
-          buttons: [{ label: "try again", action: "post" }],
-          postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+          image: getQuestionImageUrl(id, false, false, true),
+          buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
+          postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
         })
       );
+    } else {
+      throw new Error("Invalid button index");
     }
-  }
-  // index 1 means the user clicked the "upvote" to the open question
-  try {
-    const farcasterProfile = await prisma.socialProfile.findFirst({
-      where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
-      include: { user: true }
-    });
-    if (!farcasterProfile) {
-      throw new Error("No farcaster identity");
-    }
-    await upvoteQuestion(farcasterProfile.identity, parseInt(id));
-    return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: getQuestionImageUrl(id, true),
-        buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
-        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
-      })
-    );
   } catch (e) {
     console.error(e);
     return new NextResponse(

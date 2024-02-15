@@ -1,7 +1,5 @@
 import { getQuestion } from "@/backend/question/question";
-import { BASE_URL, ERROR_IMAGE_URL } from "@/lib/constants";
 import { QuestionWithInfo, generateImageSvg } from "@/lib/frame/svg";
-import { getFrameHtml } from "frames.js";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
@@ -16,14 +14,7 @@ export const GET = async (req: Request) => {
   const ownKeys = searchParams.get("ownKeys") === "true";
 
   if (!id) {
-    return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: ERROR_IMAGE_URL,
-        buttons: [{ label: "try again", action: "post" }],
-        postUrl: `${BASE_URL}/api/frame/upvote?id=${id}`
-      })
-    );
+    return new NextResponse(null, { status: 400 });
   }
 
   console.log("Fetching question...", id);
