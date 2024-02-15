@@ -42,7 +42,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     buttons,
     image: `${BASE_URL}/api/frame/image?id=${id}${isReply ? "&isReply=true" : ""}`,
     inputText: question?.replierId == null ? "your answer here" : undefined,
-    postUrl: isReply ? `${BASE_URL}/api/frame/reply?id=${id}` : `${BASE_URL}/api/frame/question?id=${id}`
+    postUrl: `${BASE_URL}/api/frame/${isReply ? "reply" : "question"}?id=${id}`
   });
 
   return {
