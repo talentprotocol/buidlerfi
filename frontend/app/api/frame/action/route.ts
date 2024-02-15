@@ -1,50 +1,49 @@
 import { BASE_URL } from "@/lib/constants";
 import { commentQuestion, getQuestionImageUrl, upvoteQuestion } from "@/lib/frame/questions";
-import { getFarcasterIdentity } from "@/lib/frame/web3bio";
-import { FrameActionPayload, getAddressForFid, getFrameHtml, getFrameMessage, validateFrameMessage } from "frames.js";
+import prisma from "@/lib/prisma";
+import { SocialProfileType } from "@prisma/client";
+import { FrameActionPayload, getFrameHtml, getFrameMessage, validateFrameMessage } from "frames.js";
 import { NextRequest, NextResponse } from "next/server";
 
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
   if (!id) {
-    return new NextResponse(`<!DOCTYPE html><html><head>
-    <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${getQuestionImageUrl(0)}" />
-    <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
-    </head></html>`);
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(0),
+        buttons: [{ label: "try again", action: "post" }],
+        postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+      })
+    );
   }
 
-  let accountAddress = "";
+  const accountAddress = "";
   // Step 2. Read the body from the Next Request
   const body: FrameActionPayload = await req.json();
 
   const frameMessage = await getFrameMessage(body);
   // Step 3. Validate the message
-  const { isValid, message } = await validateFrameMessage(body);
+  const { isValid } = await validateFrameMessage(body, {
+    hubRequestOptions: { headers: { api_key: process.env.NEYNAR_API_KEY! } }
+  });
 
   // Step 4. Determine the experience based on the validity of the message
-  if (isValid) {
-    // Step 5. Get from the message the Account Address of the user using the Frame
-    const fid = message?.data.fid;
-    accountAddress = (await getAddressForFid({ fid: fid as number })) as string;
-  } else {
-    // sorry, the message is not valid and it will be undefined
-  }
-  console.log("Message is valid");
-
-  if (!accountAddress) {
-    return new NextResponse(`<!DOCTYPE html><html><head>
-    <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${getQuestionImageUrl(id)}" />
-    <meta property="fc:frame:button:1" content="try again" />
-    <meta property="fc:frame:post_url" content="${BASE_URL}/api/frame/action?id=${id}" />
-    </head></html>`);
+  if (!isValid) {
+    return new NextResponse(null, { status: 400 });
   }
 
   console.log("Account address is", accountAddress);
   console.log("button index", frameMessage.buttonIndex);
+
+  const farcasterProfile = await prisma.socialProfile.findFirst({
+    where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
+    include: { user: true }
+  });
+  if (!farcasterProfile) {
+    throw new Error("No farcaster identity");
+  }
 
   // index 2 means the user clicked the "reply" to the open question
   if (frameMessage.buttonIndex === 2) {
@@ -56,11 +55,8 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
       if (!text || text == "") {
         throw new Error("No text");
       }
-      const farcasterIdentity = await getFarcasterIdentity(accountAddress);
-      if (!farcasterIdentity) {
-        throw new Error("No farcaster identity");
-      }
-      await commentQuestion(farcasterIdentity.identity, parseInt(id), text);
+      
+      await commentQuestion(farcasterProfile.profileName, parseInt(id), text);
       return new NextResponse(
         getFrameHtml({
           version: "vNext",
@@ -83,11 +79,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   }
   // index 1 means the user clicked the "upvote" to the open question
   try {
-    const farcasterIdentity = await getFarcasterIdentity(accountAddress);
-    if (!farcasterIdentity) {
-      throw new Error("No farcaster identity");
-    }
-    await upvoteQuestion(farcasterIdentity.identity, parseInt(id));
+    await upvoteQuestion(farcasterProfile.profileName, parseInt(id));
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
