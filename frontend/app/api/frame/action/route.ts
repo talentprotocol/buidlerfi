@@ -1,5 +1,6 @@
+import { getUser } from "@/backend/user/user";
 import { BASE_URL } from "@/lib/constants";
-import { commentQuestion, getQuestionImageUrl, upvoteQuestion } from "@/lib/frame/questions";
+import { commentQuestion, downvoteQuestion, getQuestionImageUrl, upvoteQuestion } from "@/lib/frame/questions";
 import { getFarcasterIdentity } from "@/lib/frame/web3bio";
 import { FrameActionPayload, getAddressForFid, getFrameHtml, getFrameMessage, validateFrameMessage } from "frames.js";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,6 +8,8 @@ import { NextRequest, NextResponse } from "next/server";
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
+  const isReply = searchParams.get("isReply") === "true" ?? false;
+
   if (!id) {
     return new NextResponse(`<!DOCTYPE html><html><head>
     <meta property="fc:frame" content="vNext" />
@@ -46,8 +49,37 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   console.log("Account address is", accountAddress);
   console.log("button index", frameMessage.buttonIndex);
 
-  // index 2 means the user clicked the "reply" to the open question
-  if (frameMessage.buttonIndex === 2) {
+  // check if user has keys for the answer
+  if (isReply) {
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, false, true, false),
+        buttons: [
+          { label: "buy user keys 🔑", action: "post_redirect" },
+          { label: "i own user keys 👀", action: "post" }
+        ],
+        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
+      })
+    );
+  }
+
+  // check if user is not on builder.fi
+  const { error, data } = await getUser(accountAddress);
+  console.log("user data :", data, error);
+  if (!!error || !data) {
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, true),
+        buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
+        postUrl: `${BASE_URL}`
+      })
+    );
+  }
+
+  // index 3 means the user clicked the "reply" to the open question
+  if (frameMessage.buttonIndex === 3) {
     try {
       let text: string | undefined = "";
       if (frameMessage.inputText) {
@@ -80,32 +112,41 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
         })
       );
     }
-  }
-  // index 1 means the user clicked the "upvote" to the open question
-  try {
-    const farcasterIdentity = await getFarcasterIdentity(accountAddress);
-    if (!farcasterIdentity) {
-      throw new Error("No farcaster identity");
+  } else {
+    try {
+      const farcasterIdentity = await getFarcasterIdentity(accountAddress);
+      if (!farcasterIdentity) {
+        throw new Error("No farcaster identity");
+      }
+
+      let upvoted = false;
+      let downvoted = false;
+      if (frameMessage.buttonIndex === 2) {
+        await upvoteQuestion(farcasterIdentity.identity, parseInt(id));
+        upvoted = true;
+      } else if (frameMessage.buttonIndex === 2) {
+        await downvoteQuestion(farcasterIdentity.identity, parseInt(id));
+        downvoted = true;
+      }
+      return new NextResponse(
+        getFrameHtml({
+          version: "vNext",
+          image: getQuestionImageUrl(id, upvoted, downvoted),
+          buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
+          postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
+        })
+      );
+    } catch (e) {
+      console.error(e);
+      return new NextResponse(
+        getFrameHtml({
+          version: "vNext",
+          image: getQuestionImageUrl(id),
+          buttons: [{ label: "try again", action: "post" }],
+          postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+        })
+      );
     }
-    await upvoteQuestion(farcasterIdentity.identity, parseInt(id));
-    return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: getQuestionImageUrl(id, true),
-        buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
-        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
-      })
-    );
-  } catch (e) {
-    console.error(e);
-    return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: getQuestionImageUrl(id),
-        buttons: [{ label: "try again", action: "post" }],
-        postUrl: `${BASE_URL}/api/frame/action?id=${id}`
-      })
-    );
   }
 }
 
