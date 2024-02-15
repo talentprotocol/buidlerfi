@@ -172,7 +172,7 @@ export default function EditProfilePage() {
       <Flex y gap1>
         <Flex x gap2>
           <Switch checked={isGated} onChange={e => setIsGated(e.target.checked)} />
-          <Typography>Disallow users to ask you questions without your key</Typography>
+          <Typography>Require users to have your key to ask you questions</Typography>
         </Flex>
       </Flex>
     </Flex>
