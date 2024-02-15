@@ -14,27 +14,27 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const isReply = searchParams.isReply === "true";
   const question = await prisma.question.findUnique({ where: { id: parseInt(id) } });
 
-  let buttons: FrameButtonsType = [
-    {
-      label: "upvote ⬆️",
-      action: "post"
-    } as FrameButton,
-    {
-      label: "downvote ⬇️",
-      action: "post"
-    } as FrameButton
-  ];
-
-  // if replier id is null, question is open, so everyone can reply
-  if (question?.replierId == null) {
-    buttons.push({ label: "reply ✍️", action: "post" });
-  }
-
+  let buttons: FrameButtonsType;
   if (isReply) {
     buttons = [
       { label: "buy user keys 🔑", action: "post_redirect" },
       { label: "i own user keys 👀", action: "post" }
     ];
+  } else {
+    buttons = [
+      {
+        label: "upvote ⬆️",
+        action: "post"
+      } as FrameButton,
+      {
+        label: "downvote ⬇️",
+        action: "post"
+      } as FrameButton
+    ];
+    // if replier is not set, question is open, then user can reply
+    if (question?.replierId == null) {
+      buttons.push({ label: "reply ✍️", action: "post" });
+    }
   }
 
   const fcMetadata: Record<string, string> = getFrameFlattened({
