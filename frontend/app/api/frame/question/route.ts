@@ -8,7 +8,6 @@ import { NextRequest, NextResponse } from "next/server";
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
-  const isReply = searchParams.get("isReply") === "true" ?? false;
 
   if (!id) {
     return new NextResponse(
@@ -16,7 +15,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
         version: "vNext",
         image: getQuestionImageUrl(0),
         buttons: [{ label: "try again", action: "post" }],
-        postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+        postUrl: `${BASE_URL}/api/frame/question?id=${id}`
       })
     );
   }
@@ -53,21 +52,6 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
         image: getQuestionImageUrl(id, false, false, false, true),
         buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
         postUrl: `${BASE_URL}`
-      })
-    );
-  }
-
-  // check if frame wants to show the reply
-  if (isReply) {
-    return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: getQuestionImageUrl(id, false, false, false, false, true, false),
-        buttons: [
-          { label: "buy user keys 🔑", action: "post_redirect" },
-          { label: "i own user keys 👀", action: "post" }
-        ],
-        postUrl: `${BASE_URL}/api/frame/reply?id=${id}`
       })
     );
   }
@@ -120,7 +104,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
         version: "vNext",
         image: getQuestionImageUrl(id),
         buttons: [{ label: "try again", action: "post" }],
-        postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+        postUrl: `${BASE_URL}/api/frame/question?id=${id}`
       })
     );
   }

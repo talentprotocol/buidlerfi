@@ -28,8 +28,6 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(null, { status: 400 });
   }
 
-  console.log("button index", frameMessage.buttonIndex);
-
   // check if user is on builder.fi with his fc account
   const farcasterProfile = await prisma.socialProfile.findFirst({
     where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
@@ -51,14 +49,36 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(null, { status: 404 });
   }
 
-  return new NextResponse(
-    getFrameHtml({
-      version: "vNext",
-      image: getQuestionImageUrl(id, false, false, false, true),
-      buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
-      postUrl: `${BASE_URL}`
-    })
-  );
+  if (frameMessage.buttonIndex === 1) {
+    return NextResponse.redirect(`${BASE_URL}/profile/${question.data.replier?.wallet}`, { status: 302 });
+  }
+
+  // if no reply, means user can't read the answer
+  if (frameMessage.buttonIndex === 2 && !question.data.reply) {
+    console.log("CAN'T READ");
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, true),
+        buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
+        postUrl: `${BASE_URL}`
+      })
+    );
+  }
+
+  // otherwise, user can read the answer
+  if (frameMessage.buttonIndex === 2 && question.data.reply) {
+    console.log("CAN READ");
+    return new NextResponse(
+      getFrameHtml({
+        version: "vNext",
+        image: getQuestionImageUrl(id, false, false, false, true),
+        buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
+        postUrl: `${BASE_URL}`
+      })
+    );
+  }
+  return new NextResponse(null, { status: 400 });
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
