@@ -11,12 +11,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
 
   if (!id) {
     return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: getQuestionImageUrl({ questionId: 0 }),
-        buttons: [{ label: "try again", action: "post" }],
-        postUrl: `${BASE_URL}/api/frame/question?id=${id}`
-      })
+      null, {status: 404}
     );
   }
 

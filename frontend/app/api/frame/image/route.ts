@@ -14,6 +14,8 @@ export const GET = async (req: Request) => {
   const ownKeys = searchParams.get("ownKeys") === "true";
   const privyUserId = searchParams.get("privyUserId") ?? undefined;
 
+  console.log(ownKeys);
+
   if (!id) {
     return new NextResponse(null, { status: 400 });
   }

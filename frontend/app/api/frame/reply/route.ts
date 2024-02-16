@@ -60,9 +60,14 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl({ questionId: id, isReply: true }),
-        buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
-        postUrl: `${BASE_URL}`
+        image: getQuestionImageUrl({
+          questionId: id,
+          isReply: true,
+          privyUserId: farcasterProfile.user.privyUserId!,
+          ownKeys: false
+        }),
+        buttons: [{ label: `buy ${question.data.replier?.displayName} 🔑`, action: "post_redirect" }],
+        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}&isProfile=true&address=${question.data.replier?.wallet}`
       })
     );
   }
@@ -73,9 +78,17 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl({ questionId: id, isReply: true, ownKeys: true }),
-        buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
-        postUrl: `${BASE_URL}`
+        image: getQuestionImageUrl({
+          questionId: id,
+          isReply: true,
+          ownKeys: true,
+          privyUserId: farcasterProfile.user.privyUserId!
+        }),
+        buttons: [
+          // { label: "like answer 💙", action: "post" },
+          { label: "read it on builder.fi 🔷", action: "post_redirect" }
+        ],
+        postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
       })
     );
   }

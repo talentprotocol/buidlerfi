@@ -63,11 +63,11 @@ export const generateImageSvg = async (
     question.questionContent.length > 130
       ? `${question.questionContent.substring(0, 130)}...`
       : question.questionContent;
-  const answerContent = question.reply
-    ? question.reply.length > 130
-      ? `${question.reply.substring(0, 130)}...`
-      : question.reply
-    : `you don't own ${replierUsername}'s keys, but if you wanna see the answer`;
+  const answerText =
+    question.reply && question.reply.length > 130 ? `${question.reply.substring(0, 130)}...` : question.reply;
+  const answerContent = ownKeys
+    ? answerText
+    : `you don't own ${replierUsername}'s keys, buy them if you wanna see the answer`;
 
   return await satori(
     <div
@@ -157,7 +157,7 @@ export const generateImageSvg = async (
               filter: `${userNotSignedUp || (!isOpenQuestion && isReply && !ownKeys) ? "blur(3px)" : "none"}`
             }}
           >
-            {isReply && ownKeys ? (
+            {!(isReply && ownKeys) ? (
               <img
                 src={`data:image/png;base64,${imageQuestionMark.toString("base64")}`}
                 style={{ width: "7%", alignItems: "center" }}
@@ -169,11 +169,12 @@ export const generateImageSvg = async (
                 color: "#316CF0",
                 fontSize: "24px",
                 marginLeft: "20px",
+                marginRight: "20px",
                 alignItems: "center",
                 justifyContent: "center"
               }}
             >
-              {isReply && ownKeys ? answerContent : questionContent}
+              {isReply ? answerContent : questionContent}
             </span>
           </div>
           {isOpenQuestion ? (
@@ -250,7 +251,7 @@ export const generateImageSvg = async (
               backgroundColor: "rgba(243,245,246,0.7)"
             }}
           >
-            <h2 style={{ width: "85%" }}>
+            <h2 style={{ width: "70%" }}>
               {replierUsername}&rsquo;s answer is gated. reveal it buying {replierUsername}&rsquo;s key
             </h2>
           </div>

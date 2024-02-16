@@ -11,8 +11,10 @@ type Props = {
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const id = params.id;
-  const isReply = searchParams.isReply === "true";
+
   const question = await prisma.question.findUnique({ where: { id: parseInt(id) } });
+
+  const isReply = searchParams.isReply === "true" && question?.reply;
 
   let buttons: FrameButtonsType;
   if (isReply) {
