@@ -18,6 +18,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   const body: FrameActionPayload = await req.json();
 
   const frameMessage = await getFrameMessage(body);
+
   // Step 3. Validate the message
   const { isValid } = await validateFrameMessage(body, {
     hubRequestOptions: { headers: { api_key: process.env.NEYNAR_API_KEY! } }
@@ -37,18 +38,18 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl(id, false, false, false, true),
+        image: getQuestionImageUrl({ questionId: id, userNotSignedUp: true }),
         buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
         postUrl: `${BASE_URL}`
       })
     );
   }
-
   const question = await getQuestion(parseInt(id!), farcasterProfile.user.privyUserId!, true, true);
   if (!question) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // click on buy user keys
   if (frameMessage.buttonIndex === 1) {
     return NextResponse.redirect(`${BASE_URL}/profile/${question.data.replier?.wallet}`, { status: 302 });
   }
@@ -59,7 +60,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl(id, false, false, false, true),
+        image: getQuestionImageUrl({ questionId: id, isReply: true }),
         buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
         postUrl: `${BASE_URL}`
       })
@@ -72,7 +73,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl(id, false, false, false, true),
+        image: getQuestionImageUrl({ questionId: id, isReply: true, ownKeys: true }),
         buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
         postUrl: `${BASE_URL}`
       })

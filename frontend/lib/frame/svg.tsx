@@ -59,6 +59,15 @@ export const generateImageSvg = async (
     question.questioner?.wallet as string
   );
   const replierUsername = getUsername(question.replier?.displayName as string, question.replier?.wallet as string);
+  const questionContent =
+    question.questionContent.length > 130
+      ? `${question.questionContent.substring(0, 130)}...`
+      : question.questionContent;
+  const answerContent = question.reply
+    ? question.reply.length > 130
+      ? `${question.reply.substring(0, 130)}...`
+      : question.reply
+    : `you don't own ${replierUsername}'s keys, but if you wanna see the answer`;
 
   return await satori(
     <div
@@ -148,10 +157,12 @@ export const generateImageSvg = async (
               filter: `${userNotSignedUp || (!isOpenQuestion && isReply && !ownKeys) ? "blur(3px)" : "none"}`
             }}
           >
-            <img
-              src={`data:image/png;base64,${imageQuestionMark.toString("base64")}`}
-              style={{ width: "7%", alignItems: "center" }}
-            />
+            {isReply && ownKeys ? (
+              <img
+                src={`data:image/png;base64,${imageQuestionMark.toString("base64")}`}
+                style={{ width: "7%", alignItems: "center" }}
+              />
+            ) : null}
             <span
               style={{
                 width: "85%",
@@ -162,9 +173,7 @@ export const generateImageSvg = async (
                 justifyContent: "center"
               }}
             >
-              {question.questionContent.length > 130
-                ? `${question.questionContent.substring(0, 130)}...`
-                : question.questionContent}
+              {isReply && ownKeys ? answerContent : questionContent}
             </span>
           </div>
           {isOpenQuestion ? (

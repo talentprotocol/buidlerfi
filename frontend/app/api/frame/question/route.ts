@@ -13,7 +13,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl(0),
+        image: getQuestionImageUrl({ questionId: 0 }),
         buttons: [{ label: "try again", action: "post" }],
         postUrl: `${BASE_URL}/api/frame/question?id=${id}`
       })
@@ -32,7 +32,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
 
   // Step 4. Determine the experience based on the validity of the message
   if (!isValid) {
-    console;
+    console.log("Invalid message");
     return new NextResponse(null, { status: 400 });
   }
 
@@ -49,7 +49,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl(id, false, false, false, true),
+        image: getQuestionImageUrl({ questionId: id, userNotSignedUp: true }),
         buttons: [{ label: "sign up now! 🔷", action: "post_redirect" }],
         postUrl: `${BASE_URL}`
       })
@@ -62,7 +62,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
       return new NextResponse(
         getFrameHtml({
           version: "vNext",
-          image: getQuestionImageUrl(id, true),
+          image: getQuestionImageUrl({ questionId: id, privyUserId: farcasterProfile.userId, upvoted: true }),
           buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
           postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
         })
@@ -72,7 +72,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
       return new NextResponse(
         getFrameHtml({
           version: "vNext",
-          image: getQuestionImageUrl(id, false, true),
+          image: getQuestionImageUrl({ questionId: id, privyUserId: farcasterProfile.userId, downvoted: true }),
           buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
           postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
         })
@@ -89,7 +89,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
       return new NextResponse(
         getFrameHtml({
           version: "vNext",
-          image: getQuestionImageUrl(id, false, false, true),
+          image: getQuestionImageUrl({ questionId: id, privyUserId: farcasterProfile.userId, replied: true }),
           buttons: [{ label: "read more on builder.fi 👀", action: "post_redirect" }],
           postUrl: `${BASE_URL}/api/frame/redirect?id=${id}`
         })
@@ -102,7 +102,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
-        image: getQuestionImageUrl(id),
+        image: getQuestionImageUrl({ questionId: id }),
         buttons: [{ label: "try again", action: "post" }],
         postUrl: `${BASE_URL}/api/frame/question?id=${id}`
       })

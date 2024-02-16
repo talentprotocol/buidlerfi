@@ -47,11 +47,7 @@ export const createQuestion = async (privyUserId: string, questionContent: strin
       const questionerName = getFarcasterProfileName(questioner, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW QUESTION");
-      await publishNewQuestionCast(
-        questionerName,
-        replierName,
-        `https://app.builder.fi/question/${question.id}`
-      );
+      await publishNewQuestionCast(questionerName, replierName, `https://app.builder.fi/question/${question.id}`);
     }
   }
   return { data: question };

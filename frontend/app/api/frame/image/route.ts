@@ -12,6 +12,7 @@ export const GET = async (req: Request) => {
   const userNotSignedUp = searchParams.get("userNotSignedUp") === "true";
   const isReply = searchParams.get("isReply") === "true";
   const ownKeys = searchParams.get("ownKeys") === "true";
+  const privyUserId = searchParams.get("privyUserId") ?? undefined;
 
   if (!id) {
     return new NextResponse(null, { status: 400 });
@@ -19,7 +20,7 @@ export const GET = async (req: Request) => {
 
   console.log("Fetching question...", id);
 
-  const data = (await getQuestion(parseInt(id), undefined, true, true)) as unknown as {
+  const data = (await getQuestion(parseInt(id), privyUserId, true, true)) as unknown as {
     data: { question: QuestionWithInfo };
   };
 
