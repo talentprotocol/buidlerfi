@@ -30,7 +30,10 @@ export const QuestionContent: FC<Props> = ({ question, refetch, profile }) => {
           sx={{ px: 0, py: 0, flexGrow: 1 }}
           user={question.questioner}
           nameLevel="title-sm"
-          holdersAndReplies={questionerStats}
+          holdersAndReplies={{
+            numberOfHolders: questionerStats?.numberOfHolders || 0,
+            questionsCount: questionerStats?.answersCount || 0
+          }}
         />
         <QuestionContextMenu question={question} refetch={() => refetch()} />
       </Flex>
@@ -39,7 +42,7 @@ export const QuestionContent: FC<Props> = ({ question, refetch, profile }) => {
       <Flex x yc xsb>
         <Flex x yc gap3>
           <Reactions questionId={question.id} />
-          {question.repliedOn && profile.hasKeys && (
+          {question.repliedOn && (profile.hasKeys || !profile.hasLaunchedKeys) && (
             <AddCommentButton questionId={question?.id} count={question._count.comments} />
           )}
         </Flex>

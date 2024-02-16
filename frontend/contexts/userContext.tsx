@@ -3,6 +3,7 @@ import { useAxios } from "@/hooks/useAxios";
 import { useGetKeyRelationships } from "@/hooks/useKeyRelationshipApi";
 import { useGetNotifications } from "@/hooks/useNotificationApi";
 import { usePrevious } from "@/hooks/usePrevious";
+import { UserSettingKeyEnum } from "@prisma/client";
 import { User as PrivyUser, usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useQuery } from "@tanstack/react-query";
@@ -39,6 +40,7 @@ interface UserContextType {
   holding: ReturnType<typeof useGetKeyRelationships>["data"];
   holders: ReturnType<typeof useGetKeyRelationships>["data"];
   hasLaunchedKeys: boolean;
+  userSettings?: Record<UserSettingKeyEnum, string>;
 }
 const userContext = createContext<UserContextType>({
   user: undefined,
@@ -120,7 +122,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       fetchNotificationNextPage,
       holding,
       holders,
-      hasLaunchedKeys: !!holders?.find(h => h.holderId === h.ownerId)
+      hasLaunchedKeys: !!holders?.find(h => h.holderId === h.ownerId),
+      userSettings: user.data?.settings.reduce(
+        (prev, curr) => ({ ...prev, [curr.key]: curr.value }),
+        {} as Record<UserSettingKeyEnum, string>
+      )
     }),
     [
       user.data,

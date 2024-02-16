@@ -9,7 +9,7 @@ import { useGetHotQuestions, useGetKeyQuestions, useGetQuestionsFromUser } from 
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference } from "@/lib/utils";
 import theme from "@/theme";
-import { Avatar, AvatarGroup, Box, Chip, Typography } from "@mui/joy";
+import { Avatar, AvatarGroup, Box, Chip, Grid, Typography } from "@mui/joy";
 import { FC, useMemo } from "react";
 import { QuestionContextMenu } from "./question-context-menu";
 
@@ -91,42 +91,46 @@ export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
           </Box>
         </Flex>
       </Flex>
-      <Flex
-        x
-        yc
-        xsb
-        grow
-        pointer
+      <Grid
+        container
+        xs={12}
+        sx={{ cursor: "pointer" }}
+        mt={1}
+        mb={-1}
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
           handleClick();
         }}
       >
-        <Reactions sx={{ ml: 4 }} questionId={question.id} />
-        {question.tags.length > 0 ? (
-          <Chip variant="outlined" size="sm">
-            {question.tags[0].name}
-          </Chip>
-        ) : (
-          <Flex />
-        )}
-        {isAwaitingAnswer && (
-          <Chip size="sm" color="neutral" variant="outlined">
-            Awaiting Answer
-          </Chip>
-        )}
-        {question.replier && question.repliedOn && (
-          <Chip size="sm" color="primary" variant="outlined">
-            Answered
-          </Chip>
-        )}
-        {!question.replier && numberOfReplies !== undefined && numberOfReplies > 0 && (
-          <Chip size="sm" color="primary" variant="outlined">
-            {numberOfReplies} {pluralize(numberOfReplies)}
-          </Chip>
-        )}
-      </Flex>
+        <Grid xs={4} display={"flex"} alignItems={"flex-end"}>
+          <Reactions sx={{ ml: 4 }} questionId={question.id} />
+        </Grid>
+        <Grid xs={4} display={"flex"} alignItems={"center"}>
+          {question.tags.length > 0 && (
+            <Chip variant="outlined" size="sm">
+              {question.tags[0].name}
+            </Chip>
+          )}
+        </Grid>
+        <Grid xs={4} display={"flex"} justifyContent={"flex-end"} alignItems={"center"}>
+          {isAwaitingAnswer && (
+            <Chip size="sm" color="neutral" variant="outlined">
+              Awaiting Answer
+            </Chip>
+          )}
+          {question.replier && question.repliedOn && (
+            <Chip size="sm" color="primary" variant="outlined">
+              Answered
+            </Chip>
+          )}
+          {!question.replier && numberOfReplies !== undefined && numberOfReplies > 0 && (
+            <Chip size="sm" color="primary" variant="outlined">
+              {numberOfReplies} {pluralize(numberOfReplies)}
+            </Chip>
+          )}
+        </Grid>
+      </Grid>
     </Flex>
   );
 };

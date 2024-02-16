@@ -3,6 +3,7 @@ import { AuthRoute } from "@/components/app/auth-route";
 import { Flex } from "@/components/shared/flex";
 import { DialogContainer } from "@/contexts/DialogContainer";
 import { GlobalContextProvider } from "@/contexts/globalContext";
+import { HistoryContextProvider } from "@/contexts/historyContext";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
 import theme from "@/theme";
@@ -56,7 +57,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
       <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
         <CssVarsProvider theme={theme}>
           <QueryClientProvider client={queryClient}>
-            <LayoutContextProvider>{mounted && <InnerProviders>{children}</InnerProviders>}</LayoutContextProvider>
+            {mounted && <InnerProviders>{children}</InnerProviders>}
           </QueryClientProvider>
           <ToastContainer />
           <DialogContainer />
@@ -75,32 +76,37 @@ const InnerProviders = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <Flex y grow sx={{ position: "relative" }} ref={rootContainerRef}>
-      <PrivyProvider
-        appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
-        config={{
-          loginMethods: ["google", "email", "github", "apple", "twitter"],
-          supportedChains: [supportedChain],
-          embeddedWallets: {
-            createOnLogin: "users-without-wallets"
-          },
-          defaultChain: supportedChain,
-          appearance: {
-            theme: "light",
-            accentColor: "#0B6EF9"
-          },
-          fiatOnRamp: {
-            useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"
-          }
-        }}
-      >
-        <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
-          <GlobalContextProvider>
-            <UserProvider>
-              <AuthRoute>{children}</AuthRoute>
-            </UserProvider>
-          </GlobalContextProvider>
-        </PrivyWagmiConnector>
-      </PrivyProvider>
+      <LayoutContextProvider>
+        <PrivyProvider
+          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
+          config={{
+            loginMethods: ["email", "google", "apple", "farcaster", "wallet"],
+            supportedChains: [supportedChain],
+            embeddedWallets: {
+              createOnLogin: "all-users"
+            },
+            defaultChain: supportedChain,
+            appearance: {
+              theme: "light",
+              accentColor: "#0B6EF9",
+              showWalletLoginFirst: false
+            },
+            fiatOnRamp: {
+              useSandbox: process.env.NEXT_PUBLIC_CONTRACTS_ENV !== "production"
+            }
+          }}
+        >
+          <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
+            <HistoryContextProvider>
+              <GlobalContextProvider>
+                <UserProvider>
+                  <AuthRoute>{children}</AuthRoute>
+                </UserProvider>
+              </GlobalContextProvider>
+            </HistoryContextProvider>
+          </PrivyWagmiConnector>
+        </PrivyProvider>
+      </LayoutContextProvider>
     </Flex>
   );
 };

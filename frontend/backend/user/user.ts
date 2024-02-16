@@ -7,10 +7,10 @@ import prisma from "@/lib/prisma";
 import privyClient from "@/lib/privyClient";
 import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
-import { Prisma, SocialProfileType } from "@prisma/client";
+import { Prisma, SocialProfileType, UserSettingKeyEnum } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
 import { differenceInMinutes } from "date-fns";
-import { sendNotification } from "../notification/notification";
+// import { sendNotification } from "../notification/notification";
 import { syncFarcasterFollowings } from "../socialProfile/farcasterFollowing";
 import { updateRecommendations } from "../socialProfile/recommendation";
 import { updateUserSocialProfiles } from "../socialProfile/socialProfile";
@@ -19,7 +19,7 @@ export const refreshAllUsersProfile = async () => {
   const users = await prisma.user.findMany();
   for (const user of users.filter(user => user.socialWallet)) {
     try {
-      await updateUserSocialProfiles(user.id, user.socialWallet!, user.bio!);
+      await updateUserSocialProfiles(user.id);
     } catch (err) {
       console.error("Error while updating social profiles for user: ", user.wallet, err);
     }
@@ -36,11 +36,12 @@ export const refreshCurrentUserProfile = async (privyUserId: string) => {
   });
 
   if (!user) return { error: ERRORS.USER_NOT_FOUND };
-  if (!user.socialWallet) return { error: ERRORS.NO_SOCIAL_PROFILE_FOUND };
 
-  const res = await updateUserSocialProfiles(user.id, user.socialWallet, user.bio!);
+  const res = await updateUserSocialProfiles(user.id);
   await syncFarcasterFollowings(user.id);
-  updateRecommendations(user.socialWallet.toLowerCase());
+  if (user.socialWallet) {
+    await updateRecommendations(user.socialWallet.toLowerCase());
+  }
   return { data: res };
 };
 
@@ -50,6 +51,7 @@ export const getCurrentUser = async (privyUserId: string) => {
       privyUserId: privyUserId
     },
     include: {
+      settings: true,
       inviteCodes: {
         where: {
           isActive: true
@@ -76,6 +78,11 @@ export const getCurrentUser = async (privyUserId: string) => {
     }
   });
 
+  if (res.privyUserId) {
+    const privyUser = await privyClient.getUser(res.privyUserId);
+    console.log(privyUser);
+  }
+
   return { data: res };
 };
 
@@ -93,7 +100,7 @@ export const checkUsersExist = async (wallets: string[]) => {
 
 export const getUser = async (wallet: string) => {
   const address = wallet.toLowerCase();
-  const res = await prisma.user.findUnique({
+  let res = await prisma.user.findUnique({
     where: {
       wallet: address
     },
@@ -103,14 +110,24 @@ export const getUser = async (wallet: string) => {
     }
   });
 
-  if (!res) return { error: ERRORS.USER_NOT_FOUND };
+  if (!res) {
+    res = await prisma.user.findUnique({
+      where: {
+        socialWallet: address
+      },
+      include: {
+        socialProfiles: true,
+        tags: true
+      }
+    });
+    if (!res) return { error: ERRORS.USER_NOT_FOUND };
+  }
 
   return { data: res };
 };
 
-export const createUser = async (privyUserId: string, inviteCode: string) => {
-  inviteCode = inviteCode.trim();
-
+export const createUser = async (privyUserId: string) => {
+  console.log("createUser");
   const privyUser = await privyClient.getUser(privyUserId);
   if (!privyUser) {
     return { error: ERRORS.UNAUTHORIZED };
@@ -128,39 +145,29 @@ export const createUser = async (privyUserId: string, inviteCode: string) => {
   if (!embeddedWallet) {
     return { error: ERRORS.WALLET_MISSING };
   }
-
   const address = embeddedWallet.address.toLowerCase();
 
-  const existingCode = await prisma.inviteCode.findUnique({ where: { code: inviteCode } });
-  if (!existingCode || existingCode.isActive === false) {
-    return { error: ERRORS.INVALID_INVITE_CODE };
-  }
+  //If logged in with a wallet
+  const wallet = privyUser.linkedAccounts.find(
+    account => account.type === "wallet" && account.connectorType === "injected"
+  ) as Wallet | undefined;
 
-  if (existingCode.used >= existingCode.maxUses) {
-    return { error: ERRORS.CODE_ALREADY_USED };
-  }
+  const socialAddress = wallet?.address.toLowerCase();
 
-  const newUser = await prisma.$transaction(async tx => {
-    const newUser = await tx.user.create({
-      data: {
-        privyUserId: privyUser.id,
-        invitedById: existingCode.id,
-        wallet: address,
-        isActive: true
-      }
-    });
-
-    await tx.inviteCode.update({
-      where: { id: existingCode.id },
-      data: {
-        used: existingCode.used + 1
-      }
-    });
-
-    return newUser;
+  const newUser = await prisma.user.create({
+    data: {
+      privyUserId: privyUser.id,
+      wallet: address,
+      socialWallet: socialAddress,
+      isActive: true
+    }
   });
 
-  await sendNotification(existingCode.userId, "USER_INVITED", newUser.id, newUser.id);
+  try {
+    await updateUserSocialProfiles(newUser.id);
+  } catch (err) {
+    console.error("Error while updating social profiles: ", err);
+  }
 
   return { data: newUser };
 };
@@ -205,8 +212,8 @@ export const linkNewWallet = async (privyUserId: string, signedMessage: string) 
   });
 
   try {
-    await updateUserSocialProfiles(user.id, challenge.publicKey.toLowerCase(), user.bio!);
-    updateRecommendations(challenge.publicKey.toLowerCase());
+    await updateUserSocialProfiles(user.id);
+    await updateRecommendations(challenge.publicKey.toLowerCase());
   } catch (err) {
     console.error("Error while updating social profiles: ", err);
   }
@@ -218,6 +225,7 @@ export interface UpdateUserArgs {
   tags?: string[];
   hasFinishedOnboarding?: boolean;
   bio?: string;
+  isGated?: boolean;
 }
 
 export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArgs) => {
@@ -244,7 +252,8 @@ export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArg
             connect: updatedUser.tags.map(tag => ({ name: tag }))
           }
         : undefined,
-      bio: updatedUser.bio
+      bio: updatedUser.bio,
+      isGated: updatedUser.isGated || false
     }
   });
 
@@ -252,6 +261,11 @@ export const updateUser = async (privyUserId: string, updatedUser: UpdateUserArg
 };
 
 export const generateChallenge = async (privyUserId: string, publicKey: string) => {
+  const existingUser = await prisma.user.findUnique({ where: { socialWallet: publicKey.toLowerCase() } });
+  if (existingUser) {
+    return { error: ERRORS.SOCIAL_WALLET_ALREADY_LINKED };
+  }
+
   const user = await prisma.user.findUniqueOrThrow({
     where: {
       privyUserId
@@ -642,20 +656,31 @@ type TopUser = Prisma.$UserPayload["scalars"] & {
   numberOfHolders: number;
   numberOfQuestions: number;
   numberOfReplies: number;
+  followerCount: number;
 };
 
 export const getTopUsers = async (offset: number) => {
   const users = (await prisma.$queryRaw`
-    SELECT "User".*, 
-    CAST(COUNT(DISTINCT CASE WHEN "KeyRelationship".amount > 0 then "KeyRelationship".id END) AS INTEGER) as "numberOfHolders",
-    CAST(COUNT(DISTINCT "Question".id) AS INTEGER) as "numberOfQuestions",
-    CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) as "numberOfReplies"
-    FROM "User"
-    LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
-    LEFT JOIN "Question" ON "User".id = "Question"."replierId"
-    WHERE "User"."isActive" = true AND "User"."hasFinishedOnboarding" = true AND "User"."displayName" IS NOT NULL
-    GROUP BY "User".id
-    ORDER BY "numberOfHolders" DESC
+    SELECT * FROM (
+      SELECT "User".*,
+      CAST(COUNT(DISTINCT CASE WHEN "KeyRelationship".amount > 0 THEN "KeyRelationship".id END) AS INTEGER) AS "numberOfHolders",
+      CAST(COUNT(DISTINCT "Question".id) AS INTEGER) AS "numberOfQuestions",
+      CAST(COUNT(DISTINCT CASE WHEN "Question".reply IS NOT NULL THEN "Question".id END) AS INTEGER) AS "numberOfReplies",
+      CAST("SocialProfile"."followerCount" as INTEGER) AS "followerCount"
+      FROM "User"
+      LEFT JOIN "KeyRelationship" ON "User".id = "KeyRelationship"."ownerId"
+      LEFT JOIN "Question" ON "User".id = "Question"."replierId"
+      LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId" and "SocialProfile"."type" = 'FARCASTER'
+      WHERE "User"."isActive" = true
+      AND "User"."hasFinishedOnboarding" = true
+      AND "User"."displayName" IS NOT NULL
+      GROUP BY "User".id, "SocialProfile"."followerCount"
+    ) AS subquery
+    ORDER BY
+        CASE
+            WHEN "followerCount" >= 3000 THEN "followerCount"
+			ELSE "numberOfHolders"
+    END DESC
     LIMIT ${PAGINATION_LIMIT} OFFSET ${offset};
   `) as TopUser[];
 
@@ -776,7 +801,7 @@ export const search = async (
     LEFT JOIN "SocialProfile" ON "User".id = "SocialProfile"."userId"
     LEFT JOIN "Question" ON "User".id = "Question"."replierId"
     WHERE "User"."isActive" = true
-      AND "User"."hasFinishedOnboarding" = true 
+      AND "User"."hasFinishedOnboarding" = true
       AND (
         "User"."wallet" ILIKE '%' || ${searchValue} || '%'
         OR "User"."socialWallet" ILIKE '%' || ${searchValue} || '%'
@@ -788,7 +813,7 @@ export const search = async (
         )
       )
       AND (
-        NOT ${includeOwnedKeysOnly} 
+        NOT ${includeOwnedKeysOnly}
         OR EXISTS (
           SELECT 1
           FROM "KeyRelationship"
@@ -811,12 +836,41 @@ export const getUserStats = async (id: number) => {
     where: {
       id: id
     },
-    include: {
-      replies: true,
-      keysOfSelf: {
-        where: {
-          amount: {
-            gt: 0
+    select: {
+      _count: {
+        select: {
+          questions: {
+            where: {
+              replierId: null
+            }
+          },
+          comments: {
+            where: {
+              question: {
+                replierId: null
+              }
+            }
+          },
+          replies: {
+            where: {
+              repliedOn: {
+                not: null
+              }
+            }
+          },
+          keysOfSelf: {
+            where: {
+              amount: {
+                gt: 0
+              }
+            }
+          },
+          keysOwned: {
+            where: {
+              amount: {
+                gt: 0
+              }
+            }
           }
         }
       }
@@ -825,8 +879,131 @@ export const getUserStats = async (id: number) => {
 
   return {
     data: {
-      numberOfHolders: user.keysOfSelf.length,
-      questionsCount: user.replies.filter(reply => !!reply.repliedOn).length
+      numberOfHolders: user._count.keysOfSelf,
+      numberOfHolding: user._count.keysOwned,
+      answersCount: user._count.replies,
+      openQuestionsReplied: user._count.comments,
+      openQuestionsAsked: user._count.questions
     }
   };
+};
+
+export const setUserSetting = async (privyUserId: string, key: UserSettingKeyEnum, value: string) => {
+  const currentUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      privyUserId
+    }
+  });
+
+  const res = await prisma.userSetting.upsert({
+    where: {
+      userId_key: {
+        userId: currentUser.id,
+        key
+      }
+    },
+    update: {
+      value
+    },
+    create: {
+      userId: currentUser.id,
+      key,
+      value
+    }
+  });
+
+  return { data: res };
+};
+
+//users we can ask questions to
+export const getQuestionableUsers = async (privyUserId: string, search?: string, offset = 0) => {
+  const formattedSearch = search ? search.toLowerCase().trim() : undefined;
+  const validUsersCondition = [
+    {
+      keysOfSelf: {
+        some: {
+          holder: {
+            privyUserId
+          },
+          amount: {
+            gt: 0
+          }
+        }
+      }
+    },
+    { keysOfSelf: { none: {} } }
+  ];
+
+  //users we hold a key of
+  const res = await prisma.user.findMany({
+    where: {
+      hasFinishedOnboarding: true,
+      isActive: true,
+      displayName: { not: null },
+      AND: formattedSearch
+        ? [
+            { OR: validUsersCondition },
+            {
+              OR: [
+                {
+                  displayName: { contains: formattedSearch, mode: "insensitive" }
+                },
+                {
+                  socialProfiles: {
+                    some: {
+                      profileName: {
+                        contains: formattedSearch,
+                        mode: "insensitive"
+                      }
+                    }
+                  }
+                },
+                {
+                  wallet: {
+                    contains: formattedSearch,
+                    mode: "insensitive"
+                  }
+                },
+                {
+                  socialWallet: {
+                    contains: formattedSearch,
+                    mode: "insensitive"
+                  }
+                }
+              ]
+            }
+          ]
+        : [{ OR: validUsersCondition }]
+    },
+    select: {
+      id: true,
+      displayName: true,
+      avatarUrl: true,
+      wallet: true,
+      bio: true,
+      _count: {
+        select: {
+          keysOfSelf: {
+            where: {
+              holder: {
+                privyUserId
+              },
+              amount: {
+                gt: 0
+              }
+            }
+          }
+        }
+      }
+    },
+    orderBy: {
+      keysOfSelf: {
+        _count: "desc"
+      }
+    },
+    take: PAGINATION_LIMIT,
+    skip: offset
+  });
+
+  return { data: res };
 };

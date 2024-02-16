@@ -25,13 +25,10 @@ import { useBalance } from "wagmi";
 
 export default function ChatsPage() {
   const { user } = useUserContext();
-  const [fundModalType, setFundModalType] = useState<"deposit" | "transfer" | "bridge" | "none">("none");
   const router = useBetterRouter();
-
   const { setActiveWallet, wallet } = usePrivyWagmi();
   const { wallets } = useWallets();
   const [mainWallet, setMainWallet] = useState<string | undefined>(undefined);
-
   //Ensure the active wallet is the embedded wallet from Privy
   useEffect(() => {
     const found = wallets.find(wal => wal.walletClientType === "privy");
@@ -41,7 +38,9 @@ export default function ChatsPage() {
     } else {
       setMainWallet(user?.wallet);
     }
-  }, [setActiveWallet, wallets]);
+  }, [setActiveWallet, wallets, user?.wallet, router.searchParams]);
+
+  const fundModalState = useMemo(() => router.searchParams.fundModal, [router]);
 
   const { data: builderFiData, isLoading } = useBuilderFIData();
   const { data: balance, refetch: refetchBalance } = useBalance({
@@ -110,14 +109,23 @@ export default function ChatsPage() {
         </Flex>
       </Flex>
       <Flex x xc gap={5}>
-        <RoundButton variant="soft" icon={<ExportIcon />} title={"Bridge"} onClick={() => setFundModalType("bridge")} />
+        <RoundButton
+          variant="soft"
+          icon={<ExportIcon />}
+          title={"Bridge"}
+          onClick={() => router.replace({ searchParams: { fundModal: "bridge" } })}
+        />
         <RoundButton
           variant="soft"
           icon={<ArrowUpwardOutlined />}
           title={"Withdraw"}
           onClick={() => setOpenWithdraw(true)}
         />
-        <RoundButton icon={<ArrowDownwardOutlined />} title={"Deposit"} onClick={() => setFundModalType("deposit")} />
+        <RoundButton
+          icon={<ArrowDownwardOutlined />}
+          title={"Deposit"}
+          onClick={() => router.replace({ searchParams: { fundModal: "deposit" } })}
+        />
       </Flex>
       <Flex y p={2}>
         <Button
@@ -186,21 +194,21 @@ export default function ChatsPage() {
           </>
         )}
       </Flex>
-      {fundModalType === "deposit" && (
-        <Modal open onClose={() => setFundModalType("none")}>
+      {fundModalState === "deposit" && (
+        <Modal open onClose={() => router.replace({ searchParams: { fundModal: undefined } })}>
           <ModalDialog minWidth="400px">
             <DialogTitle>Deposit</DialogTitle>
             <ModalClose />
             <Typography level="body-md" textColor="neutral.600">
               Choose your preferred method
             </Typography>
-            <Button size="lg" onClick={() => setFundModalType("transfer")}>
+            <Button size="lg" onClick={() => router.replace({ searchParams: { fundModal: "transfer" } })}>
               Deposit with crypto
             </Button>
             <Button
               size="lg"
               onClick={() => {
-                setFundModalType("none");
+                router.replace({ searchParams: { fundModal: "deposit" } });
                 openMoonpay();
               }}
               variant="soft"
@@ -210,14 +218,14 @@ export default function ChatsPage() {
           </ModalDialog>
         </Modal>
       )}
-      {(fundModalType === "transfer" || fundModalType === "bridge") && (
+      {(fundModalState === "transfer" || fundModalState === "bridge") && (
         <FundWalletModal
           address={mainWallet}
           close={() => {
-            setFundModalType("none");
+            router.replace({ searchParams: { fundModal: undefined } });
             refetchBalance();
           }}
-          type={fundModalType}
+          type={fundModalState}
         />
       )}
     </Flex>

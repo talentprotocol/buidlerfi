@@ -6,6 +6,7 @@ export interface SimpleUseQueryOptions<TResponse = unknown> {
   refetchOnMount?: boolean;
   cacheTime?: number;
   staleTime?: number;
+  showError?: boolean;
 }
 
 //Helper to prevent conflicts between Prisma User and PrivyUser during autocomplete

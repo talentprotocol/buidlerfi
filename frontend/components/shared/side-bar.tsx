@@ -1,15 +1,13 @@
+import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetContractData } from "@/hooks/useBuilderFiApi";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
-import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { FAQ_LINK } from "@/lib/constants";
 import { formatToDisplayString } from "@/lib/utils";
 import {
   AccountBalanceWalletOutlined,
   AdminPanelSettings,
-  ChatOutlined,
   LiveHelpOutlined,
   Logout,
   PersonOutlineOutlined,
@@ -34,7 +32,6 @@ import { FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useBalance } from "wagmi";
 import { PointsIcon } from "../icons/points";
-import { AddToHomePage } from "./add-to-home-page";
 import { BannerCard } from "./bannerCard";
 import { Flex } from "./flex";
 import { WalletAddress } from "./wallet-address";
@@ -44,14 +41,9 @@ interface Props {
   setOpen: (isOpen: boolean) => void;
 }
 
-interface Navigator extends globalThis.Navigator {
-  standalone?: boolean;
-}
-
 export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user, isLoading, refetch } = useUserContext();
   const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
-  const contractData = useGetContractData();
   const refreshData = useRefreshCurrentUser();
   const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
   const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
@@ -62,7 +54,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
 
   const { logout } = usePrivy();
   const handleLogout = useCallback(async () => {
-    await logout().then(() => router.push("/signup"));
+    await logout().then(() => router.push("/home"));
   }, [logout, router]);
 
   const navItems = useMemo(
@@ -99,11 +91,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
         onClick: () => window.open(FAQ_LINK)
       },
       {
-        text: "Feedback",
-        icon: <ChatOutlined />,
-        onClick: () => window.open("https://t.me/+7FGAfQx66Z8xOThk")
-      },
-      {
         text: "Log out",
         icon: <Logout />,
         onClick: () => handleLogout()
@@ -112,58 +99,20 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     [address, handleLogout, user?.isAdmin]
   );
 
-  const batchNumber = () => {
-    const numberOfBuilders = BigInt(contractData.data?.totalNumberOfBuilders || 0);
-    if (numberOfBuilders < 100n) {
-      return 1;
-    } else if (numberOfBuilders < 200n) {
-      return 2;
-    } else if (numberOfBuilders < 500n) {
-      return 3;
-    } else if (numberOfBuilders < 1000n) {
-      return 4;
-    }
-    {
-      return "5+";
-    }
-  };
-  const batchCount = () => {
-    const number = batchNumber();
-    if (number === 1) {
-      return "100";
-    } else if (number === 2) {
-      return "200";
-    } else if (number === 3) {
-      return "500";
-    } else if (number === 4) {
-      return "1,000";
-    } else {
-      return "10,000";
-    }
-  };
-
-  const isInstalled = useMemo(() => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    const { standalone } = navigator as Navigator;
-    return document.referrer.startsWith("android-app://") || standalone || isStandalone;
-  }, []);
+  const { isPwaInstalled } = useLayoutContext();
 
   const cardToDisplay = useMemo(() => {
-    if (!isInstalled && !hasIgnoredInstallApp) return "install";
+    if (!isPwaInstalled && !hasIgnoredInstallApp) return "install";
     else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
     else return "none";
-  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isInstalled, user?.socialWallet]);
+  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isPwaInstalled, user?.socialWallet]);
 
   if (!user) return <></>;
 
   return (
     <Drawer open={isOpen} onClose={() => setOpen(false)}>
       <Flex y gap2 p={2}>
-        <Avatar
-          src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE}
-          onClick={() => setOpen(false)}
-          sx={{ position: "relative" }}
-        />
+        <Avatar src={user?.avatarUrl || undefined} onClick={() => setOpen(false)} sx={{ position: "relative" }} />
         <Flex y>
           <Flex x yc>
             {user.displayName ? (
@@ -232,7 +181,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
               title="Enhance Your Experience"
               body="Install the app for a seamless, personalized experience."
             >
-              <AddToHomePage />
+              <Button onClick={() => router.replace({ searchParams: { installmodal: true } })}>Install App</Button>
             </BannerCard>
           )}
           {cardToDisplay === "connect" && (
@@ -246,13 +195,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
               </Button>
             </BannerCard>
           )}
-        </Flex>
-
-        <Flex y xc yc>
-          <Typography textColor={"neutral.600"} level="body-sm">
-            <strong>Batch 0{batchNumber()}</strong> {contractData.data?.totalNumberOfBuilders}/{batchCount()} keys
-            launched
-          </Typography>
         </Flex>
       </Flex>
     </Drawer>

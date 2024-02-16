@@ -66,9 +66,9 @@ export const ReplyCommentEntry: FC<Props> = ({ id, type, content, author, refetc
             {/* if content is empty, it means the answer is locked (open question)*/}
             {type === "comment" && content === "" ? (
               <Typography level="body-sm" textColor="neutral.500" py={0.5}>
-                {author.displayName || shortAddress(author.wallet)}&apos;s answers are gated.{" "}
+                {author.displayName || shortAddress(author.wallet)}&apos;s answer is gated.{" "}
                 <a style={{ cursor: "pointer" }} onClick={() => setIsBuyingKey(true)}>
-                  reveal them, buying {author.displayName || shortAddress(author.wallet)}&apos;s key
+                  reveal it, buying {author.displayName || shortAddress(author.wallet)}&apos;s key
                 </a>
               </Typography>
             ) : (

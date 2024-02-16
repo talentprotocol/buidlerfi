@@ -3,12 +3,11 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { getDifference, shortAddress } from "@/lib/utils";
 import { Avatar, Chip, Skeleton, Typography } from "@mui/joy";
 import { SxProps, TypographySystem } from "@mui/joy/styles/types";
-import { User } from "@prisma/client";
 import { FC, useMemo } from "react";
 import { Flex } from "./flex";
 
 interface Props {
-  user?: User;
+  user?: { displayName: string | null; wallet: string; avatarUrl: string | null; id: number };
   isLoading?: boolean;
 
   //Type 1: Holder info. (Holders and holding on wallet page)

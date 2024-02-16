@@ -18,25 +18,29 @@ export const useLinkExternalWallet = () => {
   const generateChallenge = useGenerateChallenge();
   const { connectWallet } = useConnectWallet({
     onSuccess: async wallet => {
+      if (!wallet) {
+        setIsLoading(false);
+        return;
+      }
+
       //STEP2 new connected wallet is assigned to state, and challenge is generated -> will trigger STEP3
       try {
-        if (!wallet) {
-          setIsLoading(false);
-          return;
-        }
-
         if (wallet.chainId !== `eip155:${IN_USE_CHAIN_ID}`) {
           await wallet.switchChain(IN_USE_CHAIN_ID);
         }
 
         setWalletToSign(wallet as ConnectedWallet);
-        const challenge = await generateChallenge.mutateAsync(wallet.address);
+        const challenge = await generateChallenge.mutateAsync(wallet.address).catch(err => {
+          toast.error(formatError(err));
+        });
+
         if (!challenge) {
-          setIsLoading(false);
-          return;
+          throw "Error while generating challenge";
         }
+
         setChallenge(challenge);
-      } catch {
+      } catch (err) {
+        console.error(err);
         setIsLoading(false);
       }
     },

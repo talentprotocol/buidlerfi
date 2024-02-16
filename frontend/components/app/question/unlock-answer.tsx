@@ -15,14 +15,14 @@ export const UnlockAnswer: FC<Props> = ({ profile, refetch }) => {
   return (
     <>
       <PageMessage
-        title="Unlock answer"
+        title="This answer is gated"
         icon={<UserAvatar size="sm" user={profile.user} />}
         text={
           <>
             <a style={{ cursor: "pointer" }} onClick={() => setBuyModalState("buy")}>
               Buy {profile.user?.displayName || shortAddress(profile.user?.wallet)}&apos;s key
             </a>{" "}
-            to ask questions and access all answers
+            to access all his gated answers
           </>
         }
       />
