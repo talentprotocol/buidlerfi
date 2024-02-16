@@ -1,7 +1,5 @@
 import { getQuestion } from "@/backend/question/question";
-import { BASE_URL, ERROR_IMAGE_URL } from "@/lib/constants";
 import { QuestionWithInfo, generateImageSvg } from "@/lib/frame/svg";
-import { getFrameHtml } from "frames.js";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
@@ -9,21 +7,22 @@ export const GET = async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
   const upvoted = searchParams.get("upvoted") === "true";
+  const downvoted = searchParams.get("downvoted") === "true";
   const replied = searchParams.get("replied") === "true";
+  const userNotSignedUp = searchParams.get("userNotSignedUp") === "true";
+  const isReply = searchParams.get("isReply") === "true";
+  const ownKeys = searchParams.get("ownKeys") === "true";
+  const privyUserId = searchParams.get("privyUserId") ?? undefined;
+
+  console.log(ownKeys);
+
   if (!id) {
-    return new NextResponse(
-      getFrameHtml({
-        version: "vNext",
-        image: ERROR_IMAGE_URL,
-        buttons: [{ label: "try again", action: "post" }],
-        postUrl: `${BASE_URL}/api/frame/upvote?id=${id}`
-      })
-    );
+    return new NextResponse(null, { status: 400 });
   }
 
   console.log("Fetching question...", id);
 
-  const data = (await getQuestion(parseInt(id), undefined, true, true)) as unknown as {
+  const data = (await getQuestion(parseInt(id), privyUserId, true, true)) as unknown as {
     data: { question: QuestionWithInfo };
   };
 
@@ -31,7 +30,15 @@ export const GET = async (req: Request) => {
 
   const question = data.data;
 
-  const svg = await generateImageSvg(question as unknown as QuestionWithInfo, upvoted, replied);
+  const svg = await generateImageSvg(
+    question as unknown as QuestionWithInfo,
+    upvoted,
+    downvoted,
+    replied,
+    userNotSignedUp,
+    isReply,
+    ownKeys
+  );
 
   console.log("SVG generated!");
 
