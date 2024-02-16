@@ -673,7 +673,7 @@ export const answerQuestion = async (
       const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW ANSWER");
-      await publishNewAnswerCast(replierName, questionerName, `https://app.builder.fi/question/${question.id}`);
+      await publishNewAnswerCast(replierName, questionerName, `https://app.builder.fi/question/${question.id}?isReply=true`);
     }
   }
 
