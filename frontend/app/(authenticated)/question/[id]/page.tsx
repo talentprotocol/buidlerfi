@@ -13,7 +13,10 @@ type Props = {
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const id = params.id;
 
-  const question = await prisma.question.findUnique({ where: { id: parseInt(id) } });
+  const question = await prisma.question.findUnique({
+    where: { id: parseInt(id) },
+    include: { questioner: true, replier: true }
+  });
 
   const isReply = searchParams.isReply === "true" && question?.reply;
 
@@ -32,19 +35,6 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     if (question?.replierId == null) {
       buttons.push({ label: "reply ✍️", action: "post" } as FrameButton);
     }
-  const question = await prisma.question.findUnique({
-    where: { id: parseInt(id) },
-    include: { questioner: true, replier: true }
-  });
-  const buttons: FrameButtonsType = [
-    {
-      label: "upvote ⬆️",
-      action: "post"
-    } as FrameButton
-  ];
-  // if replier id is null, question is open, so everyone can reply
-  if (question?.replierId == null) {
-    buttons.push({ label: "reply ✍️", action: "post" });
   }
 
   const fcMetadata: Record<string, string> = getFrameFlattened({
