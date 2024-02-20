@@ -68,6 +68,7 @@ export const useUserProfile = (wallet?: string) => {
     isOwnProfile: !!currentUser?.wallet && currentUser.wallet.toLowerCase() === formattedWallet,
     getQuestionsFromReplierQuery,
     getQuestionsFromQuestionerQuery,
-    hasLaunchedKeys: !!holdings?.find(key => key.holderId === key.ownerId)
+    hasLaunchedKeys: !!holdings?.find(key => key.holderId === key.ownerId),
+    isGated: user?.isGated
   };
 };
