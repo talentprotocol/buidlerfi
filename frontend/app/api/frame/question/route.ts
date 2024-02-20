@@ -15,7 +15,6 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const accountAddress = "";
   // Step 2. Read the body from the Next Request
   const body: FrameActionPayload = await req.json();
 
