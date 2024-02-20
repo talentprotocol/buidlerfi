@@ -1,5 +1,6 @@
 "use server";
 
+import { UserSettingKeyEnum } from "@prisma/client";
 import { ServerActionOptions, serverActionWrapper } from "../../lib/serverActionWrapper";
 import {
   UpdateUserArgs,
@@ -14,6 +15,7 @@ import {
   linkNewWallet,
   refreshAllUsersProfile,
   refreshCurrentUserProfile,
+  setUserSetting,
   updateUser
 } from "./user";
 
@@ -25,8 +27,8 @@ export const getUserSA = (wallet: string, options: ServerActionOptions) => {
   return serverActionWrapper(() => getUser(wallet), options);
 };
 
-export const createUserSA = (inviteCode: string, options: ServerActionOptions) => {
-  return serverActionWrapper(data => createUser(data.privyUserId, inviteCode), options);
+export const createUserSA = (options: ServerActionOptions) => {
+  return serverActionWrapper(data => createUser(data.privyUserId), options);
 };
 
 export const refreshCurrentUserProfileSA = (options: ServerActionOptions) => {
@@ -64,4 +66,8 @@ export const getRecommendedUsersSA = (address: string, options: ServerActionOpti
 
 export const getUserStatsSA = (userId: number, options: ServerActionOptions) => {
   return serverActionWrapper(() => getUserStats(userId), options);
+};
+
+export const setUserSettingSA = (key: UserSettingKeyEnum, value: string, options: ServerActionOptions) => {
+  return serverActionWrapper(data => setUserSetting(data.privyUserId, key, value), options);
 };

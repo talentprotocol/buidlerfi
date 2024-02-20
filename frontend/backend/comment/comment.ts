@@ -3,15 +3,15 @@ import { MAX_COMMENT_LENGTH } from "@/lib/constants";
 import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { ReactionType } from "@prisma/client";
-import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
+import { getKeyRelationships, hasLaunchedKeys, ownsKey } from "../keyRelationship/keyRelationship";
 
-export const getComments = async (privyUserId: string, questionId: number) => {
-  const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
+export const getComments = async (questionId: number, privyUserId?: string) => {
+  const currentUser = privyUserId ? await prisma.user.findUnique({ where: { privyUserId } }) : undefined;
   const question = await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
 
-  //Not an open question
-  if (question.replierId) {
-    const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
+  //Not an open question. If question is gated, comments are also gated
+  if (question.replierId && question.isGated) {
+    const hasKey = await ownsKey({ userId: question.replierId }, { privyUserId });
     if (!hasKey) {
       return { error: ERRORS.MUST_HOLD_KEY, data: [] };
     }
@@ -20,24 +20,18 @@ export const getComments = async (privyUserId: string, questionId: number) => {
   const comments = await prisma.comment.findMany({
     where: { questionId },
     include: {
-      author: {
-        include: {
-          keysOfSelf: true
-        }
-      },
+      author: true,
       reactions: true
     }
   });
 
   //If it's an open-question, exclude content of comments for which the user doesn't hold a key
   if (!question.replierId) {
-    const myKeys = await getKeyRelationships(currentUser.wallet, "holder");
+    //If no current user, it means anonymous access
+    const myKeys = currentUser ? await getKeyRelationships(currentUser.wallet, "holder") : { data: [] };
     const myKeysMap = myKeys.data.reduce((prev, curr) => ({ ...prev, [curr.ownerId]: true }), {});
     for (const comment of comments) {
-      const hasAuthorLaunchedKeys = comment.author.keysOfSelf.some(
-        key => key.holderId === key.ownerId && key.amount > 0
-      );
-      if (hasAuthorLaunchedKeys && !(comment.authorId in myKeysMap)) {
+      if (comment.isGated && !(comment.authorId in myKeysMap)) {
         comment.content = "";
       }
     }
@@ -46,7 +40,7 @@ export const getComments = async (privyUserId: string, questionId: number) => {
   return { data: comments };
 };
 
-export const createComment = async (privyUserId: string, questionId: number, comment: string) => {
+export const createComment = async (privyUserId: string, questionId: number, comment: string, isGated?: boolean) => {
   if (comment.length < 5 || comment.length > MAX_COMMENT_LENGTH) {
     return { error: ERRORS.INVALID_LENGTH };
   }
@@ -61,13 +55,17 @@ export const createComment = async (privyUserId: string, questionId: number, com
     if (!hasKey) return { error: ERRORS.MUST_HOLD_KEY };
   }
 
+  const hasLaunchedKey = await hasLaunchedKeys({ privyUserId });
+
   const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
 
   const newComment = await prisma.comment.create({
     data: {
       content: comment,
       questionId,
-      authorId: currentUser.id
+      authorId: currentUser.id,
+      //Can be gated if user has launched keys and is an open question
+      isGated: !question.replierId && hasLaunchedKey ? isGated || false : false
     }
   });
 

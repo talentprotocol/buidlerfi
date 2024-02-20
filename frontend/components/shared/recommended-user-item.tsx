@@ -1,6 +1,5 @@
 "use client";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { shortAddress } from "@/lib/utils";
 import { ChevronRight } from "@mui/icons-material";
 import { Typography } from "@mui/joy";
@@ -93,7 +92,7 @@ const UserItemInner: FC<UserItemInnerProps> = ({
       <Flex x yc gap2>
         <Avatar
           size="sm"
-          src={avatar || DEFAULT_PROFILE_PICTURE}
+          src={avatar || undefined}
           sx={{ cursor: "pointer" }}
           onClick={() => router.push(`/profile/${address}`)}
           alt={name}

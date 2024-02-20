@@ -1,4 +1,3 @@
-import { DEFAULT_PROFILE_PICTURE } from "@/lib/assets";
 import { Avatar, Textarea } from "@mui/joy";
 import { ChangeEvent, FC, useRef } from "react";
 import { Flex } from "./flex";
@@ -16,7 +15,7 @@ export const FullTextArea: FC<Props> = ({ avatarUrl, placeholder, value, onChang
   return (
     <Flex y grow minHeight="100px">
       <Flex x ys gap={1}>
-        <Avatar size="sm" src={avatarUrl || DEFAULT_PROFILE_PICTURE} />
+        <Avatar size="sm" src={avatarUrl || undefined} />
         <Flex grow>
           <Textarea
             ref={textAreadRef}

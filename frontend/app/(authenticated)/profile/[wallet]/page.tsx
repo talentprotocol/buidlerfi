@@ -4,15 +4,17 @@ import { QuestionsList } from "@/components/app/[wallet]/questions-list";
 import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
 import { Flex } from "@/components/shared/flex";
 import { InjectTopBar } from "@/components/shared/top-bar";
+import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { isEVMAddress } from "@/lib/utils";
 import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {
   const profile = useUserProfile(params.wallet);
-
-  const [buyModalState, setBuyModalState] = useState<"closed" | "buy" | "sell">("closed");
+  const router = useBetterRouter();
+  const tradeModal = router.searchParams.tradeModal;
+  const side = tradeModal === "buy" ? "buy" : "sell";
 
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 
@@ -22,38 +24,36 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
 
   useEffect(() => {
     if (!isValidWallet) window.location.replace("/notfound");
-  }, [isValidWallet]);
+  }, [isValidWallet, router.searchParams]);
 
   if (!isValidWallet) return <></>;
-
   return (
     <Flex component={"main"} y grow>
       <InjectTopBar withBack title={profile.user?.displayName || undefined} />
-      {buyModalState !== "closed" && profile.user && (
+      {(tradeModal == "buy" || tradeModal == "sell") && profile.user && (
         <TradeKeyModal
           keyOwner={profile.user}
           supporterKeysCount={profile.ownedKeysCount || 0}
           hasKeys={profile.hasKeys}
           isFirstKey={profile.isOwnProfile && profile.holders?.length === 0}
-          side={buyModalState}
+          side={side}
           close={async () => {
-            await profile.refetch();
-            setBuyModalState("closed");
+            router.replace({ searchParams: { tradeModal: undefined } });
+            profile.refetch();
           }}
         />
       )}
-
-      <Overview profile={profile} setBuyModalState={setBuyModalState} />
+      <Overview profile={profile} />
       <Tabs defaultValue={"answers"}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
           <Tab value="answers">{profile.questions?.length} Answers</Tab>
           <Tab value="questions">{profile.questionsAsked?.length} Questions</Tab>
         </TabList>
         <TabPanel value="answers" sx={{ p: 0 }}>
-          <QuestionsList profile={profile} type="answers" onBuyKeyClick={() => setBuyModalState("buy")} />
+          <QuestionsList profile={profile} type="answers" />
         </TabPanel>
         <TabPanel value="questions" sx={{ p: 0 }}>
-          <QuestionsList profile={profile} type="questions" onBuyKeyClick={() => setBuyModalState("buy")} />
+          <QuestionsList profile={profile} type="questions" />
         </TabPanel>
       </Tabs>
     </Flex>

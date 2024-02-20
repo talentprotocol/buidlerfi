@@ -1,6 +1,5 @@
 "use client";
-import { ExploreTopBar, TabsEnum } from "@/components/app/explore/exploreTopBar";
-import { WelcomeModal } from "@/components/app/welcome-modal";
+import { ExploreTopBar } from "@/components/app/explore/exploreTopBar";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
@@ -9,32 +8,21 @@ import { RecommendedUserItem } from "@/components/shared/recommended-user-item";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
-import { useBetterRouter } from "@/hooks/useBetterRouter";
-import {
-  useGetNewUsers,
-  useGetTopUsers,
-  useGetTopUsersByAnswersGiven,
-  useGetTopUsersByKeysOwned,
-  useGetTopUsersByQuestionsAsked,
-  useRecommendedUsers,
-  useSearch
-} from "@/hooks/useUserApi";
+import { useGetNewUsers, useGetTopUsers, useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
 import { PersonSearchOutlined, SupervisorAccountOutlined } from "@mui/icons-material";
-import { TabPanel, Tabs } from "@mui/joy";
+import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
 import { useEffect, useState } from "react";
 
+const ExploreTabs = ["Top", "New", "Friends"] as const;
+export type TabsEnum = (typeof ExploreTabs)[number];
+
 export default function ExplorePage() {
-  const [selectedTab, setSelectedTab] = useState<TabsEnum>("New");
+  const [selectedTab, setSelectedTab] = useState<TabsEnum>("Top");
   const [searchValue, setSearchValue] = useState("");
 
   const { user } = useUserContext();
   const topUsers = useGetTopUsers();
   const newUsers = useGetNewUsers();
-  const topUsersByQuestions = useGetTopUsersByQuestionsAsked();
-  const topUsersByAnswers = useGetTopUsersByAnswersGiven();
-  const topUsersByKeys = useGetTopUsersByKeysOwned();
-
-  const router = useBetterRouter();
 
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
 
@@ -46,19 +34,23 @@ export default function ExplorePage() {
 
   return (
     <Flex component={"main"} y grow>
-      <InjectTopBar
-        fullItem={
-          <ExploreTopBar
-            searchValue={searchValue}
-            setSearchValue={setSearchValue}
-            setSelectedTab={setSelectedTab}
-            selectedTab={selectedTab}
-          />
-        }
-      />
-      {router.searchParams.welcome === "1" && <WelcomeModal />}
+      <InjectTopBar fullItem={<ExploreTopBar searchValue={searchValue} setSearchValue={setSearchValue} />} />
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
-        <TabPanel value="Holders">
+        <TabList
+          sx={{
+            backgroundColor: theme => theme.palette.background.body,
+            top: "55px",
+            position: "sticky",
+            display: "flex"
+          }}
+        >
+          {ExploreTabs.map(tab => (
+            <Tab key={tab} value={tab} sx={{ width: "33.3%" }}>
+              {tab}
+            </Tab>
+          ))}
+        </TabList>
+        <TabPanel value="Top">
           {topUsers.isLoading ? (
             <LoadingPage />
           ) : (
@@ -66,10 +58,15 @@ export default function ExplorePage() {
               <div key={user.id}>
                 <UnifiedUserItem
                   user={user}
-                  holdersAndReplies={{
-                    questionsCount: user.numberOfReplies,
-                    numberOfHolders: user.numberOfHolders
-                  }}
+                  bio={user.bio || undefined}
+                  holdersAndReplies={
+                    user.bio
+                      ? undefined
+                      : {
+                          questionsCount: user.numberOfReplies,
+                          numberOfHolders: user.numberOfHolders
+                        }
+                  }
                 />
               </div>
             ))
@@ -153,61 +150,6 @@ export default function ExplorePage() {
             ))
           )}
           <LoadMoreButton query={newUsers} />
-        </TabPanel>
-        <TabPanel value="Questions">
-          {topUsersByQuestions.isLoading ? (
-            <LoadingPage />
-          ) : (
-            topUsersByQuestions.data?.map(user => (
-              <div key={user.id}>
-                <UnifiedUserItem
-                  user={user}
-                  holdersAndReplies={{
-                    numberOfHolders: user.numberOfHolders,
-                    questionsCount: user.questionsAsked,
-                    label: "question"
-                  }}
-                />
-              </div>
-            ))
-          )}
-          <LoadMoreButton query={topUsersByQuestions} />
-        </TabPanel>
-        <TabPanel value="Answers">
-          {topUsersByAnswers.isLoading ? (
-            <LoadingPage />
-          ) : (
-            topUsersByAnswers.data?.map(user => (
-              <div key={user.id}>
-                <UnifiedUserItem
-                  user={user}
-                  holdersAndReplies={{
-                    numberOfHolders: user.numberOfHolders,
-                    questionsCount: user.questionsAnswered
-                  }}
-                />
-              </div>
-            ))
-          )}
-          <LoadMoreButton query={topUsersByAnswers} />
-        </TabPanel>
-        <TabPanel value="Keys">
-          {topUsersByKeys.isLoading ? (
-            <LoadingPage />
-          ) : (
-            topUsersByKeys.data?.map(user => (
-              <div key={user.id}>
-                <UnifiedUserItem
-                  user={user}
-                  holdersAndKeys={{
-                    numberOfHolders: user.numberOfHolders || 0,
-                    ownedKeys: user.ownedKeys
-                  }}
-                />
-              </div>
-            ))
-          )}
-          <LoadMoreButton query={topUsersByKeys} />
         </TabPanel>
       </Tabs>
     </Flex>

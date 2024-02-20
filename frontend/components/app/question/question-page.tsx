@@ -14,19 +14,18 @@ import { useState } from "react";
 
 export default function QuestionPage() {
   const { id: questionId } = useParams();
-  const { data: question, refetch } = useGetQuestion(Number(questionId), {
-    cacheTime: 0,
-    staleTime: 0
-  });
+  const { data: question, refetch } = useGetQuestion(Number(questionId));
   const profile = useUserProfile(question?.replier?.wallet as `0x${string}`);
   const putQuestion = usePutQuestion();
   const [reply, setReply] = useState("");
+  const [isGateAnswer, setIsGateAnswer] = useState(false);
 
   const replyQuestion = async () => {
     if (!question) return;
     await putQuestion.mutateAsync({
       id: question.id,
-      answerContent: reply
+      answerContent: reply,
+      isGated: isGateAnswer
     });
     setReply("");
     refetch();
@@ -50,7 +49,9 @@ export default function QuestionPage() {
       <QuestionContent {...{ question, profile, refetch }} />
       <Divider />
       <Flex y grow>
-        {question.replierId && <QuestionReply {...{ question, profile, reply, setReply, refetch }} />}
+        {question.replierId && (
+          <QuestionReply {...{ question, profile, reply, setReply, refetch, isGateAnswer, setIsGateAnswer }} />
+        )}
         {(isOpenQuestion || (!isOpenQuestion && question.repliedOn)) && (
           <CommentsList isOpenQuestion={isOpenQuestion} questionId={question.id} refetch={() => refetch()} />
         )}

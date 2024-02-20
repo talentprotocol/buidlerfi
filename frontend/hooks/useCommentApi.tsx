@@ -15,8 +15,8 @@ export const useGetComments = (questionId?: number) => {
 };
 
 export const useCreateComment = () => {
-  return useMutationSA((options, params: { questionId: number; comment: string }) =>
-    createCommentSA(params.questionId, params.comment, options)
+  return useMutationSA((options, params: { questionId: number; comment: string; isGated?: boolean }) =>
+    createCommentSA(params, options)
   );
 };
 

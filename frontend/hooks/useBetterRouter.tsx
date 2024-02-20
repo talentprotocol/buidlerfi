@@ -1,3 +1,6 @@
+"use client";
+
+import { useHistoryContext } from "@/contexts/historyContext";
 import { convertParamsToString } from "@/lib/utils";
 import { isBoolean, isNumber } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -14,6 +17,7 @@ interface BetterRouterOptions {
 }
 
 export const useBetterRouter = () => {
+  const { ignoreNextNavigation, updateHistory } = useHistoryContext();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const nextRouter = useRouter();
@@ -52,7 +56,7 @@ export const useBetterRouter = () => {
       if (url.pathname.startsWith("./")) {
         url.pathname = pathname + url.pathname.substring(1);
       }
-      if (Object.entries(url.searchParams!).length === 0) return url.pathname;
+      if (Object.entries(url.searchParams || {}).length === 0) return url.pathname;
       else return `${url.pathname}?${convertParamsToString(url.searchParams!)}`;
     },
     [pathname, searchParams]
@@ -61,18 +65,29 @@ export const useBetterRouter = () => {
   const replace = useCallback(
     (url: CustomUrl | string, options?: BetterRouterOptions) => {
       const formattedUrl = formatUrl(url, options);
+      ignoreNextNavigation.current = true;
+      updateHistory({ pop: true, push: formattedUrl });
       nextRouter.replace(formattedUrl, { scroll: false });
     },
-    [formatUrl, nextRouter]
+    [formatUrl, ignoreNextNavigation, updateHistory, nextRouter]
   );
 
   const push = useCallback(
     (url: CustomUrl | string, options?: BetterRouterOptions) => {
+      ignoreNextNavigation.current = true;
       const formattedUrl = formatUrl(url, options);
+      updateHistory({ push: formattedUrl });
       nextRouter.push(formattedUrl, { scroll: false });
     },
-    [formatUrl, nextRouter]
+    [ignoreNextNavigation, formatUrl, updateHistory, nextRouter]
   );
 
-  return { ...nextRouter, replace, push, searchParams: searchParamsDict };
+  const back = useCallback(() => {
+    updateHistory({ pop: true });
+    const previous = updateHistory({ pop: true });
+    if (previous) nextRouter.replace(previous, { scroll: false });
+    else nextRouter.replace("/");
+  }, [updateHistory, nextRouter]);
+
+  return { ...nextRouter, replace, push, searchParams: searchParamsDict, back };
 };
