@@ -80,7 +80,6 @@ export const getCurrentUser = async (privyUserId: string) => {
 
   if (res.privyUserId) {
     const privyUser = await privyClient.getUser(res.privyUserId);
-    console.log(privyUser);
   }
 
   return { data: res };
@@ -127,7 +126,6 @@ export const getUser = async (wallet: string) => {
 };
 
 export const createUser = async (privyUserId: string) => {
-  console.log("createUser");
   const privyUser = await privyClient.getUser(privyUserId);
   if (!privyUser) {
     return { error: ERRORS.UNAUTHORIZED };

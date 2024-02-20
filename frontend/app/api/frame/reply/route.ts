@@ -56,7 +56,6 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
 
   // if no reply, means user can't read the answer
   if (frameMessage.buttonIndex === 2 && !question.data.reply) {
-    console.log("CAN'T READ");
     return new NextResponse(
       getFrameHtml({
         version: "vNext",
@@ -74,7 +73,6 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
 
   // otherwise, user can read the answer
   if (frameMessage.buttonIndex === 2 && question.data.reply) {
-    console.log("CAN READ");
     return new NextResponse(
       getFrameHtml({
         version: "vNext",

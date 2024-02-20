@@ -31,9 +31,6 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(null, { status: 400 });
   }
 
-  console.log("Account address is", accountAddress);
-  console.log("button index", frameMessage.buttonIndex);
-
   // check if user is on builder.fi with his fc account
   const farcasterProfile = await prisma.socialProfile.findFirst({
     where: { profileName: frameMessage.requesterUserData?.username, type: SocialProfileType.FARCASTER },
