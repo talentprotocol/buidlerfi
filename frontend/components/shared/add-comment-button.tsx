@@ -1,6 +1,7 @@
 import { useGetComments } from "@/hooks/useCommentApi";
-import { ChatBubbleOutline } from "@mui/icons-material";
-import { IconButton, Typography } from "@mui/joy";
+import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
+import IconButton from "@mui/joy/IconButton";
+import Typography from "@mui/joy/Typography";
 import { FC, useState } from "react";
 import { CreateEditCommentModal } from "../app/[wallet]/create-edit-comment-modal";
 import { Flex } from "./flex";

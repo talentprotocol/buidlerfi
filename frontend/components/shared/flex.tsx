@@ -1,4 +1,6 @@
-import { Box, Skeleton, type BoxProps } from "@mui/joy";
+import Box from "@mui/joy/Box";
+import { BoxProps } from "@mui/joy/Box/BoxProps";
+import Skeleton from "@mui/joy/Skeleton";
 import { SxProps } from "@mui/joy/styles/types";
 import { forwardRef, type ReactNode } from "react";
 

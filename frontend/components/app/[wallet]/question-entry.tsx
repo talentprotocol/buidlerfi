@@ -9,7 +9,12 @@ import { useGetHotQuestions, useGetKeyQuestions, useGetQuestionsFromUser } from 
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference } from "@/lib/utils";
 import theme from "@/theme";
-import { Avatar, AvatarGroup, Box, Chip, Grid, Typography } from "@mui/joy";
+import Avatar from "@mui/joy/Avatar";
+import AvatarGroup from "@mui/joy/AvatarGroup";
+import Box from "@mui/joy/Box";
+import Chip from "@mui/joy/Chip";
+import Grid from "@mui/joy/Grid";
+import Typography from "@mui/joy/Typography";
 import { FC, useMemo } from "react";
 import { QuestionContextMenu } from "./question-context-menu";
 

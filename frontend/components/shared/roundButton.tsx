@@ -1,4 +1,6 @@
-import { Button, ButtonProps, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import { ButtonProps } from "@mui/joy/Button/ButtonProps";
+import Typography from "@mui/joy/Typography";
 import { SxProps } from "@mui/joy/styles/types";
 import { FC } from "react";
 import { Flex } from "./flex";

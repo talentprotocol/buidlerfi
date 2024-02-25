@@ -8,8 +8,12 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
-import { Key } from "@mui/icons-material";
-import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import Key from "@mui/icons-material/Key";
+import Button from "@mui/joy/Button";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import TabPanel from "@mui/joy/TabPanel";
+import Tabs from "@mui/joy/Tabs";
 import { useLogin } from "@privy-io/react-auth";
 import { useEffect } from "react";
 

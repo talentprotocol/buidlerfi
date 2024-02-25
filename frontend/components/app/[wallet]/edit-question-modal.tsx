@@ -4,7 +4,10 @@ import { OpenDialog } from "@/contexts/DialogContainer";
 import { useUserContext } from "@/contexts/userContext";
 import { useEditQuestion, useGetQuestion, usePostQuestion } from "@/hooks/useQuestionsApi";
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH } from "@/lib/constants";
-import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { FC, useState } from "react";
 
 interface Props {

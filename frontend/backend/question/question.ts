@@ -15,7 +15,7 @@ import {
   SocialProfileType,
   User
 } from "@prisma/client";
-import { differenceInMinutes } from "date-fns";
+import differenceInMinutes from "date-fns/differenceInMinutes";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
@@ -673,7 +673,11 @@ export const answerQuestion = async (
       const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW ANSWER");
-      await publishNewAnswerCast(replierName, questionerName, `https://app.builder.fi/question/${question.id}?isReply=true`);
+      await publishNewAnswerCast(
+        replierName,
+        questionerName,
+        `https://app.builder.fi/question/${question.id}?isReply=true`
+      );
     }
   }
 

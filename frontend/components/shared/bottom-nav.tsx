@@ -1,8 +1,10 @@
 import { HomeIcon } from "@/components/icons/home";
 import { SearchIcon } from "@/components/icons/search";
 import { useUserContext } from "@/contexts/userContext";
-import { Add } from "@mui/icons-material";
-import { Badge, Button, Link as JoyLink } from "@mui/joy";
+import Add from "@mui/icons-material/Add";
+import Badge from "@mui/joy/Badge";
+import Button from "@mui/joy/Button";
+import JoyLink from "@mui/joy/Link";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";

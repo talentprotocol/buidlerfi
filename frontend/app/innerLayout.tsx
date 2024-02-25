@@ -7,12 +7,8 @@ import { HistoryContextProvider } from "@/contexts/historyContext";
 import { LayoutContextProvider, useLayoutContext } from "@/contexts/layoutContext";
 import { UserProvider } from "@/contexts/userContext";
 import theme from "@/theme";
-import { CssVarsProvider } from "@mui/joy";
-import {
-  THEME_ID as MATERIAL_THEME_ID,
-  Experimental_CssVarsProvider as MaterialCssVarsProvider,
-  experimental_extendTheme as materialExtendTheme
-} from "@mui/material/styles";
+import CssBaseline from "@mui/joy/CssBaseline";
+import { CssVarsProvider } from "@mui/joy/styles/CssVarsProvider";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { PrivyWagmiConnector } from "@privy-io/wagmi-connector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -40,7 +36,6 @@ const queryClient = new QueryClient({
 export default function InnerLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const materialTheme = materialExtendTheme();
   return (
     <Flex
       y
@@ -54,15 +49,14 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
         border: theme => "1px solid " + theme.palette.neutral[300]
       }}
     >
-      <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: materialTheme }}>
-        <CssVarsProvider theme={theme}>
-          <QueryClientProvider client={queryClient}>
-            {mounted && <InnerProviders>{children}</InnerProviders>}
-          </QueryClientProvider>
-          <ToastContainer />
-          <DialogContainer />
-        </CssVarsProvider>
-      </MaterialCssVarsProvider>
+      <CssVarsProvider theme={theme}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          {mounted && <InnerProviders>{children}</InnerProviders>}
+        </QueryClientProvider>
+        <ToastContainer />
+        <DialogContainer />
+      </CssVarsProvider>
     </Flex>
   );
 }

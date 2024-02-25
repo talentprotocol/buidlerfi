@@ -6,7 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { formatBigIntToFixedDecimals } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
 import { NotificationType } from "@prisma/client";
-import _ from "lodash";
+import uniq from "lodash/uniq";
+import uniqBy from "lodash/uniqBy";
 import { decodeEventLog, parseAbiItem } from "viem";
 import { publishNewTradeKeysCast, publishNewUserCast } from "../farcaster/farcaster";
 import { sendNotification } from "../notification/notification";
@@ -302,7 +303,7 @@ export const getTransactions = async (
     take: PAGINATION_LIMIT
   });
 
-  const uniqueWallets = _.uniq([...transactions.map(t => t.holderAddress), ...transactions.map(t => t.ownerAddress)]);
+  const uniqueWallets = uniq([...transactions.map(t => t.holderAddress), ...transactions.map(t => t.ownerAddress)]);
 
   const users = await prisma.user.findMany({
     where: {
@@ -317,7 +318,7 @@ export const getTransactions = async (
     userMap.set(user.wallet.toLowerCase(), user);
   }
 
-  const res = _.uniqBy(transactions, tx => tx.id)
+  const res = uniqBy(transactions, tx => tx.id)
     .filter(tx => userMap.has(tx.holderAddress.toLowerCase()) && userMap.has(tx.ownerAddress.toLowerCase()))
     .map(transaction => ({
       ...transaction,
@@ -368,7 +369,7 @@ export const getFriendsTransactions = async (privyUserId: string, offset: number
     take: PAGINATION_LIMIT
   });
 
-  const uniqueWallets = _.uniq([...transactions.map(t => t.holderAddress), ...transactions.map(t => t.ownerAddress)]);
+  const uniqueWallets = uniq([...transactions.map(t => t.holderAddress), ...transactions.map(t => t.ownerAddress)]);
 
   const users = await prisma.user.findMany({
     where: {
@@ -383,7 +384,7 @@ export const getFriendsTransactions = async (privyUserId: string, offset: number
     userMap.set(user.wallet.toLowerCase(), user);
   }
 
-  const res = _.uniqBy(transactions, tx => tx.id)
+  const res = uniqBy(transactions, tx => tx.id)
     .filter(tx => userMap.has(tx.holderAddress.toLowerCase()) && userMap.has(tx.ownerAddress.toLowerCase()))
     .map(transaction => ({
       ...transaction,

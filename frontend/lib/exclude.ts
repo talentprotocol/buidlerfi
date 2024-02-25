@@ -1,4 +1,4 @@
-import _ from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 
 type Prev = [never, 0, 1, 2, 3, 4, 5, ...0[]];
 
@@ -41,7 +41,7 @@ export function exclude<T, Key extends Paths<T>>(
     return item.map(i => exclude(i, keys) as SetNull<T, Key>);
   }
 
-  const clone = _.cloneDeep(item); // Use deep copy
+  const clone = cloneDeep(item); // Use deep copy
   const keysArray = Array.isArray(keys) ? keys : [keys];
 
   keysArray.forEach(keyPath => {

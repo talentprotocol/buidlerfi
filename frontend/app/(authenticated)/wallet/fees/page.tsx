@@ -10,13 +10,15 @@ import { TransactionEntry } from "@/components/shared/transaction-entry";
 import { useGetTransactions } from "@/hooks/useTransaction";
 import { useUsdPrice } from "@/hooks/useUsdPrice";
 import { formatToDisplayString, sortIntoPeriods } from "@/lib/utils";
-import { HistoryOutlined } from "@mui/icons-material";
-import { Typography } from "@mui/joy";
+import HistoryOutlined from "@mui/icons-material/HistoryOutlined";
+import Typography from "@mui/joy/Typography";
+import { useTheme } from "@mui/joy/styles/ThemeProvider";
 import { useMemo } from "react";
 
 export default function FeesPage() {
   const myTransactions = useGetTransactions("owner");
   const sortedTransactions = sortIntoPeriods(myTransactions.data || []);
+  const theme = useTheme();
 
   const tradingFees = useMemo(() => {
     return myTransactions.data?.reduce((prev, curr) => prev + BigInt(curr.ownerFee || 0), BigInt(0));
@@ -37,7 +39,7 @@ export default function FeesPage() {
           borderRadius="20px"
           sx={{ backgroundColor: theme => theme.palette.primary.softBg }}
         >
-          <FeesIcon fontSize="xl" sx={{ color: theme => theme.palette.primary[400] }} />
+          <FeesIcon fontSize="xl" sx={{ color: theme.palette.primary[400] }} />
         </Flex>
         <Flex y>
           <Typography className="remove-text-transform" level="h4">

@@ -1,4 +1,5 @@
-import { SvgIcon, SvgIconProps } from "@mui/joy";
+import SvgIcon from "@mui/joy/SvgIcon";
+import { SvgIconProps } from "@mui/joy/SvgIcon/SvgIconProps";
 
 export const EthIcon = (props: SvgIconProps) => {
   return (

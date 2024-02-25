@@ -9,7 +9,7 @@ import { ipfsToURL } from "@/lib/utils";
 import viemClient from "@/lib/viemClient";
 import { Prisma, SocialProfileType, UserSettingKeyEnum } from "@prisma/client";
 import { Wallet } from "@privy-io/server-auth";
-import { differenceInMinutes } from "date-fns";
+import differenceInMinutes from "date-fns/differenceInMinutes";
 // import { sendNotification } from "../notification/notification";
 import { syncFarcasterFollowings } from "../socialProfile/farcasterFollowing";
 import { updateRecommendations } from "../socialProfile/recommendation";
@@ -77,10 +77,6 @@ export const getCurrentUser = async (privyUserId: string) => {
       tags: true
     }
   });
-
-  if (res.privyUserId) {
-    const privyUser = await privyClient.getUser(res.privyUserId);
-  }
 
   return { data: res };
 };

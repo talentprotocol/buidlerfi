@@ -1,4 +1,5 @@
-import { Typography, useTheme } from "@mui/joy";
+import Typography from "@mui/joy/Typography";
+import { useTheme } from "@mui/joy/styles/ThemeProvider";
 import { SxProps } from "@mui/joy/styles/types";
 import { FC, ReactElement, ReactNode, cloneElement } from "react";
 import { Flex } from "./flex";

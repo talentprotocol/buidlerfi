@@ -7,8 +7,8 @@ import { PageMessage } from "@/components/shared/page-message";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { shortAddress } from "@/lib/utils";
-import { AccessTimeOutlined } from "@mui/icons-material";
-import { Button } from "@mui/joy";
+import AccessTimeOutlined from "@mui/icons-material/AccessTimeOutlined";
+import Button from "@mui/joy/Button";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
 

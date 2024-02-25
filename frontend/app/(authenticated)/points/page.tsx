@@ -10,10 +10,14 @@ import { useClaimPoint, useGetCurrentPosition } from "@/hooks/usePointApi";
 import { useGetQuest, useGetUserQuest, useVerifyQuests } from "@/hooks/useQuestAPI";
 import { AIRDROP_EXPIRATION_AFTER_CREATION, GET_NEXT_AIRDROP_DATE } from "@/lib/constants";
 import { getFullTimeDifference } from "@/lib/utils";
-import { CheckCircle, HelpOutline } from "@mui/icons-material";
-import { Button, Card, IconButton, Typography } from "@mui/joy";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import HelpOutline from "@mui/icons-material/HelpOutline";
+import Button from "@mui/joy/Button";
+import Card from "@mui/joy/Card";
+import IconButton from "@mui/joy/IconButton";
+import Typography from "@mui/joy/Typography";
 import { useQuery } from "@tanstack/react-query";
-import { differenceInDays } from "date-fns";
+import differenceInDays from "date-fns/differenceInDays";
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 

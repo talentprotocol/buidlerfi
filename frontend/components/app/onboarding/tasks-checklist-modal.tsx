@@ -1,8 +1,14 @@
 import { OnboardingTask } from "@/components/layout/onboarding-tasks";
 import { Flex } from "@/components/shared/flex";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { CheckCircle } from "@mui/icons-material";
-import { Button, Card, LinearProgress, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import Button from "@mui/joy/Button";
+import Card from "@mui/joy/Card";
+import LinearProgress from "@mui/joy/LinearProgress";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 
 interface Props {
@@ -46,6 +52,7 @@ export const TasksChecklistModal: FC<Props> = ({ tasks, finishedTasks, progress,
                 variant={isCompleted ? "soft" : "outlined"}
                 color={isCompleted ? "primary" : "neutral"}
                 onClick={() => {
+                  if (task.preRedirect) task.preRedirect();
                   router.push(task.redirect);
                   close();
                 }}

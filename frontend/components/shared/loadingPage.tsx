@@ -1,4 +1,4 @@
-import { CircularProgress } from "@mui/joy";
+import CircularProgress from "@mui/joy/CircularProgress";
 import { FC } from "react";
 import { Flex } from "./flex";
 

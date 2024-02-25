@@ -2,6 +2,8 @@ import { getQuestion } from "@/backend/question/question";
 import { ERRORS } from "@/lib/errors";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request, { params }: { params: { id: number } }) {
   try {
     const privyUserId = req.headers.get("privyUserId");

@@ -7,7 +7,10 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { isEVMAddress } from "@/lib/utils";
-import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import TabPanel from "@mui/joy/TabPanel";
+import Tabs from "@mui/joy/Tabs";
 import { useEffect, useMemo } from "react";
 
 export default function ProfilePage({ params }: { params: { wallet: `0x${string}` } }) {

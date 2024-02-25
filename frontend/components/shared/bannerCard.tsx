@@ -1,5 +1,6 @@
-import { Close } from "@mui/icons-material";
-import { Card, Typography } from "@mui/joy";
+import Close from "@mui/icons-material/Close";
+import Card from "@mui/joy/Card";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 import { Flex } from "./flex";
 

@@ -1,5 +1,8 @@
-import { Close } from "@mui/icons-material";
-import { DialogTitle, IconButton, Modal, ModalDialog, Typography } from "@mui/joy";
+import DialogTitle from "@mui/joy/DialogTitle";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 import { Flex } from "./flex";
 
@@ -12,11 +15,9 @@ export const PointInfo: FC<Props> = ({ showPointInfoModal, closePointInfo }) => 
   return (
     <Modal open={showPointInfoModal} onClose={closePointInfo}>
       <ModalDialog minWidth="400px">
+        <ModalClose />
         <Flex x xsb yc>
           <DialogTitle sx={{ fontWeight: "700", fontSize: "20px" }}>About points</DialogTitle>
-          <IconButton onClick={closePointInfo}>
-            <Close />
-          </IconButton>
         </Flex>
         <Flex y gap2>
           <Typography level="body-lg" textColor="neutral.600">

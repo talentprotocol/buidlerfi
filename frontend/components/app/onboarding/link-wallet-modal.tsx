@@ -2,7 +2,10 @@ import { Flex } from "@/components/shared/flex";
 import { useUserContext } from "@/contexts/userContext";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { WEB3_SOCIALS_IMAGE } from "@/lib/assets";
-import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 
 interface Props {

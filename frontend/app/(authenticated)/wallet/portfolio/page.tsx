@@ -10,12 +10,15 @@ import { useUserContext } from "@/contexts/userContext";
 import { useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useUsdPrice } from "@/hooks/useUsdPrice";
 import { formatToDisplayString, tryParseBigInt } from "@/lib/utils";
-import { Typography } from "@mui/joy";
+import { useTheme } from "@mui/joy/styles/ThemeProvider";
+import Typography from "@mui/joy/Typography";
 import { useMemo } from "react";
 
 export default function PortfolioPage() {
   const { user, holding, isLoading } = useUserContext();
   const { data: allHolding } = useGetHoldings(user?.wallet as `0x${string}`);
+
+  const theme = useTheme();
 
   const portfolio = useMemo(() => {
     if (!allHolding) return BigInt(0);
@@ -38,7 +41,7 @@ export default function PortfolioPage() {
           borderRadius="20px"
           sx={{ backgroundColor: theme => theme.palette.primary.softBg }}
         >
-          <KeyIcon fontSize="xl" sx={{ color: theme => theme.palette.primary[400] }} />
+          <KeyIcon fontSize="xl" sx={{ color: theme.palette.primary[400] }} />
         </Flex>
         <Flex y>
           <Typography className="remove-text-transform" level="h4">
