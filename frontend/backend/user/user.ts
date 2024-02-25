@@ -80,7 +80,6 @@ export const getCurrentUser = async (privyUserId: string) => {
 
   if (res.privyUserId) {
     const privyUser = await privyClient.getUser(res.privyUserId);
-    console.log(privyUser);
   }
 
   return { data: res };

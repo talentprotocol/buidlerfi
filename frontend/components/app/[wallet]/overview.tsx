@@ -145,7 +145,7 @@ export const Overview: FC<Props> = ({ profile }) => {
                   <EditOutlined />
                 </Button>
               )}
-              {(profile.hasKeys || !profile.hasLaunchedKeys) && !profile.isOwnProfile && (
+              {(profile.hasKeys || !profile.hasLaunchedKeys || !profile.isGated) && !profile.isOwnProfile && (
                 <Button
                   variant="outlined"
                   color="neutral"

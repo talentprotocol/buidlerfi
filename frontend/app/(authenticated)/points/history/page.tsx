@@ -37,7 +37,6 @@ export default function PointHistory(): JSX.Element {
   const closePointInfo = () => {
     setShowPointInfoModal(false);
   };
-  console.log(sorted);
 
   return (
     <Flex y grow component={"main"} px={2}>

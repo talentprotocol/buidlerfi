@@ -103,7 +103,7 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
           </Flex>
           {hasLaunchedKeys && (
             <Checkbox
-              label="Gate this response to your key holders only."
+              label="Gate this answer to be visible to your key holders only."
               size="sm"
               checked={isGateAnswer}
               onChange={e => setIsGateAnswer(e.target.checked)}

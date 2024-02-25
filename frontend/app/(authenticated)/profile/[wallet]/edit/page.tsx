@@ -25,7 +25,7 @@ export default function EditProfilePage() {
   const [bio, setBio] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsready] = useState(false);
-  const [isGated, setIsGated] = useState<boolean>(profile.user?.isGated || true);
+  const [isGated, setIsGated] = useState<boolean>(!!profile.user?.isGated);
 
   useEffect(() => {
     if (currentUser && !isReady) {
@@ -171,8 +171,8 @@ export default function EditProfilePage() {
       </Flex>
       <Flex y gap1>
         <Flex x gap2>
-          <Switch checked={isGated} onChange={e => setIsGated(e.target.checked)} />
-          <Typography>Require users to have your key to ask you questions</Typography>
+          <Switch checked={isGated} onChange={() => setIsGated((prev) => !prev)} />
+          <Typography>Require users to have your key to ask you direct questions</Typography>
         </Flex>
       </Flex>
     </Flex>
