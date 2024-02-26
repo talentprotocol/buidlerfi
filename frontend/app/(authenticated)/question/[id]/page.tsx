@@ -42,7 +42,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     buttons,
     image: `${BASE_URL}/api/frame/image?id=${id}${isReply ? "&isReply=true" : ""}`,
     inputText: question?.replierId == null ? "your answer here" : undefined,
-    postUrl: `${BASE_URL}/api/frame/action?id=${id}`
+    postUrl: `${BASE_URL}/api/frame/${isReply ? "reply" : "question"}?id=${id}`
   });
 
   const title = (() => {
