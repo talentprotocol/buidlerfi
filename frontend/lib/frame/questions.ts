@@ -50,7 +50,6 @@ const getSocialProfile = async (username: string) => {
 
 export const upvoteQuestion = async (username: string, questionId: number) => {
   const { user } = await getSocialProfile(username);
-  console.log("user", user);
   await addReaction(user.privyUserId!, questionId, ReactionType.UPVOTE);
 };
 
