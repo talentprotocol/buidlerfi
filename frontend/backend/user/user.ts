@@ -78,10 +78,6 @@ export const getCurrentUser = async (privyUserId: string) => {
     }
   });
 
-  if (res.privyUserId) {
-    const privyUser = await privyClient.getUser(res.privyUserId);
-  }
-
   return { data: res };
 };
 
