@@ -1,15 +1,20 @@
-import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetUserStats, useSetUserSetting } from "@/hooks/useUserApi";
-import { Close } from "@mui/icons-material";
-import { Alert, IconButton, LinearProgress, Typography } from "@mui/joy";
+import Close from "@mui/icons-material/Close";
+import Alert from "@mui/joy/Alert";
+import IconButton from "@mui/joy/IconButton";
+import LinearProgress from "@mui/joy/LinearProgress";
+import Typography from "@mui/joy/Typography";
 import { UserSettingKeyEnum } from "@prisma/client";
 import { useEffect, useMemo, useState } from "react";
 import { TasksChecklistModal } from "../app/onboarding/tasks-checklist-modal";
 import { Flex } from "../shared/flex";
 
+const PWA_INSTALLED_LOCAL_STORAGE_KEY = "builderfi-onboarding-pwa-installed";
+
 export interface OnboardingTask {
   description: string;
+  preRedirect?: () => void;
   redirect: { pathname?: string; searchParams?: Record<string, string | boolean> };
   verify: () => boolean;
 }
@@ -19,14 +24,16 @@ export const OnboardingTasks = () => {
   const [isAlertVisible, setIsAlertVisible] = useState(false);
   const { user, userSettings, refetch } = useUserContext();
   const { data: userStats, isLoading } = useGetUserStats(user?.id);
-  const { isPwaInstalled } = useLayoutContext();
 
   const setUserSetting = useSetUserSetting();
+
+  const isPwaInstalled = localStorage.getItem(PWA_INSTALLED_LOCAL_STORAGE_KEY) === "true";
 
   const tasks = useMemo(() => {
     return [
       {
         description: "install the app",
+        preRedirect: () => localStorage.setItem(PWA_INSTALLED_LOCAL_STORAGE_KEY, "true"),
         redirect: { searchParams: { installmodal: true } },
         verify: () => isPwaInstalled
       },
@@ -75,6 +82,7 @@ export const OnboardingTasks = () => {
     if (isLoading) return;
     if (finishedTasks.length < tasks.length && userSettings?.ONBOARDING_TASKLIST_DO_NOT_SHOW_AGAIN !== "true")
       setIsAlertVisible(true);
+    else setIsAlertVisible(false);
   }, [
     finishedTasks.length,
     isLoading,

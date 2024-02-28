@@ -12,11 +12,12 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useGetQuestionableUsers } from "@/hooks/useUserApi";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
-import { Avatar, Input, Typography, useTheme } from "@mui/joy";
+import Avatar from "@mui/joy/Avatar";
+import Input from "@mui/joy/Input";
+import Typography from "@mui/joy/Typography";
 import { useState } from "react";
 
 export default function QuestionPage() {
-  const theme = useTheme();
   const { isLoading } = useUserContext();
   const [searchValue, setSearchValue] = useState("");
   const router = useBetterRouter();
@@ -29,7 +30,7 @@ export default function QuestionPage() {
     <Flex y grow component="main">
       <InjectTopBar withBack title="Ask a question" />
 
-      <Flex y gap2 border={"1px solid " + theme.palette.divider} px={2} py={1}>
+      <Flex y gap2 sx={{ border: theme => "1px solid " + theme.palette.divider }} px={2} py={1}>
         <Input
           value={searchValue}
           onChange={e => setSearchValue(e.target.value)}
@@ -49,7 +50,7 @@ export default function QuestionPage() {
               px={2}
               py={1}
               gap2
-              sx={{ cursor: "pointer", ":hover": { bgcolor: theme.palette.neutral[100] } }}
+              sx={{ cursor: "pointer", ":hover": { bgcolor: theme => theme.palette.neutral[100] } }}
               onClick={() => router.push({ searchParams: { ask: true } })}
             >
               <Avatar size="sm" src={LOGO_BLUE_BACK} alt="logo" />

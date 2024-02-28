@@ -1,5 +1,6 @@
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { Avatar, AvatarProps } from "@mui/joy";
+import Avatar from "@mui/joy/Avatar";
+import { AvatarProps } from "@mui/joy/Avatar/AvatarProps";
 import { FC } from "react";
 
 interface Props extends AvatarProps {

@@ -11,8 +11,15 @@ import { useRefreshCurrentUser, useUpdateUser } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { USER_BIO_MAX_LENGTH } from "@/lib/constants";
 import { formatError, shortAddress } from "@/lib/utils";
-import { RefreshOutlined } from "@mui/icons-material";
-import { Avatar, Button, Card, Chip, Link as JoyLink, Switch, Textarea, Typography } from "@mui/joy";
+import RefreshOutlined from "@mui/icons-material/RefreshOutlined";
+import Avatar from "@mui/joy/Avatar";
+import Button from "@mui/joy/Button";
+import Card from "@mui/joy/Card";
+import Chip from "@mui/joy/Chip";
+import JoyLink from "@mui/joy/Link";
+import Switch from "@mui/joy/Switch";
+import Textarea from "@mui/joy/Textarea";
+import Typography from "@mui/joy/Typography";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -171,7 +178,7 @@ export default function EditProfilePage() {
       </Flex>
       <Flex y gap1>
         <Flex x gap2>
-          <Switch checked={isGated} onChange={() => setIsGated((prev) => !prev)} />
+          <Switch checked={isGated} onChange={() => setIsGated(prev => !prev)} />
           <Typography>Require users to have your key to ask you direct questions</Typography>
         </Flex>
       </Flex>

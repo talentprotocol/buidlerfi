@@ -1,7 +1,12 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useAddReaction, useDeleteReaction, useGetReactions } from "@/hooks/useQuestionsApi";
-import { ArrowDownward, ArrowUpward, Favorite, FavoriteBorder } from "@mui/icons-material";
-import { IconButton, Typography, useTheme } from "@mui/joy";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import Favorite from "@mui/icons-material/Favorite";
+import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
+import IconButton from "@mui/joy/IconButton";
+import Typography from "@mui/joy/Typography";
+import { useTheme } from "@mui/joy/styles/ThemeProvider";
 import { SxProps } from "@mui/joy/styles/types";
 import { ReactionType } from "@prisma/client";
 import { FC, MouseEvent, useMemo } from "react";
@@ -51,11 +56,11 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
   if (type === "like") {
     return (
       <Flex x yc sx={sx}>
-        <IconButton onClick={e => handleAddReaction(e, "LIKE")} variant="plain">
+        <IconButton onClick={e => handleAddReaction(e, "LIKE")} variant="plain" disabled={!user?.privyUserId}>
           {hasLikedReply ? (
             <Favorite htmlColor={theme.palette.primary[500]} fontSize="small" />
           ) : (
-            <FavoriteBorder fontSize="small" />
+            <FavoriteBorder fontSize="small" htmlColor={!user?.privyUserId ? theme.palette.neutral[300] : undefined} />
           )}
         </IconButton>
         <Typography level="body-sm">{likes}</Typography>
@@ -72,7 +77,7 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
           color={myVote === "UPVOTE" ? "primary" : undefined}
           disabled={!user?.privyUserId}
         >
-          <ArrowUpward fontSize="small" />
+          <ArrowUpward fontSize="small" htmlColor={!user?.privyUserId ? theme.palette.neutral[300] : undefined} />
         </IconButton>
         <Typography
           textColor={!myVote ? undefined : myVote === "UPVOTE" ? "primary.500" : "danger.500"}
@@ -87,7 +92,7 @@ export const Reactions: FC<Props> = ({ questionId, type = "upvote", sx }) => {
           color={myVote === "DOWNVOTE" ? "danger" : undefined}
           disabled={!user?.privyUserId}
         >
-          <ArrowDownward fontSize="small" />
+          <ArrowDownward fontSize="small" htmlColor={!user?.privyUserId ? theme.palette.neutral[300] : undefined} />
         </IconButton>
       </Flex>
     </Flex>

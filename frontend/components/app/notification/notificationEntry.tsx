@@ -4,7 +4,9 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetNotifications, useMarkNotificationsAsRead } from "@/hooks/useNotificationApi";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference, shortAddress } from "@/lib/utils";
-import { Avatar, Badge, Typography } from "@mui/joy";
+import Avatar from "@mui/joy/Avatar";
+import Badge from "@mui/joy/Badge";
+import Typography from "@mui/joy/Typography";
 import { NotificationType } from "@prisma/client";
 import { FC } from "react";
 

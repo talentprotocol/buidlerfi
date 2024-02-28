@@ -1,4 +1,4 @@
-import { Button } from "@mui/joy";
+import Button from "@mui/joy/Button";
 import { FC, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Flex } from "./flex";

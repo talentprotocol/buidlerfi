@@ -3,26 +3,28 @@ import { QuestionEntry } from "@/components/app/[wallet]/question-entry";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
-import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetHotQuestions, useGetKeyQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
-import { Key } from "@mui/icons-material";
-import { Button, Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import { useGetHotQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
+import Button from "@mui/joy/Button";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import TabPanel from "@mui/joy/TabPanel";
+import Tabs from "@mui/joy/Tabs";
 import { useLogin } from "@privy-io/react-auth";
 import { useEffect } from "react";
 
-const tabs = ["New", "Top", "Your holdings"];
+const tabs = ["New", "Top"];
 
 export default function Home() {
-  const { holding, isAuthenticatedAndActive } = useUserContext();
+  const { isAuthenticatedAndActive } = useUserContext();
   const router = useBetterRouter();
   const { login } = useLogin();
   const tab = router.searchParams.tab as (typeof tabs)[number] | undefined;
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();
-  const keysQuestions = useGetKeyQuestions();
+  // const keysQuestions = useGetKeyQuestions();
 
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
   return (
@@ -53,12 +55,7 @@ export default function Home() {
           }}
         >
           {tabs.map(tab => (
-            <Tab
-              key={tab}
-              value={tab}
-              disabled={tab === "Your holdings" && !isAuthenticatedAndActive}
-              sx={{ width: "33.3%" }}
-            >
+            <Tab key={tab} value={tab} sx={{ width: "50%" }}>
               {tab}
             </Tab>
           ))}
@@ -77,7 +74,7 @@ export default function Home() {
           ))}
           {<LoadMoreButton query={hotQuestions} />}
         </TabPanel>
-        <TabPanel value="Your holdings">
+        {/* <TabPanel value="Your holdings">
           {keysQuestions.isLoading && <LoadingPage />}
           {keysQuestions.data?.length === 0 ? (
             <PageMessage
@@ -95,7 +92,7 @@ export default function Home() {
             ))
           )}
           {<LoadMoreButton query={keysQuestions} />}
-        </TabPanel>
+        </TabPanel> */}
       </Tabs>
     </Flex>
   );

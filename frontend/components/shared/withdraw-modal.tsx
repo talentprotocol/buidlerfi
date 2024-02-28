@@ -1,18 +1,17 @@
 "use client";
 import { Flex } from "@/components/shared/flex";
 import { IN_USE_CHAIN_ID } from "@/lib/constants";
-import { Close } from "@mui/icons-material";
-import {
-  Button,
-  DialogTitle,
-  FormControl,
-  FormHelperText,
-  IconButton,
-  Input,
-  Modal,
-  ModalDialog,
-  Typography
-} from "@mui/joy";
+import Close from "@mui/icons-material/Close";
+import Button from "@mui/joy/Button";
+import DialogTitle from "@mui/joy/DialogTitle";
+import FormControl from "@mui/joy/FormControl";
+import FormHelperText from "@mui/joy/FormHelperText";
+import IconButton from "@mui/joy/IconButton";
+import Input from "@mui/joy/Input";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
+
 import { usePrivy } from "@privy-io/react-auth";
 import { useState } from "react";
 import { toast } from "react-toastify";

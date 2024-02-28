@@ -1,6 +1,10 @@
 import { Flex } from "@/components/shared/flex";
 import { useGetNotificationSettings, useUpdateNotificationSettings } from "@/hooks/useNotificationApi";
-import { Modal, ModalClose, ModalDialog, Switch, Typography } from "@mui/joy";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Switch from "@mui/joy/Switch";
+import Typography from "@mui/joy/Typography";
 import { NotificationType } from "@prisma/client";
 import { FC, useMemo } from "react";
 

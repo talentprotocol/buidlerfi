@@ -15,7 +15,7 @@ import {
   SocialProfileType,
   User
 } from "@prisma/client";
-import { differenceInMinutes } from "date-fns";
+import differenceInMinutes from "date-fns/differenceInMinutes";
 import { getKeyRelationships, ownsKey } from "../keyRelationship/keyRelationship";
 import { sendNotification } from "../notification/notification";
 
@@ -185,6 +185,8 @@ type getHotQuestionResponse = Prisma.QuestionGetPayload<{
     questionContent: true;
     repliedOn: true;
     createdAt: true;
+    questionerId: true;
+    replierId: true;
     questioner: {
       select: {
         displayName: true;
@@ -262,6 +264,8 @@ export async function getHotQuestions(offset: number, filters: { questionerId?: 
       questionContent: row.questionContent,
       repliedOn: row.repliedOn,
       createdAt: row.createdAt,
+      questionerId: row.questionerId,
+      replierId: row.replierId,
       questioner: {
         id: row.questionerId,
         displayName: row.questionerDisplayName,
@@ -673,9 +677,35 @@ export const answerQuestion = async (
       const questionerName = getFarcasterProfileName(questioner!, questionerFarcaster);
       // if one of the two has farcaster, publish the cast
       console.log("CASTING NEW ANSWER");
-      await publishNewAnswerCast(replierName, questionerName, `https://app.builder.fi/question/${question.id}?isReply=true`);
+      await publishNewAnswerCast(
+        replierName,
+        questionerName,
+        `https://app.builder.fi/question/${question.id}?isReply=true`
+      );
     }
   }
 
   return { data: res };
+};
+
+//Get all answers from a user including open questions
+//Open question answers are comments in the DB
+export const getUserAnswers = async (userId: number, offset = 0) => {
+  const res = await prisma.question.findMany({
+    where: {
+      OR: [{ replierId: userId, repliedOn: { not: null } }, { comments: { some: { authorId: userId } } }]
+    },
+    orderBy: {
+      createdAt: "desc"
+    },
+    include: {
+      questioner: true,
+      replier: true,
+      tags: true
+    },
+    take: PAGINATION_LIMIT,
+    skip: offset
+  });
+
+  return { data: exclude(res, ["reply"]) };
 };

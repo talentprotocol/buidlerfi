@@ -1,6 +1,6 @@
 "use client";
 
-import { Typography } from "@mui/joy";
+import Typography from "@mui/joy/Typography";
 import { useQuery } from "@tanstack/react-query";
 import anchorme from "anchorme";
 import { marked } from "marked";

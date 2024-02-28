@@ -6,8 +6,12 @@ import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { Chat, Lock } from "@mui/icons-material";
-import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import Chat from "@mui/icons-material/Chat";
+import Lock from "@mui/icons-material/Lock";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import TabPanel from "@mui/joy/TabPanel";
+import Tabs from "@mui/joy/Tabs";
 import { useParams } from "next/navigation";
 
 export default function HoldersPage() {

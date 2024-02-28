@@ -1,4 +1,5 @@
-import { Avatar, Textarea } from "@mui/joy";
+import Avatar from "@mui/joy/Avatar";
+import Textarea from "@mui/joy/Textarea";
 import { ChangeEvent, FC, useRef } from "react";
 import { Flex } from "./flex";
 

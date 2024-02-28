@@ -1,7 +1,10 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { getDifference, shortAddress } from "@/lib/utils";
-import { Avatar, Chip, Skeleton, Typography } from "@mui/joy";
+import Avatar from "@mui/joy/Avatar";
+import Chip from "@mui/joy/Chip";
+import Skeleton from "@mui/joy/Skeleton";
+import Typography from "@mui/joy/Typography";
 import { SxProps, TypographySystem } from "@mui/joy/styles/types";
 import { FC, useMemo } from "react";
 import { Flex } from "./flex";

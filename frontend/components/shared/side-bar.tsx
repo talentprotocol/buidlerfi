@@ -5,28 +5,26 @@ import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
 import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { FAQ_LINK } from "@/lib/constants";
 import { formatToDisplayString } from "@/lib/utils";
-import {
-  AccountBalanceWalletOutlined,
-  AdminPanelSettings,
-  LiveHelpOutlined,
-  Logout,
-  PersonOutlineOutlined,
-  Refresh,
-  SettingsOutlined
-} from "@mui/icons-material";
-import {
-  Avatar,
-  Button,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  Skeleton,
-  Typography
-} from "@mui/joy";
-import { ListItemIcon, ListItemText } from "@mui/material";
+import AccountBalanceWalletOutlined from "@mui/icons-material/AccountBalanceWalletOutlined";
+import AdminPanelSettings from "@mui/icons-material/AdminPanelSettings";
+import LiveHelpOutlined from "@mui/icons-material/LiveHelpOutlined";
+import Logout from "@mui/icons-material/Logout";
+import PersonOutlineOutlined from "@mui/icons-material/PersonOutlineOutlined";
+import Refresh from "@mui/icons-material/Refresh";
+import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
+
+import Avatar from "@mui/joy/Avatar";
+import Button from "@mui/joy/Button";
+import Divider from "@mui/joy/Divider";
+import Drawer from "@mui/joy/Drawer";
+import IconButton from "@mui/joy/IconButton";
+import List from "@mui/joy/List";
+import ListItem from "@mui/joy/ListItem";
+import ListItemButton from "@mui/joy/ListItemButton";
+import Skeleton from "@mui/joy/Skeleton";
+import Typography from "@mui/joy/Typography";
+
+import { ListItemContent, ListItemDecorator } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
 import { FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -155,7 +153,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             item.type === "divider" ? (
               <Divider key={"divider"} sx={{ my: 1 }} />
             ) : (
-              <ListItem key={item.text}>
+              <ListItem key={item.text} variant="plain">
                 <ListItemButton
                   onClick={() => {
                     if (item.path) {
@@ -166,8 +164,8 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
                     }
                   }}
                 >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
+                  <ListItemDecorator>{item.icon}</ListItemDecorator>
+                  <ListItemContent>{item.text}</ListItemContent>
                 </ListItemButton>
               </ListItem>
             )

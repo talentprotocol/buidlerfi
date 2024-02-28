@@ -7,8 +7,8 @@ import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
 import { useMarkNotificationsAsRead } from "@/hooks/useNotificationApi";
 import { sortIntoPeriods } from "@/lib/utils";
-import { Notifications } from "@mui/icons-material";
-import { Typography } from "@mui/joy";
+import Notifications from "@mui/icons-material/Notifications";
+import Typography from "@mui/joy/Typography";
 import { useEffect, useMemo } from "react";
 
 const periods = ["today", "last 7 days", "last 30 days", "last year", "all time"] as const;

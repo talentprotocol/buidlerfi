@@ -4,7 +4,12 @@ import { LoadingPage } from "@/components/shared/loadingPage";
 import { useUserContext } from "@/contexts/userContext";
 import { useUpdateUser } from "@/hooks/useUserApi";
 import { USER_BIO_MAX_LENGTH } from "@/lib/constants";
-import { Button, Chip, Modal, ModalDialog, Textarea, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Chip from "@mui/joy/Chip";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Textarea from "@mui/joy/Textarea";
+import Typography from "@mui/joy/Typography";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useState } from "react";
 

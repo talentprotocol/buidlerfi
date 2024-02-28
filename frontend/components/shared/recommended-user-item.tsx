@@ -1,9 +1,9 @@
 "use client";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { shortAddress } from "@/lib/utils";
-import { ChevronRight } from "@mui/icons-material";
-import { Typography } from "@mui/joy";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import Avatar from "@mui/joy/Avatar";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 import { Flex } from "./flex";
 

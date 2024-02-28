@@ -1,4 +1,4 @@
-import { getHotQuestions, getQuestion, getQuestions, getReactions } from "@/backend/question/question";
+import { getHotQuestions, getQuestion, getQuestions, getReactions, getUserAnswers } from "@/backend/question/question";
 import {
   addReactionSA,
   answerQuestionSA,
@@ -45,7 +45,7 @@ export const useGetKeyQuestions = () => {
 };
 
 export const useGetQuestionsFromUser = (userId?: number, side: "questions" | "replies" = "replies") => {
-  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getQuestions>>>(
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getQuestions>> | Awaited<ReturnType<typeof getUserAnswers>>>(
     ["useGetQuestionsFromUser", userId, side],
     "/api/question/user",
     { enabled: !!userId },
