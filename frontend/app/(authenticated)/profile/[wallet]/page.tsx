@@ -49,7 +49,7 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
       <Overview profile={profile} />
       <Tabs defaultValue={"answers"}>
         <TabList tabFlex={1} className="grid w-full grid-cols-3">
-          <Tab value="answers">{profile.questions?.length} Answers</Tab>
+          <Tab value="answers">{profile.questionsAnswered?.length} Answers</Tab>
           <Tab value="questions">{profile.questionsAsked?.length} Questions</Tab>
         </TabList>
         <TabPanel value="answers" sx={{ p: 0 }}>

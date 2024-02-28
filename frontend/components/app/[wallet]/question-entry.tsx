@@ -32,7 +32,7 @@ interface Props {
 export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
   const askedOn = useMemo(() => getDifference(question?.createdAt), [question?.createdAt]);
   const router = useBetterRouter();
-  const askedHimself = question?.replier?.id === question?.questioner.id;
+  const askedHimself = question?.replierId === question?.questionerId;
   const content = useMarkdown(question?.questionContent);
   //Only fetch for open questions
   const { data: numberOfReplies } = useGetCommentsCount(question?.id, !question?.replier);

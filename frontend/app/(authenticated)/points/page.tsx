@@ -110,9 +110,9 @@ export default function Invite() {
             </>
           )}
         </Button>
-        <Button color="primary" variant="plain" size="md" onClick={() => router.push("/points/history")}>
+        {/* <Button color="primary" variant="plain" size="md" onClick={() => router.push("/points/history")}>
           See points history
-        </Button>
+        </Button> */}
       </Card>
       <Typography level="title-md" mt={2} mb={1} px={2}>
         Quests

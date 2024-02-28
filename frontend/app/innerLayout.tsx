@@ -41,9 +41,8 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
       y
       component={"body"}
       grow
-      m={0}
       sx={{
-        maxWidth: "min(100vw, 500px)",
+        maxWidth: "min(100vw, 502px)",
         margin: "auto",
         minHeight: "100vh",
         border: theme => "1px solid " + theme.palette.neutral[300]

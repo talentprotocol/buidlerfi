@@ -24,6 +24,7 @@ import ListItemButton from "@mui/joy/ListItemButton";
 import Skeleton from "@mui/joy/Skeleton";
 import Typography from "@mui/joy/Typography";
 
+import { ListItemContent, ListItemDecorator } from "@mui/joy";
 import { usePrivy } from "@privy-io/react-auth";
 import { FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -152,7 +153,7 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
             item.type === "divider" ? (
               <Divider key={"divider"} sx={{ my: 1 }} />
             ) : (
-              <ListItem key={item.text}>
+              <ListItem key={item.text} variant="plain">
                 <ListItemButton
                   onClick={() => {
                     if (item.path) {
@@ -163,8 +164,8 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
                     }
                   }}
                 >
-                  {item.icon}
-                  {item.text}
+                  <ListItemDecorator>{item.icon}</ListItemDecorator>
+                  <ListItemContent>{item.text}</ListItemContent>
                 </ListItemButton>
               </ListItem>
             )
