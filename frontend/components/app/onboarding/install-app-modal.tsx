@@ -1,6 +1,10 @@
 import { Flex } from "@/components/shared/flex";
-import { IosShare } from "@mui/icons-material";
-import { DialogTitle, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
+import IosShare from "@mui/icons-material/IosShare";
+import DialogTitle from "@mui/joy/DialogTitle";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 
 interface Props {

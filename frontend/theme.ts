@@ -113,6 +113,24 @@ const theme = extendTheme({
         })
       }
     },
+    JoyListItem: {
+      styleOverrides: {
+        root: {
+          ".MuiListItemButton-root": {
+            gap: "32px",
+            paddingTop: "8px",
+            paddingBottom: "8px"
+          },
+          "& > .MuiListItemButton-root > .MuiListItemContent-root, & > .MuiListItemButton-root > MuiListItemDecorator-root":
+            {
+              fontWeight: "700"
+            },
+          ".MuiListItemDecorator-root svg": {
+            fontSize: "24px"
+          }
+        }
+      }
+    },
     JoyChip: {
       styleOverrides: {
         root: {

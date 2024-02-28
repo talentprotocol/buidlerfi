@@ -1,6 +1,8 @@
 import { shortAddress } from "@/lib/utils";
-import { ContentCopy } from "@mui/icons-material";
-import { IconButton, Typography, TypographySystem } from "@mui/joy";
+import ContentCopy from "@mui/icons-material/ContentCopy";
+import IconButton from "@mui/joy/IconButton";
+import Typography from "@mui/joy/Typography";
+import { TypographySystem } from "@mui/joy/styles/types/typography";
 import { FC } from "react";
 import { toast } from "react-toastify";
 import { Flex } from "./flex";

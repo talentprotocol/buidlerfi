@@ -60,7 +60,7 @@ export const useUserProfile = (wallet?: string) => {
       isLoadingRecommendedUser ||
       isLoadingHoldings ||
       isLoadingUser,
-    questions: getQuestionsFromReplierQuery.data,
+    questionsAnswered: getQuestionsFromReplierQuery.data,
     questionsAsked: getQuestionsFromQuestionerQuery.data,
     refetch: refetchAll,
     user,

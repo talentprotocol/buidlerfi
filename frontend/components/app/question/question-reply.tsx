@@ -8,7 +8,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useGetQuestion } from "@/hooks/useQuestionsApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { shortAddress } from "@/lib/utils";
-import { Checkbox } from "@mui/joy";
+import Checkbox from "@mui/joy/Checkbox";
 import { FC, useState } from "react";
 import { ReplyCommentEntry } from "../[wallet]/reply-comment-entry";
 import { GateAnswerHelpModal } from "./gate-answer-help-modal";
@@ -42,7 +42,9 @@ export const QuestionReply: FC<Props> = ({
         <PageMessage
           title="This answer is gated"
           icon={<UserAvatar size="sm" user={profile.user} />}
-          text={`You must hold ${profile.user?.displayName}'s key to access his gated answers`}
+          text={`You must hold ${
+            profile.user?.displayName || shortAddress(profile.user?.wallet)
+          }'s key to access his gated answers`}
         />
       )}
       {question.isGated && !question.reply && question?.repliedOn && isAuthenticatedAndActive && (
@@ -58,7 +60,7 @@ export const QuestionReply: FC<Props> = ({
       )}
 
       {profile.isOwnProfile && !question.repliedOn && (
-        <Flex y p={2}>
+        <Flex y p={2} gap3>
           <FullTextArea
             placeholder={`Answer ${question.questioner.displayName || shortAddress(question.questioner.wallet)} ...`}
             avatarUrl={question?.replier?.avatarUrl || undefined}

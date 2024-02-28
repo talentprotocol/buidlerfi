@@ -7,8 +7,16 @@ import {
   useGetQuestion,
   useGetQuestionsFromUser
 } from "@/hooks/useQuestionsApi";
-import { DeleteOutline, EditOutlined, FileUploadOutlined, MoreHoriz } from "@mui/icons-material";
-import { CircularProgress, Dropdown, ListItemDecorator, Menu, MenuButton, MenuItem } from "@mui/joy";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import EditOutlined from "@mui/icons-material/EditOutlined";
+import FileUploadOutlined from "@mui/icons-material/FileUploadOutlined";
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import CircularProgress from "@mui/joy/CircularProgress";
+import Dropdown from "@mui/joy/Dropdown";
+import ListItemDecorator from "@mui/joy/ListItemDecorator";
+import Menu from "@mui/joy/Menu";
+import MenuButton from "@mui/joy/MenuButton";
+import MenuItem from "@mui/joy/MenuItem";
 import { FC, useState } from "react";
 import { toast } from "react-toastify";
 import { EditQuestionModal } from "./edit-question-modal";

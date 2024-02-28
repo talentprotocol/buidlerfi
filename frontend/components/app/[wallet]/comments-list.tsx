@@ -3,7 +3,9 @@ import { FullTextArea } from "@/components/shared/full-text-area";
 import { LoadingPage } from "@/components/shared/loadingPage";
 import { useUserContext } from "@/contexts/userContext";
 import { useCreateComment, useGetComments } from "@/hooks/useCommentApi";
-import { Button, Checkbox, Divider } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Checkbox from "@mui/joy/Checkbox";
+import Divider from "@mui/joy/Divider";
 import { FC, useState } from "react";
 import { GateAnswerHelpModal } from "../question/gate-answer-help-modal";
 import { ReplyCommentEntry } from "./reply-comment-entry";
@@ -81,7 +83,7 @@ export const CommentsList: FC<Props> = ({ questionId, isOpenQuestion }) => {
         />
       )}
       {isAuthenticatedAndActive && (
-        <Flex y p={2}>
+        <Flex y p={2} gap3>
           <Flex x sx={{ minHeight: "100px" }}>
             <FullTextArea
               avatarUrl={currentUser?.avatarUrl || undefined}

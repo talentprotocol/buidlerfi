@@ -7,8 +7,8 @@ import { PageMessage } from "@/components/shared/page-message";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { shortAddress } from "@/lib/utils";
-import { AccessTimeOutlined } from "@mui/icons-material";
-import { Button } from "@mui/joy";
+import AccessTimeOutlined from "@mui/icons-material/AccessTimeOutlined";
+import Button from "@mui/joy/Button";
 import { FC } from "react";
 import { QuestionEntry } from "./question-entry";
 
@@ -19,7 +19,7 @@ interface Props {
 
 export const QuestionsList: FC<Props> = ({ type, profile }) => {
   const router = useBetterRouter();
-  const questionsToUse = type === "answers" ? profile?.questions : profile?.questionsAsked;
+  const questionsToUse = type === "answers" ? profile?.questionsAnswered : profile?.questionsAsked;
   const hasQuestion: boolean = !!questionsToUse?.length;
   // const hasQuestion: boolean = false;
   if (!profile || profile.isLoading) {
@@ -129,7 +129,7 @@ export const QuestionsList: FC<Props> = ({ type, profile }) => {
   };
 
   const message = getMessage();
-  if (message && profile.questions?.length === 0) {
+  if (message && profile.questionsAnswered?.length === 0) {
     return (
       <Flex y grow>
         <PageMessage title={message.title} icon={message.icon} text={message.text} />

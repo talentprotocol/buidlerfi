@@ -28,6 +28,10 @@
     {
       "path": "/api/cron/transaction",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/farcaster-followers",
+      "schedule": "0 0 * * *"
     }
   ]
 }

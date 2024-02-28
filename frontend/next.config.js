@@ -1,27 +1,33 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+let nextConfig = {
   modularizeImports: {
-    "@mui/icons-material/?(((\\w*)?/?)*)": {
-      transform: "@mui/icons-material/{{ matches.[1] }}/{{member}}"
+    "@mui/icons-material": {
+      transform: "@mui/icons-material/{{member}}"
+    },
+    "@heroicons/react": {
+      transform: "@heroicons/react/{{member}}"
     }
+  },
+  webpack: config => {
+    config.resolve.alias["@mui/material"] = "@mui/joy";
+    return config;
   }
 };
 
 // Injected content via PWA below
-
 //eslint-disable-next-line
 const withPWA = require("next-pwa")({
   dest: "public"
 });
 
-module.exports = process.env.NODE_ENV === "production" ? withPWA(nextConfig) : nextConfig;
+nextConfig = process.env.NODE_ENV === "production" ? withPWA(nextConfig) : nextConfig;
 
 // Injected content via Sentry wizard below
 //eslint-disable-next-line
 const { withSentryConfig } = require("@sentry/nextjs");
 
-module.exports = withSentryConfig(
-  module.exports,
+nextConfig = withSentryConfig(
+  nextConfig,
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
@@ -51,3 +57,5 @@ module.exports = withSentryConfig(
     disableLogger: true
   }
 );
+
+module.exports = nextConfig;

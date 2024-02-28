@@ -4,7 +4,9 @@ import { useUserContext } from "@/contexts/userContext";
 import { useCreateComment, useEditComment } from "@/hooks/useCommentApi";
 import { usePutQuestion } from "@/hooks/useQuestionsApi";
 import { MAX_COMMENT_LENGTH } from "@/lib/constants";
-import { Button, Modal, ModalDialog } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
 import { FC, useState } from "react";
 
 interface Props {

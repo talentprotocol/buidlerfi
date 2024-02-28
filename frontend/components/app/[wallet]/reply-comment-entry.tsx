@@ -6,7 +6,7 @@ import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useMarkdown } from "@/hooks/useMarkdown";
 import { getDifference, shortAddress } from "@/lib/utils";
-import { Typography, useTheme } from "@mui/joy";
+import Typography from "@mui/joy/Typography";
 import { User } from "@prisma/client";
 import { FC, useState } from "react";
 import { ReplyCommentContextMenu } from "./reply-comment-context-menu";
@@ -23,13 +23,12 @@ interface Props {
 
 export const ReplyCommentEntry: FC<Props> = ({ id, type, content, author, refetch, createdAt }) => {
   const { user: currentUser, refetch: refetchUserContext } = useUserContext();
-  const theme = useTheme();
   const router = useBetterRouter();
   const formattedContent = useMarkdown(content);
   const [isBuyingKey, setIsBuyingKey] = useState(false);
 
   return (
-    <Flex borderBottom={"1px solid " + theme.palette.divider} fullwidth>
+    <Flex sx={{ borderBottom: theme => "1px solid " + theme.palette.divider }} fullwidth>
       {isBuyingKey && (
         <TradeKeyModal
           keyOwner={author}

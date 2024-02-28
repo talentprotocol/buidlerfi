@@ -7,8 +7,12 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { TransactionEntry } from "@/components/shared/transaction-entry";
 import { useGetFriendsTransactions, useGetTransactions } from "@/hooks/useTransaction";
 import { sortIntoPeriods } from "@/lib/utils";
-import { HistoryOutlined } from "@mui/icons-material";
-import { Tab, TabList, TabPanel, Tabs, Typography } from "@mui/joy";
+import HistoryOutlined from "@mui/icons-material/HistoryOutlined";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import TabPanel from "@mui/joy/TabPanel";
+import Tabs from "@mui/joy/Tabs";
+import Typography from "@mui/joy/Typography";
 import { useState } from "react";
 
 export default function KeysPage() {

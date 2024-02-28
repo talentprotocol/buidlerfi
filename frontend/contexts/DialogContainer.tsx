@@ -1,5 +1,9 @@
 import { Flex } from "@/components/shared/flex";
-import { Button, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { useCallback, useEffect, useState } from "react";
 
 interface DialogOptions {

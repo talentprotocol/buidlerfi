@@ -1,5 +1,9 @@
 import { AxiosError } from "axios";
-import { differenceInMinutes, differenceInSeconds, startOfDay, subDays, subMonths } from "date-fns";
+import differenceInMinutes from "date-fns/differenceInMinutes";
+import differenceInSeconds from "date-fns/differenceInSeconds";
+import startOfDay from "date-fns/startOfDay";
+import subDays from "date-fns/subDays";
+import subMonths from "date-fns/subMonths";
 
 import { URLSearchParams } from "url";
 import { formatUnits, parseEther } from "viem";
@@ -170,10 +174,14 @@ export function sortIntoPeriods<T extends { createdAt: Date }>(toSort: T[]) {
   return sorted;
 }
 
-export function formatBigIntToFixedDecimals(bigNumber: bigint, currentDecimals: number, targetDecimals: number): string {
+export function formatBigIntToFixedDecimals(
+  bigNumber: bigint,
+  currentDecimals: number,
+  targetDecimals: number
+): string {
   // Check if target decimals is greater than current decimals
   if (targetDecimals > currentDecimals) {
-      throw new Error("Target decimals cannot be greater than current decimals");
+    throw new Error("Target decimals cannot be greater than current decimals");
   }
 
   // Define the divisor as a BigInt
@@ -187,8 +195,24 @@ export function formatBigIntToFixedDecimals(bigNumber: bigint, currentDecimals: 
   const len: number = asString.length;
 
   // Pad with zeros if necessary (for numbers less than 1.00000 based on target decimals)
-  const padded: string = len > targetDecimals ? asString : '0'.repeat(targetDecimals - len + 1) + asString;
+  const padded: string = len > targetDecimals ? asString : "0".repeat(targetDecimals - len + 1) + asString;
 
   // Insert the decimal point
   return `${padded.slice(0, -targetDecimals)}.${padded.slice(-targetDecimals)}`;
+}
+
+export function nFormatter(num?: number | null, digits = 1) {
+  if (!num) return "0";
+  const lookup = [
+    { value: 1, symbol: "" },
+    { value: 1e3, symbol: "k" },
+    { value: 1e6, symbol: "M" },
+    { value: 1e9, symbol: "G" },
+    { value: 1e12, symbol: "T" },
+    { value: 1e15, symbol: "P" },
+    { value: 1e18, symbol: "E" }
+  ];
+  const regexp = /\.0+$|(?<=\.[0-9]*[1-9])0+$/;
+  const item = lookup.findLast(item => num >= item.value);
+  return item ? (num / item.value).toFixed(digits).replace(regexp, "").concat(item.symbol) : "0";
 }

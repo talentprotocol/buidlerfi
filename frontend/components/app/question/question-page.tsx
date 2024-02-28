@@ -8,7 +8,8 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { useGetQuestion, usePutQuestion } from "@/hooks/useQuestionsApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { shortAddress } from "@/lib/utils";
-import { Button, Divider } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Divider from "@mui/joy/Divider";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 

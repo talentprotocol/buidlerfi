@@ -1,5 +1,6 @@
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { Avatar, AvatarGroup } from "@mui/joy";
+import Avatar from "@mui/joy/Avatar";
+import AvatarGroup from "@mui/joy/AvatarGroup";
 
 interface SimpleUser {
   avatarUrl: string | null;

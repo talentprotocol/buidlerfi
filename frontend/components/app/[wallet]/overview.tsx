@@ -9,9 +9,14 @@ import { useRefreshCurrentUser } from "@/hooks/useUserApi";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { ENS_LOGO, FARCASTER_LOGO, LENS_LOGO, TALENT_PROTOCOL_LOGO } from "@/lib/assets";
 import { NEW_BUILDERFI_INVITE_CAST } from "@/lib/constants";
-import { encodeQueryData, formatEth, shortAddress } from "@/lib/utils";
-import { EditOutlined } from "@mui/icons-material";
-import { Avatar, Button, Chip, Link as JoyLink, Skeleton, Typography } from "@mui/joy";
+import { encodeQueryData, formatEth, nFormatter, shortAddress } from "@/lib/utils";
+import EditOutlined from "@mui/icons-material/EditOutlined";
+import Avatar from "@mui/joy/Avatar";
+import Button from "@mui/joy/Button";
+import Chip from "@mui/joy/Chip";
+import JoyLink from "@mui/joy/Link";
+import Skeleton from "@mui/joy/Skeleton";
+import Typography from "@mui/joy/Typography";
 import { SocialProfile, SocialProfileType } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
@@ -239,11 +244,11 @@ export const Overview: FC<Props> = ({ profile }) => {
                 <Flex flexDirection={"row"} alignItems={"center"}>
                   <Typography level="body-sm">
                     <strong>
-                      {
+                      {nFormatter(
                         profile.user?.socialProfiles?.find(
                           socialProfile => socialProfile.type === SocialProfileType.FARCASTER
                         )?.followerCount
-                      }
+                      )}
                     </strong>{" "}
                     followers on Farcaster
                   </Typography>

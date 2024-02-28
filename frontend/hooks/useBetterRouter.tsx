@@ -2,7 +2,8 @@
 
 import { useHistoryContext } from "@/contexts/historyContext";
 import { convertParamsToString } from "@/lib/utils";
-import { isBoolean, isNumber } from "lodash";
+import isBoolean from "lodash/isBoolean";
+import isNumber from "lodash/isNumber";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 

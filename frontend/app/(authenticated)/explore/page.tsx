@@ -9,8 +9,12 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { UnifiedUserItem } from "@/components/shared/unified-user-item";
 import { useUserContext } from "@/contexts/userContext";
 import { useGetNewUsers, useGetTopUsers, useRecommendedUsers, useSearch } from "@/hooks/useUserApi";
-import { PersonSearchOutlined, SupervisorAccountOutlined } from "@mui/icons-material";
-import { Tab, TabList, TabPanel, Tabs } from "@mui/joy";
+import PersonSearchOutlined from "@mui/icons-material/PersonSearchOutlined";
+import SupervisorAccountOutlined from "@mui/icons-material/SupervisorAccountOutlined";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import TabPanel from "@mui/joy/TabPanel";
+import Tabs from "@mui/joy/Tabs";
 import { useEffect, useState } from "react";
 
 const ExploreTabs = ["Top", "New", "Friends"] as const;

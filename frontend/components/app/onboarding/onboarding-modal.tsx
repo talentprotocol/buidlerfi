@@ -1,14 +1,17 @@
 import { Flex } from "@/components/shared/flex";
-import { WELCOME_MODAL } from "@/lib/assets";
-import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
-import { FC } from "react";
-import { useCreateUser } from "@/hooks/useUserApi";
-import { toast } from "react-toastify";
-import { formatError } from "@/lib/utils";
-import { usePrivy } from "@privy-io/react-auth";
 import { useUserContext } from "@/contexts/userContext";
-import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
+import { useCreateUser } from "@/hooks/useUserApi";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { WELCOME_MODAL } from "@/lib/assets";
+import { formatError } from "@/lib/utils";
+import Button from "@mui/joy/Button";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
+import { usePrivy } from "@privy-io/react-auth";
+import { FC } from "react";
+import { toast } from "react-toastify";
 
 interface Props {
   openModal: boolean;

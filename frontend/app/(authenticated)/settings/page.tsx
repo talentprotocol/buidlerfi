@@ -3,10 +3,11 @@
 import { Flex } from "@/components/shared/flex";
 import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { ArrowForwardIosOutlined, Logout } from "@mui/icons-material";
-import { Typography } from "@mui/joy";
+import ArrowForwardIosOutlined from "@mui/icons-material/ArrowForwardIosOutlined";
+import Logout from "@mui/icons-material/Logout";
 import Button from "@mui/joy/Button";
 import ButtonGroup from "@mui/joy/ButtonGroup";
+import Typography from "@mui/joy/Typography";
 import { usePrivy } from "@privy-io/react-auth";
 import { useCallback } from "react";
 

@@ -1,6 +1,6 @@
 import { Flex } from "@/components/shared/flex";
 import { BackButton } from "@/components/shared/top-bar";
-import { Input } from "@mui/joy";
+import Input from "@mui/joy/Input";
 import { FC } from "react";
 
 interface Props {

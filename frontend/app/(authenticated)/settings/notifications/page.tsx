@@ -3,7 +3,8 @@
 import { Flex } from "@/components/shared/flex";
 import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
 import { useGetNotificationSettings, useUpdateNotificationSettings } from "@/hooks/useNotificationApi";
-import { Switch, Typography } from "@mui/joy";
+import Switch from "@mui/joy/Switch";
+import Typography from "@mui/joy/Typography";
 import { NotificationType } from "@prisma/client";
 import { useMemo } from "react";
 

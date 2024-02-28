@@ -2,7 +2,9 @@
 
 import { Flex } from "@/components/shared/flex";
 import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
-import { Button, Link, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Link from "@mui/joy/Link";
+import Typography from "@mui/joy/Typography";
 import { WalletWithMetadata, usePrivy } from "@privy-io/react-auth";
 
 export default function SecurityPage() {

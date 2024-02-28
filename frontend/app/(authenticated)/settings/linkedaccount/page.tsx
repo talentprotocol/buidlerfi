@@ -2,7 +2,8 @@
 
 import { Flex } from "@/components/shared/flex";
 import { BackButton, InjectTopBar } from "@/components/shared/top-bar";
-import { Button, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Typography from "@mui/joy/Typography";
 import { usePrivy } from "@privy-io/react-auth";
 
 export default function LinkedAccountPage() {

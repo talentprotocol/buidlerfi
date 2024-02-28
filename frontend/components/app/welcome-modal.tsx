@@ -1,7 +1,10 @@
 import { useUserContext } from "@/contexts/userContext";
 import { useUpdateUser } from "@/hooks/useUserApi";
 import { formatError } from "@/lib/utils";
-import { Button, Modal, ModalDialog, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 import { toast } from "react-toastify";
 import { Flex } from "../shared/flex";

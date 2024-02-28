@@ -1,5 +1,6 @@
 import { Flex } from "@/components/shared/flex";
-import { Button, Typography } from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Typography from "@mui/joy/Typography";
 
 export default function NotFound() {
   return (

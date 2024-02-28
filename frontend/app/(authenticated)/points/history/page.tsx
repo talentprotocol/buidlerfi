@@ -6,8 +6,11 @@ import { InjectTopBar } from "@/components/shared/top-bar";
 import { useGetPointHistory } from "@/hooks/usePointApi";
 import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference, sortIntoPeriods } from "@/lib/utils";
-import { HelpOutline, History } from "@mui/icons-material";
-import { Avatar, IconButton, Typography } from "@mui/joy";
+import HelpOutline from "@mui/icons-material/HelpOutline";
+import History from "@mui/icons-material/History";
+import Avatar from "@mui/joy/Avatar";
+import IconButton from "@mui/joy/IconButton";
+import Typography from "@mui/joy/Typography";
 import { useMemo, useState } from "react";
 
 const periods = ["today", "last 7 days", "last 30 days", "last year", "all time"] as const;

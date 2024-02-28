@@ -1,6 +1,13 @@
 import { shortAddress } from "@/lib/utils";
-import { ContentCopy, CopyAll } from "@mui/icons-material";
-import { Button, DialogTitle, IconButton, Modal, ModalClose, ModalDialog, Typography } from "@mui/joy";
+import ContentCopy from "@mui/icons-material/ContentCopy";
+import CopyAll from "@mui/icons-material/CopyAll";
+import Button from "@mui/joy/Button";
+import DialogTitle from "@mui/joy/DialogTitle";
+import IconButton from "@mui/joy/IconButton";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Typography from "@mui/joy/Typography";
 import { FC } from "react";
 import { toast } from "react-toastify";
 import { Flex } from "./flex";
