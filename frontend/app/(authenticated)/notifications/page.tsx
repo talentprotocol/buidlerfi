@@ -36,7 +36,6 @@ export default function NotificationPage() {
 
   return (
     <Flex component={"main"} y grow>
-      {/* {isNotifSettingsOpen && <NotificationSettingsModal close={() => setIsNotifSettingsOpen(false)} />} */}
       <InjectTopBar
         title="notifications"
         startItem={<BackButton />}

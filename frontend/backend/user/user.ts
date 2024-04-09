@@ -941,6 +941,7 @@ export const getQuestionableUsers = async (privyUserId: string, search?: string,
             {
               OR: [
                 {
+                  //@ts-expect-error prisma is messing up types
                   displayName: { contains: formattedSearch, mode: "insensitive" }
                 },
                 {

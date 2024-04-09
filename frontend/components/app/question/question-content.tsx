@@ -12,7 +12,6 @@ import Typography from "@mui/joy/Typography";
 import format from "date-fns/format";
 import { FC } from "react";
 import { toast } from "react-toastify";
-import { QuestionContextMenu } from "../[wallet]/question-context-menu";
 
 interface Props {
   question: NonNullable<ReturnType<typeof useGetQuestion>["data"]>;
@@ -20,7 +19,7 @@ interface Props {
   profile: ReturnType<typeof useUserProfile>;
 }
 
-export const QuestionContent: FC<Props> = ({ question, refetch, profile }) => {
+export const QuestionContent: FC<Props> = ({ question, profile }) => {
   const { data: questionerStats } = useGetUserStats(question?.questioner?.id);
   const questionContent = useMarkdown(question?.questionContent);
   return (
