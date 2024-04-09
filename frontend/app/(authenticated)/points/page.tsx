@@ -1,28 +1,22 @@
 "use client";
-import { ParachuteIcon } from "@/components/icons/parachute";
 import { Flex } from "@/components/shared/flex";
 import { PointInfo } from "@/components/shared/point-info";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useClaimPoint, useGetCurrentPosition } from "@/hooks/usePointApi";
+import { useGetCurrentPosition } from "@/hooks/usePointApi";
 import { useGetQuest, useGetUserQuest, useVerifyQuests } from "@/hooks/useQuestAPI";
-import { AIRDROP_EXPIRATION_AFTER_CREATION, GET_NEXT_AIRDROP_DATE } from "@/lib/constants";
-import { getFullTimeDifference } from "@/lib/utils";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import HelpOutline from "@mui/icons-material/HelpOutline";
-import Button from "@mui/joy/Button";
 import Card from "@mui/joy/Card";
 import IconButton from "@mui/joy/IconButton";
 import Typography from "@mui/joy/Typography";
 import { useQuery } from "@tanstack/react-query";
-import differenceInDays from "date-fns/differenceInDays";
 import { useMemo, useState } from "react";
-import { toast } from "react-toastify";
 
 export default function Invite() {
-  const { user, refetch, isLoading } = useUserContext();
+  const { user, refetch } = useUserContext();
   const { data: currentPosition } = useGetCurrentPosition();
   const [showPointInfoModal, setShowPointInfoModal] = useState(false);
   const router = useBetterRouter();
@@ -30,15 +24,15 @@ export default function Invite() {
     () => user?.points?.filter(point => point.claimed).reduce((prev, curr) => prev + curr.points, 0),
     [user?.points]
   );
-  const unclaimedPoints = useMemo(() => {
-    return (
-      user?.points
-        ?.filter(
-          point => !point.claimed && differenceInDays(point.createdAt, new Date()) < AIRDROP_EXPIRATION_AFTER_CREATION
-        )
-        .reduce((prev, curr) => prev + curr.points, 0) || 0
-    );
-  }, [user?.points]);
+  // const unclaimedPoints = useMemo(() => {
+  //   return (
+  //     user?.points
+  //       ?.filter(
+  //         point => !point.claimed && differenceInDays(point.createdAt, new Date()) < AIRDROP_EXPIRATION_AFTER_CREATION
+  //       )
+  //       .reduce((prev, curr) => prev + curr.points, 0) || 0
+  //   );
+  // }, [user?.points]);
 
   const position = useMemo(() => {
     if (!currentPosition) {
@@ -54,10 +48,6 @@ export default function Invite() {
   };
   const { data: quests } = useGetQuest();
   const { data: userQuests } = useGetUserQuest();
-
-  const time = useMemo(() => getFullTimeDifference(GET_NEXT_AIRDROP_DATE()), []);
-
-  const claimPoints = useClaimPoint();
 
   const verifyQuests = useVerifyQuests();
 
@@ -91,28 +81,6 @@ export default function Invite() {
           </Flex>
           <Typography level="h4"> {points} pts</Typography>
         </Flex>
-        <Button
-          onClick={async () => {
-            const res = await claimPoints.mutateAsync();
-            await refetch();
-            if (res.count > 0) toast.success("Claimed successfully");
-          }}
-          disabled={unclaimedPoints > 0 ? false : true}
-          loading={claimPoints.isLoading || isLoading}
-          color="primary"
-          size="lg"
-        >
-          {unclaimedPoints > 0 ? (
-            "Claim " + unclaimedPoints + " points"
-          ) : (
-            <>
-              <ParachuteIcon sx={{ mr: 1 }} /> Next drop {time}
-            </>
-          )}
-        </Button>
-        {/* <Button color="primary" variant="plain" size="md" onClick={() => router.push("/points/history")}>
-          See points history
-        </Button> */}
       </Card>
       <Typography level="title-md" mt={2} mb={1} px={2}>
         Quests

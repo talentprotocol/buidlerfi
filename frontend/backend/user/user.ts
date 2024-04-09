@@ -925,7 +925,8 @@ export const getQuestionableUsers = async (privyUserId: string, search?: string,
         }
       }
     },
-    { keysOfSelf: { none: {} } }
+    { keysOfSelf: { none: {} } },
+    { isGated: false }
   ];
 
   //users we hold a key of
@@ -975,6 +976,7 @@ export const getQuestionableUsers = async (privyUserId: string, search?: string,
       avatarUrl: true,
       wallet: true,
       bio: true,
+      isGated: true,
       _count: {
         select: {
           keysOfSelf: {

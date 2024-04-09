@@ -14,7 +14,6 @@ import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useBuilderFIData, useGetHoldings } from "@/hooks/useBuilderFiApi";
 import { useGetTransactions } from "@/hooks/useTransaction";
-import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { formatToDisplayString, sortIntoPeriods, tryParseBigInt } from "@/lib/utils";
 import ArrowDownwardOutlined from "@mui/icons-material/ArrowDownwardOutlined";
 import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos";
@@ -106,7 +105,6 @@ export default function ChatsPage() {
       )}
       <InjectTopBar title="Wallet" withBack />
       <Flex y xc p={2} gap2>
-        <img src={LOGO_BLUE_BACK} width="40px" alt="builderfi logo" />
         <Flex y xc>
           <Typography fontWeight="600" textAlign={"center"} level="body-sm">
             Builderfi balance

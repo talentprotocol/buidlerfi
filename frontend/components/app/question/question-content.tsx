@@ -36,7 +36,6 @@ export const QuestionContent: FC<Props> = ({ question, refetch, profile }) => {
             questionsCount: questionerStats?.answersCount || 0
           }}
         />
-        <QuestionContextMenu question={question} refetch={() => refetch()} />
       </Flex>
       {questionContent}
       <Typography level="helper">{format(question.createdAt, "MMM dd, yyyy")}</Typography>

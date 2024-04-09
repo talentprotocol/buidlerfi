@@ -32,12 +32,6 @@ export const OnboardingTasks = () => {
   const tasks = useMemo(() => {
     return [
       {
-        description: "install the app",
-        preRedirect: () => localStorage.setItem(PWA_INSTALLED_LOCAL_STORAGE_KEY, "true"),
-        redirect: { searchParams: { installmodal: true } },
-        verify: () => isPwaInstalled
-      },
-      {
         description: "ask 1 open question",
         redirect: { searchParams: { ask: true }, pathname: "/question" },
         verify: () => userStats && userStats.openQuestionsAsked > 0

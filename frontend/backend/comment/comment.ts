@@ -4,6 +4,7 @@ import { ERRORS } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { ReactionType } from "@prisma/client";
 import { getKeyRelationships, hasLaunchedKeys, ownsKey } from "../keyRelationship/keyRelationship";
+import { sendNotification } from "../notification/notification";
 
 export const getComments = async (questionId: number, privyUserId?: string) => {
   const currentUser = privyUserId ? await prisma.user.findUnique({ where: { privyUserId } }) : undefined;
@@ -54,22 +55,29 @@ export const createComment = async (privyUserId: string, questionId: number, com
     const hasKey = ownsKey({ userId: question.replierId }, { privyUserId });
     if (!hasKey) return { error: ERRORS.MUST_HOLD_KEY };
   }
-
+  const isOpenQuestion = !question.replierId;
   const hasLaunchedKey = await hasLaunchedKeys({ privyUserId });
 
   const currentUser = await prisma.user.findUniqueOrThrow({ where: { privyUserId } });
 
-  const newComment = await prisma.comment.create({
-    data: {
-      content: comment,
-      questionId,
-      authorId: currentUser.id,
-      //Can be gated if user has launched keys and is an open question
-      isGated: !question.replierId && hasLaunchedKey ? isGated || false : false
+  const res = await prisma.$transaction(async tx => {
+    const newComment = await tx.comment.create({
+      data: {
+        content: comment,
+        questionId,
+        authorId: currentUser.id,
+        //Can be gated if user has launched keys and is an open question
+        isGated: !question.replierId && hasLaunchedKey ? isGated || false : false
+      }
+    });
+    if (isOpenQuestion) {
+      await sendNotification(question.questionerId, "REPLIED_YOUR_QUESTION", currentUser.id, question.id, tx);
+    } else {
+      await sendNotification(question.questionerId, "COMMENT", currentUser.id, question.id, tx);
     }
+    return newComment;
   });
-
-  return { data: newComment };
+  return { data: res };
 };
 
 export const editComment = async (privyUserId: string, commentId: number, comment: string) => {
@@ -152,10 +160,10 @@ export const addReaction = async (privyUserId: string, commentId: number) => {
           reactionType: ReactionType.LIKE
         }
       });
+      await sendNotification(comment.authorId, "LIKE_YOUR_COMMENT", currentUser.id, comment.questionId, tx);
       return newReaction;
     }
   });
-
   return { data: res };
 };
 

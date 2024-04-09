@@ -1,32 +1,36 @@
 "use client";
 import { QuestionEntry } from "@/components/app/[wallet]/question-entry";
+import { QuestionSearch } from "@/components/app/question/question-search";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
+import { PageMessage } from "@/components/shared/page-message";
 import { InjectTopBar } from "@/components/shared/top-bar";
 import { useUserContext } from "@/contexts/userContext";
-import { useBetterRouter } from "@/hooks/useBetterRouter";
-import { useGetHotQuestions, useGetNewQuestions } from "@/hooks/useQuestionsApi";
+import { useGetHotQuestions, useGetNewQuestions, useGetSearchQuestion } from "@/hooks/useQuestionsApi";
+import PersonSearchOutlined from "@mui/icons-material/PersonSearchOutlined";
 import Button from "@mui/joy/Button";
 import Tab from "@mui/joy/Tab";
 import TabList from "@mui/joy/TabList";
 import TabPanel from "@mui/joy/TabPanel";
 import Tabs from "@mui/joy/Tabs";
 import { useLogin } from "@privy-io/react-auth";
-import { useEffect } from "react";
-
-const tabs = ["New", "Top"];
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const { isAuthenticatedAndActive } = useUserContext();
-  const router = useBetterRouter();
   const { login } = useLogin();
-  const tab = router.searchParams.tab as (typeof tabs)[number] | undefined;
   const newQuestions = useGetNewQuestions();
   const hotQuestions = useGetHotQuestions();
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedTab, setSelectedTab] = useState<TabsEnum>("New");
+
   // const keysQuestions = useGetKeyQuestions();
+  const HomeTabs = ["New", "Top"] as const;
+  type TabsEnum = (typeof HomeTabs)[number];
 
   useEffect(() => window.document.scrollingElement?.scrollTo(0, 0), []);
+  const searchResult = useGetSearchQuestion(searchValue);
   return (
     <Flex component={"main"} y grow>
       <InjectTopBar
@@ -37,29 +41,32 @@ export default function Home() {
             </Button>
           )
         }
+        fullItem={
+          isAuthenticatedAndActive && (
+            <QuestionSearch title="Home" searchValue={searchValue} setSearchValue={setSearchValue} />
+          )
+        }
       />
-      <Tabs
-        sx={{ width: "min(100vw, 500px)" }}
-        value={tab || tabs[0]}
-        onChange={(_, newTab) => router.replace({ searchParams: { tab: newTab || undefined } })}
-      >
-        <TabList
-          sx={{
-            backgroundColor: theme => theme.palette.background.body,
-            top: "55px",
-            position: "sticky",
-            display: "flex"
-            // overflow: "auto",
-            // scrollSnapType: "x mandatory",
-            // "&::-webkit-scrollbar": { display: "none" }
-          }}
-        >
-          {tabs.map(tab => (
-            <Tab key={tab} value={tab} sx={{ width: "50%" }}>
-              {tab}
-            </Tab>
-          ))}
-        </TabList>
+      <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
+        {!searchValue && (
+          <TabList
+            sx={{
+              backgroundColor: theme => theme.palette.background.body,
+              top: "55px",
+              position: "sticky",
+              display: "flex"
+              // overflow: "auto",
+              // scrollSnapType: "x mandatory",
+              // "&::-webkit-scrollbar": { display: "none" }
+            }}
+          >
+            {HomeTabs.map(tab => (
+              <Tab key={tab} value={tab} sx={{ width: "50%" }}>
+                {tab}
+              </Tab>
+            ))}
+          </TabList>
+        )}
         <TabPanel value="New">
           {newQuestions.isLoading && <LoadingPage />}
           {newQuestions.data?.map(question => (
@@ -74,6 +81,23 @@ export default function Home() {
           ))}
           {<LoadMoreButton query={hotQuestions} />}
         </TabPanel>
+        <TabPanel value="Search">
+          {searchResult.isLoading ? (
+            <LoadingPage />
+          ) : searchResult.data?.length === 0 ? (
+            <PageMessage
+              icon={<PersonSearchOutlined />}
+              title={`No results for "${searchValue}"`}
+              text="Please try searching another keywords."
+            />
+          ) : (
+            searchResult.data?.map(question => (
+              <QuestionEntry key={question?.id} question={question} refetch={hotQuestions?.refetch} />
+            ))
+          )}
+          <LoadMoreButton query={searchResult} />
+        </TabPanel>
+
         {/* <TabPanel value="Your holdings">
           {keysQuestions.isLoading && <LoadingPage />}
           {keysQuestions.data?.length === 0 ? (

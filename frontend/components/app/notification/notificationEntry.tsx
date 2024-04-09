@@ -21,6 +21,8 @@ const NotificationContent = {
   [NotificationType.REPLY_REACTION]: "liked your answer",
   [NotificationType.FRIEND_JOINED]: "joined builder.fi",
   [NotificationType.KEYBUY]: "bought your key",
+  [NotificationType.LIKE_YOUR_COMMENT]: "liked your comment",
+  [NotificationType.COMMENT]: "commented on your question",
   [NotificationType.KEYSELL]: "sold your key",
   [NotificationType.REPLIED_OTHER_QUESTION]: "answered a question you follow",
   [NotificationType.NEW_OPEN_QUESTION]: "asked a question that might interest you",
@@ -47,7 +49,10 @@ const GetNotificationPath = (notification: BuilderfiNotification) => {
     case NotificationType.POINTS_DROP:
     case NotificationType.NEW_INVITE_CODE:
       return `/invite`;
-
+    case NotificationType.LIKE_YOUR_COMMENT:
+      return `/question/${notification.referenceId}`;
+    case NotificationType.COMMENT:
+      return `/question/${notification.referenceId}`;
     //Not used yet
     case NotificationType.REPLIED_OTHER_QUESTION:
     case NotificationType.SYSTEM:

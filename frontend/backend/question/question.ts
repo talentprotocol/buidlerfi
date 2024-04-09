@@ -709,3 +709,23 @@ export const getUserAnswers = async (userId: number, offset = 0) => {
 
   return { data: exclude(res, ["reply"]) };
 };
+
+export const SearchQuestions = async (search: string, offset: number) => {
+  const res = await prisma.question.findMany({
+    where: {
+      questionContent: {
+        contains: search,
+        mode: "insensitive" // Make search case insensitive
+      }
+    },
+    include: {
+      questioner: true,
+      replier: true,
+      tags: true
+    },
+    take: PAGINATION_LIMIT,
+    skip: offset
+  });
+
+  return { data: exclude(res, ["reply"]) };
+};
