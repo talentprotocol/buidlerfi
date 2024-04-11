@@ -1,5 +1,6 @@
 "use client";
 import { Overview } from "@/components/app/[wallet]/overview";
+import { ProfileContextMenu } from "@/components/app/[wallet]/profile-context-menu";
 import { QuestionsList } from "@/components/app/[wallet]/questions-list";
 import { TradeKeyModal } from "@/components/app/[wallet]/trade-key-modal";
 import { Flex } from "@/components/shared/flex";
@@ -32,7 +33,11 @@ export default function ProfilePage({ params }: { params: { wallet: `0x${string}
   if (!isValidWallet) return <></>;
   return (
     <Flex component={"main"} y grow>
-      <InjectTopBar withBack title={profile.user?.displayName || undefined} />
+      <InjectTopBar
+        withBack
+        title={profile.user?.displayName || undefined}
+        endItem={<ProfileContextMenu profile={profile.user} />}
+      />
       {(tradeModal == "buy" || tradeModal == "sell") && profile.user && (
         <TradeKeyModal
           keyOwner={profile.user}

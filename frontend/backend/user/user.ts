@@ -925,7 +925,8 @@ export const getQuestionableUsers = async (privyUserId: string, search?: string,
         }
       }
     },
-    { keysOfSelf: { none: {} } }
+    { keysOfSelf: { none: {} } },
+    { isGated: false }
   ];
 
   //users we hold a key of
@@ -940,6 +941,7 @@ export const getQuestionableUsers = async (privyUserId: string, search?: string,
             {
               OR: [
                 {
+                  //@ts-expect-error prisma is messing up types
                   displayName: { contains: formattedSearch, mode: "insensitive" }
                 },
                 {
@@ -975,6 +977,7 @@ export const getQuestionableUsers = async (privyUserId: string, search?: string,
       avatarUrl: true,
       wallet: true,
       bio: true,
+      isGated: true,
       _count: {
         select: {
           keysOfSelf: {

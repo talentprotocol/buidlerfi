@@ -6,10 +6,8 @@ import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useGetCommentsCount } from "@/hooks/useCommentApi";
 import { useMarkdown } from "@/hooks/useMarkdown";
 import { useGetHotQuestions, useGetKeyQuestions, useGetQuestionsFromUser } from "@/hooks/useQuestionsApi";
-import { LOGO_BLUE_BACK } from "@/lib/assets";
 import { getDifference } from "@/lib/utils";
 import theme from "@/theme";
-import Avatar from "@mui/joy/Avatar";
 import AvatarGroup from "@mui/joy/AvatarGroup";
 import Box from "@mui/joy/Box";
 import Chip from "@mui/joy/Chip";
@@ -51,7 +49,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
   return (
     <Flex y gap1 p={2} borderBottom={"1px solid " + theme.palette.divider}>
       <Flex x ys gap1>
-        <AvatarGroup>
+        <AvatarGroup sx={{ width: !question.replier?.id ? "34px" : undefined }}>
           <UserAvatar
             sx={{
               width: "24px",
@@ -59,11 +57,7 @@ export const QuestionEntry: FC<Props> = ({ question, refetch }) => {
             }}
             user={question.questioner}
           />
-          {question.replier?.id ? (
-            <UserAvatar sx={{ width: "24px", height: "24px" }} user={question?.replier} />
-          ) : (
-            <Avatar sx={{ width: "24px", height: "24px" }} src={LOGO_BLUE_BACK} />
-          )}
+          {question.replier?.id && <UserAvatar sx={{ width: "24px", height: "24px" }} user={question?.replier} />}
         </AvatarGroup>
         <Flex y basis="100%">
           <Flex x xsb ys>

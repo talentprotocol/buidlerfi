@@ -1,4 +1,3 @@
-import { useLayoutContext } from "@/contexts/layoutContext";
 import { useUserContext } from "@/contexts/userContext";
 import { useBetterRouter } from "@/hooks/useBetterRouter";
 import { useLinkExternalWallet } from "@/hooks/useLinkWallet";
@@ -43,7 +42,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
   const { address, user, isLoading, refetch } = useUserContext();
   const { isLoading: isLoadingLinkWallet, linkWallet } = useLinkExternalWallet();
   const refreshData = useRefreshCurrentUser();
-  const [hasIgnoredInstallApp, setHasIgnoredInstallApp] = useState<boolean>(false);
   const [hasIgnoredConnectWallet, setHasIgnoredConnectWallet] = useState<boolean>(false);
   const { data: balance } = useBalance({
     address
@@ -97,13 +95,10 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
     [address, handleLogout, user?.isAdmin]
   );
 
-  const { isPwaInstalled } = useLayoutContext();
-
   const cardToDisplay = useMemo(() => {
-    if (!isPwaInstalled && !hasIgnoredInstallApp) return "install";
-    else if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
+    if (!user?.socialWallet && !hasIgnoredConnectWallet) return "connect";
     else return "none";
-  }, [hasIgnoredConnectWallet, hasIgnoredInstallApp, isPwaInstalled, user?.socialWallet]);
+  }, [hasIgnoredConnectWallet, user?.socialWallet]);
 
   if (!user) return <></>;
 
@@ -173,15 +168,6 @@ export const Sidebar: FC<Props> = ({ isOpen, setOpen }) => {
       </List>
       <Flex xc y p={2} gap1>
         <Flex>
-          {cardToDisplay === "install" && (
-            <BannerCard
-              onClose={() => setHasIgnoredInstallApp(true)}
-              title="Enhance Your Experience"
-              body="Install the app for a seamless, personalized experience."
-            >
-              <Button onClick={() => router.replace({ searchParams: { installmodal: true } })}>Install App</Button>
-            </BannerCard>
-          )}
           {cardToDisplay === "connect" && (
             <BannerCard
               onClose={() => setHasIgnoredConnectWallet(true)}
