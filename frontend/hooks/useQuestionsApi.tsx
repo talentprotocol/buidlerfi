@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAxios } from "./useAxios";
 import { useInfiniteQueryAxios } from "./useInfiniteQueryAxios";
 import { useMutationSA } from "./useMutationSA";
+import { useDebounce } from "./useDebounce";
 
 export function useGetQuestion(
   id: number,
@@ -119,5 +120,15 @@ export const useGetReactions = (questionId: number, type: "like" | "upvote") => 
       })
       .then(res => res.data)
       .then(res => res.data)
+  );
+};
+
+export const useGetSearchQuestion = (searchValue: string, queryOptions?: SimpleUseQueryOptions) => {
+  const debouncedValue = useDebounce(searchValue, 500);
+  return useInfiniteQueryAxios<Awaited<ReturnType<typeof getQuestions>>>(
+    ["useGetSearchQuestion", debouncedValue],
+    "/api/question/search",
+    { enabled: !!searchValue, ...queryOptions },
+    { search: debouncedValue }
   );
 };

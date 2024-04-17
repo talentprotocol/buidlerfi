@@ -43,6 +43,24 @@ export default function SecurityPage() {
           </Button>
         </Flex>
       </Flex>
+      <Flex x xc gap3 m={2} p={1.5} style={{ borderRadius: "10px", backgroundColor: "#F0F4F8" }}>
+        <Link
+          color="primary"
+          target="_blank"
+          href="https://talentprotocol.notion.site/Privacy-Policy-cc2b297006b54b3db1a008592302ccf5"
+          sx={{ fontSize: "14px" }}
+        >
+          Privacy Policy
+        </Link>
+        <Link
+          color="primary"
+          target="_blank"
+          href="https://talentprotocol.notion.site/Terms-Conditions-ec060cb6c06e49a98f17d235d0835773"
+          sx={{ fontSize: "14px" }}
+        >
+          Terms of Conditions
+        </Link>
+      </Flex>
     </Flex>
   );
 }
