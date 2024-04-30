@@ -12,6 +12,7 @@ model User {
   wallet                      String                    @unique @db.VarChar(50)
   socialWallet                String?                   @unique @db.VarChar(50)
   privyUserId                 String?                   @unique
+  email                       String?                   @unique
   displayName                 String?                   @db.VarChar(255)
   avatarUrl                   String?                   @db.VarChar(500)
   isActive                    Boolean                   @default(false)
