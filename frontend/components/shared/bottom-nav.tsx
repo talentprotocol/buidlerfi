@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { KeyIcon } from "../icons/key";
 import { NotificationIcon } from "../icons/notification";
-import { OnboardingTasks } from "../layout/onboarding-tasks";
 import { Flex } from "./flex";
 
 export function BottomNav() {
@@ -70,7 +69,6 @@ export function BottomNav() {
         backgroundColor: "white"
       }}
     >
-      <OnboardingTasks />
       <Flex
         x
         yc

@@ -1,6 +1,7 @@
 "use client";
 import { QuestionEntry } from "@/components/app/[wallet]/question-entry";
 import { QuestionSearch } from "@/components/app/question/question-search";
+import { MaintenanceAlert } from "@/components/layout/maintenance-alert";
 import { Flex } from "@/components/shared/flex";
 import { LoadMoreButton } from "@/components/shared/loadMoreButton";
 import { LoadingPage } from "@/components/shared/loadingPage";
@@ -47,6 +48,7 @@ export default function Home() {
           )
         }
       />
+      <MaintenanceAlert />
       <Tabs value={searchValue ? "Search" : selectedTab} onChange={(_, val) => val && setSelectedTab(val as TabsEnum)}>
         {!searchValue && (
           <TabList
