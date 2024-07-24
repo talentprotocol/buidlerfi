@@ -1,5 +1,5 @@
 import Close from "@mui/icons-material/Close";
-import { Alert, IconButton, Link, Typography } from "@mui/joy";
+import { Alert, IconButton, Typography } from "@mui/joy";
 import { useState } from "react";
 import { Flex } from "../shared/flex";
 
@@ -25,11 +25,7 @@ export const MaintenanceAlert = () => {
         >
           <Flex y grow>
             <Typography level="title-sm" textColor={"warning.600"}>
-              builder.fi is now on maintenance mode, please check our new endeavour at{" "}
-              <Link href="https://www.build.top/" target="_blank">
-                build.top
-              </Link>
-              .
+              Builder.fi is sunsetting until end of Aug, 2024. Please withdraw your funds asap.
             </Typography>
           </Flex>
         </Alert>
