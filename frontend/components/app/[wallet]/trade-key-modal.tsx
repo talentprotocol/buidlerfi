@@ -12,7 +12,6 @@ import Tooltip from "@mui/joy/Tooltip";
 import Typography from "@mui/joy/Typography";
 import { User } from "@prisma/client";
 import { FC, useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import { parseEther } from "viem";
 import { useBalance } from "wagmi";
 
@@ -32,8 +31,9 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
   });
   const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const { refetch, buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } =
-    useGetBuilderInfo(keyOwner.wallet);
+  const { buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } = useGetBuilderInfo(
+    keyOwner.wallet
+  );
 
   const closeOrShowSuccessPurchase = () => {
     if (hasKeys) {
@@ -52,31 +52,8 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
     }
   };
 
-  const handleBuy = async (recalculatePrice = false) => {
-    if (isFirstKey) {
-      tx.executeTx({ args: [keyOwner.wallet as `0x${string}`], value: buyPriceAfterFee });
-      return;
-    }
-
-    if (!buyPriceAfterFee || !balance) return;
-
-    let buyPrice = buyPriceAfterFee;
-    if (recalculatePrice) {
-      const [, , , newBuyPrice] = await refetch();
-      buyPrice = newBuyPrice.data || buyPriceAfterFee;
-    }
-
-    if (buyPrice > balance.value) {
-      toast.error(
-        `Insufficient balance. You have: ${formatToDisplayString(
-          balance.value,
-          18
-        )} ETH. You need: ${formatToDisplayString(buyPrice, 18)} ETH`
-      );
-      return;
-    }
-
-    tx.executeTx({ args: [keyOwner.wallet as `0x${string}`], value: buyPrice });
+  const handleBuy = async () => {
+    return;
   };
 
   const handleSell = () => {
@@ -93,6 +70,7 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
 
   const enableTradeButton = () => {
     if (side === "sell") return true;
+    if (side === "buy") return false;
     if (isFirstKey) return true;
     if (!buyPriceAfterFee) return false;
 
@@ -142,7 +120,7 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
               <Button variant="outlined" onClick={() => close()}>
                 Close
               </Button>
-              <Button loading={tx.isLoading} onClick={() => handleBuy(true)} disabled={!enableTradeButton()}>
+              <Button loading={tx.isLoading} onClick={() => handleBuy()} disabled={!enableTradeButton()}>
                 Buy 1 more
               </Button>
             </Flex>
