@@ -120,7 +120,7 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
               <Button variant="outlined" onClick={() => close()}>
                 Close
               </Button>
-              <Button loading={tx.isLoading} onClick={() => handleBuy(true)} disabled={!enableTradeButton()}>
+              <Button loading={tx.isLoading} onClick={() => handleBuy()} disabled={!enableTradeButton()}>
                 Buy 1 more
               </Button>
             </Flex>
