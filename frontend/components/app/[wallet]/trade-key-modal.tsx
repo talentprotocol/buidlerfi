@@ -12,7 +12,6 @@ import Tooltip from "@mui/joy/Tooltip";
 import Typography from "@mui/joy/Typography";
 import { User } from "@prisma/client";
 import { FC, useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import { parseEther } from "viem";
 import { useBalance } from "wagmi";
 
@@ -32,8 +31,9 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
   });
   const tx = useTradeKey(side, () => closeOrShowSuccessPurchase());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const { refetch, buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } =
-    useGetBuilderInfo(keyOwner.wallet);
+  const { buyPriceAfterFee, buyPrice, builderFee, protocolFee, sellPriceAfterFee, sellPrice } = useGetBuilderInfo(
+    keyOwner.wallet
+  );
 
   const closeOrShowSuccessPurchase = () => {
     if (hasKeys) {
@@ -52,7 +52,7 @@ export const TradeKeyModal: FC<Props> = ({ hasKeys, close, supporterKeysCount, i
     }
   };
 
-  const handleBuy = async (recalculatePrice = false) => {
+  const handleBuy = async () => {
     return;
   };
 
