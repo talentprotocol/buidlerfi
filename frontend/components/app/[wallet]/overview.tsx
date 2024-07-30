@@ -175,11 +175,15 @@ export const Overview: FC<Props> = ({ profile }) => {
                 </Button>
               )}
               {isAuthenticatedAndActive && profile.user && profile.hasLaunchedKeys && (
-                <Button onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>Buy</Button>
+                <Button disabled={true} onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>
+                  Buy
+                </Button>
               )}
 
               {isAuthenticatedAndActive && profile.user && profile.isOwnProfile && !profile.hasLaunchedKeys && (
-                <Button onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>Create keys</Button>
+                <Button disabled={true} onClick={() => router.replace({ searchParams: { tradeModal: "buy" } })}>
+                  Create keys
+                </Button>
               )}
               {!profile.user && farcasterProfile && (
                 <Link
